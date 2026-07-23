@@ -14,3 +14,7 @@ pnpm-debug.log*
 .DS_Store
 tsconfig.tsbuildinfo
 .next-dev*.log
+cinematic-hero/node_modules
+cinematic-hero/dist
+cinematic-hero/*.log
+cinematic-hero/tsconfig*.tsbuildinfo
