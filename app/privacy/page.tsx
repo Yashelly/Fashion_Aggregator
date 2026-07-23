@@ -1,20 +1,23 @@
-export default function PrivacyPage() {
+import { getCopy, getLocale, type SearchParamsInput } from "@/lib/i18n";
+
+type PrivacyPageProps = {
+  searchParams: Promise<SearchParamsInput>;
+};
+
+export default async function PrivacyPage({ searchParams }: PrivacyPageProps) {
+  const locale = getLocale(await searchParams);
+  const t = getCopy(locale).pages.privacy;
+
   return (
     <div className="stack">
-      <h1 className="page-title">Privacy Policy Draft</h1>
+      <h1 className="page-title">{t.title}</h1>
       <section className="section">
+        <p>{t.paragraphs[0]}</p>
+        <p>{t.paragraphs[1]}</p>
         <p>
-          This page is a website placeholder for the draft in
-          <code> docs/legal/privacy_policy_draft.md</code>. Before public launch,
-          replace it with the finalized policy and project details.
-        </p>
-        <p>
-          The site may process technical data, search events, outbound clicks,
-          UTM parameters, and contact messages. Purchases happen on retailer
-          websites.
+          {t.paragraphs[2]} <a href="mailto:legal@vibewear.lt">legal@vibewear.lt</a>.
         </p>
       </section>
     </div>
   );
 }
-

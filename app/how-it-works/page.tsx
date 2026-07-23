@@ -1,26 +1,34 @@
-export default function HowItWorksPage() {
+import { getCopy, getLocale, type SearchParamsInput } from "@/lib/i18n";
+
+type HowItWorksPageProps = {
+  searchParams: Promise<SearchParamsInput>;
+};
+
+export default async function HowItWorksPage({ searchParams }: HowItWorksPageProps) {
+  const locale = getLocale(await searchParams);
+  const t = getCopy(locale).pages.howItWorks;
+
   return (
     <div className="stack">
-      <h1 className="page-title">How it works</h1>
+      <h1 className="page-title">{t.title}</h1>
       <section className="two-col">
         <div className="section">
-          <h2>For shoppers</h2>
+          <h2>{t.shoppersTitle}</h2>
           <ol className="list">
-            <li>Search by vibe, category, color, size, price, or store.</li>
-            <li>Browse visual product cards across approved sources.</li>
-            <li>Click through to the official retailer page to buy.</li>
+            {t.shoppers.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
           </ol>
         </div>
         <div className="section">
-          <h2>For retailers</h2>
+          <h2>{t.retailersTitle}</h2>
           <ol className="list">
-            <li>Products are added through approved feeds or direct permission.</li>
-            <li>Users are sent to official product pages.</li>
-            <li>Outbound clicks can be tracked through approved affiliate links.</li>
+            {t.retailers.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
           </ol>
         </div>
       </section>
     </div>
   );
 }
-

@@ -1,23 +1,21 @@
-export default function DataSourcesPage() {
+import { getCopy, getLocale, type SearchParamsInput } from "@/lib/i18n";
+
+type DataSourcesPageProps = {
+  searchParams: Promise<SearchParamsInput>;
+};
+
+export default async function DataSourcesPage({ searchParams }: DataSourcesPageProps) {
+  const locale = getLocale(await searchParams);
+  const t = getCopy(locale).pages.dataSources;
+
   return (
     <div className="stack">
-      <h1 className="page-title">Data sources</h1>
+      <h1 className="page-title">{t.title}</h1>
       <section className="section">
-        <p>
-          Live product data should come from approved affiliate product feeds,
-          approved affiliate deeplinks, merchant-provided exports, or direct
-          merchant permission.
-        </p>
-        <p>
-          The current demo uses synthetic mock products only. It is intentionally
-          not a scraped retailer catalog.
-        </p>
-        <p>
-          Retailers can request corrections, removal, or partnership discussion
-          through the contact page.
-        </p>
+        {t.paragraphs.map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
       </section>
     </div>
   );
 }
-
