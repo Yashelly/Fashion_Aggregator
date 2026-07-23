@@ -30,6 +30,7 @@ Infrastructure/specs:
 - `data_workflow.html`
 - `feed_import_spec.md`
 - `clickout_tracking_spec.md`
+- `glami_affiliate_provider_discovery.md`
 - `mvp_prd.md`
 - `no_design_wireframes.md`
 
