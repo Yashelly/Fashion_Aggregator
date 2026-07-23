@@ -1,0 +1,1303 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Workflow данных Fashion Aggregator</title>
+    <style>
+      :root {
+        --bg: #fbfbf8;
+        --panel: #ffffff;
+        --text: #141414;
+        --muted: #646464;
+        --line: #deded7;
+        --soft: #f1f1ec;
+        --accent: #111111;
+        --ok: #176b4f;
+        --warn: #996900;
+        --bad: #a33131;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Arial,
+          Helvetica,
+          sans-serif;
+        line-height: 1.55;
+        margin: 0;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .page {
+        margin: 0 auto;
+        max-width: 1180px;
+        padding: 36px 24px 72px;
+      }
+
+      .hero {
+        border-bottom: 1px solid var(--line);
+        display: grid;
+        gap: 18px;
+        padding: 38px 0 30px;
+      }
+
+      .eyebrow {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-size: clamp(42px, 8vw, 92px);
+        letter-spacing: 0;
+        line-height: 0.9;
+        margin: 0;
+        max-width: 980px;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        border-top: 1px solid var(--line);
+        font-size: clamp(28px, 4vw, 48px);
+        line-height: 1;
+        margin: 48px 0 18px;
+        padding-top: 26px;
+        text-transform: uppercase;
+      }
+
+      h3 {
+        font-size: 18px;
+        margin: 28px 0 10px;
+        text-transform: uppercase;
+      }
+
+      p {
+        margin: 0 0 12px;
+      }
+
+      .lead {
+        color: var(--muted);
+        font-size: 20px;
+        max-width: 820px;
+      }
+
+      .meta-grid,
+      .two-col,
+      .three-col,
+      .four-col {
+        display: grid;
+        gap: 14px;
+      }
+
+      .meta-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .two-col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .three-col {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .four-col {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .card,
+      .note,
+      .flow-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+      }
+
+      .card strong,
+      .flow-card strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .note {
+        background: var(--soft);
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .tag {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        padding: 5px 9px;
+      }
+
+      table {
+        border-collapse: collapse;
+        font-size: 14px;
+        margin: 14px 0 24px;
+        width: 100%;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--soft);
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      code {
+        background: var(--soft);
+        border-radius: 4px;
+        font-family: Consolas, Monaco, monospace;
+        font-size: 0.95em;
+        padding: 2px 5px;
+      }
+
+      pre {
+        background: #111;
+        border-radius: 8px;
+        color: #fff;
+        overflow: auto;
+        padding: 16px;
+      }
+
+      .flow {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(6, minmax(120px, 1fr));
+        margin: 16px 0 26px;
+      }
+
+      .flow-card {
+        min-height: 96px;
+        position: relative;
+      }
+
+      .flow-card::after {
+        color: var(--muted);
+        content: "→";
+        font-size: 22px;
+        position: absolute;
+        right: -14px;
+        top: 34px;
+      }
+
+      .flow-card:last-child::after {
+        content: "";
+      }
+
+      .status {
+        display: inline-block;
+        font-weight: 800;
+      }
+
+      .status.ok {
+        color: var(--ok);
+      }
+
+      .status.warn {
+        color: var(--warn);
+      }
+
+      .status.bad {
+        color: var(--bad);
+      }
+
+      ul,
+      ol {
+        margin-top: 0;
+        padding-left: 22px;
+      }
+
+      li {
+        margin: 4px 0;
+      }
+
+      .toc {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 18px;
+      }
+
+      .toc a {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 10px 12px;
+        text-decoration: none;
+      }
+
+      @media (max-width: 920px) {
+        .meta-grid,
+        .two-col,
+        .three-col,
+        .four-col,
+        .toc {
+          grid-template-columns: 1fr;
+        }
+
+        .flow {
+          grid-template-columns: 1fr;
+        }
+
+        .flow-card::after {
+          bottom: -18px;
+          left: 16px;
+          right: auto;
+          top: auto;
+          transform: rotate(90deg);
+        }
+      }
+
+      @media print {
+        body {
+          background: #fff;
+        }
+
+        .page {
+          max-width: none;
+          padding: 0;
+        }
+
+        .card,
+        .note,
+        .flow-card,
+        .toc a {
+          break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <div class="eyebrow">Fashion Aggregator / Data Workflow</div>
+        <h1>Workflow данных проекта</h1>
+        <p class="lead">
+          Подробная схема движения данных: от affiliate approval и продуктовых
+          фидов до поиска, карточек товаров, кликов в магазины, аналитики и
+          масштабирования на 1k / 10k / 100k пользователей в день.
+        </p>
+        <div class="tag-row">
+          <span class="tag">Next.js</span>
+          <span class="tag">Supabase / Postgres</span>
+          <span class="tag">Affiliate feeds</span>
+          <span class="tag">Search</span>
+          <span class="tag">Clickout tracking</span>
+        </div>
+      </header>
+
+      <nav class="toc" aria-label="Содержание">
+        <a href="#goal">Цель данных</a>
+        <a href="#principles">Принципы</a>
+        <a href="#architecture">Архитектура</a>
+        <a href="#domains">Домены данных</a>
+        <a href="#store-onboarding">Магазины</a>
+        <a href="#feed-import">Импорт фидов</a>
+        <a href="#normalization">Нормализация</a>
+        <a href="#search">Поиск</a>
+        <a href="#clickout">Clickout</a>
+        <a href="#analytics">Аналитика</a>
+        <a href="#scale">Масштабирование</a>
+        <a href="#backlog">Backlog</a>
+      </nav>
+
+      <section id="goal">
+        <h2>1. Цель данных</h2>
+        <p>
+          Проект должен стать визуальным fashion-discovery сайтом для Литвы:
+          пользователь ищет не по одному магазину, а по настроению, категории,
+          цвету, размеру, цене и бренду, затем переходит на официальный сайт
+          магазина через approved affiliate link.
+        </p>
+        <div class="four-col">
+          <div class="card">
+            <strong>1. Feed-ready</strong>
+            Показать, что approved product feeds можно безопасно импортировать.
+          </div>
+          <div class="card">
+            <strong>2. Единый каталог</strong>
+            Привести разные фиды магазинов к одной модели товара.
+          </div>
+          <div class="card">
+            <strong>3. Поиск и discovery</strong>
+            Дать пользователю удобный поиск по vibe, категории, цвету и цене.
+          </div>
+          <div class="card">
+            <strong>4. Деньги и атрибуция</strong>
+            Связать outbound clicks с affiliate reports и комиссией.
+          </div>
+        </div>
+        <div class="note">
+          MVP не является маркетплейсом, скрапером, checkout-системой или coupon
+          сайтом. Покупка всегда происходит на стороне официального магазина.
+        </div>
+      </section>
+
+      <section id="principles">
+        <h2>2. Принципы работы с данными</h2>
+        <div class="two-col">
+          <div class="card">
+            <strong>Что делаем</strong>
+            <ul>
+              <li>Используем только approved affiliate feeds или written permission.</li>
+              <li>Храним raw rows для аудита и отладки.</li>
+              <li>Нормализуем товары в общую модель.</li>
+              <li>Делаем импорт идемпотентным.</li>
+              <li>Кешируем публичные страницы перед ростом трафика.</li>
+              <li>Храним affiliate subid без PII.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Чего избегаем</strong>
+            <ul>
+              <li>Не скрапим сайты магазинов.</li>
+              <li>Не показываем store как live без feed permission.</li>
+              <li>Не храним raw IP.</li>
+              <li>Не логиним каждого посетителя автоматически.</li>
+              <li>Не проксируем все merchant images через себя.</li>
+              <li>Не помечаем товары out of stock после failed import.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="architecture">
+        <h2>3. Общая архитектура данных</h2>
+        <div class="flow">
+          <div class="flow-card">
+            <strong>Affiliate networks</strong>
+            VIVnetworks / CJ, Awin, direct partners
+          </div>
+          <div class="flow-card">
+            <strong>Product feeds</strong>
+            XML, CSV, TSV, JSON
+          </div>
+          <div class="flow-card">
+            <strong>Feed importer</strong>
+            Scheduled job, validation, normalization
+          </div>
+          <div class="flow-card">
+            <strong>Postgres</strong>
+            Stores, rules, products, events, clicks
+          </div>
+          <div class="flow-card">
+            <strong>Search</strong>
+            Postgres first, Meili/Typesense later
+          </div>
+          <div class="flow-card">
+            <strong>Next.js</strong>
+            Search, collections, clickout
+          </div>
+        </div>
+        <p>
+          Пользователь видит только нормализованный каталог. Raw feed, affiliate
+          credentials, internal validation errors и subid mapping остаются
+          внутри системы.
+        </p>
+      </section>
+
+      <section id="domains">
+        <h2>4. Домены данных</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Домен</th>
+              <th>Зачем нужен</th>
+              <th>Таблицы / файлы</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Магазины</td>
+              <td>Какие stores есть и можно ли показывать их публично.</td>
+              <td><code>stores</code>, <code>store_tracker.csv</code></td>
+            </tr>
+            <tr>
+              <td>Affiliate rules</td>
+              <td>Комиссия, cookie, feed, deeplink, SEM и traffic rules.</td>
+              <td><code>affiliate_program_rules</code></td>
+            </tr>
+            <tr>
+              <td>Импорты</td>
+              <td>Статус фидов, ошибки, fresh data, counts.</td>
+              <td><code>feed_import_runs</code></td>
+            </tr>
+            <tr>
+              <td>Raw source</td>
+              <td>Оригинальные строки фида для аудита и debug.</td>
+              <td><code>raw_feed_items</code></td>
+            </tr>
+            <tr>
+              <td>Каталог</td>
+              <td>Единые карточки товаров и варианты.</td>
+              <td><code>products</code>, <code>product_variants</code></td>
+            </tr>
+            <tr>
+              <td>Поиск</td>
+              <td>Фильтры, текстовый поиск, позже embeddings/style.</td>
+              <td><code>product_embeddings</code>, search index later</td>
+            </tr>
+            <tr>
+              <td>Поведение</td>
+              <td>Поисковые запросы, фильтры, result count.</td>
+              <td><code>search_events</code></td>
+            </tr>
+            <tr>
+              <td>Clickout</td>
+              <td>Переходы в магазин и affiliate attribution.</td>
+              <td><code>outbound_clicks</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="store-onboarding">
+        <h2>5. Workflow магазинов</h2>
+        <p>
+          Магазин нельзя сразу показывать как live source. Сначала нужно
+          подтвердить affiliate access, правила, feed availability и возможность
+          использовать images/deeplinks.
+        </p>
+        <div class="flow">
+          <div class="flow-card">
+            <strong>Research</strong>
+            Находим affiliate network и feed signal
+          </div>
+          <div class="flow-card">
+            <strong>Tracker</strong>
+            Заполняем <code>store_tracker.csv</code>
+          </div>
+          <div class="flow-card">
+            <strong>Apply</strong>
+            Подаемся в affiliate program
+          </div>
+          <div class="flow-card">
+            <strong>Rules</strong>
+            Сохраняем финальные условия
+          </div>
+          <div class="flow-card">
+            <strong>Feed config</strong>
+            Создаем конфиг импорта
+          </div>
+          <div class="flow-card">
+            <strong>Live</strong>
+            Показываем после успешного импорта
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Статус</th>
+              <th>Что означает</th>
+              <th>Можно ли показывать товары</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>target</code></td>
+              <td>Магазин интересен, но permission ещё нет.</td>
+              <td><span class="status bad">Нет</span></td>
+            </tr>
+            <tr>
+              <td><code>applied</code></td>
+              <td>Заявка отправлена, ждём ответ.</td>
+              <td><span class="status bad">Нет</span></td>
+            </tr>
+            <tr>
+              <td><code>approved_deeplink</code></td>
+              <td>Есть deeplink/click permission, feed может быть не готов.</td>
+              <td><span class="status warn">Ограниченно</span></td>
+            </tr>
+            <tr>
+              <td><code>approved_feed</code></td>
+              <td>Есть разрешение и доступ к product feed.</td>
+              <td><span class="status ok">Да, после импорта</span></td>
+            </tr>
+            <tr>
+              <td><code>paused / blocked</code></td>
+              <td>Правила, ошибки или операционная пауза.</td>
+              <td><span class="status bad">Нет</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="feed-config">
+        <h2>6. Feed config</h2>
+        <p>
+          Feed config описывает, как импортировать конкретный approved feed. В
+          репозиторий можно класть только не-секретные настройки. URL с ключами,
+          токены и пароли должны жить в environment secrets.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Поле</th>
+              <th>Пример</th>
+              <th>Комментарий</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>store_slug</code></td>
+              <td><code>reserved_lt</code></td>
+              <td>Связь с <code>stores.slug</code>.</td>
+            </tr>
+            <tr>
+              <td><code>source_type</code></td>
+              <td><code>affiliate_feed</code></td>
+              <td>Не scraper.</td>
+            </tr>
+            <tr>
+              <td><code>source_format</code></td>
+              <td><code>xml</code></td>
+              <td>XML, CSV, TSV или JSON.</td>
+            </tr>
+            <tr>
+              <td><code>is_full_snapshot</code></td>
+              <td><code>true</code></td>
+              <td>Определяет, можно ли ставить missing products в out of stock.</td>
+            </tr>
+            <tr>
+              <td><code>category_map</code></td>
+              <td><code>reserved_v1</code></td>
+              <td>Версия внутренних правил нормализации категорий.</td>
+            </tr>
+            <tr>
+              <td><code>schedule</code></td>
+              <td><code>daily</code></td>
+              <td>Hourly только когда появится реальная необходимость.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="feed-import">
+        <h2>7. Workflow импорта фида</h2>
+        <div class="flow">
+          <div class="flow-card">
+            <strong>1. Load rules</strong>
+            Проверить store и program rules
+          </div>
+          <div class="flow-card">
+            <strong>2. Create run</strong>
+            <code>feed_import_runs.started</code>
+          </div>
+          <div class="flow-card">
+            <strong>3. Download</strong>
+            Скачать XML/CSV/JSON
+          </div>
+          <div class="flow-card">
+            <strong>4. Parse</strong>
+            Разобрать строки
+          </div>
+          <div class="flow-card">
+            <strong>5. Normalize</strong>
+            Категория, цена, цвет, размер
+          </div>
+          <div class="flow-card">
+            <strong>6. Upsert</strong>
+            Raw rows, products, variants
+          </div>
+        </div>
+        <ol>
+          <li>Загрузить store и affiliate rules.</li>
+          <li>Остановить job, если feed permission не подтверждён.</li>
+          <li>Создать <code>feed_import_runs</code> со статусом <code>started</code>.</li>
+          <li>Скачать feed во временное хранилище.</li>
+          <li>Посчитать hash фида и при полном совпадении завершить без лишней работы.</li>
+          <li>Распарсить rows строго по формату.</li>
+          <li>Проверить обязательные поля.</li>
+          <li>Нормализовать canonical fields.</li>
+          <li>Посчитать <code>raw_hash</code> и <code>content_hash</code>.</li>
+          <li>Сохранить <code>raw_feed_items</code>.</li>
+          <li>Upsert <code>products</code> по <code>store_id + external_product_id</code>.</li>
+          <li>Upsert <code>product_variants</code>, если есть размеры/варианты.</li>
+          <li>После full snapshot отметить unseen products как <code>out_of_stock</code>.</li>
+          <li>Поставить changed products в очередь search reindex/enrichment.</li>
+          <li>Завершить import run с counts, warnings и errors.</li>
+        </ol>
+        <div class="note">
+          Важное правило: failed import не имеет права менять активные товары на
+          out of stock. Иначе один сломанный feed может выключить весь магазин.
+        </div>
+      </section>
+
+      <section id="normalization">
+        <h2>8. Нормализация товара</h2>
+        <p>
+          Фиды разных магазинов будут отличаться: названия полей, категории,
+          цвета, размеры, цены, availability. Наша задача — сохранить source
+          payload и одновременно собрать единый catalog model.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Source concept</th>
+              <th>Canonical field</th>
+              <th>Зачем</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Merchant product ID</td>
+              <td><code>external_product_id</code></td>
+              <td>Уникальность товара внутри магазина.</td>
+            </tr>
+            <tr>
+              <td>Product name</td>
+              <td><code>title</code></td>
+              <td>Карточка и поиск.</td>
+            </tr>
+            <tr>
+              <td>Category path</td>
+              <td><code>merchant_category</code>, <code>normalized_category</code></td>
+              <td>Debug + фильтры/SEO.</td>
+            </tr>
+            <tr>
+              <td>Audience / department</td>
+              <td><code>gender</code></td>
+              <td>WOMAN / MAN / KIDS.</td>
+            </tr>
+            <tr>
+              <td>Color</td>
+              <td><code>color_label</code>, <code>normalized_color</code></td>
+              <td>Показ source color и общий color filter.</td>
+            </tr>
+            <tr>
+              <td>Price</td>
+              <td><code>price</code>, <code>sale_price</code>, <code>old_price</code></td>
+              <td>Карточка, sale, сортировка.</td>
+            </tr>
+            <tr>
+              <td>Product / affiliate URL</td>
+              <td><code>product_url</code>, <code>affiliate_url</code></td>
+              <td>Clickout и attribution.</td>
+            </tr>
+            <tr>
+              <td>Stock</td>
+              <td><code>availability</code>, <code>in_stock</code>, <code>status</code></td>
+              <td>Не показывать dead products.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Примеры нормализации</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Raw input</th>
+              <th>Normalized output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Women &gt; Shoes &gt; Trainers</code></td>
+              <td><code>gender = woman</code>, <code>category = sneakers</code></td>
+            </tr>
+            <tr>
+              <td><code>Black / Noir / Juoda</code></td>
+              <td><code>normalized_color = black</code></td>
+            </tr>
+            <tr>
+              <td><code>EU 42</code></td>
+              <td><code>normalized_size = eu_42</code></td>
+            </tr>
+            <tr>
+              <td><code>Out of stock</code></td>
+              <td><code>in_stock = false</code>, <code>status = out_of_stock</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="lifecycle">
+        <h2>9. Lifecycle товара</h2>
+        <div class="flow">
+          <div class="flow-card">
+            <strong>demo</strong>
+            Синтетический товар до approval
+          </div>
+          <div class="flow-card">
+            <strong>active</strong>
+            Товар из approved feed
+          </div>
+          <div class="flow-card">
+            <strong>out_of_stock</strong>
+            Нет в наличии или исчез из full snapshot
+          </div>
+          <div class="flow-card">
+            <strong>removed</strong>
+            Старый товар после retention window
+          </div>
+          <div class="flow-card">
+            <strong>blocked</strong>
+            Скрыт оператором или validation rule
+          </div>
+          <div class="flow-card">
+            <strong>reactivated</strong>
+            Вернулся в feed и снова active
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Статус</th>
+              <th>Показывать в поиске?</th>
+              <th>Комментарий</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>demo</code></td>
+              <td>Только в demo mode</td>
+              <td>Нельзя выдавать за live merchant product.</td>
+            </tr>
+            <tr>
+              <td><code>active</code></td>
+              <td>Да</td>
+              <td>Основной публичный статус.</td>
+            </tr>
+            <tr>
+              <td><code>out_of_stock</code></td>
+              <td>По умолчанию нет</td>
+              <td>Можно хранить для истории.</td>
+            </tr>
+            <tr>
+              <td><code>removed</code></td>
+              <td>Нет</td>
+              <td>Старый товар, убран из public catalog.</td>
+            </tr>
+            <tr>
+              <td><code>blocked</code></td>
+              <td>Нет</td>
+              <td>Правила, legal issue или bad data.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="search">
+        <h2>10. Search workflow</h2>
+        <div class="flow">
+          <div class="flow-card">
+            <strong>User query</strong>
+            Запрос, department, filters
+          </div>
+          <div class="flow-card">
+            <strong>Normalize</strong>
+            trim, lowercase, filters JSON
+          </div>
+          <div class="flow-card">
+            <strong>Query catalog</strong>
+            Postgres products или search index
+          </div>
+          <div class="flow-card">
+            <strong>Result count</strong>
+            Считаем количество результатов
+          </div>
+          <div class="flow-card">
+            <strong>search_events</strong>
+            Пишем событие
+          </div>
+          <div class="flow-card">
+            <strong>Product grid</strong>
+            Возвращаем карточки
+          </div>
+        </div>
+        <h3>MVP search</h3>
+        <ul>
+          <li>Только <code>active</code> товары.</li>
+          <li>Фильтры: store, category, color, gender, price, availability.</li>
+          <li>Text search по title, brand, category, tags.</li>
+          <li>Search event создается после получения result count.</li>
+          <li>Популярные collection pages можно кешировать.</li>
+        </ul>
+        <h3>Когда нужен Meilisearch / Typesense</h3>
+        <ul>
+          <li>100k+ active products.</li>
+          <li>Postgres facets стали медленными.</li>
+          <li>Нужны typo tolerance, synonyms и autocomplete.</li>
+          <li>Нужно лучше ранжировать vibe/style search.</li>
+        </ul>
+        <div class="note">
+          Algolia лучше не включать рано: она удобная, но autocomplete и
+          поисковые запросы могут быстро стать самой дорогой статьей.
+        </div>
+      </section>
+
+      <section id="public-pages">
+        <h2>11. Данные публичных страниц</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Страница</th>
+              <th>Источник данных</th>
+              <th>Правило</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Home</td>
+              <td>Editorial blocks + selected products</td>
+              <td>Кешировать максимально.</td>
+            </tr>
+            <tr>
+              <td>Search</td>
+              <td>Products + filters</td>
+              <td>Сначала dynamic, позже cache popular params.</td>
+            </tr>
+            <tr>
+              <td>Store page</td>
+              <td>Store + products</td>
+              <td>Показывать только approved/live stores.</td>
+            </tr>
+            <tr>
+              <td>Collection page</td>
+              <td>Category/style query</td>
+              <td>Подходит для SEO и рекламы.</td>
+            </tr>
+            <tr>
+              <td>Data sources</td>
+              <td>Store/rule summary</td>
+              <td>Trust page для affiliate review.</td>
+            </tr>
+            <tr>
+              <td><code>/out/:productId</code></td>
+              <td>Product + affiliate rules</td>
+              <td>Только server-side validation.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="clickout">
+        <h2>12. Clickout workflow</h2>
+        <div class="flow">
+          <div class="flow-card">
+            <strong>Click</strong>
+            User нажимает View in store
+          </div>
+          <div class="flow-card">
+            <strong>Load data</strong>
+            Product, store, rules
+          </div>
+          <div class="flow-card">
+            <strong>Validate</strong>
+            Status, host, affiliate permission
+          </div>
+          <div class="flow-card">
+            <strong>Create click</strong>
+            <code>outbound_clicks.pending</code>
+          </div>
+          <div class="flow-card">
+            <strong>SubID</strong>
+            <code>fa_&lt;short_click_id&gt;</code>
+          </div>
+          <div class="flow-card">
+            <strong>302 redirect</strong>
+            В merchant / network URL
+          </div>
+        </div>
+        <h3>Destination priority</h3>
+        <ol>
+          <li>Variant-level <code>affiliate_url</code>.</li>
+          <li>Product-level <code>affiliate_url</code>.</li>
+          <li>Approved deeplink template + <code>product_url</code>.</li>
+          <li><code>product_url</code> only if direct tracking is explicitly allowed.</li>
+        </ol>
+        <h3>Validation rules</h3>
+        <ul>
+          <li>Product exists and status is active.</li>
+          <li>Store is live.</li>
+          <li>Affiliate/deeplink rules allow clickout.</li>
+          <li>URL uses HTTPS.</li>
+          <li>Destination host is allowlisted.</li>
+          <li>Destination is not cart, checkout, admin or unknown host.</li>
+        </ul>
+      </section>
+
+      <section id="reconciliation">
+        <h2>13. Affiliate reconciliation</h2>
+        <p>
+          Affiliate network reports обычно приходят с задержкой. На MVP можно
+          делать reconciliation вручную, позже добавить таблицы для report import.
+        </p>
+        <ol>
+          <li>Экспортировать report из affiliate network.</li>
+          <li>Получить date range, store, click/subid, order status, commission.</li>
+          <li>Сматчить report subid с <code>outbound_clicks.affiliate_subid</code>.</li>
+          <li>Посчитать EPC, conversion rate, approval rate.</li>
+          <li>Сравнить эффективность store/category/query.</li>
+        </ol>
+        <table>
+          <thead>
+            <tr>
+              <th>Метрика</th>
+              <th>Формула</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Clicks</td>
+              <td>count of <code>outbound_clicks</code></td>
+            </tr>
+            <tr>
+              <td>Conversion rate</td>
+              <td>approved orders / clicks</td>
+            </tr>
+            <tr>
+              <td>EPC</td>
+              <td>commission / clicks</td>
+            </tr>
+            <tr>
+              <td>Approval rate</td>
+              <td>approved orders / tracked orders</td>
+            </tr>
+            <tr>
+              <td>Revenue per session</td>
+              <td>commission / sessions</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="analytics">
+        <h2>14. Analytics и dashboards</h2>
+        <div class="three-col">
+          <div class="card">
+            <strong>Product metrics</strong>
+            <ul>
+              <li>sessions</li>
+              <li>searches</li>
+              <li>zero-result rate</li>
+              <li>filter usage</li>
+              <li>product impressions</li>
+              <li>outbound clicks</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Feed health</strong>
+            <ul>
+              <li>latest successful run</li>
+              <li>invalid row rate</li>
+              <li>missing image rate</li>
+              <li>duplicate rate</li>
+              <li>products updated</li>
+              <li>out-of-stock count</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Affiliate metrics</strong>
+            <ul>
+              <li>clicks by store</li>
+              <li>clicks by query</li>
+              <li>EPC</li>
+              <li>conversion rate</li>
+              <li>approval rate</li>
+              <li>commission by store</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="errors">
+        <h2>15. Ошибки и алерты</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Зона</th>
+              <th>Что отслеживать</th>
+              <th>Порог</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Feed import</td>
+              <td>Download failed, parse failed, zero valid products.</td>
+              <td>Алерт сразу.</td>
+            </tr>
+            <tr>
+              <td>Feed quality</td>
+              <td>Invalid rows, missing images, price parse errors.</td>
+              <td>Invalid &gt; 30%, missing image &gt; 10%, price error &gt; 2%.</td>
+            </tr>
+            <tr>
+              <td>Search</td>
+              <td>Zero-result spike, slow response, index unavailable.</td>
+              <td>По baseline после первых данных.</td>
+            </tr>
+            <tr>
+              <td>Clickout</td>
+              <td>Blocked/failed redirects, unknown host.</td>
+              <td>Failed clickout &gt; 1%.</td>
+            </tr>
+            <tr>
+              <td>Privacy/security</td>
+              <td>Raw IP in logs, PII in affiliate URL, credentials in logs.</td>
+              <td>Алерт сразу.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="retention">
+        <h2>16. Retention данных</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Данные</th>
+              <th>Retention</th>
+              <th>Комментарий</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Products</td>
+              <td>Пока active</td>
+              <td>Основной catalog.</td>
+            </tr>
+            <tr>
+              <td>Out-of-stock products</td>
+              <td>30-90 дней</td>
+              <td>Для reactivation/history.</td>
+            </tr>
+            <tr>
+              <td>Raw feed rows</td>
+              <td>30-90 дней</td>
+              <td>Позже архивировать в R2.</td>
+            </tr>
+            <tr>
+              <td>Feed import runs</td>
+              <td>12 месяцев</td>
+              <td>Дешево и полезно для ops.</td>
+            </tr>
+            <tr>
+              <td>Search events</td>
+              <td>6-12 месяцев</td>
+              <td>Старые данные агрегировать.</td>
+            </tr>
+            <tr>
+              <td>Outbound clicks</td>
+              <td>12-24 месяца</td>
+              <td>Нужно для affiliate reconciliation.</td>
+            </tr>
+            <tr>
+              <td>Logs</td>
+              <td>7-30 дней</td>
+              <td>Без PII.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="scale">
+        <h2>17. Масштабирование по фазам</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Фаза</th>
+              <th>Данные</th>
+              <th>Стек</th>
+              <th>Главный фокус</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Development / pre-affiliate</td>
+              <td><code>mock_products.csv</code>, <code>store_tracker.csv</code></td>
+              <td>Next.js, local/Vercel, CSV mock data</td>
+              <td>Показать credible demo без unauthorized merchant data.</td>
+            </tr>
+            <tr>
+              <td>First approved feed</td>
+              <td>1 approved affiliate feed</td>
+              <td>Supabase Postgres, scheduled import, Postgres search</td>
+              <td>Импорт без дублей, clickout tracking.</td>
+            </tr>
+            <tr>
+              <td>1k users/day</td>
+              <td>30k users/month, daily imports</td>
+              <td>Vercel + Supabase Pro</td>
+              <td>Cache, no image proxy, key analytics only.</td>
+            </tr>
+            <tr>
+              <td>10k users/day</td>
+              <td>100k+ products possible</td>
+              <td>Supabase compute upgrade, Meili/Typesense if needed</td>
+              <td>Search speed, index quality, feed freshness.</td>
+            </tr>
+            <tr>
+              <td>100k users/day</td>
+              <td>Millions of sessions/month</td>
+              <td>Cloudflare CDN, separate search, worker, batched events</td>
+              <td>Cost control, cache, sampled analytics, async writes.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="future">
+        <h2>18. Будущие workflow</h2>
+        <div class="three-col">
+          <div class="card">
+            <strong>Saved boards</strong>
+            Только после traffic validation. Browsing остается anonymous,
+            login optional.
+          </div>
+          <div class="card">
+            <strong>Subscription features</strong>
+            3D try-on, AI stylist, advanced filters. Не смешивать billing events
+            с affiliate click events.
+          </div>
+          <div class="card">
+            <strong>AI enrichment</strong>
+            Генерировать tags/embeddings только для changed products и с daily
+            spend cap.
+          </div>
+        </div>
+      </section>
+
+      <section id="backlog">
+        <h2>19. Implementation backlog</h2>
+        <div class="two-col">
+          <div class="card">
+            <strong>Phase A: Mock MVP</strong>
+            <ul>
+              <li>Оставить <code>mock_products.csv</code> как demo-only source.</li>
+              <li>Добавить search event skeleton.</li>
+              <li>Добавить safe demo behavior для <code>/out/:productId</code>.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Phase B: Database activation</strong>
+            <ul>
+              <li>Применить <code>001_pre_affiliate_schema.sql</code> в Supabase.</li>
+              <li>Seed first-wave stores.</li>
+              <li>Заменить CSV reads на database reads.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Phase C: First feed import</strong>
+            <ul>
+              <li>Собрать feed config.</li>
+              <li>Импортировать первый XML feed.</li>
+              <li>Сохранить raw rows и upsert products/variants.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Phase D: Search and clickout</strong>
+            <ul>
+              <li>Query active products from DB.</li>
+              <li>Сохранять <code>search_events</code>.</li>
+              <li>Реализовать safe <code>/out/:productId</code>.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="acceptance">
+        <h2>20. Acceptance checklist</h2>
+        <ul>
+          <li>Ни один unapproved store не показан как live source.</li>
+          <li>Минимум один approved feed успешно импортируется.</li>
+          <li>Повторный импорт того же feed не создает дубли.</li>
+          <li>Failed import не делает active products out of stock.</li>
+          <li>Product cards показывают только valid public fields.</li>
+          <li>Search возвращает только active products.</li>
+          <li>Search event содержит query, filters и result count.</li>
+          <li>Clickout создает <code>outbound_clicks</code> до redirect.</li>
+          <li>Destination URL валидируется.</li>
+          <li>Affiliate subid не содержит PII.</li>
+          <li>Ошибки feed import видны оператору.</li>
+          <li>Legal/data source pages объясняют affiliate data usage.</li>
+          <li>Можно понять, какой store/query/category генерит clicks.</li>
+        </ul>
+      </section>
+
+      <section id="stack">
+        <h2>21. Рекомендованный первый production stack</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Слой</th>
+              <th>Рекомендация</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Web</td>
+              <td>Next.js на Vercel Pro</td>
+            </tr>
+            <tr>
+              <td>Database</td>
+              <td>Supabase Postgres Pro</td>
+            </tr>
+            <tr>
+              <td>Search</td>
+              <td>Postgres filters/text search first</td>
+            </tr>
+            <tr>
+              <td>Feed jobs</td>
+              <td>GitHub Actions или Supabase scheduled job</td>
+            </tr>
+            <tr>
+              <td>Assets/feed snapshots</td>
+              <td>Сначала не отдельно, Cloudflare R2 later</td>
+            </tr>
+            <tr>
+              <td>Analytics</td>
+              <td><code>search_events</code>, <code>outbound_clicks</code>, limited GA4/PostHog</td>
+            </tr>
+            <tr>
+              <td>Monitoring</td>
+              <td>Sentry + Better Stack/Uptime monitor</td>
+            </tr>
+            <tr>
+              <td>Email</td>
+              <td>Google Workspace + Resend</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note">
+          Пересматривать стек стоит при 100k+ active products, ухудшении search
+          latency, достижении 10k users/day или когда analytics/search cost
+          начинает расти быстрее affiliate revenue.
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
+

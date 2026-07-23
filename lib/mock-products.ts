@@ -91,6 +91,7 @@ export function filterProducts(
     store?: string;
     category?: string;
     color?: string;
+    gender?: string;
   },
 ) {
   const query = params.query?.trim().toLowerCase();
@@ -99,6 +100,9 @@ export function filterProducts(
     if (params.store && product.store_slug !== params.store) return false;
     if (params.category && product.category !== params.category) return false;
     if (params.color && product.color !== params.color) return false;
+    if (params.gender && product.gender.toLowerCase() !== params.gender.toLowerCase()) {
+      return false;
+    }
 
     if (!query) return true;
 
@@ -118,4 +122,3 @@ export function filterProducts(
     return haystack.includes(query);
   });
 }
-
