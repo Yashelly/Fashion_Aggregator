@@ -1,19 +1,21 @@
-export default function TermsPage() {
+import { getCopy, getLocale, type SearchParamsInput } from "@/lib/i18n";
+
+type TermsPageProps = {
+  searchParams: Promise<SearchParamsInput>;
+};
+
+export default async function TermsPage({ searchParams }: TermsPageProps) {
+  const locale = getLocale(await searchParams);
+  const t = getCopy(locale).pages.terms;
+
   return (
     <div className="stack">
-      <h1 className="page-title">Terms of Use Draft</h1>
+      <h1 className="page-title">{t.title}</h1>
       <section className="section">
-        <p>
-          This page is a website placeholder for
-          <code> docs/legal/terms_of_use_draft.md</code>. Before public launch,
-          replace it with finalized terms.
-        </p>
-        <p>
-          The service is for fashion discovery. It does not operate checkout,
-          resell products, or act as the retailer.
-        </p>
+        {t.paragraphs.map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
       </section>
     </div>
   );
 }
-
