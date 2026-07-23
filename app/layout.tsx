@@ -18,15 +18,25 @@ export default function RootLayout({
       <body>
         <div className="shell">
           <header className="site-header">
+            <div className="header-left">
+              <Link className="menu-link" href="/stores">
+                MENU
+              </Link>
+              <nav className="department-nav" aria-label="Departments">
+                <Link href="/search?gender=woman">WOMAN</Link>
+                <Link href="/search?gender=man">MAN</Link>
+                <Link href="/search?gender=kids">KIDS</Link>
+                <Link href="/search?query=beauty">BEAUTY</Link>
+              </nav>
+            </div>
             <Link className="brand" href="/">
-              Fashion Aggregator
+              VIBEWEAR
             </Link>
             <nav className="nav" aria-label="Main navigation">
-              <Link href="/search">Search</Link>
-              <Link href="/stores">Stores</Link>
-              <Link href="/how-it-works">How it works</Link>
-              <Link href="/data-sources">Data sources</Link>
-              <Link href="/contact">Contact</Link>
+              <Link href="/search">SEARCH</Link>
+              <Link href="/stores">STORES</Link>
+              <Link href="/data-sources">DATA</Link>
+              <Link href="/contact">CONTACT</Link>
             </nav>
           </header>
           <main className="main">{children}</main>
