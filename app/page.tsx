@@ -1,52 +1,84 @@
 import Link from "next/link";
+import { CinematicHero } from "@/components/cinematic-hero";
 import { ProductGrid } from "@/components/product-grid";
 import { getMockProducts } from "@/lib/mock-products";
 
+const editorialLinks = [
+  { number: "01", title: "NEW IN", href: "/search" },
+  { number: "02", title: "TRENDING NOW", href: "/search?query=streetwear" },
+  { number: "03", title: "SNEAKERS", href: "/search?query=sneakers" },
+  { number: "04", title: "SUMMER EDIT", href: "/search?query=summer" },
+  { number: "05", title: "SPECIAL PRICES", href: "/search?query=sale" },
+];
+
+const categoryColumns = [
+  {
+    title: "DISCOVER",
+    links: ["NEW IN", "EDITORIAL", "LOOKBOOK", "CAMPAIGN", "STORES"],
+  },
+  {
+    title: "COLLECTION",
+    links: ["DRESSES", "T-SHIRTS", "TROUSERS", "HOODIES", "JACKETS"],
+  },
+  {
+    title: "SHOES | ACCESSORIES",
+    links: ["TRAINERS", "BAGS", "BELTS", "SUNGLASSES", "JEWELLERY"],
+  },
+  {
+    title: "STORES",
+    links: ["RESERVED", "SINSAY", "SIZEER", "MODIVO", "ABOUT DATA"],
+  },
+];
+
 export default function HomePage() {
-  const featuredProducts = getMockProducts().slice(0, 8);
+  const featuredProducts = getMockProducts().slice(28, 36);
 
   return (
-    <div className="stack">
-      <section className="hero">
-        <div>
-          <h1>Find fashion by vibe, not by store.</h1>
-          <p className="lead">
-            A visual fashion discovery MVP for Lithuanian shoppers. Search demo
-            products by style, color, price, size, and store before live
-            affiliate feeds are approved.
-          </p>
-          <p className="small">
-            Current mode: mock data only. Live products should come from approved
-            affiliate/product feeds.
-          </p>
-          <p>
-            <Link className="button" href="/search">
-              Open demo search
-            </Link>
-          </p>
-        </div>
-        <form className="search-panel" action="/search">
-          <div className="search-form">
-            <label className="field">
-              <span>Search demo catalog</span>
-              <input
-                className="input"
-                name="query"
-                placeholder="black sneakers, summer dress, office"
-              />
-            </label>
-            <button className="button" type="submit">
-              Search
-            </button>
-          </div>
-        </form>
-      </section>
+    <>
+      <CinematicHero />
 
-      <section>
-        <h2>Demo products</h2>
-        <ProductGrid products={featuredProducts} />
-      </section>
-    </div>
+      <div className="zara-home">
+        <section className="editorial-index" aria-label="Editorial index">
+          {editorialLinks.map((item) => (
+            <Link href={item.href} key={item.title}>
+              <span>{item.number}</span>
+              {item.title}
+            </Link>
+          ))}
+        </section>
+
+        <section className="category-board" aria-label="Catalog navigation">
+          {categoryColumns.map((column) => (
+            <div className="category-column" key={column.title}>
+              <h2>{column.title}</h2>
+              <ul>
+                {column.links.map((link) => (
+                  <li key={link}>
+                    <Link href={`/search?query=${encodeURIComponent(link.toLowerCase())}`}>
+                      {link}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </section>
+
+        <section className="collection-strip">
+          <div className="collection-copy">
+            <span>DEMO FEED</span>
+            <h2>STREETWEAR SELECTION</h2>
+            <p>
+              Synthetic products now. Approved affiliate feeds later.
+            </p>
+          </div>
+          <Link href="/search?query=sneakers">VIEW ALL</Link>
+        </section>
+
+        <section className="zara-product-section">
+          <ProductGrid products={featuredProducts} />
+        </section>
+      </div>
+    </>
   );
 }
-

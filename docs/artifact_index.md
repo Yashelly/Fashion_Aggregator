@@ -24,6 +24,10 @@ Operational data:
 Infrastructure/specs:
 
 - `../sql/001_pre_affiliate_schema.sql`
+- `lyst_reference_strategy.md`
+- `data_workflow.md`
+- `data_workflow.md`
+- `data_workflow.html`
 - `feed_import_spec.md`
 - `clickout_tracking_spec.md`
 - `mvp_prd.md`

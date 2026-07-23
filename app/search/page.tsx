@@ -11,6 +11,7 @@ type SearchPageProps = {
     store?: string;
     category?: string;
     color?: string;
+    gender?: string;
   }>;
 };
 
@@ -25,6 +26,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const stores = getStoreOptions(products);
   const categories = unique(products.map((product) => product.category));
   const colors = unique(products.map((product) => product.color));
+  const genders = unique(products.map((product) => product.gender));
 
   return (
     <div className="stack">
@@ -54,6 +56,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               {stores.map((store) => (
                 <option key={store.value} value={store.value}>
                   {store.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>Department</span>
+            <select className="select" defaultValue={params.gender ?? ""} name="gender">
+              <option value="">All departments</option>
+              {genders.map((gender) => (
+                <option key={gender} value={gender}>
+                  {gender}
                 </option>
               ))}
             </select>
@@ -98,4 +111,3 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     </div>
   );
 }
-
