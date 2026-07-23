@@ -1,18 +1,24 @@
-export default function ContactPage() {
+import { getCopy, getLocale, type SearchParamsInput } from "@/lib/i18n";
+
+type ContactPageProps = {
+  searchParams: Promise<SearchParamsInput>;
+};
+
+export default async function ContactPage({ searchParams }: ContactPageProps) {
+  const locale = getLocale(await searchParams);
+  const t = getCopy(locale).pages.contact;
+
   return (
     <div className="stack">
-      <h1 className="page-title">Contact</h1>
+      <h1 className="page-title">{t.title}</h1>
       <section className="section">
+        <p>{t.intro}</p>
         <p>
-          Replace this placeholder with a project email before applying to
-          affiliate networks.
-        </p>
-        <p>
-          Suggested inboxes: <code>hello@[domain]</code>,{" "}
-          <code>partners@[domain]</code>, or <code>legal@[domain]</code>.
+          {t.partnerships}: <a href="mailto:partners@vibewear.lt">partners@vibewear.lt</a>
+          <br />
+          {t.legal}: <a href="mailto:legal@vibewear.lt">legal@vibewear.lt</a>
         </p>
       </section>
     </div>
   );
 }
-
