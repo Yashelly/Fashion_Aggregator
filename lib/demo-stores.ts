@@ -21,7 +21,15 @@ type ProductStoreReference = {
   store_slug: string;
 };
 
-const storeTrackerPath = path.join(process.cwd(), "data", "store_tracker.csv");
+const appRootCandidates = [
+  process.cwd(),
+  path.join(process.cwd(), "dist"),
+];
+const storeTrackerPath =
+  appRootCandidates
+    .map((root) => path.join(root, "data", "store_tracker.csv"))
+    .find((candidate) => fs.existsSync(candidate)) ??
+  path.join(appRootCandidates[0], "data", "store_tracker.csv");
 const publicDemoStoreCount = 6;
 
 function parseCsvLine(line: string): string[] {

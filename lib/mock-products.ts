@@ -36,11 +36,19 @@ export type MockProduct = CsvMockProduct & {
   detail_image_available: boolean;
 };
 
-const csvPath = path.join(process.cwd(), "data", "mock_products.csv");
-const demoProductDirectories = [
-  path.join(process.cwd(), "public", "demo-products"),
-  path.join(process.cwd(), "client", "demo-products"),
+const appRootCandidates = [
+  process.cwd(),
+  path.join(process.cwd(), "dist"),
 ];
+const csvPath =
+  appRootCandidates
+    .map((root) => path.join(root, "data", "mock_products.csv"))
+    .find((candidate) => fs.existsSync(candidate)) ??
+  path.join(appRootCandidates[0], "data", "mock_products.csv");
+const demoProductDirectories = appRootCandidates.flatMap((root) => [
+  path.join(root, "public", "demo-products"),
+  path.join(root, "client", "demo-products"),
+]);
 
 function parseCsvLine(line: string): string[] {
   const values: string[] = [];
