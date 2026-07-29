@@ -1,23 +1,30 @@
+import { InfoPage, ProseSection } from "@/components/info-page";
 import { getCopy, getLocale, type SearchParamsInput } from "@/lib/i18n";
 
 type PrivacyPageProps = {
   searchParams: Promise<SearchParamsInput>;
 };
 
-export default async function PrivacyPage({ searchParams }: PrivacyPageProps) {
+export default async function Page({
+  searchParams,
+}: PrivacyPageProps): Promise<React.ReactElement> {
   const locale = getLocale(await searchParams);
-  const t = getCopy(locale).pages.privacy;
+  const copy = getCopy(locale).pages.privacy;
 
   return (
-    <div className="stack">
-      <h1 className="page-title">{t.title}</h1>
-      <section className="section">
-        <p>{t.paragraphs[0]}</p>
-        <p>{t.paragraphs[1]}</p>
+    <InfoPage
+      eyebrow={locale === "lt" ? "Duomenys ir privatumas" : "Data and privacy"}
+      title={copy.title}
+    >
+      <ProseSection number="02">
+        <p>{copy.paragraphs[0]}</p>
+        <p>{copy.paragraphs[1]}</p>
         <p>
-          {t.paragraphs[2]} <a href="mailto:legal@vibewear.lt">legal@vibewear.lt</a>.
+          {locale === "lt"
+            ? "Privatumo, pataisymų ar pašalinimo užklausų kontaktas bus paskelbtas kontaktų puslapyje, kai bus patvirtintas domeno ir pašto dėžutės valdymas."
+            : "A privacy, correction, and removal-request contact will be published on the contact page after domain and mailbox control are verified."}
         </p>
-      </section>
-    </div>
+      </ProseSection>
+    </InfoPage>
   );
 }

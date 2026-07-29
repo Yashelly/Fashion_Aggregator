@@ -1,31 +1,35 @@
 "use client";
 
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { copy, getLocale, withLocale } from "@/lib/i18n";
 
 export function SiteFooter() {
-  const searchParams = useSearchParams();
-  const locale = getLocale({ lang: searchParams.get("lang") ?? undefined });
+  const params = useSearchParams();
+  const locale = getLocale({ lang: params.get("lang") ?? undefined });
   const t = copy[locale].footer;
+  const links = [
+    ["/how-it-works", t.links.howItWorks], ["/about", t.links.about],
+    ["/stores", locale === "lt" ? "Parduotuvės" : "Stores"], ["/contact", t.links.contact],
+    ["/data-sources", t.links.dataSources], ["/affiliate-disclosure", t.links.affiliate],
+    ["/privacy", t.links.privacy], ["/terms", t.links.terms],
+  ] as const;
 
   return (
     <footer className="site-footer">
-      <div>
-        <Link className="footer-brand" href={withLocale("/", locale)}>
-          VIBEWEAR
-        </Link>
-        <p>{t.text}</p>
+      <div className="footer-statement">
+        <span className="index-stamp">05</span>
+        <div>
+          <Link className="footer-brand" href={withLocale("/", locale)}>VIBEWEAR</Link>
+          <p>{t.text}</p>
+          <p className="preview-line">PREVIEW CATALOG · SYNTHETIC PRODUCTS</p>
+        </div>
       </div>
       <nav aria-label={t.aria}>
-        <Link href={withLocale("/how-it-works", locale)}>{t.links.howItWorks}</Link>
-        <Link href={withLocale("/data-sources", locale)}>{t.links.dataSources}</Link>
-        <Link href={withLocale("/affiliate-disclosure", locale)}>
-          {t.links.affiliate}
-        </Link>
-        <Link href={withLocale("/privacy", locale)}>{t.links.privacy}</Link>
-        <Link href={withLocale("/terms", locale)}>{t.links.terms}</Link>
-        <Link href={withLocale("/contact", locale)}>{t.links.contact}</Link>
+        {links.map(([href, label]) => (
+          <Link href={withLocale(href, locale)} key={href}>{label}<ArrowUpRight aria-hidden="true" size={14} /></Link>
+        ))}
       </nav>
     </footer>
   );

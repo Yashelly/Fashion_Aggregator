@@ -1,59 +1,37 @@
+import { ArrowRight, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { Search } from "lucide-react";
 import { getCopy, type Locale, withLocale } from "@/lib/i18n";
-
-const heroImageUrl =
-  "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1800&q=80";
-
-function delay(ms: number) {
-  return { animationDelay: `${ms}ms` };
-}
 
 export function CinematicHero({ locale }: { locale: Locale }) {
   const t = getCopy(locale).hero;
+  const quickLinks = locale === "lt"
+    ? [["01", "Miesto juoda", "/search?query=juoda"], ["02", "Vasaros minimalizmas", "/search?query=vasaros minimalizmas"], ["03", "Sportbačiai iki €100", "/search?query=sportbačiai iki 100"]]
+    : [["01", "City black", "/search?query=black"], ["02", "Summer minimal", "/search?query=summer minimal"], ["03", "Sneakers under €100", "/search?query=sneakers under 100"]];
 
   return (
-    <section className="cinematic-hero">
-      <img
-        alt=""
-        aria-hidden="true"
-        className="cinematic-video"
-        src={heroImageUrl}
-      />
-      <div className="cinematic-scrim" aria-hidden="true" />
-      <div className="cinematic-bottom-blur" aria-hidden="true" />
-
-      <div className="cinematic-content">
-        <div className="cinematic-copy">
-          <div className="hero-proof" style={delay(200)}>
-            {t.proof.map((item) => (
-              <span key={item}>{item}</span>
-            ))}
+    <section className="discovery-hero" aria-labelledby="home-title">
+      <div className="hero-copy">
+        <p className="preview-kicker"><Sparkles aria-hidden="true" size={16} /> PREVIEW CATALOG · SYNTHETIC PRODUCTS</p>
+        <h1 id="home-title">{locale === "lt" ? <>RASK SAVO<br/><em>STILIŲ.</em></> : <>FIND YOUR<br/><em>VIBE.</em></>}</h1>
+        <p className="hero-lead">{locale === "lt" ? "Ieškok pagal drabužį, nuotaiką, spalvą ar kainą. Pirkimas vyks pardavėjo svetainėje, kai šaltiniai bus patvirtinti." : "Search by item, mood, colour, or price. Checkout will happen on retailer sites once sources are approved."}</p>
+        <form action="/search" className="hero-search" role="search">
+          {locale === "lt" ? <input name="lang" type="hidden" value="lt" /> : null}
+          <label htmlFor="home-query">{locale === "lt" ? "Ko ieškai?" : "What are you looking for?"}</label>
+          <div className="hero-search-row">
+            <Search aria-hidden="true" size={22} />
+            <input id="home-query" name="query" placeholder={t.searchPlaceholder} required />
+            <button type="submit">{locale === "lt" ? "Ieškoti" : "Search"}<ArrowRight aria-hidden="true" size={20} /></button>
           </div>
-
-          <h1 style={delay(300)}>{t.title}</h1>
-          <p style={delay(400)}>{t.lead}</p>
-
-          <form action="/search" className="hero-search" style={delay(500)}>
-            <Search aria-hidden="true" size={20} />
-            {locale === "lt" ? <input name="lang" type="hidden" value="lt" /> : null}
-            <input
-              aria-label={t.searchAria}
-              name="query"
-              placeholder={t.searchPlaceholder}
-            />
-            <button type="submit">{t.submit}</button>
-          </form>
-
-          <div className="hero-departments" style={delay(600)}>
-            {t.departments.map((department) => (
-              <Link href={withLocale(department.href, locale)} key={department.label}>
-                {department.label}
-              </Link>
-            ))}
-          </div>
-        </div>
+          <small>{locale === "lt" ? "Pvz. „juodi batai iki 100“" : "Try “black boots under 100”"}</small>
+        </form>
       </div>
+      <nav className="runway-links" aria-label={locale === "lt" ? "Greitos paieškos" : "Quick searches"}>
+        {quickLinks.map(([number, label, href]) => (
+          <Link href={withLocale(href, locale)} key={number}>
+            <span>{number}</span><strong>{label}</strong><ArrowRight aria-hidden="true" size={20} />
+          </Link>
+        ))}
+      </nav>
     </section>
   );
 }

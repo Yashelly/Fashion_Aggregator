@@ -12,8 +12,12 @@ First-wave feed targets:
 | Sinsay LT | VIVnetworks / CJ-style feed access | XML feed available after approval |
 | Sizeer LT | VIVnetworks | XML feed available after approval |
 | MODIVO LT | Awin / MODIVO affiliate page | Product feeds mentioned publicly, verify after approval |
+| Cropp LT | VIVnetworks / CJ-style feed access | XML feed available after approval |
+| ABOUT YOU LT | FlexOffers | Product feeds mentioned publicly, verify LT terms after approval |
 
 Stores without confirmed feed access stay out of the first import pipeline.
+
+Factcool LT is excluded from the first import pipeline because the official LT site currently states that sales were suspended from 2025-03-06. Revisit only if LT sales resume and the network dashboard confirms active LT feed terms.
 
 ## Import Principles
 
