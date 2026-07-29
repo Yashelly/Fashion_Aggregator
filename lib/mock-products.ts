@@ -1,7 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
+import {
+  filterProductsByPublicDemoStore,
+  getPublicDemoStoreForProduct,
+  getPublicDemoStores,
+  type DemoStoreLocale,
+} from "@/lib/demo-stores";
 
-export type MockProduct = {
+type CsvMockProduct = {
   mock_product_id: string;
   store_slug: string;
   source_status: string;
@@ -22,7 +28,16 @@ export type MockProduct = {
   notes: string;
 };
 
+export type MockProduct = CsvMockProduct & {
+  public_store_id: string;
+  image_path: string;
+  image_available: boolean;
+  detail_image_path: string;
+  detail_image_available: boolean;
+};
+
 const csvPath = path.join(process.cwd(), "data", "mock_products.csv");
+const demoProductDirectory = path.join(process.cwd(), "public", "demo-products");
 
 function parseCsvLine(line: string): string[] {
   const values: string[] = [];
@@ -60,33 +75,50 @@ function parseCsvLine(line: string): string[] {
 export function getMockProducts(): MockProduct[] {
   const csv = fs.readFileSync(csvPath, "utf8").trim();
   const [headerLine, ...rows] = csv.split(/\r?\n/);
-  const headers = parseCsvLine(headerLine) as Array<keyof MockProduct>;
+  const headers = parseCsvLine(headerLine) as Array<keyof CsvMockProduct>;
 
   return rows
-    .map((row) => {
+    .map((row, index) => {
       const values = parseCsvLine(row);
-      return headers.reduce((product, header, index) => {
-        product[header] = values[index] ?? "";
+      const csvProduct = headers.reduce((product, header, valueIndex) => {
+        product[header] = values[valueIndex] ?? "";
         return product;
-      }, {} as MockProduct);
+      }, {} as CsvMockProduct);
+      const imagePath =
+        csvProduct.image_url || `/demo-products/product-${String(index + 1).padStart(2, "0")}.webp`;
+      const detailImagePath = `/demo-products/product-${String(index + 1).padStart(2, "0")}-tryon.webp`;
+
+      return {
+        ...csvProduct,
+        image_url: imagePath,
+        image_path: imagePath,
+        image_available: hasDemoProductImage(imagePath),
+        detail_image_path: detailImagePath,
+        detail_image_available: hasDemoProductImage(detailImagePath),
+        public_store_id: getPublicDemoStoreForProduct(csvProduct).id,
+      };
     })
     .filter((product) => product.source_status === "mock_not_live");
 }
 
-export function getStoreOptions(products: MockProduct[]) {
-  const stores = new Map<string, string>();
+export function getStoreOptions(
+  products: MockProduct[],
+  locale: DemoStoreLocale = "en",
+) {
+  const populatedStoreIds = new Set(products.map((product) => product.public_store_id));
 
-  products.forEach((product) => {
-    stores.set(product.store_slug, product.store_slug.replaceAll("_", " "));
-  });
+  return getPublicDemoStores()
+    .filter((store) => populatedStoreIds.has(store.id))
+    .map((store) => ({
+      value: store.id,
+      label: store.label[locale],
+      labels: store.label,
+    }));
+}
 
-  return Array.from(stores.entries()).map(([value, label]) => ({
-    value,
-    label: label
-      .replace(/\b\w/g, (char) => char.toUpperCase())
-      .replace(/\bVibewear\b/g, "VIBEWEAR")
-      .replace(/\bLt\b/g, "LT"),
-  }));
+export function hasDemoProductImage(imagePath: string): boolean {
+  if (!/^\/demo-products\/product-\d+(?:-tryon)?\.(?:png|webp)$/.test(imagePath)) return false;
+  return fs.existsSync(path.join(demoProductDirectory, path.basename(imagePath)));
 }
 
 function normalizeSearchText(value: string) {
@@ -116,8 +148,7 @@ export function filterProducts(
   const availability = params.availability || (status !== "sale" ? status : "");
   const saleOnly = params.sale === "on" || status === "sale";
 
-  return products.filter((product) => {
-    if (params.store && product.store_slug !== params.store) return false;
+  return filterProductsByPublicDemoStore(products, params.store).filter((product) => {
     if (params.category && product.category !== params.category) return false;
     if (params.color && product.color !== params.color) return false;
     if (saleOnly && !product.old_price_eur) return false;
@@ -163,6 +194,8 @@ export function filterProducts(
       striukes: ["jacket", "outerwear"],
       suknele: ["dress", "dresses"],
       sukneles: ["dress", "dresses"],
+      vasaros: ["summer"],
+      minimalizmas: ["minimal"],
       trainers: ["sneakers", "shoes"],
       sneaker: ["sneakers", "trainers"],
       sneakers: ["trainers", "shoes"],
@@ -194,7 +227,6 @@ export function filterProducts(
       product.gender,
       product.color,
       product.style_tags,
-      product.store_slug,
       product.old_price_eur ? "sale discount old_price" : "",
     ]
       .join(" ")

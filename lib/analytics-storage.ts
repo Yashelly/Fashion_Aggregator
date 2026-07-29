@@ -94,7 +94,7 @@ export async function saveBlockedPreviewClick(input: PreviewClickInput) {
         affiliate_subid: `fa_${input.clickId.replaceAll("-", "").slice(0, 12)}`,
         anonymous_user_id: input.anonymousUserId,
         destination_url: input.destinationUrl,
-        error_message: `Synthetic preview product ${input.productId}; merchant redirect disabled`,
+        error_message: `Product ${input.productId}; merchant redirect disabled`,
         id: input.clickId,
         page_url: input.pageUrl,
         redirect_status: "blocked",

@@ -13,10 +13,9 @@ export default async function Page({
 
   return (
     <InfoPage
-      eyebrow={locale === "lt" ? "Naudojimo ribos" : "Use boundaries"}
       title={copy.title}
     >
-      <ProseSection number="02">
+      <ProseSection>
         {copy.paragraphs.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}

@@ -13,18 +13,17 @@ export default async function Page({
 
   return (
     <InfoPage
-      eyebrow={locale === "lt" ? "Produkto srautas" : "Product flow"}
       title={copy.title}
     >
       <div className="info-columns">
-        <ProseSection number="02" title={copy.shoppersTitle}>
+        <ProseSection title={copy.shoppersTitle}>
           <ol>
             {copy.shoppers.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ol>
         </ProseSection>
-        <ProseSection number="03" title={copy.retailersTitle}>
+        <ProseSection title={copy.retailersTitle}>
           <ol>
             {copy.retailers.map((item) => (
               <li key={item}>{item}</li>
@@ -32,7 +31,7 @@ export default async function Page({
           </ol>
         </ProseSection>
       </div>
-      <ProseSection number="04" title={copy.reviewModeTitle}>
+      <ProseSection title={copy.reviewModeTitle}>
         <ul>
           {copy.reviewMode.map((item) => (
             <li key={item}>{item}</li>
