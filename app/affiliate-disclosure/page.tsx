@@ -1,23 +1,28 @@
+import { InfoPage, ProseSection } from "@/components/info-page";
 import { getCopy, getLocale, type SearchParamsInput } from "@/lib/i18n";
 
 type AffiliateDisclosurePageProps = {
   searchParams: Promise<SearchParamsInput>;
 };
 
-export default async function AffiliateDisclosurePage({
+export default async function Page({
   searchParams,
-}: AffiliateDisclosurePageProps) {
+}: AffiliateDisclosurePageProps): Promise<React.ReactElement> {
   const locale = getLocale(await searchParams);
-  const t = getCopy(locale).pages.affiliate;
+  const copy = getCopy(locale).pages.affiliate;
 
   return (
-    <div className="stack">
-      <h1 className="page-title">{t.title}</h1>
-      <section className="section">
-        {t.paragraphs.map((paragraph) => (
+    <InfoPage
+      eyebrow={
+        locale === "lt" ? "Komercinis skaidrumas" : "Commercial transparency"
+      }
+      title={copy.title}
+    >
+      <ProseSection number="02">
+        {copy.paragraphs.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
-      </section>
-    </div>
+      </ProseSection>
+    </InfoPage>
   );
 }

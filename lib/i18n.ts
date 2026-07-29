@@ -37,6 +37,7 @@ export function formatStoreName(slug: string) {
   return slug
     .replaceAll("_", " ")
     .replace(/\b\w/g, (char) => char.toUpperCase())
+    .replace(/\bVibewear\b/g, "VIBEWEAR")
     .replace(/\bLt\b/g, "LT");
 }
 
@@ -187,6 +188,7 @@ export const copy = {
       languageAria: "Language",
       mainNavAria: "Main navigation",
       nav: {
+        about: "About",
         contact: "Contact",
         search: "Search",
         sources: "Sources",
@@ -203,8 +205,9 @@ export const copy = {
     footer: {
       aria: "Footer navigation",
       text:
-        "Fashion discovery from selected retailer sources. Purchases happen on official retailer websites.",
+        "Synthetic fashion discovery preview. Future live products will use approved retailer sources.",
       links: {
+        about: "About",
         affiliate: "Affiliate disclosure",
         contact: "Contact",
         dataSources: "Data sources",
@@ -214,9 +217,9 @@ export const copy = {
       },
     },
     hero: {
-      proof: ["New in", "Style search", "Selected stores"],
+      proof: ["New in", "Style search", "Application targets"],
       title: "Shop by vibe",
-      lead: "Find fashion from selected stores by mood, item, brand, or occasion.",
+      lead: "Explore a synthetic fashion preview by mood, item, brand, or occasion.",
       searchAria: "Search fashion catalog",
       searchPlaceholder: "black sneakers under 100",
       submit: "Go",
@@ -271,32 +274,30 @@ export const copy = {
         {
           title: "Stores",
           links: [
-            { label: "Reserved", href: "/search?store=reserved_lt" },
-            { label: "Sinsay", href: "/search?store=sinsay_lt" },
-            { label: "Sizeer", href: "/search?store=sizeer_lt" },
-            { label: "Modivo", href: "/search?store=modivo_lt" },
-            { label: "About data", href: "/data-sources" },
+            { label: "Application targets", href: "/stores" },
+            { label: "Source policy", href: "/data-sources" },
+            { label: "Corrections & contact", href: "/contact" },
           ],
         },
       ],
       collection: {
         eyebrow: "Curated edit",
         title: "Streetwear selection",
-        text: "Sneakers, layers, and clean everyday pieces from selected store sources.",
+        text: "Synthetic sneakers, layers, and clean everyday pieces for preview.",
         cta: "View all",
         href: "/search?query=sneakers",
       },
       trust: {
         aria: "Shopping transparency",
         text:
-          "VIBEWEAR helps you discover products from selected retailer sources. Purchases happen on official retailer sites, where final prices, availability, delivery, and returns are confirmed.",
-        cta: "How product data works",
+          "Preview catalog now. Live products will use approved feeds, and checkout stays on official retailer sites.",
+        cta: "Data policy",
       },
     },
     search: {
       title: "Search VIBEWEAR",
       lead:
-        "Discover pieces by item, mood, color, store, or occasion. Final prices and availability are confirmed on the retailer site.",
+        "Search by item, mood, color, store, or occasion.",
       labels: {
         search: "Search",
         store: "Store",
@@ -305,6 +306,7 @@ export const copy = {
         color: "Color",
         status: "Status",
         sort: "Sort",
+        advanced: "More filters",
       },
       placeholders: {
         search: "black sneakers under 100",
@@ -335,8 +337,10 @@ export const copy = {
       },
       resultsFound: (count: number) => `${count} ${count === 1 ? "piece" : "pieces"} found`,
       sourceNoteAria: "Product source note",
+      sourceNoteTitle: "Review mode",
       sourceNote:
-        "VIBEWEAR uses approved retailer feeds, deeplinks, merchant exports, or direct permission for live product data.",
+        "Demo products are synthetic. Live retailer products are added only after feed, deeplink, export, or direct permission.",
+      sourceNoteCta: "Data policy",
     },
     productGrid: {
       aria: "Product results",
@@ -352,6 +356,14 @@ export const copy = {
       wishlistComingSoon: "Wishlist coming soon",
     },
     pages: {
+      about: {
+        title: "About VIBEWEAR",
+        paragraphs: [
+          "VIBEWEAR is a visual fashion search and discovery site for Lithuanian shoppers. The service helps users browse styles, stores, colors, prices, and categories before clicking through to official retailer websites.",
+          "VIBEWEAR does not operate checkout, resell products, or claim official retailer partnership before approval. The current catalog is a synthetic demo preview for affiliate review and product development.",
+          "Live retailer products will be added only through approved affiliate product feeds, approved deeplinks, merchant exports, or direct permission.",
+        ],
+      },
       affiliate: {
         title: "Affiliate Disclosure",
         paragraphs: [
@@ -362,16 +374,22 @@ export const copy = {
       contact: {
         title: "Contact",
         intro:
-          "For partnership, retailer source questions, product data corrections, or removal requests, contact the VIBEWEAR team.",
-        partnerships: "Partnerships",
-        legal: "Legal and data requests",
+          "This preview keeps partnership, retailer-source, correction, and removal paths visible without publishing unverified contact details.",
       },
       dataSources: {
         title: "Product Sources",
         paragraphs: [
           "VIBEWEAR is designed to show retailer product data only when there is permission, an approved partner feed, or retailer-provided product information.",
+          "The current public catalog is a demo preview with synthetic products. It exists to show the search and clickout experience while affiliate/feed approvals are being requested.",
           "We do not present scraped retailer checkout pages as our own catalog. Product details should always be checked on the retailer website before purchase.",
           "Retailers can request corrections, removal, or partnership discussion through the contact page.",
+        ],
+        reviewTitle: "Review-ready data rules",
+        reviewItems: [
+          "No live merchant catalog is enabled before affiliate approval or direct permission.",
+          "Demo products are marked internally as mock data and are not presented as checkout offers.",
+          "Outbound clicks use a safe preview redirect until approved affiliate deeplinks are available.",
+          "Final price, stock, delivery, returns, and checkout are always confirmed by the retailer.",
         ],
       },
       howItWorks: {
@@ -388,24 +406,36 @@ export const copy = {
           "Users are sent to official product pages.",
           "Outbound clicks can be tracked through approved affiliate links.",
         ],
+        reviewModeTitle: "Current review mode",
+        reviewMode: [
+          "The live site can be reviewed as a fashion discovery publisher before real feeds are connected.",
+          "Current product cards are synthetic demo items used to demonstrate search, filters, store pages, and clickout flow.",
+          "A store becomes a live source only after the affiliate program or merchant approves feed/deeplink use.",
+        ],
       },
       privacy: {
         title: "Privacy Policy",
         paragraphs: [
           "VIBEWEAR processes only the information needed to operate fashion discovery, improve product search, answer contact messages, and measure outbound retailer clicks.",
           "This may include technical browser data, search events, saved preferences if enabled, outbound click events, UTM parameters, and messages sent through contact channels. Purchases happen on retailer websites, and retailer privacy policies apply to checkout, delivery, returns, and account activity on those sites.",
-          "Product data corrections, removal requests, or privacy questions can be sent to",
         ],
       },
       stores: {
         title: "Stores",
         lead:
-          "VIBEWEAR helps shoppers discover products from selected fashion, footwear, beauty, and lifestyle retailers. Availability, pricing, delivery, and returns are confirmed on each retailer website.",
-        retailerSource: "retailer source",
+          "Selected stores and application targets for the VIBEWEAR preview.",
+        reviewLead:
+          "No official partnership is claimed before approval.",
+        applicationTarget: "Application target",
+        pendingApproval: "Feed approval pending",
         fallbackDescription: "Selected retailer source for VIBEWEAR discovery.",
-        checkDetails: "Product details are checked on the retailer website before purchase.",
-        explore: "Explore pieces",
         descriptions: {
+          about_you_lt:
+            "Broad fashion marketplace source for branded apparel, shoes, sport, premium edits, and trend-led discovery.",
+          cropp_lt:
+            "Youth streetwear source for graphic tees, denim, casual layers, sneakers, and expressive city styling.",
+          factcool_lt:
+            "Monitoring-only target. The Lithuanian market remains paused and no live source is enabled.",
           modivo_lt:
             "Broad fashion, footwear, and accessories source with strong catalogue depth for elevated everyday edits.",
           reserved_lt:
@@ -436,6 +466,7 @@ export const copy = {
       languageAria: "Kalba",
       mainNavAria: "Pagrindinė navigacija",
       nav: {
+        about: "Apie",
         contact: "Kontaktai",
         search: "Paieška",
         sources: "Šaltiniai",
@@ -452,8 +483,9 @@ export const copy = {
     footer: {
       aria: "Apatinė navigacija",
       text:
-        "Mados paieška iš atrinktų parduotuvių šaltinių. Pirkimas vyksta oficialiose parduotuvių svetainėse.",
+        "Sintetinė mados paieškos peržiūra. Būsimos tikros prekės naudos tik patvirtintus parduotuvių šaltinius.",
       links: {
+        about: "Apie",
         affiliate: "Partnerystės nuorodos",
         contact: "Kontaktai",
         dataSources: "Prekių šaltiniai",
@@ -463,9 +495,9 @@ export const copy = {
       },
     },
     hero: {
-      proof: ["Naujienos", "Stiliaus paieška", "Atrinktos parduotuvės"],
+      proof: ["Naujienos", "Stiliaus paieška", "Paraiškų tikslai"],
       title: "Rask savo stilių",
-      lead: "Rask madą iš atrinktų parduotuvių pagal nuotaiką, prekę, ženklą ar progą.",
+      lead: "Naršyk sintetinę mados peržiūrą pagal nuotaiką, prekę, ženklą ar progą.",
       searchAria: "Ieškoti mados kataloge",
       searchPlaceholder: "juodi sportbačiai iki 100",
       submit: "Ieškoti",
@@ -520,32 +552,30 @@ export const copy = {
         {
           title: "Parduotuvės",
           links: [
-            { label: "Reserved", href: "/search?store=reserved_lt" },
-            { label: "Sinsay", href: "/search?store=sinsay_lt" },
-            { label: "Sizeer", href: "/search?store=sizeer_lt" },
-            { label: "Modivo", href: "/search?store=modivo_lt" },
-            { label: "Apie duomenis", href: "/data-sources" },
+            { label: "Paraiškų tikslai", href: "/stores" },
+            { label: "Šaltinių politika", href: "/data-sources" },
+            { label: "Pataisymai ir kontaktai", href: "/contact" },
           ],
         },
       ],
       collection: {
         eyebrow: "Atrinkta redakcija",
         title: "Gatvės stiliaus atranka",
-        text: "Sportbačiai, sluoksniai ir kasdieniai deriniai iš atrinktų parduotuvių šaltinių.",
+        text: "Sintetiniai sportbačiai, sluoksniai ir kasdieniai deriniai peržiūrai.",
         cta: "Peržiūrėti viską",
         href: "/search?query=sneakers",
       },
       trust: {
         aria: "Apsipirkimo skaidrumas",
         text:
-          "VIBEWEAR padeda atrasti prekes iš atrinktų parduotuvių šaltinių. Pirkimas vyksta oficialiose parduotuvių svetainėse, kur patvirtinamos galutinės kainos, prieinamumas, pristatymas ir grąžinimas.",
-        cta: "Kaip veikia prekių duomenys",
+          "Dabar tai peržiūros katalogas. Gyvos prekės bus iš patvirtintų duomenų kanalų, o pirkimas vyks oficialiose parduotuvėse.",
+        cta: "Duomenų politika",
       },
     },
     search: {
       title: "VIBEWEAR paieška",
       lead:
-        "Atrask prekes pagal daiktą, nuotaiką, spalvą, parduotuvę ar progą. Galutinės kainos ir prieinamumas patvirtinami parduotuvės svetainėje.",
+        "Ieškok pagal prekę, nuotaiką, spalvą, parduotuvę ar progą.",
       labels: {
         search: "Paieška",
         store: "Parduotuvė",
@@ -554,6 +584,7 @@ export const copy = {
         color: "Spalva",
         status: "Būsena",
         sort: "Rūšiuoti",
+        advanced: "Daugiau filtrų",
       },
       placeholders: {
         search: "juodi sportbačiai iki 100",
@@ -584,8 +615,10 @@ export const copy = {
       },
       resultsFound: (count: number) => `Rasta prekių: ${count}`,
       sourceNoteAria: "Prekių šaltinių pastaba",
+      sourceNoteTitle: "Peržiūros režimas",
       sourceNote:
-        "VIBEWEAR naudoja patvirtintus parduotuvių prekių duomenų kanalus, partnerių nuorodas, parduotuvių eksportus arba tiesioginį leidimą gyviems prekių duomenims.",
+        "Demo prekės yra sintetinės. Gyvos parduotuvių prekės pridedamos tik gavus duomenų kanalo, nuorodų, eksporto arba tiesioginį leidimą.",
+      sourceNoteCta: "Duomenų politika",
     },
     productGrid: {
       aria: "Prekių rezultatai",
@@ -601,6 +634,14 @@ export const copy = {
       wishlistComingSoon: "Mėgstamiausi netrukus",
     },
     pages: {
+      about: {
+        title: "Apie VIBEWEAR",
+        paragraphs: [
+          "VIBEWEAR yra vizuali mados paieškos ir atradimo svetainė Lietuvos pirkėjams. Ji padeda naršyti stilius, parduotuves, spalvas, kainas ir kategorijas prieš pereinant į oficialias parduotuvių svetaines.",
+          "VIBEWEAR nevaldo atsiskaitymo, neperparduoda prekių ir neteigia oficialios partnerystės su parduotuvėmis prieš patvirtinimą. Dabartinis katalogas yra sintetinė demo peržiūra partnerystės programų vertinimui ir produkto kūrimui.",
+          "Gyvos parduotuvių prekės bus pridėtos tik per patvirtintus partnerių prekių duomenų kanalus, patvirtintas nuorodas, parduotuvių eksportus arba tiesioginį leidimą.",
+        ],
+      },
       affiliate: {
         title: "Partnerystės nuorodos",
         paragraphs: [
@@ -611,16 +652,22 @@ export const copy = {
       contact: {
         title: "Kontaktai",
         intro:
-          "Dėl partnerystės, parduotuvių šaltinių, prekių duomenų pataisymų ar pašalinimo užklausų susisiekite su VIBEWEAR komanda.",
-        partnerships: "Partnerystės",
-        legal: "Teisinės ir duomenų užklausos",
+          "Ši peržiūra aiškiai nurodo partnerystės, šaltinių, pataisymų ir pašalinimo užklausų kelią, tačiau neskelbia nepatvirtintų kontaktinių duomenų.",
       },
       dataSources: {
         title: "Prekių šaltiniai",
         paragraphs: [
           "VIBEWEAR sukurtas rodyti parduotuvių prekių duomenis tik tada, kai yra leidimas, patvirtintas partnerio prekių duomenų kanalas arba parduotuvės pateikta prekių informacija.",
+          "Dabartinis viešas katalogas yra demo peržiūra su sintetinėmis prekėmis. Jis rodo paieškos ir perėjimo į parduotuvę patirtį, kol prašoma partnerių arba duomenų kanalų patvirtinimo.",
           "Mes nepateikiame nukopijuotų parduotuvių atsiskaitymo puslapių kaip savo katalogo. Prieš perkant prekės informaciją visada reikia patikrinti parduotuvės svetainėje.",
           "Parduotuvės gali kreiptis dėl pataisymų, pašalinimo arba partnerystės aptarimo per kontaktų puslapį.",
+        ],
+        reviewTitle: "Duomenų taisyklės peržiūrai",
+        reviewItems: [
+          "Gyvas parduotuvės katalogas neįjungiamas be partnerystės patvirtinimo arba tiesioginio leidimo.",
+          "Demo prekės viduje pažymėtos kaip bandomieji duomenys ir nepateikiamos kaip pirkimo pasiūlymai.",
+          "Išeinantys paspaudimai naudoja saugų peržiūros nukreipimą, kol nėra patvirtintų partnerystės nuorodų.",
+          "Galutinę kainą, likutį, pristatymą, grąžinimą ir atsiskaitymą visada patvirtina parduotuvė.",
         ],
       },
       howItWorks: {
@@ -637,24 +684,36 @@ export const copy = {
           "Naudotojai nukreipiami į oficialius prekių puslapius.",
           "Išeinantys paspaudimai gali būti sekami per patvirtintas partnerystės nuorodas.",
         ],
+        reviewModeTitle: "Dabartinis peržiūros režimas",
+        reviewMode: [
+          "Svetainę galima peržiūrėti kaip mados paieškos leidėją dar prieš prijungiant realius duomenų kanalus.",
+          "Dabartinės prekių kortelės yra sintetinės demo prekės, rodančios paiešką, filtrus, parduotuvių puslapius ir paspaudimų srautą.",
+          "Parduotuvė tampa gyvu šaltiniu tik tada, kai partnerystės programa arba parduotuvė patvirtina duomenų kanalo ar nuorodų naudojimą.",
+        ],
       },
       privacy: {
         title: "Privatumo politika",
         paragraphs: [
           "VIBEWEAR tvarko tik informaciją, kurios reikia mados paieškai veikti, prekių paieškai gerinti, atsakyti į kontaktines žinutes ir matuoti išeinančius paspaudimus į parduotuves.",
           "Tai gali apimti techninius naršyklės duomenis, paieškos įvykius, išsaugotas nuostatas, jei jos įjungtos, išeinančių paspaudimų įvykius, UTM parametrus ir per kontaktinius kanalus atsiųstas žinutes. Pirkimai vyksta parduotuvių svetainėse, o jų privatumo politikos taikomos atsiskaitymui, pristatymui, grąžinimui ir paskyros veiklai tose svetainėse.",
-          "Prekių duomenų pataisymus, pašalinimo užklausas ar privatumo klausimus galima siųsti adresu",
         ],
       },
       stores: {
         title: "Parduotuvės",
         lead:
-          "VIBEWEAR padeda pirkėjams atrasti prekes iš atrinktų mados, avalynės, grožio ir gyvenimo būdo parduotuvių. Prieinamumas, kainos, pristatymas ir grąžinimas patvirtinami kiekvienos parduotuvės svetainėje.",
-        retailerSource: "prekių šaltinis",
+          "Atrinktos parduotuvės ir paraiškų tikslai VIBEWEAR peržiūrai.",
+        reviewLead:
+          "Oficiali partnerystė neteigiama, kol programa nėra patvirtinta.",
+        applicationTarget: "Paraiškos tikslas",
+        pendingApproval: "Laukiama duomenų kanalo patvirtinimo",
         fallbackDescription: "Atrinktas parduotuvės šaltinis VIBEWEAR paieškai.",
-        checkDetails: "Prieš perkant prekės informaciją patikrinkite parduotuvės svetainėje.",
-        explore: "Peržiūrėti prekes",
         descriptions: {
+          about_you_lt:
+            "Platus mados prekybos platformos šaltinis prekiniams ženklams, drabužiams, avalynei, sportui ir trendinėms atrankoms.",
+          cropp_lt:
+            "Gatvės stiliaus šaltinis grafiniams marškinėliams, denimui, kasdieniams sluoksniams, sportbačiams ir miesto įvaizdžiams.",
+          factcool_lt:
+            "Tik stebėjimui skirtas tikslas. Lietuvos rinka tebėra sustabdyta ir joks tiesioginis šaltinis neįjungtas.",
           modivo_lt:
             "Platus mados, avalynės ir aksesuarų šaltinis su giliu katalogu kasdieniams ir labiau išskirtiniams deriniams.",
           reserved_lt:
