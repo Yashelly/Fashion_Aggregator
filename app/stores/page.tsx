@@ -1,140 +1,64 @@
-import fs from "node:fs";
-import path from "node:path";
-import { CircleDashed, Database, PauseCircle, Store } from "lucide-react";
-import { getCopy, getLocale, type SearchParamsInput } from "@/lib/i18n";
-
-type StoreRow = {
-  application_status: string;
-  market: string;
-  network: string;
-  source_status: string;
-  store_name: string;
-  store_slug: string;
-};
+import { ArrowRight, ShoppingBag } from "lucide-react";
+import Link from "next/link";
+import {
+  getPublicDemoStoreLabel,
+  getPublicDemoStores,
+} from "@/lib/demo-stores";
+import { getCopy, getLocale, type SearchParamsInput, withLocale } from "@/lib/i18n";
+import { getMockProducts } from "@/lib/mock-products";
 
 type StoresPageProps = {
   searchParams: Promise<SearchParamsInput>;
 };
 
-function parseCsvLine(line: string) {
-  const values: string[] = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-
-    if (char === '"' && inQuotes && line[index + 1] === '"') {
-      current += '"';
-      index += 1;
-    } else if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === "," && !inQuotes) {
-      values.push(current);
-      current = "";
-    } else {
-      current += char;
-    }
-  }
-
-  values.push(current);
-  return values;
-}
-
-function getApplicationTargets() {
-  const [headerLine, ...rows] = fs
-    .readFileSync(path.join(process.cwd(), "data", "store_tracker.csv"), "utf8")
-    .trim()
-    .split(/\r?\n/);
-  const headers = parseCsvLine(headerLine);
-
-  return rows
-    .map((row) => {
-      const values = parseCsvLine(row);
-      return Object.fromEntries(
-        headers.map((header, index) => [header, values[index] ?? ""]),
-      ) as StoreRow;
-    })
-    .filter(
-      (store) =>
-        store.application_status === "ready_to_apply" ||
-        store.source_status === "market_suspended",
-    );
-}
-
-export default async function StoresPage({
-  searchParams,
-}: StoresPageProps) {
+export default async function StoresPage({ searchParams }: StoresPageProps) {
   const locale = getLocale(await searchParams);
   const copy = getCopy(locale).pages.stores;
+  const products = getMockProducts();
+  const stores = getPublicDemoStores();
 
   return (
     <div className="route-shell stores-route">
       <header className="route-heading">
-        <div className="section-rail">
-          <span>01</span>
-          <p>{locale === "lt" ? "Šaltinių registras" : "Source ledger"}</p>
-        </div>
         <div>
-          <p className="preview-kicker">
-            <Database aria-hidden="true" size={16} /> NO LIVE RETAILER FEEDS
-          </p>
           <h1>{copy.title}</h1>
           <p className="lead">{copy.lead}</p>
         </div>
       </header>
-      <p className="ledger-intro">{copy.reviewLead}</p>
-      <section className="store-ledger" aria-label={copy.title}>
-        {getApplicationTargets().map((store, index) => {
-          const isPaused = store.source_status === "market_suspended";
-          const description =
-            copy.descriptions[
-              store.store_slug as keyof typeof copy.descriptions
-            ] ?? copy.fallbackDescription;
+
+      <section className="demo-store-grid" aria-label={copy.title}>
+        {stores.map((store) => {
+          const storeProducts = products.filter(
+            (product) => product.public_store_id === store.id,
+          );
+          const storeLabel = getPublicDemoStoreLabel(store, locale);
+          const categoryCount = new Set(
+            storeProducts.map((product) => product.category),
+          ).size;
+          const href = withLocale(`/search?store=${store.id}`, locale);
 
           return (
-            <article key={store.store_slug}>
-              <span className="store-number">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <Store aria-hidden="true" size={26} />
-              <div className="store-main">
-                <p className="store-eyebrow">
-                  {store.market} · {store.network}
-                </p>
-                <h2>{store.store_name}</h2>
-                <p>{description}</p>
+            <Link
+              aria-label={`${copy.browseCta}: ${storeLabel}`}
+              className="demo-store-card"
+              href={href}
+              key={store.id}
+            >
+              <div className="demo-store-icon">
+                <ShoppingBag aria-hidden="true" size={24} />
               </div>
-              <div className="store-status">
+              <div className="demo-store-copy">
+                <p className="store-eyebrow">{locale === "lt" ? "VIBEWEAR ATRANKA" : "VIBEWEAR EDIT"}</p>
+                <h2>{storeLabel}</h2>
+                <p>{copy.fallbackDescription}</p>
                 <span>
-                  {isPaused ? (
-                    <PauseCircle aria-hidden="true" size={16} />
-                  ) : (
-                    <CircleDashed aria-hidden="true" size={16} />
-                  )}
-                  {isPaused
-                    ? locale === "lt"
-                      ? "Tik stebėjimui"
-                      : "Monitoring only"
-                    : copy.applicationTarget}
-                </span>
-                <strong>
-                  {isPaused
-                    ? locale === "lt"
-                      ? "LT rinka sustabdyta"
-                      : "LT market paused"
-                    : copy.pendingApproval}
-                </strong>
-                <small>
                   {locale === "lt"
-                    ? "Nėra patvirtinto tiesioginio katalogo"
-                    : "No approved live catalog"}
-                </small>
+                    ? `${storeProducts.length} prekių · ${categoryCount} kategorijos`
+                    : `${storeProducts.length} products · ${categoryCount} categories`}
+                </span>
               </div>
-              <span className="text-link disabled" aria-disabled="true">
-                {locale === "lt" ? "Laukiama prieigos" : "Awaiting access"}
-              </span>
-            </article>
+              <ArrowRight aria-hidden="true" className="demo-store-arrow" size={22} />
+            </Link>
           );
         })}
       </section>

@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     (candidate) => candidate.mock_product_id === productId,
   );
   if (!product) {
-    return NextResponse.json({ error: "Unknown preview item" }, { status: 404 });
+    return NextResponse.json({ error: "Unknown item" }, { status: 404 });
   }
 
   const clickId = crypto.randomUUID();

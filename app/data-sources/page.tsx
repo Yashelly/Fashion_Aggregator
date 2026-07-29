@@ -13,16 +13,15 @@ export default async function Page({
 
   return (
     <InfoPage
-      eyebrow={locale === "lt" ? "Šaltinių politika" : "Source policy"}
       title={copy.title}
       intro={copy.paragraphs[0]}
     >
-      <ProseSection number="02">
+      <ProseSection>
         {copy.paragraphs.slice(1).map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
       </ProseSection>
-      <ProseSection number="03" title={copy.reviewTitle}>
+      <ProseSection title={copy.reviewTitle}>
         <ul>
           {copy.reviewItems.map((item) => (
             <li key={item}>{item}</li>

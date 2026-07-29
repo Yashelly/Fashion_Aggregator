@@ -13,11 +13,10 @@ export default async function Page({
 
   return (
     <InfoPage
-      eyebrow={locale === "lt" ? "Apie projektą" : "About the project"}
       title={copy.title}
       intro={copy.paragraphs[0]}
     >
-      <ProseSection number="02">
+      <ProseSection>
         {copy.paragraphs.slice(1).map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
