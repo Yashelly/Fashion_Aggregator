@@ -21,6 +21,10 @@ cinematic-hero/dist
 cinematic-hero/*.log
 cinematic-hero/tsconfig*.tsbuildinfo
 .omx/
+generated-demo-products/
+public/demo-products/*.png
+.asset-cache/
+.tmp/
 .codex/*
 !.codex/agents/
 !.codex/agents/**

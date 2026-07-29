@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { copy, getLocale, withLocale } from "@/lib/i18n";
@@ -19,18 +19,27 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="footer-statement">
-        <span className="index-stamp">05</span>
-        <div>
-          <Link className="footer-brand" href={withLocale("/", locale)}>VIBEWEAR</Link>
-          <p>{t.text}</p>
-          <p className="preview-line">PREVIEW CATALOG · SYNTHETIC PRODUCTS</p>
-        </div>
+        <Link className="footer-brand" href={withLocale("/", locale)}>VIBEWEAR</Link>
+        <p>{t.text}</p>
       </div>
-      <nav aria-label={t.aria}>
-        {links.map(([href, label]) => (
-          <Link href={withLocale(href, locale)} key={href}>{label}<ArrowUpRight aria-hidden="true" size={14} /></Link>
-        ))}
-      </nav>
+      <div className="footer-links">
+        <nav aria-label={locale === "lt" ? "Atrasti" : "Discover"}>
+          <p>{locale === "lt" ? "Atrasti" : "Discover"}</p>
+          {links.slice(0, 4).map(([href, label]) => (
+            <Link href={withLocale(href, locale)} key={href}>
+              {label}<ArrowRight aria-hidden="true" size={14} />
+            </Link>
+          ))}
+        </nav>
+        <nav aria-label={locale === "lt" ? "Informacija" : "Information"}>
+          <p>{locale === "lt" ? "Informacija" : "Information"}</p>
+          {links.slice(4).map(([href, label]) => (
+            <Link href={withLocale(href, locale)} key={href}>
+              {label}<ArrowRight aria-hidden="true" size={14} />
+            </Link>
+          ))}
+        </nav>
+      </div>
     </footer>
   );
 }
