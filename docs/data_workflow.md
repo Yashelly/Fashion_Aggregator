@@ -126,6 +126,12 @@ Current first-wave stores:
 - Sinsay LT
 - Sizeer LT
 - MODIVO LT
+- Cropp LT
+- ABOUT YOU LT
+
+Monitoring-only:
+
+- Factcool LT, because the official LT site currently states sales were suspended from 2025-03-06.
 
 ## 6. End-to-End Workflow Overview
 
@@ -869,4 +875,3 @@ Revisit the stack when:
 - traffic reaches 10k users/day
 - analytics cost grows faster than revenue
 - outbound clicks justify deeper affiliate reconciliation
-

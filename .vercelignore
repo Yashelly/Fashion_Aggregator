@@ -1,0 +1,10 @@
+# Local agent/runtime state
+.agents/
+.codex/
+.omx/
+AGENTS.md
+skills-lock.json
+
+# Design-kit transfer artifacts
+CODEX_DESIGN_FIGMA_KIT_INSTALL_AND_USE_PROMPT.md
+codex-design-figma-kit-*.zip
