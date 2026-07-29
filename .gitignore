@@ -1,7 +1,10 @@
 node_modules
 .next
+/.vinext/
 /out
 dist
+/wrangler/
+/.wrangler/
 coverage
 __pycache__/
 *.py[cod]

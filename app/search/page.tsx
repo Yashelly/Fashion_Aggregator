@@ -1,6 +1,7 @@
 import { RotateCcw, Search } from "lucide-react";
 import { ProductGrid } from "@/components/product-grid";
 import { FilterDisclosure } from "@/components/filter-disclosure";
+import { MascotSearchForm } from "@/components/loading-mascot";
 import { SearchAnalyticsTracker } from "@/components/search-analytics-tracker";
 import {
   formatAvailabilityLabel, formatCategoryLabel, formatColorLabel, formatGenderLabel,
@@ -93,7 +94,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <div><h1>{t.title}</h1><p className="lead">{t.lead}</p></div>
       </header>
 
-      <form action="/search" className="catalog-form" role="search">
+      <MascotSearchForm action="/search" className="catalog-form" role="search">
         {locale === "lt" && <input name="lang" type="hidden" value="lt" />}
         <input name="perPage" type="hidden" value={perPage} />
         <label className="query-field" htmlFor="catalog-query"><span>{t.labels.search}</span><div><Search aria-hidden="true" size={22}/><input id="catalog-query" defaultValue={params.query ?? ""} name="query" placeholder={t.placeholders.search}/><button type="submit">{t.actions.showResults}</button></div></label>
@@ -112,7 +113,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             <label><span>{t.labels.status}</span><select defaultValue={status} name="status"><option value="">{t.options.allItems}</option><option value="in_stock">{formatAvailabilityLabel("in_stock",locale)}</option><option value="limited">{formatAvailabilityLabel("limited",locale)}</option><option value="sale">{formatAvailabilityLabel("sale",locale)}</option></select></label>
           </div>
         </FilterDisclosure>
-      </form>
+      </MascotSearchForm>
 
       <div className="results-toolbar">
         <p role="status" aria-live="polite" aria-atomic="true"><strong>{results.length}</strong> {locale === "lt" ? "prekių" : results.length === 1 ? "product" : "products"}</p>
