@@ -1,5 +1,6 @@
 import { ArrowRight, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { MascotSearchForm } from "@/components/loading-mascot";
 import { getCopy, type Locale, withLocale } from "@/lib/i18n";
 
 export function CinematicHero({ locale }: { locale: Locale }) {
@@ -21,7 +22,7 @@ export function CinematicHero({ locale }: { locale: Locale }) {
             ? "Ieškok pagal drabužį, nuotaiką, spalvą ar kainą. Viena paieška, aiškūs filtrai ir lengvai naršomos atrankos."
             : "Search by item, mood, colour, or price. One search, clear filters, and easy-to-browse edits."}
         </p>
-        <form action="/search" className="hero-search" role="search">
+        <MascotSearchForm action="/search" className="hero-search" role="search">
           {locale === "lt" ? <input name="lang" type="hidden" value="lt" /> : null}
           <label htmlFor="home-query">{locale === "lt" ? "Ko ieškai?" : "What are you looking for?"}</label>
           <div className="hero-search-row">
@@ -30,7 +31,7 @@ export function CinematicHero({ locale }: { locale: Locale }) {
             <button type="submit">{locale === "lt" ? "Ieškoti" : "Search"}<ArrowRight aria-hidden="true" size={20} /></button>
           </div>
           <small>{locale === "lt" ? "Pvz. „juodi batai iki 100“" : "Try “black boots under 100”"}</small>
-        </form>
+        </MascotSearchForm>
       </div>
       <nav className="runway-links" aria-label={locale === "lt" ? "Greitos paieškos" : "Quick searches"}>
         {quickLinks.map(([label, href]) => (

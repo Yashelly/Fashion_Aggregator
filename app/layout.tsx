@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { IBM_Plex_Sans, Syne } from "next/font/google";
 import { Suspense } from "react";
+import { LoadingMascotProvider } from "@/components/loading-mascot";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
@@ -34,7 +35,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body className={`${syne.variable} ${plex.variable}`}>
         <div className="shell">
           <Suspense fallback={<div className="header-skeleton" aria-hidden="true" />}><SiteHeader /></Suspense>
-          <main className="main" id="main-content">{children}</main>
+          <LoadingMascotProvider locale={locale}>
+            <main className="main" id="main-content">{children}</main>
+          </LoadingMascotProvider>
           <Suspense fallback={null}><SiteFooter /></Suspense>
         </div>
       </body>

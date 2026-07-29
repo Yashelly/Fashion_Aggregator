@@ -1474,30 +1474,67 @@ summary {
   margin-top: 20px;
 }
 
-.loading-grid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(4, 1fr);
-  margin-top: 40px;
-  width: 100%;
+.route-loading-space {
+  min-height: 65vh;
 }
 
-.loading-grid span {
-  animation: loading-sweep 1.3s ease-in-out infinite;
-  aspect-ratio: 4 / 5;
-  background: linear-gradient(
-    100deg,
-    var(--color-placeholder-a) 20%,
-    var(--color-surface) 40%,
-    var(--color-placeholder-a) 60%
-  );
-  background-size: 200% 100%;
+.loading-mascot-layer {
+  align-items: center;
+  color: var(--color-ink);
+  display: flex;
+  inset: 76px 0 0;
+  justify-content: center;
+  pointer-events: none;
+  position: fixed;
+  z-index: 40;
 }
 
-@keyframes loading-sweep {
-  to {
-    background-position: -200% 0;
-  }
+.loading-mascot-svg {
+  height: clamp(88px, 7.5vw, 102px);
+  overflow: visible;
+  width: clamp(108px, 9vw, 124px);
+}
+
+.loading-mascot-svg path,
+.loading-mascot-svg rect,
+.loading-mascot-svg circle {
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+  vector-effect: non-scaling-stroke;
+}
+
+.loading-mascot-paper {
+  fill: var(--color-canvas);
+}
+
+.loading-mascot-ink,
+.loading-mascot-item,
+.loading-mascot-found {
+  fill: none;
+}
+
+.loading-mascot-inside,
+.loading-mascot-eye {
+  fill: currentColor;
+}
+
+.loading-mascot-item,
+.loading-mascot-robot,
+.loading-mascot-found,
+.loading-mascot-front-flap,
+.loading-mascot-diamond {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.loading-mascot-found {
+  opacity: 0;
+}
+
+.loading-mascot-diamond {
+  fill: var(--color-canvas);
 }
 
 .site-footer {
@@ -1878,8 +1915,8 @@ summary {
     min-height: 70vh;
   }
 
-  .loading-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .loading-mascot-layer {
+    inset-block-start: 68px;
   }
 
   .site-footer {
@@ -1961,5 +1998,10 @@ summary {
   .product-media:hover svg,
   .demo-store-card:hover {
     transform: none;
+  }
+
+  .loading-mascot-svg {
+    height: 92px;
+    width: 112px;
   }
 }
