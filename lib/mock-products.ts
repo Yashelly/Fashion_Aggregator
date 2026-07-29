@@ -1,5 +1,4 @@
-import fs from "node:fs";
-import path from "node:path";
+import mockProductData from "@/data/mock-products.json";
 import {
   filterProductsByPublicDemoStore,
   getPublicDemoStoreForProduct,
@@ -36,65 +35,9 @@ export type MockProduct = CsvMockProduct & {
   detail_image_available: boolean;
 };
 
-const appRootCandidates = [
-  process.cwd(),
-  path.join(process.cwd(), "dist"),
-];
-const csvPath =
-  appRootCandidates
-    .map((root) => path.join(root, "data", "mock_products.csv"))
-    .find((candidate) => fs.existsSync(candidate)) ??
-  path.join(appRootCandidates[0], "data", "mock_products.csv");
-const demoProductDirectories = appRootCandidates.flatMap((root) => [
-  path.join(root, "public", "demo-products"),
-  path.join(root, "client", "demo-products"),
-]);
-
-function parseCsvLine(line: string): string[] {
-  const values: string[] = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-    const next = line[index + 1];
-
-    if (char === '"' && inQuotes && next === '"') {
-      current += '"';
-      index += 1;
-      continue;
-    }
-
-    if (char === '"') {
-      inQuotes = !inQuotes;
-      continue;
-    }
-
-    if (char === "," && !inQuotes) {
-      values.push(current);
-      current = "";
-      continue;
-    }
-
-    current += char;
-  }
-
-  values.push(current);
-  return values;
-}
-
 export function getMockProducts(): MockProduct[] {
-  const csv = fs.readFileSync(csvPath, "utf8").trim();
-  const [headerLine, ...rows] = csv.split(/\r?\n/);
-  const headers = parseCsvLine(headerLine) as Array<keyof CsvMockProduct>;
-
-  return rows
-    .map((row, index) => {
-      const values = parseCsvLine(row);
-      const csvProduct = headers.reduce((product, header, valueIndex) => {
-        product[header] = values[valueIndex] ?? "";
-        return product;
-      }, {} as CsvMockProduct);
+  return (mockProductData as CsvMockProduct[])
+    .map((csvProduct, index) => {
       const imagePath =
         csvProduct.image_url || `/demo-products/product-${String(index + 1).padStart(2, "0")}.webp`;
       const detailImagePath = `/demo-products/product-${String(index + 1).padStart(2, "0")}-tryon.webp`;
@@ -128,10 +71,7 @@ export function getStoreOptions(
 }
 
 export function hasDemoProductImage(imagePath: string): boolean {
-  if (!/^\/demo-products\/product-\d+(?:-tryon)?\.(?:png|webp)$/.test(imagePath)) return false;
-  return demoProductDirectories.some((directory) =>
-    fs.existsSync(path.join(directory, path.basename(imagePath))),
-  );
+  return /^\/demo-products\/product-\d+(?:-tryon)?\.webp$/.test(imagePath);
 }
 
 function normalizeSearchText(value: string) {
