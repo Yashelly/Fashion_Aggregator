@@ -37,7 +37,10 @@ export type MockProduct = CsvMockProduct & {
 };
 
 const csvPath = path.join(process.cwd(), "data", "mock_products.csv");
-const demoProductDirectory = path.join(process.cwd(), "public", "demo-products");
+const demoProductDirectories = [
+  path.join(process.cwd(), "public", "demo-products"),
+  path.join(process.cwd(), "client", "demo-products"),
+];
 
 function parseCsvLine(line: string): string[] {
   const values: string[] = [];
@@ -118,7 +121,9 @@ export function getStoreOptions(
 
 export function hasDemoProductImage(imagePath: string): boolean {
   if (!/^\/demo-products\/product-\d+(?:-tryon)?\.(?:png|webp)$/.test(imagePath)) return false;
-  return fs.existsSync(path.join(demoProductDirectory, path.basename(imagePath)));
+  return demoProductDirectories.some((directory) =>
+    fs.existsSync(path.join(directory, path.basename(imagePath))),
+  );
 }
 
 function normalizeSearchText(value: string) {
