@@ -13,16 +13,15 @@ export default async function Page({
 
   return (
     <InfoPage
-      eyebrow={locale === "lt" ? "Duomenys ir privatumas" : "Data and privacy"}
       title={copy.title}
     >
-      <ProseSection number="02">
+      <ProseSection>
         <p>{copy.paragraphs[0]}</p>
         <p>{copy.paragraphs[1]}</p>
         <p>
           {locale === "lt"
-            ? "Privatumo, pataisymų ar pašalinimo užklausų kontaktas bus paskelbtas kontaktų puslapyje, kai bus patvirtintas domeno ir pašto dėžutės valdymas."
-            : "A privacy, correction, and removal-request contact will be published on the contact page after domain and mailbox control are verified."}
+            ? "Privatumo, pataisymų ar pašalinimo užklausų kontaktas bus paskelbtas kontaktų puslapyje prieš įjungiant realių parduotuvių katalogus."
+            : "A privacy, correction, and removal contact will be published on the contact page before live retailer catalogs are enabled."}
         </p>
       </ProseSection>
     </InfoPage>

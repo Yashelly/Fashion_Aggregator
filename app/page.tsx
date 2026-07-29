@@ -18,27 +18,26 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <div className="home-stack">
       <CinematicHero locale={locale} />
-      <section className="indexed-section category-index">
-        <div className="section-rail"><span>02</span><p>{locale === "lt" ? "Naršyti kategorijas" : "Browse the index"}</p></div>
+      <section className="home-section category-section">
+        <div className="section-label"><p>{locale === "lt" ? "Naršyti kategorijas" : "Browse categories"}</p></div>
         <nav className="category-links" aria-label={t.catalogAria}>
-          {categories.map(([label, href], index) => (
-            <Link href={withLocale(href, locale)} key={href}><span>{String(index + 1).padStart(2, "0")}</span>{label}<ArrowRight aria-hidden="true" size={18} /></Link>
+          {categories.map(([label, href]) => (
+            <Link href={withLocale(href, locale)} key={href}>{label}<ArrowRight aria-hidden="true" size={18} /></Link>
           ))}
         </nav>
       </section>
-      <section className="indexed-section discovery-section">
-        <div className="section-rail"><span>03</span><p>{locale === "lt" ? "Šios savaitės demonstracija" : "This week’s demo edit"}</p></div>
+      <section className="home-section discovery-section">
+        <div className="section-label"><p>{locale === "lt" ? "Šios savaitės atranka" : "This week’s edit"}</p></div>
         <div className="section-content">
           <div className="section-heading">
-            <div><p className="eyebrow">SYNTHETIC / ORIGINAL PLACEHOLDERS</p><h2>{locale === "lt" ? "Nauja indekse" : "New in the index"}</h2></div>
+            <div><p className="eyebrow">{locale === "lt" ? "NAUJIENOS" : "NEW ARRIVALS"}</p><h2>{locale === "lt" ? "Nauja kolekcijoje" : "New in the collection"}</h2></div>
             <Link className="text-link" href={withLocale("/search", locale)}>{locale === "lt" ? "Visi rezultatai" : "All results"}<ArrowRight aria-hidden="true" size={18} /></Link>
           </div>
           <ProductGrid locale={locale} products={products} />
         </div>
       </section>
       <section className="trust-band">
-        <span className="index-stamp">04</span>
-        <div><p className="eyebrow">{locale === "lt" ? "Aiški riba" : "A clear source boundary"}</p><h2>{locale === "lt" ? "Dabar — demonstracija. Vėliau — tik patvirtinti šaltiniai." : "Demo now. Approved sources only, later."}</h2><p>{t.trust.text}</p></div>
+        <div><p className="eyebrow">{locale === "lt" ? "Kitas žingsnis" : "What’s next"}</p><h2>{locale === "lt" ? "Atrask dabar. Pirkimas — vėliau." : "Discover now. Shop later."}</h2><p>{t.trust.text}</p></div>
         <Link className="button inverse" href={withLocale("/data-sources", locale)}>{t.trust.cta}<ArrowRight aria-hidden="true" size={18} /></Link>
       </section>
     </div>

@@ -10,14 +10,27 @@ const syne = Syne({ subsets: ["latin", "latin-ext"], variable: "--font-display",
 const plex = IBM_Plex_Sans({ subsets: ["latin", "latin-ext"], weight: ["400", "500", "600"], variable: "--font-body", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "VIBEWEAR — Fashion discovery, indexed",
-  description: "Search a clearly labelled synthetic fashion preview by item, mood, colour, price, and category.",
+  title: "VIBEWEAR — Fashion discovery",
+  description: "Discover fashion by item, mood, colour, price, and category.",
 };
+
+const themeScript = `
+  (() => {
+    let savedTheme = null;
+    try { savedTheme = localStorage.getItem("vibewear-theme"); } catch {}
+    const theme = savedTheme === "dark" ? "dark" : "light";
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+  })();
+`;
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const locale = (await cookies()).get("vibewear-locale")?.value === "lt" ? "lt" : "en";
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html data-theme="light" lang={locale} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className={`${syne.variable} ${plex.variable}`}>
         <div className="shell">
           <Suspense fallback={<div className="header-skeleton" aria-hidden="true" />}><SiteHeader /></Suspense>

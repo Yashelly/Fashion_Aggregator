@@ -2,8 +2,13 @@
 .agents/
 .codex/
 .omx/
+generated-demo-products/
 AGENTS.md
 skills-lock.json
+
+# Original PNG sources stay out of the deployment.
+# Optimized product and matching -tryon WebP files are deployed with the app.
+public/demo-products/*.png
 
 # Design-kit transfer artifacts
 CODEX_DESIGN_FIGMA_KIT_INSTALL_AND_USE_PROMPT.md
