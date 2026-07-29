@@ -62,13 +62,15 @@ export function getMockProducts(): MockProduct[] {
   const [headerLine, ...rows] = csv.split(/\r?\n/);
   const headers = parseCsvLine(headerLine) as Array<keyof MockProduct>;
 
-  return rows.map((row) => {
-    const values = parseCsvLine(row);
-    return headers.reduce((product, header, index) => {
-      product[header] = values[index] ?? "";
-      return product;
-    }, {} as MockProduct);
-  });
+  return rows
+    .map((row) => {
+      const values = parseCsvLine(row);
+      return headers.reduce((product, header, index) => {
+        product[header] = values[index] ?? "";
+        return product;
+      }, {} as MockProduct);
+    })
+    .filter((product) => product.source_status === "mock_not_live");
 }
 
 export function getStoreOptions(products: MockProduct[]) {
@@ -82,6 +84,7 @@ export function getStoreOptions(products: MockProduct[]) {
     value,
     label: label
       .replace(/\b\w/g, (char) => char.toUpperCase())
+      .replace(/\bVibewear\b/g, "VIBEWEAR")
       .replace(/\bLt\b/g, "LT"),
   }));
 }

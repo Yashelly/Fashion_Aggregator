@@ -42,7 +42,7 @@ GLAMI LT сам описывает себя как fashion search/discovery plat
 | 1 | MODIVO LT | Awin + MODIVO affiliate page | Есть Awin merchant profile и официальная страница MODIVO | cookie 10 дней, комиссия в Awin | MODIVO публично пишет про product feeds | Подаваться в первой волне |
 | 2 | Cropp LT | VIVnetworks / CJ | Есть отдельная LT affiliate page | 4.6-9.3%, 30 дней | XML feed есть, redirect URL есть | Добавить в первую или вторую волну |
 | 2 | ABOUT YOU LT | FlexOffers | Есть публичная active program page | 1.6% existing / 12% new, 7 дней | product feeds упомянуты | Хороший кандидат, но проверить в кабинете |
-| 2 | Factcool | VIVnetworks / CJ | Program lists LT among available countries | 8-14%, 15 дней | XML feed есть, redirect URL есть | Хороший кандидат, но не LT-отдельная страница |
+| 5 | Factcool LT | VIVnetworks / CJ regional signal | Program lists LT among available countries, но официальный LT-сайт сообщает об остановке продаж | 8-14%, 15 дней как regional signal | XML feed signal есть регионально | Не брать в первую волну, держать как monitoring lead |
 | 3 | Answear | Awin | Официальная partner page ведет в Awin | от 9%, cookie нужно проверить по стране | product feed есть | Кандидат после проверки LT/region |
 | 3 | Eavalyne.lt | Awin signal via affiliate directory | GLAMI показывает Eavalyne как partner-shop example | не публично подтверждено | нужно проверить в Awin | Не первая заявка без dashboard-проверки |
 | 4 | Mohito.com | VIVnetworks signal, GLAMI example | Есть VIV pages по другим рынкам/generic, GLAMI показывает Mohito.com | 5-10%, 30 дней на некоторых рынках | XML feed есть на найденных pages | Проверить в VIV dashboard, не считать LT-confirmed |
@@ -60,7 +60,8 @@ GLAMI LT сам описывает себя как fashion search/discovery plat
 4. MODIVO LT
 5. Cropp LT
 6. ABOUT YOU LT
-7. Factcool
+
+Factcool LT исключен из первой волны: официальный LT-сайт содержит notice, что продажи были остановлены с 2025-03-06. Его можно вернуться проверять позже, если LT продажи возобновятся.
 
 Почему именно так:
 
@@ -82,7 +83,7 @@ GLAMI LT сам описывает себя как fashion search/discovery plat
 - Sinsay LT;
 - Sizeer LT;
 - Cropp LT;
-- Factcool с LT в списке доступных стран;
+- Factcool только как monitoring lead: есть regional affiliate signal, но LT sales suspended;
 - потенциально другие LPP/CEE fashion brands через catalog search.
 
 Плюсы:
@@ -193,7 +194,7 @@ Scoring для первой волны:
    4. MODIVO LT
    5. Cropp LT
    6. ABOUT YOU LT
-   7. Factcool
+   7. Factcool не подавать сейчас; мониторить LT sales status и dashboard availability
 5. После approval для каждого магазина сохранить:
    - final commission;
    - cookie days;
@@ -276,6 +277,7 @@ Affilitizer и подобные базы полезны, но это не фин
 - Sizeer LT on VIVnetworks: https://www.vivnetworks.com/en/affiliate-catalog/sizeer-lt/
 - Cropp LT on VIVnetworks: https://www.vivnetworks.com/en/affiliate-catalog/cropp-lt/
 - Factcool on VIVnetworks: https://www.vivnetworks.com/en/affiliate-catalog/factcool-gr/
+- Factcool LT sales suspended notice: https://lt.factcool.com/campaign773
 - MODIVO LT affiliate page: https://modivo.lt/b/afiliacija
 - MODIVO LT on Awin: https://ui.awin.com/merchant-profile/117515
 - ABOUT YOU LT on FlexOffers: https://www.flexoffers.com/affiliate-programs/aboutyou-lt-affiliate-program/

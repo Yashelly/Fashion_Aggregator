@@ -152,7 +152,13 @@ blocked
 - Reserved LT;
 - Sinsay LT;
 - Sizeer LT;
-- MODIVO LT.
+- MODIVO LT;
+- Cropp LT;
+- ABOUT YOU LT.
+
+Monitoring-only:
+
+- Factcool LT, потому что официальный LT-сайт сейчас сообщает, что продажи были остановлены с 2025-03-06.
 
 ## 6. Store onboarding flow
 
@@ -872,4 +878,3 @@ Revisit stack when:
 - traffic reaches 10k users/day;
 - analytics cost grows faster than affiliate revenue;
 - outbound clicks justify deeper affiliate reconciliation.
-

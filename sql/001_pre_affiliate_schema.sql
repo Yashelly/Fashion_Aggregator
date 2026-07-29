@@ -265,7 +265,7 @@ create table if not exists public.outbound_clicks (
   session_id text,
   anonymous_user_id text,
   search_event_id uuid references public.search_events(id) on delete set null,
-  store_id uuid not null references public.stores(id) on delete restrict,
+  store_id uuid references public.stores(id) on delete restrict,
   product_id uuid references public.products(id) on delete set null,
   variant_id uuid references public.product_variants(id) on delete set null,
   affiliate_network text,
@@ -325,5 +325,42 @@ create index if not exists idx_outbound_clicks_store
 
 create index if not exists idx_outbound_clicks_product
   on public.outbound_clicks (product_id, clicked_at desc);
+
+alter table public.stores enable row level security;
+alter table public.affiliate_program_rules enable row level security;
+alter table public.feed_import_runs enable row level security;
+alter table public.products enable row level security;
+alter table public.raw_feed_items enable row level security;
+alter table public.product_variants enable row level security;
+alter table public.product_embeddings enable row level security;
+alter table public.search_events enable row level security;
+alter table public.outbound_clicks enable row level security;
+
+revoke all privileges on table
+  public.stores,
+  public.affiliate_program_rules,
+  public.feed_import_runs,
+  public.products,
+  public.raw_feed_items,
+  public.product_variants,
+  public.product_embeddings,
+  public.search_events,
+  public.outbound_clicks
+from anon, authenticated;
+
+grant select, insert, update, delete on table
+  public.stores,
+  public.affiliate_program_rules,
+  public.feed_import_runs,
+  public.products,
+  public.raw_feed_items,
+  public.product_variants,
+  public.product_embeddings,
+  public.search_events,
+  public.outbound_clicks
+to service_role;
+
+revoke execute on function public.set_updated_at()
+from public, anon, authenticated, service_role;
 
 commit;

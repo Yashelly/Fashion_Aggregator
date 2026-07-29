@@ -1,6 +1,6 @@
 # Pre-Affiliate Application Pack
 
-Prepared: 2026-05-25
+Prepared: 2026-07-23
 
 This file contains copy-ready positioning, application answers, and reviewer-facing text for affiliate network and merchant program applications.
 
@@ -10,6 +10,13 @@ Replace placeholders before use:
 - `[DOMAIN]`
 - `[CONTACT_EMAIL]`
 - `[OWNER_NAME_OR_COMPANY]`
+
+Current working assumption:
+
+- `[PROJECT_NAME]` = `VIBEWEAR`
+- Launch languages = English and Lithuanian
+- Primary market = Lithuania first, Baltics later
+- Use `[DOMAIN]`, `[CONTACT_EMAIL]`, and `[OWNER_NAME_OR_COMPANY]` only after the live domain and mailbox are actually ready.
 
 ---
 
@@ -86,12 +93,12 @@ Use this as the basis for a visible "About" page, network profile, or applicatio
 Project name: [PROJECT_NAME]
 Website: [DOMAIN]
 Primary market: Lithuania first, Baltics later
-Language: English first, Lithuanian/Russian optional later
+Language: English and Lithuanian
 Category: visual fashion search and discovery
 Monetization: affiliate links from approved programs
 Purchase flow: users click from [PROJECT_NAME] to the official retailer website; checkout happens on the retailer website
 Product data: approved affiliate/product feeds or direct merchant permission only
-Initial retailers requested: Reserved LT, Sinsay LT, Sizeer LT, MODIVO LT
+Initial retailers requested: Reserved LT, Sinsay LT, Sizeer LT, MODIVO LT, Cropp LT, ABOUT YOU LT
 Traffic sources: SEO pages, visual discovery pages, organic social content, curated style pages, micro-creator collaborations, and limited paid tests to our own pages
 Compliance: no scraping, no prohibited brand bidding, no fake coupon claims, no unauthorized use of merchant data, no claim of official partnership before approval
 Contact: [CONTACT_EMAIL]
@@ -170,8 +177,12 @@ Apply only after the site is live and review-ready.
 | Sinsay LT | VIVnetworks / CJ | XML feed, commission, cookie window publicly listed | 2 |
 | Sizeer LT | VIVnetworks / CJ | XML feed, commission, cookie window publicly listed | 3 |
 | MODIVO LT | Awin | Awin merchant profile and MODIVO affiliate page | 4 |
+| Cropp LT | VIVnetworks / CJ | XML feed, commission, cookie window publicly listed | 5 |
+| ABOUT YOU LT | FlexOffers | Active program page, payout, cookie window, product feeds mentioned | 6 |
 
 Do not apply first to stores where the feed path is unclear or market-specific unless the network dashboard confirms the correct Lithuanian/EU program.
+
+Factcool LT should not be treated as a first-wave target right now. The official LT site currently contains a notice saying sales were suspended from 2025-03-06, so keep it as monitoring-only until LT sales resume and dashboard terms are re-confirmed.
 
 ---
 
@@ -209,6 +220,8 @@ Use these notes only for the first wave.
 | Sinsay LT | Affordable fashion discovery, style/category pages, approved XML feed usage | coupon site, cashback, brand keyword ads |
 | Sizeer LT | Sneaker/streetwear discovery, size/color/brand filters, approved XML feed usage | unauthorized use of Sizeer brand keywords, scraped product images |
 | MODIVO LT | Broad fashion/shoes discovery, visual product search, feed-based product cards | real-time price guarantee, official partner claim before approval |
+| Cropp LT | Streetwear/youth fashion discovery, graphic tees, denim, accessories, approved XML feed usage | official Cropp partner before approval, brand SEM, scraped product images |
+| ABOUT YOU LT | Branded fashion marketplace discovery, premium/sport/streetwear/category pages, approved feed usage | marketplace data scraping, official ABOUT YOU partner claim before approval |
 
 Initial application order:
 
@@ -216,6 +229,8 @@ Initial application order:
 2. Sinsay LT
 3. Sizeer LT
 4. MODIVO LT
+5. Cropp LT
+6. ABOUT YOU LT
 
 If a network asks for expected volume, keep it conservative:
 
@@ -366,6 +381,7 @@ Useful screenshots for applications or follow-up emails:
 - homepage
 - search/demo page
 - product card grid
+- store page with application-target wording
 - product clickout CTA
 - affiliate disclosure
 - data source policy
@@ -388,8 +404,10 @@ Ready to apply when:
 - Terms of Use exists
 - Affiliate Disclosure exists
 - Data Source Policy exists
+- language switch works for EN/LT public copy
 - no live page claims official partnership before approval
 - no scraped merchant catalog is displayed
+- demo products are clearly described as synthetic review-mode data
 - application copy is ready
 - first-wave store tracker is ready
 - traffic strategy does not rely on prohibited brand SEM

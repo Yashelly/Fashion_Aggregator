@@ -11,6 +11,7 @@ Core strategy document:
 Pre-application materials:
 
 - `pre_affiliate_application_pack.md`
+- `affiliate_application_readiness_ru.md`
 - `legal/privacy_policy_draft.md`
 - `legal/terms_of_use_draft.md`
 - `legal/affiliate_disclosure.md`
@@ -33,6 +34,8 @@ Infrastructure/specs:
 - `glami_affiliate_provider_discovery_ru.md`
 - `mvp_prd.md`
 - `no_design_wireframes.md`
+- `frontend_design_references.md`
+- `service_connections.md`
 
 Intended workflow:
 
@@ -49,6 +52,12 @@ First-wave stores:
 - Sinsay LT
 - Sizeer LT
 - MODIVO LT
+- Cropp LT
+- ABOUT YOU LT
+
+Monitoring-only:
+
+- Factcool LT, because the official LT site currently states sales were suspended from 2025-03-06.
 
 Important rule:
 

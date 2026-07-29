@@ -3,6 +3,8 @@ node_modules
 /out
 dist
 coverage
+__pycache__/
+*.py[cod]
 .env
 .env.local
 .env.*.local
@@ -18,3 +20,15 @@ cinematic-hero/node_modules
 cinematic-hero/dist
 cinematic-hero/*.log
 cinematic-hero/tsconfig*.tsbuildinfo
+.omx/
+.codex/*
+!.codex/agents/
+!.codex/agents/**
+!.codex/skills/
+!.codex/skills/**
+.codex/skills/.system/**
+!.codex/prompts/
+!.codex/prompts/**
+
+.vercel
+.env*

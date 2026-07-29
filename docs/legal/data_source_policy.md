@@ -91,5 +91,9 @@ For the first affiliate launch phase, live products should come only from the ap
 - Sinsay LT
 - Sizeer LT
 - MODIVO LT
+- Cropp LT
+- ABOUT YOU LT
 
 Other stores can be tracked as future candidates, but they should not appear as active live catalog sources until the correct program, feed, or direct permission is confirmed.
+
+Factcool LT is monitoring-only for now because the official LT site currently states sales were suspended from 2025-03-06.
