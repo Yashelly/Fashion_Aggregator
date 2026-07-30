@@ -242,7 +242,7 @@ export default async function OutPage({ params, searchParams }: OutPageProps) {
               <dd>{colorLabel}</dd>
             </div>
             <div>
-              <dt><UsersRound aria-hidden="true" size={17} />{locale === "lt" ? "Skirta" : "Edit"}</dt>
+              <dt><UsersRound aria-hidden="true" size={17} />{locale === "lt" ? "Skirta" : "For"}</dt>
               <dd>{genderLabel}</dd>
             </div>
             <div>

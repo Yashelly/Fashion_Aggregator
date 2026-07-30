@@ -144,7 +144,7 @@ export function ProductGrid({
               <dl className="product-facts">
                 <div><dt>{locale === "lt" ? "Spalva" : "Colour"}</dt><dd>{formatColorLabel(product.color, locale)}</dd></div>
                 <div><dt>{locale === "lt" ? "Dydžiai" : "Sizes"}</dt><dd>{sizes(product.size_options)}</dd></div>
-                <div><dt>{locale === "lt" ? "Skirta" : "Edit"}</dt><dd>{formatGenderLabel(product.gender, locale)}</dd></div>
+                <div><dt>{locale === "lt" ? "Skirta" : "For"}</dt><dd>{formatGenderLabel(product.gender, locale)}</dd></div>
               </dl>
               <p className={`availability availability-${product.availability}`}>{formatAvailabilityLabel(product.availability, locale)}</p>
               {unavailable ? (
