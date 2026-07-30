@@ -1,7 +1,7 @@
 import { RotateCcw, Search } from "lucide-react";
 import { ProductGrid } from "@/components/product-grid";
 import { FilterDisclosure } from "@/components/filter-disclosure";
-import { MascotSearchForm } from "@/components/loading-mascot";
+import { MascotSearchForm, SearchMascotSettler } from "@/components/loading-mascot";
 import { SearchAnalyticsTracker } from "@/components/search-analytics-tracker";
 import {
   formatAvailabilityLabel, formatCategoryLabel, formatColorLabel, formatGenderLabel,
@@ -89,6 +89,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <div className="route-shell search-route">
+      <SearchMascotSettler />
       <SearchAnalyticsTracker resultCount={results.length} />
       <header className="route-heading">
         <div><h1>{t.title}</h1><p className="lead">{t.lead}</p></div>

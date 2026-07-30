@@ -25,8 +25,9 @@ type LoadingMascotController = {
 
 const LoadingMascotContext = createContext<LoadingMascotController | null>(null);
 const ITEMS: ItemKind[] = ["sock", "shirt", "shoe", "hat", "bag", "dress"];
-const SHOW_DELAY_MS = 180;
-const FOUND_DURATION_MS = 560;
+const MIN_SEARCHING_DURATION_MS = 520;
+const FOUND_DURATION_MS = 720;
+const MAX_SEARCH_DURATION_MS = 6_500;
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -45,36 +46,36 @@ function useReducedMotion() {
 function ItemShape({ kind }: { kind: ItemKind }) {
   switch (kind) {
     case "sock":
-      return <path d="M102 47v20c0 8 6 13 14 13h8c7 0 11-4 11-10v-5h-13V47z" />;
+      return <path d="M104 40v27c0 8 6 13 14 13h10c7 0 11-4 11-10v-7h-16V40z" />;
     case "shirt":
-      return <path d="m97 53 14-7h18l14 7 8 14-12 6-6-10v26h-28V63l-6 10-12-6z" />;
+      return <path d="m96 50 15-8h20l15 8 10 16-14 7-7-11v29h-30V62l-7 11-14-7z" />;
     case "shoe":
-      return <path d="M91 72c10-1 17-8 23-18l12 9c4 4 10 7 18 9l5 10H98c-5 0-8-4-7-10Z" />;
+      return <path d="M88 72c11-1 20-9 27-22l13 11c5 5 12 8 21 10l6 13H97c-7 0-11-5-9-12Z" />;
     case "hat":
       return (
         <>
-          <path d="M99 75v-7c0-13 9-22 22-22s22 9 22 22v7" />
-          <path d="M94 75h54v10H94zM105 47l-3-6M114 44l-1-7M124 44l1-7M134 48l3-6" />
+          <path d="M97 74v-7c0-15 10-25 24-25s24 10 24 25v7" />
+          <path d="M90 74h62v12H90z" />
         </>
       );
     case "bag":
       return (
         <>
-          <path d="M95 62h52l5 28H90z" />
-          <path d="M105 63c0-12 6-18 16-18s16 6 16 18" />
+          <path d="M91 60h60l6 32H85z" />
+          <path d="M103 61c0-14 7-21 18-21s18 7 18 21" />
         </>
       );
     case "dress":
-      return <path d="M110 45h22l2 13-7 8 16 24H99l16-24-7-8z" />;
+      return <path d="M108 39h26l3 16-8 10 18 29H95l18-29-8-10z" />;
   }
 }
 
 function Diamond() {
   return (
-    <g className="loading-mascot-diamond" aria-hidden="true">
-      <path d="m78 48 16-18h32l16 18-32 38z" />
-      <path d="m78 48 32 38 32-38M94 30l16 56 16-56M78 48h64M94 30l16 18 16-18" />
-      <path d="M66 32v12M60 38h12M151 25v14M144 32h14M151 67v12M145 73h12" />
+    <g className="loading-mascot-diamond" aria-hidden="true" transform="translate(0 -18)">
+      <path d="m84 34 13-15h26l13 15-26 36z" />
+      <path d="m84 34 26 36 26-36M97 19l13 51 13-51M84 34h52M97 19l13 15 13-15" />
+      <path d="M75 20v10M70 25h10M145 24v11M140 29h10" />
     </g>
   );
 }
@@ -85,8 +86,11 @@ function MascotSvg({ phase }: { phase: Exclude<LoadingPhase, "idle"> }) {
   const [side, setSide] = useState<ThrowSide>(() => (Math.random() > 0.5 ? 1 : -1));
   const robotRef = useRef<SVGGElement>(null);
   const itemRef = useRef<SVGGElement>(null);
-  const frontFlapRef = useRef<SVGPathElement>(null);
-  const diamondRef = useRef<SVGGElement>(null);
+  const leftArmRef = useRef<SVGGElement>(null);
+  const rightArmRef = useRef<SVGGElement>(null);
+  const backBoxRef = useRef<SVGGElement>(null);
+  const frontBoxRef = useRef<SVGGElement>(null);
+  const treasureRef = useRef<SVGGElement>(null);
   const cycleRef = useRef(0);
 
   useEffect(() => {
@@ -105,7 +109,7 @@ function MascotSvg({ phase }: { phase: Exclude<LoadingPhase, "idle"> }) {
 
     if (reducedMotion) {
       if (itemRef.current) itemRef.current.style.opacity = "0";
-      if (diamondRef.current) diamondRef.current.style.opacity = phase === "found" ? "1" : "0";
+      if (treasureRef.current) treasureRef.current.style.opacity = phase === "found" ? "1" : "0";
       return () => {
         animations.forEach((animation) => animation.cancel());
       };
@@ -117,62 +121,93 @@ function MascotSvg({ phase }: { phase: Exclude<LoadingPhase, "idle"> }) {
         robotRef.current,
         [
           { transform: "translateY(0)" },
-          { transform: "translateY(28px)", offset: 0.23 },
-          { transform: "translateY(-8px)", offset: 0.68 },
+          { transform: "translateY(18px)", offset: 0.2 },
+          { transform: "translateY(-7px)", offset: 0.62 },
           { transform: "translateY(0)" },
         ],
-        { duration: 440, easing: "cubic-bezier(.3,.8,.2,1)", fill: "both" },
+        { duration: 480, easing: "cubic-bezier(.3,.8,.2,1)", fill: "both" },
       );
       animate(
-        diamondRef.current,
+        treasureRef.current,
         [
-          { opacity: 0, transform: "translateY(22px) scale(.35)" },
-          { opacity: 0, transform: "translateY(22px) scale(.35)", offset: 0.3 },
-          { opacity: 1, transform: "translateY(-3px) scale(1.08)", offset: 0.75 },
+          { opacity: 0, transform: "translateY(30px) scale(.55)" },
+          { opacity: 0, transform: "translateY(30px) scale(.55)", offset: 0.18 },
+          { opacity: 1, transform: "translateY(-3px) scale(1.06)", offset: 0.72 },
           { opacity: 1, transform: "translateY(0) scale(1)" },
         ],
-        { duration: 460, easing: "cubic-bezier(.2,.9,.25,1.25)", fill: "both" },
+        { duration: 480, easing: "cubic-bezier(.2,.9,.25,1.2)", fill: "both" },
       );
-      animate(
-        frontFlapRef.current,
-        [
-          { transform: "rotate(0deg)" },
-          { transform: "rotate(3deg)", offset: 0.48 },
-          { transform: "rotate(-2deg)", offset: 0.72 },
-          { transform: "rotate(0deg)" },
-        ],
-        { duration: 430, easing: "ease-out", fill: "both" },
-      );
+      [backBoxRef.current, frontBoxRef.current].forEach((box) => {
+        animate(
+          box,
+          [
+            { transform: "translateY(0) rotate(0deg)" },
+            { transform: "translateY(2px) rotate(-1deg)", offset: 0.42 },
+            { transform: "translateY(0) rotate(0deg)" },
+          ],
+          { duration: 430, easing: "ease-out", fill: "both" },
+        );
+      });
     } else {
       const direction = side;
+      const itemIndex = ITEMS.indexOf(item);
+      const duration = [780, 940, 830, 1_020, 870, 920][itemIndex];
+      const throwDistance = [96, 112, 104, 118, 108, 114][itemIndex];
+      const throwLift = [72, 86, 78, 90, 76, 84][itemIndex];
       const robotAnimation = animate(
         robotRef.current,
         [
           { transform: "translate(0, 0) rotate(0deg)" },
-          { transform: `translate(${direction * 7}px, 4px) rotate(${direction * 9}deg)`, offset: 0.32 },
-          { transform: `translate(${direction * 11}px, -3px) rotate(${direction * 13}deg)`, offset: 0.58 },
+          { transform: `translate(${direction * -3}px, 10px) rotate(${direction * -5}deg)`, offset: 0.24 },
+          { transform: `translate(${direction * 8}px, 5px) rotate(${direction * 10}deg)`, offset: 0.5 },
+          { transform: `translate(${direction * 12}px, -5px) rotate(${direction * 13}deg)`, offset: 0.68 },
           { transform: "translate(0, 0) rotate(0deg)" },
         ],
-        { duration: 860, easing: "cubic-bezier(.45,0,.2,1)", fill: "both" },
+        { duration, easing: "cubic-bezier(.45,0,.2,1)", fill: "both" },
       );
       animate(
         itemRef.current,
         [
-          { opacity: 0, transform: "translate(0, 18px) rotate(0deg) scale(.72)" },
-          { opacity: 1, transform: `translate(${direction * 8}px, 2px) rotate(${direction * 5}deg) scale(.9)`, offset: 0.26 },
-          { opacity: 1, transform: `translate(${direction * 66}px, -58px) rotate(${direction * 24}deg) scale(1)`, offset: 0.76 },
-          { opacity: 0, transform: `translate(${direction * 88}px, -34px) rotate(${direction * 38}deg) scale(.96)` },
+          { opacity: 0, transform: "translate(0, 24px) rotate(0deg) scale(.68)" },
+          { opacity: 0.95, transform: `translate(${direction * 8}px, 4px) rotate(${direction * 6}deg) scale(.92)`, offset: 0.3 },
+          { opacity: 1, transform: `translate(${direction * 34}px, -32px) rotate(${direction * 18}deg) scale(1.16)`, offset: 0.56 },
+          { opacity: 1, transform: `translate(${direction * throwDistance}px, ${throwLift * -1}px) rotate(${direction * 34}deg) scale(1.24)`, offset: 0.82 },
+          { opacity: 0, transform: `translate(${direction * (throwDistance + 34)}px, ${throwLift * -0.72}px) rotate(${direction * 50}deg) scale(1.1)` },
         ],
-        { duration: 860, easing: "cubic-bezier(.35,.1,.25,1)", fill: "both" },
+        { duration, easing: "cubic-bezier(.3,.05,.2,1)", fill: "both" },
+      );
+      [backBoxRef.current, frontBoxRef.current].forEach((box) => {
+        animate(
+          box,
+          [
+            { transform: "translate(0, 0) rotate(0deg)" },
+            { transform: `translate(${direction * -2}px, 1px) rotate(${direction * -1.2}deg)`, offset: 0.28 },
+            { transform: `translate(${direction * 3}px, 0) rotate(${direction}deg)`, offset: 0.58 },
+            { transform: "translate(0, 0) rotate(0deg)" },
+          ],
+          { duration: duration * 0.88, easing: "ease-out", fill: "both" },
+        );
+      });
+      animate(
+        direction < 0 ? leftArmRef.current : rightArmRef.current,
+        [
+          { transform: "translate(0, 0) rotate(0deg)" },
+          { transform: `translate(${direction * -2}px, 8px) rotate(${direction * -8}deg)`, offset: 0.25 },
+          { transform: `translate(${direction * 8}px, -13px) rotate(${direction * 34}deg)`, offset: 0.56 },
+          { transform: `translate(${direction * 14}px, -19px) rotate(${direction * 48}deg)`, offset: 0.7 },
+          { transform: "translate(0, 0) rotate(0deg)" },
+        ],
+        { duration, easing: "cubic-bezier(.45,0,.2,1)", fill: "both" },
       );
       animate(
-        frontFlapRef.current,
+        direction < 0 ? rightArmRef.current : leftArmRef.current,
         [
-          { transform: "rotate(0deg)" },
-          { transform: `rotate(${direction * -2.5}deg)`, offset: 0.52 },
-          { transform: "rotate(0deg)" },
+          { transform: "translate(0, 0)" },
+          { transform: "translate(0, 7px)", offset: 0.25 },
+          { transform: "translate(0, 2px)", offset: 0.58 },
+          { transform: "translate(0, 0)" },
         ],
-        { duration: 680, easing: "ease-out", fill: "both" },
+        { duration, easing: "ease-in-out", fill: "both" },
       );
 
       robotAnimation?.finished
@@ -201,45 +236,59 @@ function MascotSvg({ phase }: { phase: Exclude<LoadingPhase, "idle"> }) {
       viewBox="0 0 220 180"
     >
       <g className="loading-mascot-ink">
-        <path className="loading-mascot-paper" d="m43 91 15-19 50-7 57 7 19 18-24 20H67z" />
-        <path className="loading-mascot-inside" d="m43 91 55-17 86 16-29 24H66z" />
-        <path d="m56 83-25-13-20 14 32 7M164 82l25-12 20 15-25 5" />
-      </g>
-
-      <g className="loading-mascot-robot" ref={robotRef}>
-        <rect className="loading-mascot-paper" height="62" rx="18" width="68" x="76" y="39" />
-        {phase === "found" ? (
-          <path d="M92 70c3-5 8-5 11 0M117 70c3-5 8-5 11 0" />
-        ) : (
-          <>
-            <circle className="loading-mascot-eye" cx="98" cy="69" r="4.5" />
-            <circle className="loading-mascot-eye" cx="122" cy="69" r="4.5" />
-          </>
-        )}
-        <path d="M89 96 73 86M131 96l17-12" />
-        <circle className="loading-mascot-paper" cx="71" cy="85" r="6" />
-        <circle className="loading-mascot-paper" cx="150" cy="82" r="6" />
+        <g className="loading-mascot-box" ref={backBoxRef}>
+          <path className="loading-mascot-paper" d="m42 92 22-17h93l24 17-23 20H64z" />
+          <path className="loading-mascot-inside" d="m42 92 48-14 91 14-28 24-89-4z" />
+          <path className="loading-mascot-paper" d="m64 75-23-12-18 17 19 12M157 75l24-12 18 17-18 12" />
+        </g>
       </g>
 
       <g className="loading-mascot-item loading-mascot-paper" ref={itemRef}>
         <ItemShape kind={item} />
       </g>
 
-      <g className="loading-mascot-ink">
-        <path className="loading-mascot-paper" d="m43 91 24 18-7 52-20-14z" />
-        <path className="loading-mascot-paper" d="m159 110 25-20 22 16-20 23z" />
-        <path className="loading-mascot-paper" d="m60 108 99 2-4 52-95-1z" />
-        <path
-          className="loading-mascot-paper loading-mascot-front-flap"
-          d="m43 91 116 19-18 25-118-20z"
-          ref={frontFlapRef}
-        />
-        <path d="m159 110 27 19-2 37-29-4M60 108l-20-17-17 24" />
+      <g className="loading-mascot-robot" ref={robotRef}>
+        <rect className="loading-mascot-paper" height="68" rx="21" width="76" x="72" y="34" />
+        {phase === "found" ? (
+          <>
+            <path d="M91 68c4-6 9-6 13 0M116 68c4-6 9-6 13 0" />
+            <path d="M101 82c5 4 13 4 18 0" />
+          </>
+        ) : (
+          <>
+            <circle className="loading-mascot-eye" cx="96" cy="67" r="5" />
+            <circle className="loading-mascot-eye" cx="124" cy="67" r="5" />
+            <path d="M103 82c4 3 10 3 14 0" />
+          </>
+        )}
       </g>
 
-      <g className="loading-mascot-found" ref={diamondRef}>
-        <Diamond />
+      <g className="loading-mascot-ink loading-mascot-box" ref={frontBoxRef}>
+        <path className="loading-mascot-paper" d="m42 92 22 20v46l-21-13z" />
+        <path className="loading-mascot-paper" d="m158 112 23-20-2 57-24 9z" />
+        <path className="loading-mascot-paper" d="m64 112h94l-3 46H64z" />
+        <path className="loading-mascot-paper" d="m42 92 116 20-15 24-119-22z" />
       </g>
+
+      {phase === "searching" ? (
+        <>
+          <g className="loading-mascot-arm" ref={leftArmRef}>
+            <path d="M87 86Q74 92 77 109" />
+            <circle className="loading-mascot-paper" cx="77" cy="109" r="6" />
+          </g>
+          <g className="loading-mascot-arm" ref={rightArmRef}>
+            <path d="M133 86q13 6 10 23" />
+            <circle className="loading-mascot-paper" cx="143" cy="109" r="6" />
+          </g>
+        </>
+      ) : (
+        <g className="loading-mascot-found" ref={treasureRef}>
+          <Diamond />
+          <path d="M82 88Q70 66 91 48M138 88q12-22-9-40" />
+          <circle className="loading-mascot-paper" cx="91" cy="48" r="5.5" />
+          <circle className="loading-mascot-paper" cx="129" cy="48" r="5.5" />
+        </g>
+      )}
     </svg>
   );
 }
@@ -255,15 +304,17 @@ export function LoadingMascotProvider({
   const phaseRef = useRef<LoadingPhase>("idle");
   const pendingRef = useRef(0);
   const navigationOriginRef = useRef<Element | null>(null);
-  const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startedAtRef = useRef(0);
+  const foundTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const safetyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const setCurrentPhase = useCallback((nextPhase: LoadingPhase) => {
     phaseRef.current = nextPhase;
     setPhase(nextPhase);
   }, []);
 
-  const clearTimer = (timerRef: typeof showTimerRef) => {
+  const clearTimer = (timerRef: typeof foundTimerRef) => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
@@ -273,34 +324,50 @@ export function LoadingMascotProvider({
   const start = useCallback(() => {
     if (pendingRef.current > 0) return;
     pendingRef.current = 1;
+    startedAtRef.current = Date.now();
     navigationOriginRef.current = document.querySelector("#main-content")?.firstElementChild ?? null;
 
+    clearTimer(foundTimerRef);
     clearTimer(hideTimerRef);
-    if (phaseRef.current !== "idle") {
-      setCurrentPhase("searching");
-      return;
-    }
+    clearTimer(safetyTimerRef);
+    safetyTimerRef.current = setTimeout(() => {
+      safetyTimerRef.current = null;
+      pendingRef.current = 0;
+      setCurrentPhase("idle");
+    }, MAX_SEARCH_DURATION_MS);
 
-    clearTimer(showTimerRef);
-    showTimerRef.current = setTimeout(() => {
-      showTimerRef.current = null;
-      if (pendingRef.current > 0) setCurrentPhase("searching");
-    }, SHOW_DELAY_MS);
+    setCurrentPhase("searching");
   }, [setCurrentPhase]);
 
   const finish = useCallback(() => {
     pendingRef.current = Math.max(0, pendingRef.current - 1);
     if (pendingRef.current > 0) return;
 
-    clearTimer(showTimerRef);
+    clearTimer(safetyTimerRef);
     if (phaseRef.current === "idle") return;
 
-    setCurrentPhase("found");
-    clearTimer(hideTimerRef);
-    hideTimerRef.current = setTimeout(() => {
-      hideTimerRef.current = null;
-      if (pendingRef.current === 0) setCurrentPhase("idle");
-    }, FOUND_DURATION_MS);
+    const showFoundState = () => {
+      foundTimerRef.current = null;
+      if (pendingRef.current > 0) return;
+
+      setCurrentPhase("found");
+      clearTimer(hideTimerRef);
+      hideTimerRef.current = setTimeout(() => {
+        hideTimerRef.current = null;
+        if (pendingRef.current === 0) setCurrentPhase("idle");
+      }, FOUND_DURATION_MS);
+    };
+    const remainingSearchTime = Math.max(
+      0,
+      MIN_SEARCHING_DURATION_MS - (Date.now() - startedAtRef.current),
+    );
+
+    clearTimer(foundTimerRef);
+    if (remainingSearchTime > 0) {
+      foundTimerRef.current = setTimeout(showFoundState, remainingSearchTime);
+    } else {
+      showFoundState();
+    }
   }, [setCurrentPhase]);
 
   useEffect(() => {
@@ -314,8 +381,9 @@ export function LoadingMascotProvider({
     observer.observe(document.body, { childList: true, subtree: true });
     return () => {
       observer.disconnect();
-      clearTimer(showTimerRef);
+      clearTimer(foundTimerRef);
       clearTimer(hideTimerRef);
+      clearTimer(safetyTimerRef);
     };
   }, [finish]);
 
@@ -360,8 +428,14 @@ export function MascotSearchForm({
       if (typeof value === "string" && value) params.append(key, value);
     });
 
+    const target = `/search${params.size ? `?${params}` : ""}`;
     controller?.start();
-    router.push(`/search${params.size ? `?${params}` : ""}`);
+
+    if (`${window.location.pathname}${window.location.search}` === target) {
+      router.refresh();
+    } else {
+      router.push(target);
+    }
   };
 
   return (
@@ -369,6 +443,16 @@ export function MascotSearchForm({
       {children}
     </form>
   );
+}
+
+export function SearchMascotSettler() {
+  const controller = useContext(LoadingMascotContext);
+
+  useEffect(() => {
+    controller?.finish();
+  });
+
+  return null;
 }
 
 export function RouteLoadingFallback({ label }: { label: string }) {
