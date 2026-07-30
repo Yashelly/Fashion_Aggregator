@@ -1,10 +1,18 @@
+"use client";
+
 import { ArrowLeft, SearchX } from "lucide-react";
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { withLocale } from "@/lib/i18n";
+import { useEffect, useState } from "react";
+import { getLocale, withLocale, type Locale } from "@/lib/i18n";
 
-export default async function NotFound() {
-  const locale = (await cookies()).get("vibewear-locale")?.value === "lt" ? "lt" : "en";
+export default function NotFound() {
+  const [locale, setLocale] = useState<Locale>("en");
+
+  useEffect(() => {
+    const match = document.cookie.match(/(?:^|; )vibewear-locale=([^;]+)/);
+    setLocale(getLocale({ lang: match ? decodeURIComponent(match[1]) : undefined }));
+  }, []);
+
   return (
     <div className="route-shell state-page">
       <SearchX aria-hidden="true" size={36} />
