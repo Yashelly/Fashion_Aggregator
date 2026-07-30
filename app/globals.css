@@ -58,6 +58,19 @@
   --shadow: 0 20px 55px rgba(0, 0, 0, 0.34);
 }
 
+/*
+ * Visual Variant B overrides (site audit prototype, see
+ * .omc/specs/deep-interview-vibewear-site-audit.md). Both theme states get
+ * their own Variant B block so the two toggles (theme, variant) compose
+ * independently. Tokens below are authored in a later story; this block is
+ * intentionally a structural placeholder only.
+ */
+:root[data-visual-variant="b"] {
+}
+
+:root[data-theme="dark"][data-visual-variant="b"] {
+}
+
 * {
   box-sizing: border-box;
 }
@@ -231,7 +244,8 @@ summary {
   border-color: var(--color-ink);
 }
 
-.account-link[aria-current="page"] {
+.account-link[aria-current="page"],
+.variant-toggle[aria-pressed="true"] {
   background: var(--color-ink);
   border-color: var(--color-ink);
   color: var(--color-canvas);
