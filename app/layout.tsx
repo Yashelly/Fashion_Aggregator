@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { IBM_Plex_Sans, Syne } from "next/font/google";
 import { Suspense } from "react";
-import { LoadingMascotProvider } from "@/components/loading-mascot";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
@@ -22,22 +20,21 @@ const themeScript = `
     const theme = savedTheme === "dark" ? "dark" : "light";
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
+    const cookieMatch = document.cookie.match(/(?:^|; )vibewear-locale=([^;]+)/);
+    document.documentElement.lang = cookieMatch && decodeURIComponent(cookieMatch[1]) === "lt" ? "lt" : "en";
   })();
 `;
 
-export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const locale = (await cookies()).get("vibewear-locale")?.value === "lt" ? "lt" : "en";
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html data-theme="light" lang={locale} suppressHydrationWarning>
+    <html data-theme="light" lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className={`${syne.variable} ${plex.variable}`}>
         <div className="shell">
           <Suspense fallback={<div className="header-skeleton" aria-hidden="true" />}><SiteHeader /></Suspense>
-          <LoadingMascotProvider locale={locale}>
-            <main className="main" id="main-content">{children}</main>
-          </LoadingMascotProvider>
+          <main className="main" id="main-content">{children}</main>
           <Suspense fallback={null}><SiteFooter /></Suspense>
         </div>
       </body>

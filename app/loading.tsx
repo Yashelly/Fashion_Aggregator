@@ -1,7 +1,7 @@
-import { cookies } from "next/headers";
-import { RouteLoadingFallback } from "@/components/loading-mascot";
-
-export default async function Loading() {
-  const locale = (await cookies()).get("vibewear-locale")?.value === "lt" ? "lt" : "en";
-  return <RouteLoadingFallback label={locale === "lt" ? "Kraunama…" : "Loading…"} />;
+export default function Loading() {
+  return (
+    <div aria-busy="true" className="route-shell route-loading-space">
+      <p className="sr-only" role="status">Loading…</p>
+    </div>
+  );
 }
