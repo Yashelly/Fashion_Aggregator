@@ -18,17 +18,21 @@ export const metadata: Metadata = {
 const themeScript = `
   (() => {
     let savedTheme = null;
+    let savedVariant = null;
     try { savedTheme = localStorage.getItem("vibewear-theme"); } catch {}
+    try { savedVariant = localStorage.getItem("vibewear-visual-variant"); } catch {}
     const theme = savedTheme === "dark" ? "dark" : "light";
+    const variant = savedVariant === "b" ? "b" : "a";
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
+    document.documentElement.dataset.visualVariant = variant;
   })();
 `;
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const locale = (await cookies()).get("vibewear-locale")?.value === "lt" ? "lt" : "en";
   return (
-    <html data-theme="light" lang={locale} suppressHydrationWarning>
+    <html data-theme="light" data-visual-variant="a" lang={locale} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
