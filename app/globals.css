@@ -1478,89 +1478,6 @@ summary {
   min-height: 65vh;
 }
 
-.loading-mascot-layer {
-  align-items: center;
-  color: var(--color-ink);
-  display: flex;
-  inset: 76px 0 0;
-  justify-content: center;
-  pointer-events: none;
-  position: fixed;
-  z-index: 40;
-}
-
-.loading-mascot-svg {
-  height: clamp(95px, 7.8vw, 111px);
-  overflow: visible;
-  width: clamp(116px, 9.5vw, 136px);
-}
-
-.loading-mascot-svg path,
-.loading-mascot-svg rect,
-.loading-mascot-svg circle {
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 3.25;
-  vector-effect: non-scaling-stroke;
-}
-
-.loading-mascot-paper {
-  fill: var(--color-canvas);
-}
-
-.loading-mascot-ink,
-.loading-mascot-item,
-.loading-mascot-arm,
-.loading-mascot-found {
-  fill: none;
-}
-
-.loading-mascot-inside {
-  fill: var(--color-canvas);
-}
-
-.loading-mascot-eye {
-  fill: currentColor;
-}
-
-.loading-mascot-item,
-.loading-mascot-robot,
-.loading-mascot-box,
-.loading-mascot-arm,
-.loading-mascot-found,
-.loading-mascot-diamond {
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-.loading-mascot-arm {
-  transform-origin: top center;
-}
-
-.loading-mascot-found {
-  opacity: 0;
-}
-
-.loading-mascot-layer.is-found {
-  animation: loading-mascot-dismiss 720ms ease-out both;
-}
-
-.loading-mascot-diamond {
-  fill: var(--color-canvas);
-}
-
-@keyframes loading-mascot-dismiss {
-  0%,
-  76% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
 .site-footer {
   border-top: 2px solid var(--color-ink);
   display: grid;
@@ -1939,10 +1856,6 @@ summary {
     min-height: 70vh;
   }
 
-  .loading-mascot-layer {
-    inset-block-start: 68px;
-  }
-
   .site-footer {
     padding: 44px 16px;
   }
@@ -2022,10 +1935,5 @@ summary {
   .product-media:hover svg,
   .demo-store-card:hover {
     transform: none;
-  }
-
-  .loading-mascot-svg {
-    height: 92px;
-    width: 112px;
   }
 }
