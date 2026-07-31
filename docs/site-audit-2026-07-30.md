@@ -47,6 +47,29 @@ fourth, unexplained icon-only control that a real shopper has no way to
 interpret — it does not belong in the live site once a variant decision is
 made.
 
+### Reviewer feedback (live comparison, 2026-07-31)
+
+After comparing both variants live via the toggle:
+
+- **Canvas: white preferred.** The crisp white/near-black base from Variant B
+  reads better than Variant A's warm paper/espresso — this is a clear signal
+  toward Variant B's canvas direction, independent of its other changes.
+- **Acid-lime accent (`--color-acid`) disliked in both variants.** This
+  applies regardless of canvas choice — Variant A's `#d4ee70`/`#cdea69` (light/
+  dark) and Variant B's `#c6f22e`/`#d4f24a` are both rejected. Exact locations
+  in `app/globals.css` where this token renders, so whoever picks a
+  replacement knows the full surface area:
+  - `.button.inverse` — the "How product data works" CTA on the homepage
+    dark trust-band (the most visible instance, appears in every screenshot
+    taken during this audit).
+  - `.category-links a:hover` — homepage category-link hover background.
+  - `.runway-links a:hover` — homepage hero quick-search link hover color.
+  - `.demo-store-icon` — icon background on `/stores` cards.
+- **Net direction implied:** white/near-black canvas (Variant B) + a
+  replacement for the acid-lime accent (neither variant's current value) is
+  not yet built — this is feedback for the next pass, not a third variant
+  implemented in this branch.
+
 ### Variant A — polish pass
 
 The current `DESIGN.md` language, palette, and typography are unchanged.
@@ -68,9 +91,12 @@ rather than by guessing from the stylesheet:
 3. **Unbalanced product-detail layout.** On the product detail page, the
    two-column layout (image gallery + info card) used `align-items: start`;
    for products where the info card is taller than the gallery, this left a
-   large, unbalanced block of empty space under the images. Fixed by
-   centering the gallery within its grid row (`align-self: center` in
-   `app/globals.css`).
+   large, unbalanced block of empty space under the images. First attempt
+   (`align-self: center`) just moved the gap to both top and bottom instead
+   of removing it — still read as "floating," per live review. Fixed
+   properly by making the gallery `position: sticky` (top-aligned with the
+   card, follows on scroll for taller cards) instead, matching common PDP
+   layouts; disabled on the single-column mobile breakpoint. `app/globals.css`.
 
 Verified, not just assumed:
 
