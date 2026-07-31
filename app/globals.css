@@ -212,7 +212,6 @@ summary {
 }
 
 .desktop-nav a,
-.header-search,
 .language-switcher {
   font-size: 12px;
   font-weight: 600;
@@ -246,18 +245,12 @@ summary {
   justify-self: end;
 }
 
-.header-search,
 .account-link,
 .theme-toggle {
   align-items: center;
   display: flex;
   justify-content: center;
   min-height: 44px;
-}
-
-.header-search {
-  gap: 7px;
-  padding: 0 8px;
 }
 
 .account-link,
@@ -1702,10 +1695,6 @@ summary {
 
   .brand {
     font-size: 23px;
-  }
-
-  .header-search {
-    display: none;
   }
 
   .header-tools {
