@@ -81,6 +81,29 @@ def seed_locale(context: BrowserContext, locale: str) -> None:
     )
 
 
+# The header's search entry point used to be a dedicated `.header-search`
+# element. It was replaced by an ordinary nav link in commit c3069b9; these
+# selectors track the current markup.
+SEARCH_LINK = '.desktop-nav a[href^="/search"]'
+MOBILE_SEARCH_LINK = '.mobile-menu nav a[href^="/search"]'
+
+
+def click_search(page: Page) -> None:
+    """Reach /search through the header at any viewport.
+
+    `.desktop-nav` is `display: none` below 1180px, so on narrow viewports the
+    same link has to be opened through the collapsed `<details>` menu. Both
+    paths render the same `nav.search` label, so either satisfies the locale
+    assertions.
+    """
+    desktop_link = page.locator(SEARCH_LINK)
+    if desktop_link.is_visible():
+        desktop_link.click()
+        return
+    page.locator(".mobile-menu > summary").click()
+    page.locator(MOBILE_SEARCH_LINK).click()
+
+
 def wait_for_locale(page: Page, locale: str) -> None:
     expected_search = "Paieška" if locale == "lt" else "Search"
     expected_aria = "Kalba" if locale == "lt" else "Language"
@@ -91,12 +114,16 @@ def wait_for_locale(page: Page, locale: str) -> None:
     )
     page.wait_for_function(
         """expected => {
-          const label = document.querySelector('.header-search span');
+          const label = document.querySelector(expected.selector);
           const switcher = document.querySelector('.language-switcher');
           return label?.textContent?.trim() === expected.search
             && switcher?.getAttribute('aria-label') === expected.aria;
         }""",
-        arg={"search": expected_search, "aria": expected_aria},
+        arg={
+            "search": expected_search,
+            "aria": expected_aria,
+            "selector": SEARCH_LINK,
+        },
     )
     page.wait_for_function(
         "expected => document.cookie.includes(`vibewear-locale=${expected}`)",
@@ -385,7 +412,7 @@ def run_history_and_stress_matrix(browser) -> int:
     click_language(page, "lt")
     for _ in range(5):
         for selector, path in (
-            ('.header-search', "/search"),
+            (SEARCH_LINK, "/search"),
             ('.desktop-nav a[href^="/stores"]', "/stores"),
             ('.desktop-nav a[href^="/how-it-works"]', "/how-it-works"),
             ('.desktop-nav a[href^="/about"]', "/about"),
@@ -421,7 +448,7 @@ def run_atomic_switch_matrix(browser) -> int:
             page.evaluate(
                 """() => {
                   document.querySelector('.language-switcher a:last-child').click();
-                  document.querySelector('.header-search').click();
+                  document.querySelector('.desktop-nav a[href^="/search"]').click();
                 }"""
             )
             page.wait_for_function(
@@ -430,7 +457,7 @@ def run_atomic_switch_matrix(browser) -> int:
             assert urlparse(page.url).path in {"/", "/search"}, page.url
             assert_locale(page, context, "lt")
 
-            page.locator(".header-search").click()
+            click_search(page)
             page.wait_for_function(
                 """() => location.pathname === '/search'
                   && new URL(location.href).searchParams.get('lang') === 'lt'"""
@@ -447,7 +474,7 @@ def run_atomic_switch_matrix(browser) -> int:
             page.evaluate(
                 """() => {
                   document.querySelector('.language-switcher a:first-child').click();
-                  document.querySelector('.header-search').click();
+                  document.querySelector('.desktop-nav a[href^="/search"]').click();
                 }"""
             )
             page.wait_for_function(
@@ -456,7 +483,7 @@ def run_atomic_switch_matrix(browser) -> int:
             assert urlparse(page.url).path in {"/", "/search"}, page.url
             assert_locale(page, context, "en")
 
-            page.locator(".header-search").click()
+            click_search(page)
             page.wait_for_function(
                 """() => location.pathname === '/search'
                   && !new URL(location.href).searchParams.has('lang')"""

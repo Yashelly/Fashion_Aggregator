@@ -59,14 +59,20 @@
 }
 
 /*
- * Visual Variant B overrides (site audit prototype, see
- * .omc/specs/deep-interview-vibewear-site-audit.md). Both theme states get
- * their own Variant B block so the two toggles (theme, variant) compose
- * independently. A bolder, higher-contrast editorial/streetwear direction:
- * crisp white/near-black base instead of warm paper/espresso, and the
- * existing coral/cobalt/acid-lime accent family pushed to full saturation.
- * Same Syne/IBM Plex Sans pairing and the same WCAG AA bar as Variant A
- * (verified: all pairs below are >= 4.5:1).
+ * Variant B token values — INACTIVE. Nothing sets data-visual-variant="b"
+ * anymore; the A/B comparison toggle these belonged to was a review tool and
+ * was removed from production once the comparison was settled.
+ *
+ * Kept deliberately as input values for the Phase 3 visual work, not as live
+ * configuration. See .omc/specs/deep-interview-vibewear-strategic-vision.md
+ * §5 for the decided direction: the light-mode block below is the confirmed
+ * source for the new light canvas (crisp white/near-black beat the warm
+ * paper/espresso it replaces), while the dark-mode block below is REJECTED —
+ * it skews blue-purple, and dark mode stays on Variant A's neutral/warm
+ * surfaces. The acid-lime accent (--color-acid) is rejected in both blocks
+ * and needs a replacement that hasn't been chosen yet.
+ *
+ * All pairs verified >= 4.5:1 (WCAG AA) when they were live.
  */
 :root[data-visual-variant="b"] {
   --color-canvas: #ffffff;
@@ -99,11 +105,6 @@
   --color-success: #6fe0a8;
   --color-warning: #f2c94c;
   --color-error: #ff8577;
-}
-
-:root[data-visual-variant="b"] .hero-copy h1 {
-  font-size: clamp(4rem, 10.4vw, 9.6rem);
-  letter-spacing: -0.065em;
 }
 
 * {
@@ -279,8 +280,7 @@ summary {
   border-color: var(--color-ink);
 }
 
-.account-link[aria-current="page"],
-.variant-toggle[aria-pressed="true"] {
+.account-link[aria-current="page"] {
   background: var(--color-ink);
   border-color: var(--color-ink);
   color: var(--color-canvas);
