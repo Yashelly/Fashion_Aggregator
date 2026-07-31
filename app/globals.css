@@ -58,6 +58,54 @@
   --shadow: 0 20px 55px rgba(0, 0, 0, 0.34);
 }
 
+/*
+ * Visual Variant B overrides (site audit prototype, see
+ * .omc/specs/deep-interview-vibewear-site-audit.md). Both theme states get
+ * their own Variant B block so the two toggles (theme, variant) compose
+ * independently. A bolder, higher-contrast editorial/streetwear direction:
+ * crisp white/near-black base instead of warm paper/espresso, and the
+ * existing coral/cobalt/acid-lime accent family pushed to full saturation.
+ * Same Syne/IBM Plex Sans pairing and the same WCAG AA bar as Variant A
+ * (verified: all pairs below are >= 4.5:1).
+ */
+:root[data-visual-variant="b"] {
+  --color-canvas: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f2f0ff;
+  --color-surface-elevated: #ffffff;
+  --color-ink: #0d0d0d;
+  --color-ink-muted: #55536b;
+  --color-line: #d8d6f0;
+  --color-accent: #d81f10;
+  --color-focus: #3150ff;
+  --color-acid: #c6f22e;
+  --color-success: #0a7a4f;
+  --color-warning: #8a5a00;
+  --color-error: #c81c10;
+  --color-on-acid: #0d0d0d;
+}
+
+:root[data-theme="dark"][data-visual-variant="b"] {
+  --color-canvas: #0a0a0f;
+  --color-surface: #131320;
+  --color-surface-soft: #1c1c30;
+  --color-surface-elevated: #191928;
+  --color-ink: #f5f5ff;
+  --color-ink-muted: #b3b0d6;
+  --color-line: #35314f;
+  --color-accent: #ff6b5a;
+  --color-focus: #8fa0ff;
+  --color-acid: #d4f24a;
+  --color-success: #6fe0a8;
+  --color-warning: #f2c94c;
+  --color-error: #ff8577;
+}
+
+:root[data-visual-variant="b"] .hero-copy h1 {
+  font-size: clamp(4rem, 10.4vw, 9.6rem);
+  letter-spacing: -0.065em;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -231,7 +279,8 @@ summary {
   border-color: var(--color-ink);
 }
 
-.account-link[aria-current="page"] {
+.account-link[aria-current="page"],
+.variant-toggle[aria-pressed="true"] {
   background: var(--color-ink);
   border-color: var(--color-ink);
   color: var(--color-canvas);
@@ -1242,6 +1291,8 @@ summary {
   gap: 16px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   min-width: 0;
+  position: sticky;
+  top: calc(76px + 24px);
 }
 
 .product-gallery figure {
@@ -1605,7 +1656,8 @@ summary {
     grid-template-columns: 1fr;
   }
 
-  .product-detail-card {
+  .product-detail-card,
+  .product-gallery {
     position: static;
   }
 

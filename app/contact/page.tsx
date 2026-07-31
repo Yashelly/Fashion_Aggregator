@@ -1,14 +1,11 @@
+"use client";
+
 import { InfoPage, ProseSection } from "@/components/info-page";
-import { getCopy, getLocale, type SearchParamsInput } from "@/lib/i18n";
+import { getCopy } from "@/lib/i18n";
+import { useClientLocale } from "@/lib/use-client-locale";
 
-type ContactPageProps = {
-  searchParams: Promise<SearchParamsInput>;
-};
-
-export default async function Page({
-  searchParams,
-}: ContactPageProps): Promise<React.ReactElement> {
-  const locale = getLocale(await searchParams);
+export default function Page(): React.ReactElement {
+  const locale = useClientLocale();
   const copy = getCopy(locale).pages.contact;
 
   return (
