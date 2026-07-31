@@ -174,6 +174,14 @@ export const copy = {
     common: {
       skipToContent: "Skip to content",
     },
+    cookieBanner: {
+      title: "Cookies on this site",
+      body: "Essential cookies keep the site working and remember your language. Anonymous analytics help us see which searches lead nowhere, so we can fix them. Nothing here identifies you personally.",
+      accept: "Accept analytics",
+      reject: "Essential only",
+      privacyLink: "Read the privacy policy",
+      ariaLabel: "Cookie consent",
+    },
     header: {
       browse: "Browse",
       departmentsAria: "Departments",
@@ -410,6 +418,8 @@ export const copy = {
         paragraphs: [
           "Weft processes only the information needed to operate fashion discovery, improve product search, answer contact messages, and measure outbound retailer clicks.",
           "This may include technical browser data, search events, saved preferences if enabled, outbound click events, UTM parameters, and messages sent through contact channels. Purchases happen on retailer websites, and retailer privacy policies apply to checkout, delivery, returns, and account activity on those sites.",
+          "Cookies and similar technologies are used for essential site functionality and for anonymous analytics. Your language choice is remembered in a cookie so the site opens in the language you picked. If non-essential cookies are introduced later, you will be asked to consent first.",
+          "You can ask to see, correct, delete, or restrict the processing of your personal data. If EU or EEA law applies to you, you can also object to processing, ask for your data in a portable form, withdraw consent where processing relies on it, and lodge a complaint with a data protection authority. Use the contact page to make any of these requests.",
         ],
       },
       stores: {
@@ -435,6 +445,14 @@ export const copy = {
   lt: {
     common: {
       skipToContent: "Pereiti prie pagrindinio turinio",
+    },
+    cookieBanner: {
+      title: "Slapukai šioje svetainėje",
+      body: "Būtini slapukai užtikrina svetainės veikimą ir įsimena jūsų kalbą. Anoniminė analitika padeda pamatyti, kurios paieškos nieko neranda, kad galėtume tai pataisyti. Niekas čia jūsų asmeniškai neidentifikuoja.",
+      accept: "Sutikti su analitika",
+      reject: "Tik būtinieji",
+      privacyLink: "Skaityti privatumo politiką",
+      ariaLabel: "Sutikimas dėl slapukų",
     },
     header: {
       browse: "Naršyti",
@@ -672,6 +690,8 @@ export const copy = {
         paragraphs: [
           "Weft tvarko tik informaciją, kurios reikia mados paieškai veikti, prekių paieškai gerinti, atsakyti į kontaktines žinutes ir matuoti išeinančius paspaudimus į parduotuves.",
           "Tai gali apimti techninius naršyklės duomenis, paieškos įvykius, išsaugotas nuostatas, jei jos įjungtos, išeinančių paspaudimų įvykius, UTM parametrus ir per kontaktinius kanalus atsiųstas žinutes. Pirkimai vyksta parduotuvių svetainėse, o jų privatumo politikos taikomos atsiskaitymui, pristatymui, grąžinimui ir paskyros veiklai tose svetainėse.",
+          "Slapukai ir panašios technologijos naudojami būtinam svetainės veikimui ir anoniminei analitikai. Jūsų pasirinkta kalba įsimenama slapuke, kad svetainė atsidarytų ta kalba, kurią pasirinkote. Jei vėliau bus įdiegti nebūtini slapukai, pirmiausia bus paprašyta jūsų sutikimo.",
+          "Galite prašyti susipažinti su savo asmens duomenimis, juos ištaisyti, ištrinti arba apriboti jų tvarkymą. Jei jums taikoma ES arba EEE teisė, taip pat galite nesutikti su duomenų tvarkymu, prašyti perkelti duomenis, atšaukti sutikimą, kai tvarkymas juo grindžiamas, ir pateikti skundą duomenų apsaugos priežiūros institucijai. Dėl bet kurio iš šių prašymų kreipkitės per kontaktų puslapį.",
         ],
       },
       stores: {

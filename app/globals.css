@@ -1978,3 +1978,60 @@ summary {
     transform: none;
   }
 }
+
+/*
+ * Cookie consent banner. Rendered only when
+ * NEXT_PUBLIC_COOKIE_BANNER_ENABLED is "true" — see
+ * components/cookie-consent.tsx for why it ships staged rather than live.
+ * Both actions share the same button treatment on purpose: refusing must not
+ * be visually harder than accepting.
+ */
+.cookie-consent {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--color-surface-elevated);
+  border-top: 1px solid var(--color-line);
+  box-shadow: var(--shadow);
+}
+
+.cookie-consent-text {
+  flex: 1 1 320px;
+  max-width: 70ch;
+}
+
+.cookie-consent-text p {
+  margin: 0 0 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+.cookie-consent-title {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.cookie-consent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .cookie-consent {
+    padding: 16px;
+  }
+
+  .cookie-consent-actions .button {
+    flex: 1 1 auto;
+  }
+}

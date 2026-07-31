@@ -2,13 +2,13 @@
 
 Last updated: 2026-05-25
 
-This is a draft for `[PROJECT_NAME]` at `[DOMAIN]`. It should be reviewed and adapted before public launch.
+This is a draft for `Weft` at `[DOMAIN]`. It should be reviewed and adapted before public launch.
 
 ---
 
 ## 1. Who We Are
 
-`[PROJECT_NAME]` is a fashion search and discovery website. We help users discover products from approved retailer feeds and click through to official retailer websites.
+`Weft` is a fashion search and discovery website. We help users discover products from approved retailer feeds and click through to official retailer websites.
 
 Contact: `[CONTACT_EMAIL]`
 
@@ -121,13 +121,13 @@ If EU/EEA law applies, you may also have the right to object to processing, requ
 
 ## 11. Third-Party Websites
 
-When you click through to a retailer, you leave `[PROJECT_NAME]`. The retailer's privacy policy, terms, checkout, delivery, and returns rules apply.
+When you click through to a retailer, you leave `Weft`. The retailer's privacy policy, terms, checkout, delivery, and returns rules apply.
 
 ---
 
 ## 12. Children
 
-`[PROJECT_NAME]` is not intended for children under the age where parental consent is required under applicable law. We do not knowingly collect personal data from children for account creation or checkout because we do not operate checkout.
+`Weft` is not intended for children under the age where parental consent is required under applicable law. We do not knowingly collect personal data from children for account creation or checkout because we do not operate checkout.
 
 ---
 
