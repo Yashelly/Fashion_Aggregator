@@ -13,7 +13,7 @@ export function CinematicHero({ locale }: { locale: Locale }) {
       <div className="hero-copy">
         <p className="preview-kicker">
           <Sparkles aria-hidden="true" size={16} />
-          DEMO · SINTETINIS KATALOGAS
+          {locale === "lt" ? "DEMO · SINTETINIS KATALOGAS" : "DEMO · SYNTHETIC CATALOG"}
         </p>
         <h1 id="home-title">{locale === "lt" ? <>RASK SAVO<br/><em>STILIŲ</em></> : <>FIND YOUR<br/><em>VIBE.</em></>}</h1>
         <p className="hero-lead">
