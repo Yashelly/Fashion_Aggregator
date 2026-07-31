@@ -1,4 +1,4 @@
-"""Browser regression suite for the VIBEWEAR EN/LT locale contract.
+"""Browser regression suite for the WEFT EN/LT locale contract.
 
 Run a local production or development server first, then execute:
 
@@ -22,7 +22,7 @@ REPORT_PATH = Path(
         ".omx/artifacts/qa/locale-summary.json",
     )
 )
-LOCALE_COOKIE = "vibewear-locale"
+LOCALE_COOKIE = "weft-locale"
 PUBLIC_ROUTES = [
     "/",
     "/search?query=black",
@@ -151,7 +151,7 @@ def wait_for_locale(page: Page, locale: str) -> None:
         },
     )
     page.wait_for_function(
-        "expected => document.cookie.includes(`vibewear-locale=${expected}`)",
+        "expected => document.cookie.includes(`weft-locale=${expected}`)",
         arg=locale,
     )
 

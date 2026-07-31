@@ -19,7 +19,7 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="footer-statement">
-        <Link className="footer-brand" href={withLocale("/", locale)}>VIBEWEAR</Link>
+        <Link className="footer-brand" href={withLocale("/", locale)}>WEFT</Link>
         <p>{t.text}</p>
       </div>
       <div className="footer-links">

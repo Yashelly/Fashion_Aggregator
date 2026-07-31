@@ -13,7 +13,7 @@ function languageHref(pathname: string, params: URLSearchParams, locale: Locale)
 }
 
 function publicPathname(pathname: string) {
-  const missingPreviewPrefix = "/__vibewear-missing-preview/";
+  const missingPreviewPrefix = "/__weft-missing-preview/";
   return pathname.startsWith(missingPreviewPrefix)
     ? `/out/${pathname.slice(missingPreviewPrefix.length)}`
     : pathname;
@@ -21,7 +21,7 @@ function publicPathname(pathname: string) {
 
 function persistLocale(locale: Locale) {
   document.documentElement.lang = locale;
-  document.cookie = `vibewear-locale=${locale}; Path=/; Max-Age=31536000; SameSite=Lax`;
+  document.cookie = `weft-locale=${locale}; Path=/; Max-Age=31536000; SameSite=Lax`;
 }
 
 function ThemeToggle({ locale }: { locale: Locale }) {
@@ -39,7 +39,7 @@ function ThemeToggle({ locale }: { locale: Locale }) {
     document.documentElement.style.colorScheme = nextTheme;
     setTheme(nextTheme);
     try {
-      localStorage.setItem("vibewear-theme", nextTheme);
+      localStorage.setItem("weft-theme", nextTheme);
     } catch {
       // The visible toggle still works for the current page session.
     }
@@ -102,8 +102,8 @@ export function SiteHeader() {
     <>
       <a className="skip-link" href="#main-content">{copy[locale].common.skipToContent}</a>
       <header className="site-header">
-        <Link className="brand" href={withLocale("/", locale)} aria-label={locale === "lt" ? "VIBEWEAR pradinis puslapis" : "VIBEWEAR home"}>
-          VIBEWEAR
+        <Link className="brand" href={withLocale("/", locale)} aria-label={locale === "lt" ? "Weft pradinis puslapis" : "Weft home"}>
+          WEFT
         </Link>
         <nav className="desktop-nav" aria-label={t.mainNavAria}>
           {nav.map(({ href, label, temporary }) => (

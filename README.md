@@ -1,4 +1,4 @@
-# VIBEWEAR
+# Weft
 
 Pre-affiliate Next.js foundation for a visual fashion discovery/search MVP.
 
@@ -8,7 +8,7 @@ Pre-affiliate Next.js foundation for a visual fashion discovery/search MVP.
 - No live retailer catalog is displayed.
 - Live products should come only from approved affiliate feeds or direct merchant permission.
 - Public copy supports English and Lithuanian through a canonical `lang` query
-  parameter backed by the `vibewear-locale` preference cookie.
+  parameter backed by the `weft-locale` preference cookie.
 - Store pages describe targets as application/demo sources, not official partnerships.
 
 ## First-Wave Affiliate Targets

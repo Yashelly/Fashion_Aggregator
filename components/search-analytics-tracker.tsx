@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 const FILTER_KEYS = ["availability", "category", "color", "gender", "sale", "status", "store"] as const;
 
 function getAnonymousId() {
-  const key = "vibewear-anonymous-id";
+  const key = "weft-anonymous-id";
   const created =
     globalThis.crypto?.randomUUID?.() ??
     `anon-${Date.now()}-${Math.random().toString(36).slice(2)}`;

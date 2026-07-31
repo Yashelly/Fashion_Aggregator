@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getMockProducts } from "@/lib/mock-products";
 
-const LOCALE_COOKIE = "vibewear-locale";
+const LOCALE_COOKIE = "weft-locale";
 
 function syncLocaleCookie(response: NextResponse, lang: string | null) {
   if (lang !== "en" && lang !== "lt") return response;
@@ -48,7 +48,7 @@ export function proxy(request: NextRequest) {
     if (!productExists) {
       const rewriteUrl = request.nextUrl.clone();
       rewriteUrl.pathname =
-        `/__vibewear-missing-preview/${encodeURIComponent(productId || "invalid")}`;
+        `/__weft-missing-preview/${encodeURIComponent(productId || "invalid")}`;
 
       return syncLocaleCookie(
         NextResponse.rewrite(rewriteUrl, {

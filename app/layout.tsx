@@ -9,18 +9,18 @@ const syne = Syne({ subsets: ["latin", "latin-ext"], variable: "--font-display",
 const plex = IBM_Plex_Sans({ subsets: ["latin", "latin-ext"], weight: ["400", "500", "600"], variable: "--font-body", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "VIBEWEAR — Fashion discovery",
+  title: "Weft — Fashion discovery",
   description: "Discover fashion by item, mood, colour, price, and category.",
 };
 
 const themeScript = `
   (() => {
     let savedTheme = null;
-    try { savedTheme = localStorage.getItem("vibewear-theme"); } catch {}
+    try { savedTheme = localStorage.getItem("weft-theme"); } catch {}
     const theme = savedTheme === "dark" ? "dark" : "light";
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
-    const cookieMatch = document.cookie.match(/(?:^|; )vibewear-locale=([^;]+)/);
+    const cookieMatch = document.cookie.match(/(?:^|; )weft-locale=([^;]+)/);
     document.documentElement.lang = cookieMatch && decodeURIComponent(cookieMatch[1]) === "lt" ? "lt" : "en";
   })();
 `;

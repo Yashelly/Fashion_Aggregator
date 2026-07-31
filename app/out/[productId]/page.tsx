@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: OutPageProps): Promise<Metada
   if (!product) return {};
 
   return {
-    title: `${product.title} — VIBEWEAR`,
+    title: `${product.title} — Weft`,
     description: `View ${product.title}, available sizes, product details, and styling images.`,
   };
 }
