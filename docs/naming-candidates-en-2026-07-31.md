@@ -254,3 +254,32 @@ Also free: `dibsfit.com` — the single `.com` survivor across all three pools.
   finalist before buying anything.
 
 No winner picked here — evidence only.
+
+---
+
+# DECISION — 2026-07-31
+
+**Chosen: WEFT.** Domain: **weft.lt**.
+
+The weft is the crosswise thread in weaving — the one that actually crosses
+and binds the warp. It is a real textile term, short, spellable, has no
+hostile letters for a Lithuanian speaker, and promises nothing the product
+can't deliver. Scour, Trawl and Prowl were the runners-up.
+
+Also verified free at decision time: `weft.eu`, `weft.io`, `weft.co`,
+`weft.shop`. `weft.store` and `weft.ai` are taken. `weft.com` is registered
+since 1999 and dormant — an approach to its owner is deferred, not ruled out.
+
+`.lt` was chosen over `.io` and `.ai` deliberately. Both of those read as
+tech-product domains to a general shopper; `.ai` is also ~$70-150/yr versus
+~EUR 10-15 for `.lt`, and every candidate name was already taken there
+anyway. The buyer here is a Lithuanian consumer arriving from Instagram or
+Google, and for a shopping site local familiarity beats international polish.
+
+**Open risk — not cleared.** Two companies already trade under this name:
+Weft Apparel (US, made-to-order clothing manufacturer — Nice class 25) and
+Weft Technologies (digital product consultancy — different sector). This
+product is retail search and comparison (class 35), and both use compound
+domains rather than bare "weft", so the classes appear to differ. That is a
+reading of public web results, NOT a legal clearance. Run EUIPO TMview before
+any spend on logo, packaging or print.
