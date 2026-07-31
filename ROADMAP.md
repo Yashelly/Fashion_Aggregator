@@ -32,7 +32,14 @@ overlooked.
       term that is short, unclaimed, and promises nothing it can't deliver.
       Evidence and the rejected candidates are in
       [`docs/naming-candidates-en-2026-07-31.md`](docs/naming-candidates-en-2026-07-31.md).
-- [ ] Rename applied across the app, docs, and legal placeholders
+- [x] Rename applied across the app and living docs (2026-07-31). Storage keys
+      moved with it (`weft-locale`, `weft-theme`, `weft-anonymous-id`,
+      `weft-account-preferences`). Two deliberate exclusions: the `store_slug`
+      in `data/mock_products.csv` keeps its old value (internal identity,
+      decoupled from anything public, and changing it would reshuffle products
+      across demo stores), and dated audit documents keep the old name because
+      they are records of a moment. Legal placeholders are still pending —
+      they land with the legal baseline below.
 - [ ] Domain secured: **weft.lt** (verified available). `weft.eu`, `weft.io`,
       `weft.co`, `weft.shop` also free; `weft.com` is registered since 1999,
       dormant, and would need an approach to its owner — deliberately deferred.
