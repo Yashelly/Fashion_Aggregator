@@ -65,10 +65,23 @@ After comparing both variants live via the toggle:
   - `.category-links a:hover` — homepage category-link hover background.
   - `.runway-links a:hover` — homepage hero quick-search link hover color.
   - `.demo-store-icon` — icon background on `/stores` cards.
-- **Net direction implied:** white/near-black canvas (Variant B) + a
-  replacement for the acid-lime accent (neither variant's current value) is
-  not yet built — this is feedback for the next pass, not a third variant
-  implemented in this branch.
+- **Dark mode: Variant A preferred, Variant B rejected ("goes blue").** Light
+  mode should come from Variant B (white canvas, see above), but dark mode
+  should come from Variant A, not B. This is a real, verifiable difference,
+  not just a subjective read: Variant B's dark surfaces
+  (`--color-canvas: #0a0a0f`, `--color-surface: #131320`,
+  `--color-surface-soft: #1c1c30`, `--color-surface-elevated: #191928`, plus
+  `--color-ink: #f5f5ff` and `--color-focus: #8fa0ff`) all carry a
+  noticeably higher blue channel than red/green, giving the whole dark theme
+  a blue-purple cast. Variant A's dark surfaces
+  (`--color-canvas: #161412`, `--color-surface: #211e1b`,
+  `--color-surface-soft: #2a2622`, `--color-surface-elevated: #2e2925`) are
+  neutral/warm-tinted instead, which reads as "fine."
+- **Emerging direction (not yet built as one variant):** light mode = Variant
+  B's canvas tokens, dark mode = Variant A's canvas tokens, accent = neither
+  variant's current acid-lime (replacement still undecided). This is
+  feedback captured for the next pass — no third/merged variant has been
+  implemented in this branch yet.
 
 ### Variant A — polish pass
 
