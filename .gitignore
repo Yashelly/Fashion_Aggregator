@@ -21,6 +21,14 @@ cinematic-hero/dist
 cinematic-hero/*.log
 cinematic-hero/tsconfig*.tsbuildinfo
 .omx/
+# OMC working state. Only .omc/specs/ is durable and committed — DESIGN.md and
+# app/globals.css reference spec paths that must resolve in every clone.
+# Everything else under .omc/ (plans, state, sessions, project-memory) is
+# session-local. The glob-then-unignore form keeps any future .omc/ entry
+# ignored by default rather than silently untracked.
+.omc/*
+!.omc/specs/
+.claude/
 generated-demo-products/
 public/demo-products/*.png
 .asset-cache/
