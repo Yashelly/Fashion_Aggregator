@@ -184,7 +184,33 @@ domain market actually allows.
 
 A deliberate junk control (`placeholderx.com`) returned 404/free in the same
 run, so the check discriminates correctly — the zeros are real, not a broken
-probe.
+probe. Cross-checked against a second independent source (the `rdap.org`
+bootstrap), which agrees on every sample.
+
+**Refinement — "`.com` is exhausted" is too blunt.** Availability is a
+function of length, measured over random pronounceable strings:
+
+| Length | Free on `.com` |
+|---|---|
+| 4 letters | 0 / 14 |
+| 5 letters | 1 / 14 |
+| 6 letters | 6 / 14 |
+| 7 letters | 14 / 14 |
+| 8 letters | 14 / 14 |
+
+So the cliff sits at six letters. But this does NOT reopen `.com` in
+practice: 46 hand-picked, brand-quality 6-7 letter names (Velora, Kirano,
+Solvea, Zentro, Nimbra, Lumira… and textile words Thread, Stitch, Bobbin,
+Damask, Muslin, Brocade, Selvage…) were **all** registered. The strings that
+come back free are free precisely because nobody wants them — `nonided`,
+`tinepag`, `sebozu`. Anything that reads like a brand has already been
+bought.
+
+Practical consequence: for a single-word name the realistic choices are a
+`.lt` domain (free, and Lithuania is the launch market) or paying aftermarket
+prices for a premium `.com`. Compounds do remain available — verified free:
+`scourhq.com`, `scourlabs.com`, `scourstore.com`, `trawllabs.com`,
+`weftfashion.com`.
 
 `.app` is also gone: all of dibs/stash/snag/peep/grail/steez/yoink/peeka/
 nabbi/dripp `.app` are registered (verified via the `rdap.org` bootstrap with
