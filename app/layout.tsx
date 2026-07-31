@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Sans, Syne } from "next/font/google";
 import { Suspense } from "react";
 import { SiteFooter } from "@/components/site-footer";
+import { CookieConsent } from "@/components/cookie-consent";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <main className="main" id="main-content">{children}</main>
           <Suspense fallback={null}><SiteFooter /></Suspense>
         </div>
+        <Suspense fallback={null}><CookieConsent /></Suspense>
       </body>
     </html>
   );
