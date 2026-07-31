@@ -1,4 +1,4 @@
-# VIBEWEAR Design Contract
+# Weft Design Contract
 
 > **Partially superseded — read this first.**
 >
@@ -8,8 +8,9 @@
 > [`.omc/specs/deep-interview-vibewear-strategic-vision.md`](.omc/specs/deep-interview-vibewear-strategic-vision.md)
 > §5, which changes three things:
 >
-> - **The name "VIBEWEAR" is temporary** and will be replaced. Treat every
->   occurrence in this document as a placeholder.
+> - **The product is now called Weft** (chosen 2026-07-31, replacing the
+>   placeholder name it launched this document under). The wordmark is set in
+>   caps — `WEFT` — but prose uses `Weft`.
 > - **Light mode is superseded.** The warm-paper canvas is being replaced by a
 >   crisp white/near-black base. The **acid-lime accent is rejected outright**
 >   and its replacement has not been chosen yet — ignore the acid-lime

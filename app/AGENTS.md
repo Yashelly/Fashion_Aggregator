@@ -11,7 +11,7 @@ Next.js App Router tree — every routable page plus the two analytics API route
 
 | File | Description |
 |------|-------------|
-| `layout.tsx` | Root layout. Loads Syne (display) + IBM Plex Sans (body) fonts, reads the `vibewear-locale` cookie for `<html lang>`, inlines a pre-hydration theme script (`localStorage["vibewear-theme"]` → `data-theme`/`color-scheme`, defaults to light), and wraps children in `LoadingMascotProvider` between `SiteHeader`/`SiteFooter`. |
+| `layout.tsx` | Root layout. Loads Syne (display) + IBM Plex Sans (body) fonts, reads the `weft-locale` cookie for `<html lang>`, inlines a pre-hydration theme script (`localStorage["weft-theme"]` → `data-theme`/`color-scheme`, defaults to light), and wraps children in `LoadingMascotProvider` between `SiteHeader`/`SiteFooter`. |
 | `page.tsx` | Home route. Renders `CinematicHero`, a static category-link grid, an 8-product "new arrivals" `ProductGrid` (filtered to `availability !== "out_of_stock"`), and a trust-band CTA to `/data-sources`. No search/filter state — that lives in `search/`. |
 | `globals.css` | Semantic CSS custom properties with explicit light/dark token maps (see `DESIGN.md`), plus all component styling — there is no CSS-in-JS or CSS modules in this repo. |
 | `loading.tsx` | Route-level Suspense fallback; reads the locale cookie server-side and renders `RouteLoadingFallback` from `components/loading-mascot.tsx`. |

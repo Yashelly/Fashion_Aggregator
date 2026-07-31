@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-VIBEWEAR: a pre-affiliate Next.js (App Router) fashion discovery/search MVP for Lithuanian shoppers. It is a **synthetic demo product**, not a live shopping site — see "Demo-data boundary" below before touching product data, store names, or purchase flows.
+Weft: a pre-affiliate Next.js (App Router) fashion discovery/search MVP for Lithuanian shoppers. It is a **synthetic demo product**, not a live shopping site — see "Demo-data boundary" below before touching product data, store names, or purchase flows.
 
 ## Commands
 
@@ -40,7 +40,7 @@ When in doubt about whether something counts as "real retailer data," treat it a
 ## Architecture
 
 - **App Router pages** (`app/**/page.tsx`) are server components. Locale-aware pages take `searchParams` as a `Promise` (Next 16 convention) and pass it through `lib/i18n.ts` helpers.
-- **i18n**: two locales (`en` default, `lt`), selected via a `lang` query param and persisted through a `vibewear-locale` cookie (not shown in `lib/i18n.ts` itself — cookie handling lives in the layout/middleware). `lib/i18n.ts` centralizes all UI copy in one large `copy` object plus label formatters (`formatCategoryLabel`, `formatColorLabel`, etc.) and a `withLocale(href, locale)` helper for building locale-preserving links. Add new UI strings there under both `en` and `lt`, not inline in components.
+- **i18n**: two locales (`en` default, `lt`), selected via a `lang` query param and persisted through a `weft-locale` cookie (not shown in `lib/i18n.ts` itself — cookie handling lives in the layout/middleware). `lib/i18n.ts` centralizes all UI copy in one large `copy` object plus label formatters (`formatCategoryLabel`, `formatColorLabel`, etc.) and a `withLocale(href, locale)` helper for building locale-preserving links. Add new UI strings there under both `en` and `lt`, not inline in components.
 - **Product data** (`lib/mock-products.ts`): reads and hand-parses `data/mock_products.csv` at request time (no DB dependency for the base catalog), joins each product to a public demo store via `lib/demo-stores.ts`, and resolves local image paths under `public/demo-products/` (falling back gracefully — `image_available`/`detail_image_available` flags — when a demo image file is missing). `filterProducts`/`sortProducts` implement search (including an EN/LT synonym table and `under N` / `iki N` price parsing) and sorting; these are pure functions over the in-memory product array, called from `app/search/page.tsx`.
 - **Supabase** (`lib/supabase.ts` browser client, `lib/supabase-server.ts` admin client): both are optional — analytics/persistence degrade gracefully when env vars are absent. `lib/supabase-server.ts` uses the service-role key and is guarded by `import "server-only"`; never import it from client components, and never give the service-role key a `NEXT_PUBLIC_` prefix.
 - **Analytics** (`lib/analytics.ts`, `lib/analytics-storage.ts`, `app/api/analytics/{search,click}/route.ts`): server-side HTTPS capture to PostHog via `captureAnalyticsEvent`, keyed by an anonymous ID (`createAnonymousId`/`normalizeAnonymousId`). `POST /api/analytics/search` records search events; `POST /api/analytics/click` is called by the `/out/:productId` guard after render, validates same-origin (`lib/request-security.ts`) and the product ID, reads correlation only from HttpOnly cookies, and returns `202` without blocking navigation. Both endpoints are no-ops (return a "disabled" status) when `POSTHOG_PROJECT_API_KEY` is unset.

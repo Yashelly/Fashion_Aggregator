@@ -29,7 +29,7 @@ type Profile = {
   priceAlerts: boolean;
 };
 
-const storageKey = "vibewear-account-preferences";
+const storageKey = "weft-account-preferences";
 const defaults: Profile = {
   name: "",
   email: "",

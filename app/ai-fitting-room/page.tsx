@@ -8,8 +8,8 @@ type AiFittingRoomPageProps = {
 };
 
 export const metadata: Metadata = {
-  title: "AI fitting room — VIBEWEAR",
-  description: "Preview the private photo and product selection flow for VIBEWEAR's AI fitting room.",
+  title: "AI fitting room — Weft",
+  description: "Preview the private photo and product selection flow for Weft's AI fitting room.",
 };
 
 export default async function AiFittingRoomPage({ searchParams }: AiFittingRoomPageProps) {
