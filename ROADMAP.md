@@ -22,8 +22,16 @@ overlooked.
       direction
 - [ ] Brand-name candidates researched and presented for a decision
 - [ ] Affiliate feed-format research → flexible DB schema proposal
-- [ ] Legal/GDPR baseline drafted (disclosure, cookie consent, privacy) —
-      staged behind a flag, ships before the first live affiliate link
+- [x] Legal/GDPR baseline (2026-07-31). Live privacy page now covers cookie
+      use and EU/EEA data rights in both languages. Cookie consent banner
+      built and exercised, rendered only when
+      `NEXT_PUBLIC_COOKIE_BANNER_ENABLED=true` — flip it on before the first
+      real affiliate link. Affiliate-tracking language stays out of the live
+      pages until there is an actual affiliate relationship to describe.
+      **Still open before going live:** wire the recorded consent into
+      `app/api/analytics/*` (they no-op today without a PostHog key, which is
+      the interim cover), and fill `[CONTACT_EMAIL]`, `[DOMAIN]`,
+      `[OWNER_NAME_OR_COMPANY]` in `docs/legal/`.
 
 ## Phase 1 — Name
 
