@@ -16,14 +16,10 @@ export const metadata: Metadata = {
 const themeScript = `
   (() => {
     let savedTheme = null;
-    let savedVariant = null;
     try { savedTheme = localStorage.getItem("vibewear-theme"); } catch {}
-    try { savedVariant = localStorage.getItem("vibewear-visual-variant"); } catch {}
     const theme = savedTheme === "dark" ? "dark" : "light";
-    const variant = savedVariant === "b" ? "b" : "a";
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
-    document.documentElement.dataset.visualVariant = variant;
     const cookieMatch = document.cookie.match(/(?:^|; )vibewear-locale=([^;]+)/);
     document.documentElement.lang = cookieMatch && decodeURIComponent(cookieMatch[1]) === "lt" ? "lt" : "en";
   })();

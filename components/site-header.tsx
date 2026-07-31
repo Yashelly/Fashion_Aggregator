@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Moon, Palette, Sun, UserRound } from "lucide-react";
+import { Menu, Moon, Sun, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -71,49 +71,6 @@ function ThemeToggle({ locale }: { locale: Locale }) {
   );
 }
 
-function VariantToggle({ locale }: { locale: Locale }) {
-  const [variant, setVariant] = useState<"a" | "b">("a");
-
-  useEffect(() => {
-    const current =
-      document.documentElement.dataset.visualVariant === "b" ? "b" : "a";
-    setVariant(current);
-  }, []);
-
-  const toggleVariant = () => {
-    const nextVariant = variant === "b" ? "a" : "b";
-    document.documentElement.dataset.visualVariant = nextVariant;
-    setVariant(nextVariant);
-    try {
-      localStorage.setItem("vibewear-visual-variant", nextVariant);
-    } catch {
-      // The visible toggle still works for the current page session.
-    }
-  };
-
-  const label =
-    locale === "lt"
-      ? variant === "b"
-        ? "Grįžti prie A varianto"
-        : "Peržiūrėti B variantą"
-      : variant === "b"
-        ? "Switch to variant A"
-        : "Preview variant B";
-
-  return (
-    <button
-      aria-label={label}
-      aria-pressed={variant === "b"}
-      className="theme-toggle variant-toggle"
-      onClick={toggleVariant}
-      title={label}
-      type="button"
-    >
-      <Palette aria-hidden="true" size={18} />
-    </button>
-  );
-}
-
 export function SiteHeader() {
   const pathname = usePathname();
   const visiblePathname = publicPathname(pathname);
@@ -172,7 +129,6 @@ export function SiteHeader() {
             <UserRound aria-hidden="true" size={19} />
           </Link>
           <ThemeToggle locale={locale} />
-          <VariantToggle locale={locale} />
           <nav className="language-switcher" aria-label={t.languageAria}>
             <a
               aria-current={locale === "en" ? "true" : undefined}

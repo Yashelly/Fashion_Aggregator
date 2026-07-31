@@ -1,5 +1,26 @@
 # VIBEWEAR Design Contract
 
+> **Partially superseded — read this first.**
+>
+> Sequencing and status for all project work now live in
+> [`ROADMAP.md`](./ROADMAP.md); this document defers to it and no longer
+> describes what happens next. The direction below was revisited in
+> [`.omc/specs/deep-interview-vibewear-strategic-vision.md`](.omc/specs/deep-interview-vibewear-strategic-vision.md)
+> §5, which changes three things:
+>
+> - **The name "VIBEWEAR" is temporary** and will be replaced. Treat every
+>   occurrence in this document as a placeholder.
+> - **Light mode is superseded.** The warm-paper canvas is being replaced by a
+>   crisp white/near-black base. The **acid-lime accent is rejected outright**
+>   and its replacement has not been chosen yet — ignore the acid-lime
+>   guidance in "Visual language" below.
+> - **Dark mode is confirmed, not superseded.** The espresso-charcoal
+>   direction described below is the one that stays; a cooler blue-tinted
+>   alternative was evaluated and rejected.
+>
+> Everything else here — typography, spacing, accessibility, motion,
+> responsive behavior, and the demo-data boundary — remains in force.
+
 ## Source of truth
 
 - **Status:** Active
