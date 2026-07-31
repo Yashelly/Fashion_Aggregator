@@ -27,9 +27,25 @@ overlooked.
 
 ## Phase 1 — Name
 
-- [ ] **New brand name chosen** (VIBEWEAR is confirmed temporary)
+- [x] **New brand name chosen: WEFT** (2026-07-31) — the crosswise thread in
+      weaving. Chosen over Scour, Trawl and Prowl for being a real textile
+      term that is short, unclaimed, and promises nothing it can't deliver.
+      Evidence and the rejected candidates are in
+      [`docs/naming-candidates-en-2026-07-31.md`](docs/naming-candidates-en-2026-07-31.md).
 - [ ] Rename applied across the app, docs, and legal placeholders
-- [ ] Domain and social handles secured
+- [ ] Domain secured: **weft.lt** (verified available). `weft.eu`, `weft.io`,
+      `weft.co`, `weft.shop` also free; `weft.com` is registered since 1999,
+      dormant, and would need an approach to its owner — deliberately deferred.
+- [ ] Social handles secured
+- [ ] **Trademark clearance** — two existing companies use the name:
+      [Weft Apparel](https://weftapparel.com/) (US, made-to-order clothing
+      manufacturer, Nice class 25) and
+      [Weft Technologies](https://wefttechnologies.com/) (digital product
+      consultancy, different sector). This product is retail search/comparison
+      (class 35), and both use compound domains rather than bare "weft", so
+      the classes differ — but this has NOT been legally cleared. Run it
+      through [EUIPO TMview](https://www.tmdn.org/tmview/) before spending on
+      logo or print.
 
 ## Phase 2 — Core differentiators
 
