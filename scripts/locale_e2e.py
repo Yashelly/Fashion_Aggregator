@@ -75,7 +75,16 @@ def cookie_value(context: BrowserContext) -> str | None:
     return values[0] if values else None
 
 
-def seed_locale(context: BrowserContext, locale: str) -> None:
+def seed_locale(context: BrowserContext, locale: str, page: Page | None = None) -> None:
+    """Force the locale cookie to `locale`, as if the visitor already had it.
+
+    The currently-open page must be torn down first. Every rendered page keeps
+    a live effect that writes this same cookie from its own locale, so seeding
+    underneath one is a race: the page can rewrite the cookie between the seed
+    and the next request, and the seeded value is silently lost.
+    """
+    if page is not None:
+        page.goto("about:blank", wait_until="domcontentloaded")
     context.add_cookies(
         [{"name": LOCALE_COOKIE, "value": locale, "url": BASE_URL}]
     )
@@ -87,21 +96,37 @@ def seed_locale(context: BrowserContext, locale: str) -> None:
 SEARCH_LINK = '.desktop-nav a[href^="/search"]'
 MOBILE_SEARCH_LINK = '.mobile-menu nav a[href^="/search"]'
 
+# Breakpoints from app/globals.css. The header serves the same links from two
+# different places depending on width, so which one is clickable is decided by
+# the viewport, not by probing — `is_visible()` is an instantaneous check and
+# returns False while the header is still painting, which would send a desktop
+# run down the mobile path.
+DESKTOP_NAV_MIN_WIDTH = 1181  # .desktop-nav is display:none at <= 1180px
+LANGUAGE_SWITCHER_MIN_WIDTH = 641  # .language-switcher is display:none at <= 640px
+
+
+def open_mobile_menu(page: Page) -> None:
+    summary = page.locator(".mobile-menu > summary")
+    summary.wait_for(state="visible")
+    summary.click()
+
 
 def click_search(page: Page) -> None:
-    """Reach /search through the header at any viewport.
+    """Reach /search through the header, at any viewport.
 
-    `.desktop-nav` is `display: none` below 1180px, so on narrow viewports the
-    same link has to be opened through the collapsed `<details>` menu. Both
-    paths render the same `nav.search` label, so either satisfies the locale
-    assertions.
+    Below the desktop-nav breakpoint the same link is only reachable through
+    the collapsed `<details>` menu. Both render the same `nav.search` label, so
+    either satisfies the locale assertions.
     """
-    desktop_link = page.locator(SEARCH_LINK)
-    if desktop_link.is_visible():
-        desktop_link.click()
+    if page.viewport_size["width"] >= DESKTOP_NAV_MIN_WIDTH:
+        link = page.locator(SEARCH_LINK)
+        link.wait_for(state="visible")
+        link.click()
         return
-    page.locator(".mobile-menu > summary").click()
-    page.locator(MOBILE_SEARCH_LINK).click()
+    open_mobile_menu(page)
+    link = page.locator(MOBILE_SEARCH_LINK)
+    link.wait_for(state="visible")
+    link.click()
 
 
 def wait_for_locale(page: Page, locale: str) -> None:
@@ -152,8 +177,19 @@ def assert_public_out_path(page: Page, product_id: str) -> None:
 
 
 def click_language(page: Page, locale: str) -> None:
+    """Switch locale through the header, at any viewport.
+
+    `.language-switcher` is `display: none` below 640px, where the same two
+    links are served from `.mobile-menu-locales` inside the collapsed menu.
+    """
     label = "LT" if locale == "lt" else "EN"
-    page.locator(".language-switcher a", has_text=label).click()
+    if page.viewport_size["width"] >= LANGUAGE_SWITCHER_MIN_WIDTH:
+        link = page.locator(".language-switcher a", has_text=label)
+    else:
+        open_mobile_menu(page)
+        link = page.locator(".mobile-menu-locales a", has_text=label)
+    link.wait_for(state="visible")
+    link.click()
     page.wait_for_function(
         "expected => new URL(location.href).searchParams.get('lang') === expected",
         arg=locale,
@@ -189,7 +225,7 @@ def run_direct_matrix(browser) -> int:
             assert_locale(page, context, "en")
             assertions += 4
 
-            seed_locale(context, "lt")
+            seed_locale(context, "lt", page)
             response = page.goto(BASE_URL + route, wait_until="domcontentloaded")
             assert response and response.status == expected_status(route)
             assert parse_qs(urlparse(page.url).query).get("lang") == ["lt"]
