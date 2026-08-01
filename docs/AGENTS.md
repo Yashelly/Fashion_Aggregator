@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Planning, strategy, and pre-affiliate-application reference material for VIBEWEAR — business/legal/data-workflow documents written to prepare the project for affiliate network review and eventual live-feed integration. **These are non-normative planning docs, not source-of-truth for current app behavior.** The authoritative, current-state documentation lives at the repo root: `DESIGN.md`, `README.md`, and `CLAUDE.md`. When a doc here conflicts with the root docs or with actual code, the root docs and code win. A `legal/` subdirectory holds draft legal-page copy and has its own `docs/legal/AGENTS.md`.
+Planning, strategy, and pre-affiliate-application reference material for Weft — business/legal/data-workflow documents written to prepare the project for affiliate network review and eventual live-feed integration. **These are non-normative planning docs, not source-of-truth for current app behavior.** The authoritative, current-state documentation lives at the repo root: `DESIGN.md`, `README.md`, and `CLAUDE.md`. When a doc here conflicts with the root docs or with actual code, the root docs and code win. A `legal/` subdirectory holds draft legal-page copy and has its own `docs/legal/AGENTS.md`.
 
 ## Key Files
 
@@ -17,7 +17,7 @@ Planning, strategy, and pre-affiliate-application reference material for VIBEWEA
 | `feed_import_spec.md` | Spec for importing only approved affiliate/partner feeds (never scraping); first-wave feed targets table; idempotent-import and audit-trail principles. |
 | `data_workflow.md` | End-to-end data workflow: affiliate approval → feed import → search/product cards → outbound clicks → analytics → scaling. Cross-references `sql/001_pre_affiliate_schema.sql` and both `data/*.csv` files. |
 | `data_workflow_ru.md` | Russian-language version of `data_workflow.md` (same scope, includes reconciliation/scaling-to-100k-users/day notes). |
-| `pre_affiliate_application_pack.md` | Copy-ready positioning statements and reviewer-facing application answers for affiliate network applications, with `[PROJECT_NAME]`/`[DOMAIN]`/`[CONTACT_EMAIL]`/`[OWNER_NAME_OR_COMPANY]` placeholders (current working value: `VIBEWEAR`). |
+| `pre_affiliate_application_pack.md` | Copy-ready positioning statements and reviewer-facing application answers for affiliate network applications, with `[PROJECT_NAME]`/`[DOMAIN]`/`[CONTACT_EMAIL]`/`[OWNER_NAME_OR_COMPANY]` placeholders (current working value: `Weft`). |
 | `affiliate_application_readiness_ru.md` | Russian. Phase-1B checklist of what an affiliate-network reviewer needs to see (review-mode labeling, synthetic-catalog disclosure, Factcool LT blocked status, etc). |
 | `lyst_reference_strategy_ru.md` | Russian. Positions Lyst as a product/business-model reference ("under the hood: Lyst; in feel: Zara + Pinterest + SSENSE/Farfetch") without being the visual reference. |
 | `glami_affiliate_provider_discovery_ru.md` | Russian. Notes on using GLAMI LT as a store-discovery source (not a direct affiliate-network source), with a discovery pipeline: GLAMI → Awin/VIVnetworks/FlexOffers → apply → feed → import. |

@@ -48,7 +48,7 @@ export default async function StoresPage({ searchParams }: StoresPageProps) {
                 <ShoppingBag aria-hidden="true" size={24} />
               </div>
               <div className="demo-store-copy">
-                <p className="store-eyebrow">{locale === "lt" ? "VIBEWEAR ATRANKA" : "VIBEWEAR EDIT"}</p>
+                <p className="store-eyebrow">{locale === "lt" ? "WEFT ATRANKA" : "WEFT EDIT"}</p>
                 <h2>{storeLabel}</h2>
                 <p>{copy.fallbackDescription}</p>
                 <span>

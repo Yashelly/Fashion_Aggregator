@@ -2,7 +2,7 @@
 
 Last updated: 2026-05-25
 
-`[PROJECT_NAME]` is designed as an approved-feed fashion discovery site.
+`Weft` is designed as an approved-feed fashion discovery site.
 
 ---
 
@@ -19,7 +19,7 @@ Products may be added from:
 
 Products should not be added as active live catalog items without an approved source.
 
-`[PROJECT_NAME]` is not intended to be a scraping-first catalog. We do not add live retailer catalog data by copying product pages without feed approval or direct permission.
+`Weft` is not intended to be a scraping-first catalog. We do not add live retailer catalog data by copying product pages without feed approval or direct permission.
 
 ---
 
@@ -79,7 +79,7 @@ When a retailer requests removal or correction, the relevant store or product re
 
 ## 6. No Checkout
 
-`[PROJECT_NAME]` does not operate checkout. Users click through to official retailer websites to purchase.
+`Weft` does not operate checkout. Users click through to official retailer websites to purchase.
 
 ---
 

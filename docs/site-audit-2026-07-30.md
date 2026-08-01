@@ -1,5 +1,21 @@
 # VIBEWEAR Site Audit and Recommendations — 2026-07-30
 
+> **Addendum (2026-07-31) — priority reorder and one removed feature.**
+>
+> A later strategic interview
+> ([`.omc/specs/deep-interview-vibewear-strategic-vision.md`](../.omc/specs/deep-interview-vibewear-strategic-vision.md))
+> reordered the project's priorities. Visual work is no longer the immediate
+> next step: the order is now **name/rebrand → semantic search and
+> cross-store comparison → visual → real AI fitting room → everything else**.
+> See [`ROADMAP.md`](../ROADMAP.md) for current status. The findings below
+> remain valid; only their *timing* changed.
+>
+> The **variant toggle described throughout this document was removed from
+> production** in Phase 1, as §1 of this document itself recommended. Every
+> reference to it below is historical. The comparison it existed for is
+> settled: light mode takes Variant B's canvas, dark mode stays on Variant A,
+> and the acid-lime accent is rejected in both.
+
 This is the unified deliverable for the deep-interview spec at
 `.omc/specs/deep-interview-vibewear-site-audit.md` (interview: "make the
 interface as beautiful and clear as possible, and discuss its functions").

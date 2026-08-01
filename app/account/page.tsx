@@ -7,8 +7,8 @@ type AccountPageProps = {
 };
 
 export const metadata: Metadata = {
-  title: "Account — VIBEWEAR",
-  description: "Your VIBEWEAR preferences, sizes, saved items, and settings.",
+  title: "Account — Weft",
+  description: "Your Weft preferences, sizes, saved items, and settings.",
 };
 
 export default async function AccountPage({ searchParams }: AccountPageProps) {

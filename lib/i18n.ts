@@ -174,6 +174,14 @@ export const copy = {
     common: {
       skipToContent: "Skip to content",
     },
+    cookieBanner: {
+      title: "Cookies on this site",
+      body: "Essential cookies keep the site working and remember your language. Anonymous analytics help us see which searches lead nowhere, so we can fix them. Nothing here identifies you personally.",
+      accept: "Accept analytics",
+      reject: "Essential only",
+      privacyLink: "Read the privacy policy",
+      ariaLabel: "Cookie consent",
+    },
     header: {
       browse: "Browse",
       departmentsAria: "Departments",
@@ -287,7 +295,7 @@ export const copy = {
       },
     },
     search: {
-      title: "Search VIBEWEAR",
+      title: "Search Weft",
       lead:
         "Search by item, mood, color, store, or occasion.",
       labels: {
@@ -327,12 +335,36 @@ export const copy = {
         search: "Search",
         store: "Store",
       },
+      interpretation: {
+        aria: "How your search was read",
+        ranked: "Ranked by how closely each piece matches your description.",
+        priceCeiling: (limit: number) => `Price limit read from your search: up to €${limit}`,
+        unknown: (words: string) => `Not recognised: ${words}`,
+      },
       resultsFound: (count: number) => `${count} ${count === 1 ? "piece" : "pieces"} found`,
       sourceNoteAria: "Product source note",
       sourceNoteTitle: "Purchase status",
       sourceNote:
         "Purchase links are not enabled yet.",
       sourceNoteCta: "How product data works",
+    },
+    comparison: {
+      title: "Compare across stores",
+      aria: "This item across demo stores",
+      storeCount: (count: number) => `Stocked by ${count} demo stores`,
+      inStores: (count: number) => `${count} stores`,
+      from: "from",
+      saving: (amount: string) => `Save up to ${amount} by choosing the cheapest store`,
+      samePrice: "Every store lists the same price.",
+      columnStore: "Store",
+      columnPrice: "Price",
+      columnSizes: "Sizes",
+      columnAvailability: "Availability",
+      best: "Lowest price",
+      thisStore: "Viewing",
+      partialSizes: (sizes: string) => `Not carried everywhere: ${sizes}`,
+      syntheticNote:
+        "These listings are synthetic. Prices and stock are generated for the demo — they are not quotes from real shops.",
     },
     productGrid: {
       aria: "Product results",
@@ -349,11 +381,11 @@ export const copy = {
     },
     pages: {
       about: {
-        title: "About VIBEWEAR",
+        title: "About Weft",
         paragraphs: [
-          "VIBEWEAR is a visual fashion search and discovery site for Lithuanian shoppers. The service helps users browse styles, stores, colors, prices, and categories before clicking through to official retailer websites.",
-          "VIBEWEAR does not operate checkout or resell products. It focuses on helping shoppers search, filter, and compare styles.",
-          "Live retailer catalogs are not enabled yet. Real products and links will appear only when VIBEWEAR has permission to use them.",
+          "Weft is a visual fashion search and discovery site for Lithuanian shoppers. The service helps users browse styles, stores, colors, prices, and categories before clicking through to official retailer websites.",
+          "Weft does not operate checkout or resell products. It focuses on helping shoppers search, filter, and compare styles.",
+          "Live retailer catalogs are not enabled yet. Real products and links will appear only when Weft has permission to use them.",
         ],
       },
       affiliate: {
@@ -371,7 +403,7 @@ export const copy = {
       dataSources: {
         title: "Product Sources",
         paragraphs: [
-          "VIBEWEAR will show real retailer product data only when it has permission to use that information.",
+          "Weft will show real retailer product data only when it has permission to use that information.",
           "The current catalog supports browsing, search, filters, and store-based discovery.",
           "We do not use scraped retailer photos, logos, product pages, or trademarks.",
           "Retailers can request a correction, removal, or conversation through the contact page.",
@@ -380,7 +412,7 @@ export const copy = {
         reviewItems: [
           "Purchase links remain disabled until they are ready to be introduced.",
           "No live retailer product, photo, logo, or purchase link is shown.",
-          "Product links stay on VIBEWEAR and cannot complete a purchase.",
+          "Product links stay on Weft and cannot complete a purchase.",
           "Future product details will be confirmed on the retailer website.",
         ],
       },
@@ -408,8 +440,10 @@ export const copy = {
       privacy: {
         title: "Privacy Policy",
         paragraphs: [
-          "VIBEWEAR processes only the information needed to operate fashion discovery, improve product search, answer contact messages, and measure outbound retailer clicks.",
+          "Weft processes only the information needed to operate fashion discovery, improve product search, answer contact messages, and measure outbound retailer clicks.",
           "This may include technical browser data, search events, saved preferences if enabled, outbound click events, UTM parameters, and messages sent through contact channels. Purchases happen on retailer websites, and retailer privacy policies apply to checkout, delivery, returns, and account activity on those sites.",
+          "Cookies and similar technologies are used for essential site functionality and for anonymous analytics. Your language choice is remembered in a cookie so the site opens in the language you picked. If non-essential cookies are introduced later, you will be asked to consent first.",
+          "You can ask to see, correct, delete, or restrict the processing of your personal data. If EU or EEA law applies to you, you can also object to processing, ask for your data in a portable form, withdraw consent where processing relies on it, and lodge a complaint with a data protection authority. Use the contact page to make any of these requests.",
         ],
       },
       stores: {
@@ -420,13 +454,13 @@ export const copy = {
           "Choose a store to see its current selection.",
         browseCta: "Browse products",
         demoNotice: "Purchase links are not enabled yet.",
-        fallbackDescription: "A curated VIBEWEAR selection.",
+        fallbackDescription: "A curated Weft selection.",
       },
       terms: {
         title: "Terms of Use",
         paragraphs: [
-          "VIBEWEAR is a fashion discovery service. A future version may direct users to retailer websites to complete purchases.",
-          "VIBEWEAR does not operate retailer checkout, resell products, control final prices, guarantee availability, or handle delivery, returns, or customer service for retailer orders. Final product information is confirmed on the retailer website.",
+          "Weft is a fashion discovery service. A future version may direct users to retailer websites to complete purchases.",
+          "Weft does not operate retailer checkout, resell products, control final prices, guarantee availability, or handle delivery, returns, or customer service for retailer orders. Final product information is confirmed on the retailer website.",
           "The current version does not contain live purchase links. Future commercial links will be labelled clearly.",
         ],
       },
@@ -435,6 +469,14 @@ export const copy = {
   lt: {
     common: {
       skipToContent: "Pereiti prie pagrindinio turinio",
+    },
+    cookieBanner: {
+      title: "Slapukai šioje svetainėje",
+      body: "Būtini slapukai užtikrina svetainės veikimą ir įsimena jūsų kalbą. Anoniminė analitika padeda pamatyti, kurios paieškos nieko neranda, kad galėtume tai pataisyti. Niekas čia jūsų asmeniškai neidentifikuoja.",
+      accept: "Sutikti su analitika",
+      reject: "Tik būtinieji",
+      privacyLink: "Skaityti privatumo politiką",
+      ariaLabel: "Sutikimas dėl slapukų",
     },
     header: {
       browse: "Naršyti",
@@ -549,7 +591,7 @@ export const copy = {
       },
     },
     search: {
-      title: "VIBEWEAR paieška",
+      title: "Weft paieška",
       lead:
         "Ieškok pagal prekę, nuotaiką, spalvą, parduotuvę ar progą.",
       labels: {
@@ -589,12 +631,36 @@ export const copy = {
         search: "Paieška",
         store: "Parduotuvė",
       },
+      interpretation: {
+        aria: "Kaip suprasta jūsų paieška",
+        ranked: "Rikiuota pagal tai, kiek prekė atitinka jūsų aprašymą.",
+        priceCeiling: (limit: number) => `Kainos riba iš jūsų paieškos: iki ${limit} €`,
+        unknown: (words: string) => `Neatpažinta: ${words}`,
+      },
       resultsFound: (count: number) => `Rasta prekių: ${count}`,
       sourceNoteAria: "Prekių šaltinių pastaba",
       sourceNoteTitle: "Pirkimo būsena",
       sourceNote:
         "Pirkimo nuorodos dar neįjungtos.",
       sourceNoteCta: "Kaip naudojami duomenys",
+    },
+    comparison: {
+      title: "Palyginkite parduotuves",
+      aria: "Ši prekė demo parduotuvėse",
+      storeCount: (count: number) => `Turi ${count} demo parduotuvės`,
+      inStores: (count: number) => `${count} parduotuvės`,
+      from: "nuo",
+      saving: (amount: string) => `Pigiausioje parduotuvėje sutaupysite iki ${amount}`,
+      samePrice: "Visose parduotuvėse kaina vienoda.",
+      columnStore: "Parduotuvė",
+      columnPrice: "Kaina",
+      columnSizes: "Dydžiai",
+      columnAvailability: "Prieinamumas",
+      best: "Mažiausia kaina",
+      thisStore: "Peržiūrima",
+      partialSizes: (sizes: string) => `Yra ne visose parduotuvėse: ${sizes}`,
+      syntheticNote:
+        "Šie pasiūlymai yra sintetiniai. Kainos ir likučiai sugeneruoti demonstracijai — tai nėra tikrų parduotuvių pasiūlymai.",
     },
     productGrid: {
       aria: "Prekių rezultatai",
@@ -611,10 +677,10 @@ export const copy = {
     },
     pages: {
       about: {
-        title: "Apie VIBEWEAR",
+        title: "Apie Weft",
         paragraphs: [
-          "VIBEWEAR yra vizuali mados paieškos ir atradimo svetainė Lietuvos pirkėjams. Ji padeda naršyti stilius, parduotuves, spalvas, kainas ir kategorijas prieš pereinant į oficialias parduotuvių svetaines.",
-          "VIBEWEAR nevaldo atsiskaitymo ir neperparduoda prekių. Svetainė skirta stilių paieškai, filtravimui ir palyginimui.",
+          "Weft yra vizuali mados paieškos ir atradimo svetainė Lietuvos pirkėjams. Ji padeda naršyti stilius, parduotuves, spalvas, kainas ir kategorijas prieš pereinant į oficialias parduotuvių svetaines.",
+          "Weft nevaldo atsiskaitymo ir neperparduoda prekių. Svetainė skirta stilių paieškai, filtravimui ir palyginimui.",
           "Tikri parduotuvių katalogai dar neįjungti. Realios prekės ir nuorodos atsiras tik turint leidimą jas naudoti.",
         ],
       },
@@ -633,7 +699,7 @@ export const copy = {
       dataSources: {
         title: "Prekių šaltiniai",
         paragraphs: [
-          "VIBEWEAR rodys tik tuos realių parduotuvių prekių duomenis, kuriuos turi teisę naudoti.",
+          "Weft rodys tik tuos realių parduotuvių prekių duomenis, kuriuos turi teisę naudoti.",
           "Dabartinis katalogas leidžia naršyti, ieškoti, filtruoti ir atrasti prekes pagal parduotuvę.",
           "Nenaudojame nukopijuotų parduotuvių nuotraukų, logotipų, prekių puslapių ar prekių ženklų.",
           "Dėl pataisymo, pašalinimo ar bendradarbiavimo galima kreiptis kontaktų puslapyje.",
@@ -642,7 +708,7 @@ export const copy = {
         reviewItems: [
           "Pirkimo nuorodos lieka išjungtos, kol bus paruoštos naudojimui.",
           "Nerodomos tikros parduotuvių prekės, nuotraukos, logotipai ar pirkimo nuorodos.",
-          "Prekių nuorodos lieka VIBEWEAR svetainėje ir neleidžia pirkti.",
+          "Prekių nuorodos lieka Weft svetainėje ir neleidžia pirkti.",
           "Ateityje galutinė prekės informacija bus tikrinama parduotuvės svetainėje.",
         ],
       },
@@ -670,8 +736,10 @@ export const copy = {
       privacy: {
         title: "Privatumo politika",
         paragraphs: [
-          "VIBEWEAR tvarko tik informaciją, kurios reikia mados paieškai veikti, prekių paieškai gerinti, atsakyti į kontaktines žinutes ir matuoti išeinančius paspaudimus į parduotuves.",
+          "Weft tvarko tik informaciją, kurios reikia mados paieškai veikti, prekių paieškai gerinti, atsakyti į kontaktines žinutes ir matuoti išeinančius paspaudimus į parduotuves.",
           "Tai gali apimti techninius naršyklės duomenis, paieškos įvykius, išsaugotas nuostatas, jei jos įjungtos, išeinančių paspaudimų įvykius, UTM parametrus ir per kontaktinius kanalus atsiųstas žinutes. Pirkimai vyksta parduotuvių svetainėse, o jų privatumo politikos taikomos atsiskaitymui, pristatymui, grąžinimui ir paskyros veiklai tose svetainėse.",
+          "Slapukai ir panašios technologijos naudojami būtinam svetainės veikimui ir anoniminei analitikai. Jūsų pasirinkta kalba įsimenama slapuke, kad svetainė atsidarytų ta kalba, kurią pasirinkote. Jei vėliau bus įdiegti nebūtini slapukai, pirmiausia bus paprašyta jūsų sutikimo.",
+          "Galite prašyti susipažinti su savo asmens duomenimis, juos ištaisyti, ištrinti arba apriboti jų tvarkymą. Jei jums taikoma ES arba EEE teisė, taip pat galite nesutikti su duomenų tvarkymu, prašyti perkelti duomenis, atšaukti sutikimą, kai tvarkymas juo grindžiamas, ir pateikti skundą duomenų apsaugos priežiūros institucijai. Dėl bet kurio iš šių prašymų kreipkitės per kontaktų puslapį.",
         ],
       },
       stores: {
@@ -682,13 +750,13 @@ export const copy = {
           "Pasirinkite parduotuvę ir peržiūrėkite jos atranką.",
         browseCta: "Naršyti prekes",
         demoNotice: "Pirkimo nuorodos dar neįjungtos.",
-        fallbackDescription: "VIBEWEAR mados atranka.",
+        fallbackDescription: "Weft mados atranka.",
       },
       terms: {
         title: "Naudojimo sąlygos",
         paragraphs: [
-          "VIBEWEAR yra mados atradimų paslauga. Ateityje svetainė gali nukreipti į parduotuves pirkimui užbaigti.",
-          "VIBEWEAR nevaldo parduotuvių atsiskaitymo, neperparduoda prekių, nekontroliuoja galutinių kainų, negarantuoja prieinamumo ir netvarko parduotuvių užsakymų pristatymo, grąžinimo ar klientų aptarnavimo. Galutinė prekės informacija patvirtinama parduotuvės svetainėje.",
+          "Weft yra mados atradimų paslauga. Ateityje svetainė gali nukreipti į parduotuves pirkimui užbaigti.",
+          "Weft nevaldo parduotuvių atsiskaitymo, neperparduoda prekių, nekontroliuoja galutinių kainų, negarantuoja prieinamumo ir netvarko parduotuvių užsakymų pristatymo, grąžinimo ar klientų aptarnavimo. Galutinė prekės informacija patvirtinama parduotuvės svetainėje.",
           "Dabartinėje versijoje nėra aktyvių pirkimo nuorodų. Būsimos komercinės nuorodos bus aiškiai pažymėtos.",
         ],
       },
