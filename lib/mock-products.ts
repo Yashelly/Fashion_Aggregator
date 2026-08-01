@@ -6,6 +6,7 @@ import {
   getPublicDemoStores,
   type DemoStoreLocale,
 } from "@/lib/demo-stores";
+import { interpretQuery, semanticSearch, type QueryInterpretation } from "@/lib/semantic-search";
 
 type CsvMockProduct = {
   mock_product_id: string;
@@ -121,29 +122,29 @@ export function hasDemoProductImage(imagePath: string): boolean {
   return fs.existsSync(path.join(demoProductDirectory, path.basename(imagePath)));
 }
 
-function normalizeSearchText(value: string) {
-  return value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "");
-}
+export type SearchFilterParams = {
+  query?: string;
+  store?: string;
+  category?: string;
+  color?: string;
+  gender?: string;
+  sale?: string;
+  availability?: string;
+  status?: string;
+};
 
+/**
+ * Structural filters only — the facets the shopper picked explicitly.
+ *
+ * Free-text relevance is handled separately by `searchProducts` so that a query
+ * ranks results instead of narrowing them; see `lib/semantic-search.ts` for why
+ * the old token-AND matcher was replaced.
+ */
 export function filterProducts(
   products: MockProduct[],
-  params: {
-    query?: string;
-    store?: string;
-    category?: string;
-    color?: string;
-    gender?: string;
-    sale?: string;
-    availability?: string;
-    status?: string;
-  },
+  params: SearchFilterParams & { maxPrice?: number },
 ) {
-  const query = params.query?.trim() ? normalizeSearchText(params.query.trim()) : undefined;
-  const priceUnder = query?.match(/\b(?:under|iki)\s+(\d+)\b/);
-  const maxPrice = priceUnder ? Number(priceUnder[1]) : undefined;
+  const maxPrice = params.maxPrice;
   const status = params.status ?? "";
   const availability = params.availability || (status !== "sale" ? status : "");
   const saleOnly = params.sale === "on" || status === "sale";
@@ -158,90 +159,55 @@ export function filterProducts(
     }
     if (maxPrice && Number(product.price_eur) > maxPrice) return false;
 
-    if (!query) return true;
-
-    const synonymTerms: Record<string, string[]> = {
-      aksesuarai: ["accessories"],
-      avalyne: ["shoes"],
-      balta: ["white"],
-      baltas: ["white"],
-      balti: ["white"],
-      batai: ["shoes"],
-      dzemperiai: ["hoodie", "hoodies", "sweats"],
-      dzemperis: ["hoodie", "sweats"],
-      ispardavimas: ["sale", "discount", "old_price"],
-      juoda: ["black"],
-      juodas: ["black"],
-      juodi: ["black"],
-      kelnes: ["trousers", "pants", "bottoms"],
-      kojines: ["socks"],
-      marskineliai: ["tshirt", "t-shirt", "tee", "top"],
-      melyna: ["blue"],
-      melynas: ["blue"],
-      melyni: ["blue"],
-      moterims: ["women"],
-      moteriska: ["women"],
-      moteriski: ["women"],
-      nuolaida: ["sale", "discount", "old_price"],
-      papuosalai: ["jewelry", "accessories"],
-      rankine: ["bag", "bags", "shoulder_bag"],
-      rankines: ["bag", "bags", "shoulder_bag"],
-      raudona: ["red"],
-      ruda: ["brown"],
-      sportbaciai: ["sneakers", "trainers", "shoes"],
-      sportbatis: ["sneakers", "trainers", "shoes"],
-      striuke: ["jacket", "outerwear"],
-      striukes: ["jacket", "outerwear"],
-      suknele: ["dress", "dresses"],
-      sukneles: ["dress", "dresses"],
-      vasaros: ["summer"],
-      minimalizmas: ["minimal"],
-      trainers: ["sneakers", "shoes"],
-      sneaker: ["sneakers", "trainers"],
-      sneakers: ["trainers", "shoes"],
-      tee: ["tshirt", "t-shirt", "top"],
-      "t-shirt": ["tshirt", "tee", "top"],
-      tshirt: ["t-shirt", "tee", "top"],
-      pants: ["trousers", "bottoms"],
-      trousers: ["pants", "bottoms"],
-      purse: ["bag", "shoulder_bag"],
-      tote: ["bag", "shoulder_bag"],
-      sale: ["discount", "old_price"],
-      vyrams: ["men"],
-      vyriska: ["men"],
-      vyriski: ["men"],
-      zalia: ["green"],
-    };
-
-    const queryTokens = query
-      .replace(/\b(?:under|iki)\s+\d+\b/g, "")
-      .split(/[\s,]+/)
-      .map((token) => token.trim())
-      .filter(Boolean);
-
-    const haystack = [
-      product.title,
-      product.brand,
-      product.category,
-      product.subcategory,
-      product.gender,
-      product.color,
-      product.style_tags,
-      product.old_price_eur ? "sale discount old_price" : "",
-    ]
-      .join(" ")
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/\p{Diacritic}/gu, "");
-
-    return queryTokens.every((token) => {
-      if (haystack.includes(token)) return true;
-      return synonymTerms[token]?.some((term) => haystack.includes(term)) ?? false;
-    });
+    return true;
   });
 }
 
-export function sortProducts(products: MockProduct[], sort?: string) {
+export type ProductSearchResult = {
+  results: MockProduct[];
+  /** Relevance by product id — empty when no free-text query was given. */
+  relevance: Map<string, number>;
+  interpretation: QueryInterpretation | null;
+};
+
+/**
+ * Apply the shopper's facets, then rank whatever survives against their query.
+ * The two stages stay separate on purpose: a facet is a promise ("only show me
+ * black"), a query is a description ("something warm"), and only the second one
+ * should be allowed to reorder rather than exclude.
+ */
+export function searchProducts(
+  products: MockProduct[],
+  params: SearchFilterParams,
+): ProductSearchResult {
+  const rawQuery = params.query?.trim();
+
+  if (!rawQuery) {
+    return { results: filterProducts(products, params), relevance: new Map(), interpretation: null };
+  }
+
+  const interpretation = interpretQuery(rawQuery);
+  const faceted = filterProducts(products, { ...params, maxPrice: interpretation.maxPrice });
+  const { matches } = semanticSearch(faceted, rawQuery);
+
+  return {
+    results: matches.map((match) => match.product),
+    relevance: new Map(matches.map((match) => [match.product.mock_product_id, match.score])),
+    interpretation,
+  };
+}
+
+
+/**
+ * `relevance` is supplied when the shopper typed a query. With no explicit sort
+ * chosen, relevance wins over the availability default — a shopper who
+ * described what they wanted has already told us how to order the page.
+ */
+export function sortProducts(
+  products: MockProduct[],
+  sort?: string,
+  relevance?: Map<string, number>,
+) {
   const sorted = [...products];
 
   if (sort === "price-low") {
@@ -263,6 +229,13 @@ export function sortProducts(products: MockProduct[], sort?: string) {
 
       return secondDiscount - firstDiscount;
     });
+  }
+
+  if (relevance && relevance.size > 0) {
+    return sorted.sort(
+      (first, second) =>
+        (relevance.get(second.mock_product_id) ?? 0) - (relevance.get(first.mock_product_id) ?? 0),
+    );
   }
 
   return sorted.sort((first, second) => {

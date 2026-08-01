@@ -65,17 +65,41 @@ overlooked.
 ## Phase 2 — Core differentiators
 
 The two things that make this different from Google or a brand's own site.
-Neither exists yet — today's search is keyword/token matching over a synthetic
-catalog.
 
-- [ ] **Semantic / visual search** — "hoodie with stars" matches by visual and
-      conceptual content, not literal keyword text
-  - [ ] Test query set + agreed pass threshold (proposed by assistant,
-        approved by owner) before this ships
-- [ ] **Cross-store comparison** — same physical item across stores, with
-      price and size availability side by side
-  - [ ] Product-identity matching strategy (how do we know two listings are
-        the same item?)
+- [x] **Semantic search** (2026-08-01) — `lib/semantic-search.ts` replaces the
+      old boolean token match with a weighted concept graph. "Something warm
+      for winter" now returns coats and knitwear; before, it returned nothing,
+      because no product row contains the word "warm". Results are *ranked* by
+      relevance rather than filtered by keyword presence, so a partial match
+      surfaces instead of collapsing to an empty page. EN and LT share one
+      lexicon; typos survive one edit including transpositions.
+  - [x] Test query set + pass threshold — **`npm run test:search`**, 25
+        labelled queries across season, weather, occasion, activity, material,
+        colour, price, department, exact recall, typos, and Lithuanian.
+        **Proposed threshold: 80% of queries passing, where a query passes if
+        precision@k ≥ 0.6 (k = min(5, relevant)) and every required item ranks.
+        Current: 25/25 (100%), mean precision 0.908, mean recall 0.990.**
+        *Owner sign-off on the threshold is still outstanding* — the number is
+        measured and reproducible, but it was set by the assistant.
+  - [ ] **Visual** search (match by image content) is NOT built. The catalog
+        has no motif/pattern attributes, so a query like "hoodie with stars"
+        can reach `graphic` but not `stars`. This needs either per-product
+        visual attributes or an image-embedding model, and belongs with the
+        real catalog in Phase 5.
+- [x] **Cross-store comparison** (2026-08-01) — the same item across every
+      store that carries it, price and sizes side by side, on the product page,
+      with a "N stores · from €X" signal on search cards.
+      **Read this before trusting the demo:** the base catalog could not
+      support this at all — all 64 rows sit in one store and no two rows are
+      the same item, so there was literally nothing to compare. The multi-store
+      listings in `data/mock_listings.csv` are therefore *generated*
+      (`npm run data:listings`), and the UI says so on the page. The mechanism
+      is real; the prices are not.
+  - [x] Product-identity matching strategy — trivial here (listings are keyed
+        to `mock_product_id` by construction). The real strategy for a real
+        feed is tiered GTIN → brand+MPN → embedding similarity → manual, spec'd
+        in [`docs/feed-format-research-2026-07-31.md`](docs/feed-format-research-2026-07-31.md).
+        `lib/product-listings.ts` is shaped so only its loader changes.
 
 ## Phase 3 — Visual
 

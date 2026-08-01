@@ -2035,3 +2035,168 @@ summary {
     flex: 1 1 auto;
   }
 }
+
+/* Search: how the free-text query was interpreted (lib/semantic-search.ts). */
+.search-interpretation {
+  color: var(--color-ink-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 6px 16px;
+  margin: 0 0 12px;
+}
+
+.search-interpretation span:not(:first-child)::before {
+  content: "·";
+  margin-right: 16px;
+}
+
+/* Product card: this item is carried by more than one demo store. */
+.product-multi-store {
+  align-items: baseline;
+  border-top: 1px solid var(--color-line);
+  color: var(--color-ink-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 11px;
+  gap: 2px;
+  margin: 0;
+  padding-top: 8px;
+}
+
+.product-multi-store data {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* Product detail: the same item across demo stores. */
+.store-comparison {
+  border-top: 1px solid var(--color-line);
+  display: grid;
+  gap: 10px;
+  padding-top: 18px;
+}
+
+.store-comparison-head {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  justify-content: space-between;
+}
+
+.store-comparison-head h2 {
+  margin: 0;
+}
+
+.store-comparison-head p {
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  margin: 0;
+}
+
+.store-comparison-saving {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Wide tables scroll inside their own box rather than pushing the page. */
+.store-comparison-scroll {
+  overflow-x: auto;
+}
+
+.store-comparison-table {
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 100%;
+  text-align: left;
+  width: 100%;
+}
+
+.store-comparison-table th,
+.store-comparison-table td {
+  border-bottom: 1px solid var(--color-line);
+  padding: 9px 12px 9px 0;
+  vertical-align: top;
+}
+
+.store-comparison-table tbody th {
+  display: grid;
+  gap: 2px;
+  justify-items: start;
+}
+
+.store-comparison-table tbody th .availability {
+  font-size: 11px;
+}
+
+/* The tags stack under the store name here, so the inline offset is wrong. */
+.store-comparison-table tbody th .store-comparison-tag {
+  margin-left: 0;
+}
+
+.store-comparison-table td strong {
+  white-space: nowrap;
+}
+
+.store-comparison-sizes-cell {
+  overflow-wrap: anywhere;
+}
+
+.store-comparison-table thead th {
+  color: var(--color-ink-muted);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.store-comparison-table tbody th a {
+  font-weight: 500;
+}
+
+.store-comparison-table tbody th a {
+  color: inherit;
+}
+
+.store-comparison-table td del {
+  color: var(--color-ink-muted);
+  margin-left: 6px;
+}
+
+.store-comparison-table tr.is-lowest td strong {
+  color: var(--color-success);
+}
+
+.store-comparison-best,
+.store-comparison-tag {
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  margin-left: 8px;
+  padding: 1px 6px;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.store-comparison-best {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.store-comparison-sizes,
+.store-comparison-note {
+  color: var(--color-ink-muted);
+  font-size: 11px;
+  margin: 0;
+}
+
+@media (max-width: 520px) {
+  .store-comparison-table th,
+  .store-comparison-table td {
+    padding-right: 10px;
+  }
+}
