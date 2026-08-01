@@ -11,10 +11,13 @@
 > - **The product is now called Weft** (chosen 2026-07-31, replacing the
 >   placeholder name it launched this document under). The wordmark is set in
 >   caps — `WEFT` — but prose uses `Weft`.
-> - **Light mode is superseded.** The warm-paper canvas is being replaced by a
->   crisp white/near-black base. The **acid-lime accent is rejected outright**
->   and its replacement has not been chosen yet — ignore the acid-lime
->   guidance in "Visual language" below.
+> - **Light mode is now the crisp white/near-black base** (shipped 2026-08-01),
+>   replacing the warm-paper canvas. Its neutrals are true greys, not the
+>   lavender-tinted ones the Variant B comparison carried.
+> - **The accent is rust `#b7410e`**, chosen 2026-08-01; acid-lime is gone.
+>   Two roles: `--color-accent` for text and borders, `--color-acid` for fills
+>   that sit under near-black text (now a peach tint of the same hue). Ignore
+>   the acid-lime guidance in "Visual language" below.
 > - **Dark mode is confirmed, not superseded.** The espresso-charcoal
 >   direction described below is the one that stays; a cooler blue-tinted
 >   alternative was evaluated and rejected.
@@ -90,8 +93,9 @@
 
 ## Visual language
 
-- **Color:** Warm paper and ink in light mode; espresso-charcoal layered surfaces
-  in night mode. Coral, cobalt, and acid-lime are disciplined accents.
+- **Color:** Crisp white and near-black in light mode; espresso-charcoal layered
+  surfaces in night mode. Rust is the single accent (coral in dark mode); a
+  peach tint of it carries fills that sit under dark text.
 - **Typography:** Syne for brand/display and IBM Plex Sans for body/utility.
 - **Spacing:** 4/8-based rhythm with 16px mobile gutters and fluid larger
   gutters.

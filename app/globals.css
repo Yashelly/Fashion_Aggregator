@@ -25,6 +25,11 @@
    * light enough for `--color-on-acid` to clear the same bar. The acid-lime
    * this replaces was rejected; the fill is now a tint of the accent hue so
    * the two cannot drift apart.
+   *
+   * Rust was chosen by the owner on 2026-08-01 over magenta, teal and cobalt,
+   * judged on rendered pages rather than swatches. It carries the textile
+   * reading of the name and is the closest in temperature to the coral the
+   * dark theme already uses, so switching themes does not lurch.
    */
   --color-accent: #b7410e;
   --color-acid: #ffd9c2;
@@ -399,7 +404,47 @@ summary {
   border-inline: 1px solid var(--color-line);
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.65fr);
+  isolation: isolate;
   min-height: calc(100svh - 76px);
+  position: relative;
+}
+
+/*
+ * The wardrobe loop sits behind everything in the hero. Its frames are shot
+ * with the figures on the right and the left half deliberately empty, so the
+ * copy lands on bare studio floor rather than on top of a garment.
+ */
+.hero-media {
+  inset: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+.hero-media video {
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  width: 100%;
+}
+
+/*
+ * Scrim. The studio backdrop is a mid grey and the copy is near-black, which
+ * is not a safe pairing on its own — this fades the canvas colour across the
+ * text column so the headline keeps its contrast, then clears before it
+ * reaches the figures.
+ */
+.hero-media::after {
+  background: linear-gradient(
+    100deg,
+    var(--color-canvas) 0%,
+    var(--color-canvas) 28%,
+    color-mix(in srgb, var(--color-canvas) 82%, transparent) 46%,
+    transparent 66%
+  );
+  content: "";
+  inset: 0;
+  position: absolute;
 }
 
 .hero-copy {
@@ -544,7 +589,9 @@ summary {
 }
 
 .runway-links {
-  background: var(--color-dark-surface);
+  /* Translucent so the wardrobe keeps showing through behind the links. */
+  background: color-mix(in srgb, var(--color-dark-surface) 82%, transparent);
+  backdrop-filter: blur(6px);
   color: var(--color-on-dark);
   display: flex;
   flex-direction: column;
@@ -1637,6 +1684,24 @@ summary {
 }
 
 @media (max-width: 1023px) {
+  /*
+   * The wardrobe frames are composed for a wide hero: figures on the right,
+   * bare floor on the left for the copy. Once the hero is a single column that
+   * composition no longer exists — `cover` crops to one figure directly behind
+   * the paragraph, and the lead text ends up sitting on a lit garment. Drop it
+   * rather than fight it with a heavier scrim that would hide the video anyway.
+   */
+  .hero-media {
+    display: none;
+  }
+
+  /* With no video behind it, the translucency has nothing to reveal and just
+     lightens the panel to grey. */
+  .runway-links {
+    backdrop-filter: none;
+    background: var(--color-dark-surface);
+  }
+
   .discovery-hero {
     grid-template-columns: 1fr;
     min-height: auto;
@@ -1987,6 +2052,20 @@ summary {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  /*
+   * Drop the wardrobe loop entirely rather than pausing it. The `poster` frame
+   * stays behind as a still, so the hero keeps its image without any motion.
+   */
+  .hero-media video {
+    display: none;
+  }
+
+  .hero-media {
+    background-image: url("/hero-assets/hero-poster.jpg");
+    background-position: right center;
+    background-size: cover;
   }
 
   *,

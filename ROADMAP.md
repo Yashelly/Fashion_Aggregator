@@ -102,13 +102,28 @@ The two things that make this different from Google or a brand's own site.
         in [`docs/feed-format-research-2026-07-31.md`](docs/feed-format-research-2026-07-31.md).
         `lib/product-listings.ts` is shaped so only its loader changes.
 
-## Phase 3 — Visual
+## Phase 3 — Visual (2026-08-01)
 
-- [ ] Light theme moves to the Variant B canvas (crisp white/near-black)
-- [ ] Dark theme stays on Variant A (neutral/warm espresso-charcoal —
-      confirmed, not superseded)
-- [ ] Replacement accent color chosen (acid-lime is rejected in both variants)
-- [ ] Hero video assembled and shipped on the landing page
+- [x] Light theme moved to a crisp white canvas over near-black ink. The
+      neutrals were deliberately de-tinted: the Variant B block those values
+      came from ran 13–24 points bluer than red, a side effect of that A/B
+      comparison rather than part of what was chosen.
+- [x] Dark theme stays on Variant A (espresso-charcoal) — untouched.
+- [x] **Accent chosen: rust `#b7410e`** (owner, judged on rendered pages, over
+      magenta, teal and cobalt). It is two roles, not one: `--color-accent` is
+      drawn as text/borders at 5.6:1 on white, and `--color-acid` is the fill
+      under near-black text (inverse buttons, store chips), now a peach tint
+      of the same hue so the pair cannot drift. Acid-lime is gone.
+- [x] Hero loop shipped — 13s dissolve between five wardrobe keyframes,
+      `hero-loop.mp4` 0.89 MB / `.webm` 0.68 MB, poster for first paint,
+      removed entirely under `prefers-reduced-motion` and below 1024px where
+      the two-column composition it was shot for no longer exists.
+  - **One keyframe was excluded on purpose:** `wardrobe-keyframe-04` carries
+    recognisable branding (a Diesel-style buckle, Stan-Smith-style sneakers, a
+    logo tee), which the demo-data boundary forbids in shopper-facing imagery.
+    It stays in `public/hero-assets/` as a source file but is not in the loop.
+  - Not an AI-generated motion sequence: ffmpeg cross-dissolves stills. Real
+    interpolated movement between the keyframes needs a video model.
 
 ## Phase 4 — Real AI Fitting Room
 
