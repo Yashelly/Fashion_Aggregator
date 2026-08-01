@@ -6,6 +6,7 @@ import {
   getPublicDemoStores,
   type DemoStoreLocale,
 } from "@/lib/demo-stores";
+import { getProductAttributes } from "@/lib/product-attributes";
 import { interpretQuery, semanticSearch, type QueryInterpretation } from "@/lib/semantic-search";
 
 type CsvMockProduct = {
@@ -35,6 +36,11 @@ export type MockProduct = CsvMockProduct & {
   image_available: boolean;
   detail_image_path: string;
   detail_image_available: boolean;
+  /** Visual attributes read off the product photo; empty when unenriched. */
+  motif: string;
+  surface: string;
+  visual_details: string;
+  visual_description: string;
 };
 
 const csvPath = path.join(process.cwd(), "data", "mock_products.csv");
@@ -77,6 +83,7 @@ export function getMockProducts(): MockProduct[] {
   const csv = fs.readFileSync(csvPath, "utf8").trim();
   const [headerLine, ...rows] = csv.split(/\r?\n/);
   const headers = parseCsvLine(headerLine) as Array<keyof CsvMockProduct>;
+  const attributes = getProductAttributes();
 
   return rows
     .map((row, index) => {
@@ -89,6 +96,8 @@ export function getMockProducts(): MockProduct[] {
         csvProduct.image_url || `/demo-products/product-${String(index + 1).padStart(2, "0")}.webp`;
       const detailImagePath = `/demo-products/product-${String(index + 1).padStart(2, "0")}-tryon.webp`;
 
+      const visual = attributes.get(csvProduct.mock_product_id);
+
       return {
         ...csvProduct,
         image_url: imagePath,
@@ -97,6 +106,10 @@ export function getMockProducts(): MockProduct[] {
         detail_image_path: detailImagePath,
         detail_image_available: hasDemoProductImage(detailImagePath),
         public_store_id: getPublicDemoStoreForProduct(csvProduct).id,
+        motif: visual?.motif ?? "",
+        surface: visual?.surface ?? "",
+        visual_details: visual?.details ?? "",
+        visual_description: visual?.visualDescription ?? "",
       };
     })
     .filter((product) => product.source_status === "mock_not_live");
