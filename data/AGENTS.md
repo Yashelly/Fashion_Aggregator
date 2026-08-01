@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Two hand-maintained CSV files that back the entire synthetic demo catalog and the internal retailer-tracking sheet for VIBEWEAR. There is no database, ORM, or seed script here — these files are read directly from disk at request time by `lib/mock-products.ts` and `lib/demo-stores.ts`. This is a pre-affiliate MVP: no live retailer catalog exists anywhere in the repo, and every row in `mock_products.csv` is explicitly synthetic ("Synthetic demo item; not a real merchant product." in the `notes` column).
+Two hand-maintained CSV files that back the entire synthetic demo catalog and the internal retailer-tracking sheet for Weft. There is no database, ORM, or seed script here — these files are read directly from disk at request time by `lib/mock-products.ts` and `lib/demo-stores.ts`. This is a pre-affiliate MVP: no live retailer catalog exists anywhere in the repo, and every row in `mock_products.csv` is explicitly synthetic ("Synthetic demo item; not a real merchant product." in the `notes` column).
 
 ## Key Files
 

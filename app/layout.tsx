@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Sans, Syne } from "next/font/google";
 import { Suspense } from "react";
 import { SiteFooter } from "@/components/site-footer";
+import { CookieConsent } from "@/components/cookie-consent";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
@@ -9,22 +10,18 @@ const syne = Syne({ subsets: ["latin", "latin-ext"], variable: "--font-display",
 const plex = IBM_Plex_Sans({ subsets: ["latin", "latin-ext"], weight: ["400", "500", "600"], variable: "--font-body", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "VIBEWEAR — Fashion discovery",
+  title: "Weft — Fashion discovery",
   description: "Discover fashion by item, mood, colour, price, and category.",
 };
 
 const themeScript = `
   (() => {
     let savedTheme = null;
-    let savedVariant = null;
-    try { savedTheme = localStorage.getItem("vibewear-theme"); } catch {}
-    try { savedVariant = localStorage.getItem("vibewear-visual-variant"); } catch {}
+    try { savedTheme = localStorage.getItem("weft-theme"); } catch {}
     const theme = savedTheme === "dark" ? "dark" : "light";
-    const variant = savedVariant === "b" ? "b" : "a";
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
-    document.documentElement.dataset.visualVariant = variant;
-    const cookieMatch = document.cookie.match(/(?:^|; )vibewear-locale=([^;]+)/);
+    const cookieMatch = document.cookie.match(/(?:^|; )weft-locale=([^;]+)/);
     document.documentElement.lang = cookieMatch && decodeURIComponent(cookieMatch[1]) === "lt" ? "lt" : "en";
   })();
 `;
@@ -41,6 +38,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <main className="main" id="main-content">{children}</main>
           <Suspense fallback={null}><SiteFooter /></Suspense>
         </div>
+        <Suspense fallback={null}><CookieConsent /></Suspense>
       </body>
     </html>
   );

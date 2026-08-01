@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ProductDetailView } from "@/components/product-detail-view";
 import { getPublicDemoStoreById } from "@/lib/demo-stores";
 import { getMockProducts } from "@/lib/mock-products";
+import { compareProductAcrossStores } from "@/lib/product-listings";
 
 type OutPageProps = {
   params: Promise<{
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: OutPageProps): Promise<Metada
   if (!product) return {};
 
   return {
-    title: `${product.title} — VIBEWEAR`,
+    title: `${product.title} — Weft`,
     description: `View ${product.title}, available sizes, product details, and styling images.`,
   };
 }
@@ -38,5 +39,15 @@ export default async function OutPage({ params }: OutPageProps) {
 
   const store = getPublicDemoStoreById(product.public_store_id);
 
-  return <ProductDetailView product={product} storeLabels={store?.label ?? null} />;
+  // Read on the server: the comparison comes from a CSV on disk, and the detail
+  // view is a client component.
+  const comparison = compareProductAcrossStores(product);
+
+  return (
+    <ProductDetailView
+      comparison={comparison}
+      product={product}
+      storeLabels={store?.label ?? null}
+    />
+  );
 }

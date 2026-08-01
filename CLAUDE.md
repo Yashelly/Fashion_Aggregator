@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-VIBEWEAR: a pre-affiliate Next.js (App Router) fashion discovery/search MVP for Lithuanian shoppers. It is a **synthetic demo product**, not a live shopping site — see "Demo-data boundary" below before touching product data, store names, or purchase flows.
+Weft: a pre-affiliate Next.js (App Router) fashion discovery/search MVP for Lithuanian shoppers. It is a **synthetic demo product**, not a live shopping site — see "Demo-data boundary" below before touching product data, store names, or purchase flows.
 
 ## Commands
 
@@ -23,7 +23,30 @@ Locale regression suite (Python Playwright, requires the dev server running):
 BASE_URL=http://127.0.0.1:3000 npm run test:locale
 ```
 
-This runs `scripts/locale_e2e.py`, covering EN/LT switching, cookie/query precedence, every public route, internal links, search filters, mobile/desktop layouts, browser history, and `/out` success/404 behavior. It writes a JSON report to `.omx/artifacts/qa/locale-summary.json`. There is no other automated test suite — verify changes with `npm run build` + this script + manual browser check.
+This runs `scripts/locale_e2e.py`, covering EN/LT switching, cookie/query precedence, every public route, internal links, search filters, mobile/desktop layouts, browser history, and `/out` success/404 behavior. It writes a JSON report to `.omx/artifacts/qa/locale-summary.json`.
+
+Search relevance suite (no server needed):
+
+```bash
+npm run test:search    # node scripts/semantic-eval.mjs
+```
+
+25 labelled queries against `lib/semantic-search.ts`; a query passes at
+precision@k ≥ 0.6 (k = min(5, relevant)) with every required item ranked, and
+the suite passes at ≥ 80% of queries. Exits non-zero below the threshold. The
+labels are relevance judgements — if one looks wrong, argue with the label
+rather than tuning the graph around it.
+
+Regenerating the synthetic multi-store listings (only when the base catalog
+changes — the output is committed):
+
+```bash
+npm run data:listings  # node scripts/generate-listings.mjs
+```
+
+Verify changes with `npm run build` + both suites + a manual browser check
+against a **production** build (`next start`); `npm run dev` serves a bundle
+that never hydrates in this repo.
 
 ## Demo-data boundary (critical, cross-cutting rule)
 
@@ -40,8 +63,10 @@ When in doubt about whether something counts as "real retailer data," treat it a
 ## Architecture
 
 - **App Router pages** (`app/**/page.tsx`) are server components. Locale-aware pages take `searchParams` as a `Promise` (Next 16 convention) and pass it through `lib/i18n.ts` helpers.
-- **i18n**: two locales (`en` default, `lt`), selected via a `lang` query param and persisted through a `vibewear-locale` cookie (not shown in `lib/i18n.ts` itself — cookie handling lives in the layout/middleware). `lib/i18n.ts` centralizes all UI copy in one large `copy` object plus label formatters (`formatCategoryLabel`, `formatColorLabel`, etc.) and a `withLocale(href, locale)` helper for building locale-preserving links. Add new UI strings there under both `en` and `lt`, not inline in components.
-- **Product data** (`lib/mock-products.ts`): reads and hand-parses `data/mock_products.csv` at request time (no DB dependency for the base catalog), joins each product to a public demo store via `lib/demo-stores.ts`, and resolves local image paths under `public/demo-products/` (falling back gracefully — `image_available`/`detail_image_available` flags — when a demo image file is missing). `filterProducts`/`sortProducts` implement search (including an EN/LT synonym table and `under N` / `iki N` price parsing) and sorting; these are pure functions over the in-memory product array, called from `app/search/page.tsx`.
+- **i18n**: two locales (`en` default, `lt`), selected via a `lang` query param and persisted through a `weft-locale` cookie (not shown in `lib/i18n.ts` itself — cookie handling lives in the layout/middleware). `lib/i18n.ts` centralizes all UI copy in one large `copy` object plus label formatters (`formatCategoryLabel`, `formatColorLabel`, etc.) and a `withLocale(href, locale)` helper for building locale-preserving links. Add new UI strings there under both `en` and `lt`, not inline in components.
+- **Product data** (`lib/mock-products.ts`): reads and hand-parses `data/mock_products.csv` at request time (no DB dependency for the base catalog), joins each product to a public demo store via `lib/demo-stores.ts`, and resolves local image paths under `public/demo-products/` (falling back gracefully — `image_available`/`detail_image_available` flags — when a demo image file is missing). `filterProducts` applies the explicit facets, `searchProducts` layers free-text relevance on top, and `sortProducts` falls back to relevance order when the shopper typed a query and picked no explicit sort; all are pure functions over the in-memory product array, called from `app/search/page.tsx`.
+- **Search relevance** (`lib/semantic-search.ts`): a weighted concept graph, not a token match and not an embedding model — the app must run with no API keys or model downloads. A query is canonicalised against a bilingual lexicon, expanded two hops into the catalog's own vocabulary, and each concept is satisfied by its single best match on the product (never summed, or wide concepts would punish themselves). Terms naming a *kind of thing* additionally constrain the result set, so "shoes for hiking in the rain" cannot answer with a parka. Add vocabulary to `LEXICON`/`ASSOCIATIONS` there, then re-run `npm run test:search`.
+- **Cross-store comparison** (`lib/product-listings.ts`, `data/mock_listings.csv`): the base catalog has one store per product and no repeated items, so the multi-store listings are generated rather than observed — see the header of `scripts/generate-listings.mjs`. Listings carry a public `demo-store-NN` id directly (no internal retailer slug is invented, because no retailer is involved), and any listing naming an unpublished store id is dropped at load. The synthetic nature is stated in shopper-facing copy.
 - **Supabase** (`lib/supabase.ts` browser client, `lib/supabase-server.ts` admin client): both are optional — analytics/persistence degrade gracefully when env vars are absent. `lib/supabase-server.ts` uses the service-role key and is guarded by `import "server-only"`; never import it from client components, and never give the service-role key a `NEXT_PUBLIC_` prefix.
 - **Analytics** (`lib/analytics.ts`, `lib/analytics-storage.ts`, `app/api/analytics/{search,click}/route.ts`): server-side HTTPS capture to PostHog via `captureAnalyticsEvent`, keyed by an anonymous ID (`createAnonymousId`/`normalizeAnonymousId`). `POST /api/analytics/search` records search events; `POST /api/analytics/click` is called by the `/out/:productId` guard after render, validates same-origin (`lib/request-security.ts`) and the product ID, reads correlation only from HttpOnly cookies, and returns `202` without blocking navigation. Both endpoints are no-ops (return a "disabled" status) when `POSTHOG_PROJECT_API_KEY` is unset.
 - **SQL** (`sql/00N_*.sql`): incremental schema/hardening migrations for the pre-affiliate schema and the synthetic-click analytics boundary. Apply in numeric order; there's no migration runner wired up in this repo.

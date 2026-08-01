@@ -6,7 +6,7 @@ import {
   formatAvailabilityLabel, formatCategoryLabel, formatColorLabel, formatGenderLabel,
   getCopy, getLocale, normalizeParams, type SearchParamsInput, withLocale,
 } from "@/lib/i18n";
-import { filterProducts, getMockProducts, getStoreOptions, sortProducts } from "@/lib/mock-products";
+import { getMockProducts, getStoreOptions, searchProducts, sortProducts } from "@/lib/mock-products";
 
 type SearchPageProps = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 const unique = (values: string[]) => Array.from(new Set(values)).filter(Boolean).sort();
@@ -41,7 +41,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const locale = getLocale(params);
   const t = getCopy(locale).search;
   const products = getMockProducts();
-  const results = sortProducts(filterProducts(products, params), params.sort);
+  const { results: matched, relevance, interpretation } = searchProducts(products, params);
+  const results = sortProducts(matched, params.sort, relevance);
   const parsedPageSize = Number(params.perPage);
   const perPage = pageSizes.includes(parsedPageSize as (typeof pageSizes)[number])
     ? parsedPageSize
@@ -118,6 +119,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <p role="status" aria-live="polite" aria-atomic="true"><strong>{results.length}</strong> {locale === "lt" ? "prekių" : results.length === 1 ? "product" : "products"}</p>
         <div className="active-filters" aria-label={t.active.aria}>{active.map(([key,label])=><a href={removeUrl(key)} key={key}>{label}<span aria-hidden="true">×</span></a>)}{active.length>0&&<a className="clear-link" href={withLocale("/search",locale)}><RotateCcw aria-hidden="true" size={15}/>{t.actions.clearAll}</a>}</div>
       </div>
+      {interpretation && results.length > 0 ? (
+        <p aria-label={t.interpretation.aria} className="search-interpretation">
+          <span>{t.interpretation.ranked}</span>
+          {interpretation.maxPrice ? (
+            <span>{t.interpretation.priceCeiling(interpretation.maxPrice)}</span>
+          ) : null}
+          {interpretation.unknownTerms.length > 0 ? (
+            <span>{t.interpretation.unknown(interpretation.unknownTerms.join(", "))}</span>
+          ) : null}
+        </p>
+      ) : null}
       <div className="catalog-view-controls">
         <p>
           {results.length > 0

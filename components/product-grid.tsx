@@ -3,6 +3,7 @@ import { ArrowRight, Footprints, ImageOff, Shirt, ShoppingBag } from "lucide-rea
 import Image from "next/image";
 import Link from "next/link";
 import { getPublicDemoStoreById, getPublicDemoStoreLabel } from "@/lib/demo-stores";
+import { summariseAvailability } from "@/lib/product-listings";
 import {
   formatAvailabilityLabel,
   formatCategoryLabel,
@@ -43,6 +44,7 @@ export function ProductGrid({
   products: MockProduct[];
 }) {
   const t = getCopy(locale).productGrid;
+  const comparisonCopy = getCopy(locale).comparison;
   const resultsLabel =
     ariaLabel ??
     (locale === "lt"
@@ -73,6 +75,7 @@ export function ProductGrid({
             ? "Parduotuvė"
             : "Store";
         const categoryLabel = formatCategoryLabel(product.category, locale);
+        const multiStore = summariseAvailability(product);
         const mediaAlt =
           locale === "lt"
             ? `${product.title}, ${categoryLabel}, ${storeLabel}`
@@ -141,6 +144,16 @@ export function ProductGrid({
                   </span>
                 ) : null}
               </div>
+              {multiStore ? (
+                <p className="product-multi-store">
+                  {comparisonCopy.inStores(multiStore.storeCount)}
+                  <span aria-hidden="true"> · </span>
+                  {comparisonCopy.from}{" "}
+                  <data value={multiStore.lowestPrice}>
+                    {price(String(multiStore.lowestPrice), multiStore.currency, locale)}
+                  </data>
+                </p>
+              ) : null}
               <dl className="product-facts">
                 <div><dt>{locale === "lt" ? "Spalva" : "Colour"}</dt><dd>{formatColorLabel(product.color, locale)}</dd></div>
                 <div><dt>{locale === "lt" ? "Dydžiai" : "Sizes"}</dt><dd>{sizes(product.size_options)}</dd></div>

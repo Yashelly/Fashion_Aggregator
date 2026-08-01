@@ -9,7 +9,7 @@ export default function NotFound() {
   const [locale, setLocale] = useState<Locale>("en");
 
   useEffect(() => {
-    const match = document.cookie.match(/(?:^|; )vibewear-locale=([^;]+)/);
+    const match = document.cookie.match(/(?:^|; )weft-locale=([^;]+)/);
     setLocale(getLocale({ lang: match ? decodeURIComponent(match[1]) : undefined }));
   }, []);
 

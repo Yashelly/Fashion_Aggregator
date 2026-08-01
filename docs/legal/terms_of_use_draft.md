@@ -2,13 +2,13 @@
 
 Last updated: 2026-05-25
 
-This is a draft for `[PROJECT_NAME]` at `[DOMAIN]`. It should be reviewed and adapted before public launch.
+This is a draft for `Weft` at `[DOMAIN]`. It should be reviewed and adapted before public launch.
 
 ---
 
 ## 1. About The Service
 
-`[PROJECT_NAME]` is a fashion search and discovery website. We show product information from approved affiliate/product feeds or direct merchant permission and link users to official retailer websites.
+`Weft` is a fashion search and discovery website. We show product information from approved affiliate/product feeds or direct merchant permission and link users to official retailer websites.
 
 We do not sell products directly, process payments, operate checkout, or act as the retailer.
 
@@ -42,9 +42,9 @@ Nothing in these Terms is intended to limit consumer rights that cannot be limit
 
 ## 4. Affiliate Links
 
-Some links on `[PROJECT_NAME]` may be affiliate links. We may earn a commission if you make a purchase after clicking, at no extra cost to you.
+Some links on `Weft` may be affiliate links. We may earn a commission if you make a purchase after clicking, at no extra cost to you.
 
-Affiliate links do not make `[PROJECT_NAME]` the seller, reseller, distributor, or official representative of the retailer unless this is explicitly stated in writing.
+Affiliate links do not make `Weft` the seller, reseller, distributor, or official representative of the retailer unless this is explicitly stated in writing.
 
 ---
 
@@ -70,7 +70,7 @@ Search results, rankings, and recommendations may change over time and may depen
 
 ## 7. Intellectual Property
 
-The `[PROJECT_NAME]` website, layout, original text, and internal data structures belong to `[OWNER_NAME_OR_COMPANY]` unless otherwise stated.
+The `Weft` website, layout, original text, and internal data structures belong to `[OWNER_NAME_OR_COMPANY]` unless otherwise stated.
 
 Retailer names, product images, product data, logos, and trademarks belong to their respective owners and are used according to approved feed terms, affiliate terms, or direct permission where applicable.
 

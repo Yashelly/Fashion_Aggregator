@@ -1,5 +1,13 @@
 # UX / Navigation Audit — VIBEWEAR
 
+> **Addendum (2026-07-31).** The **variant toggle** discussed below (the
+> fourth, unexplained icon-only header control this audit flagged) **was
+> removed from production** in Phase 1 — that finding is resolved. Any
+> description of it here is historical. Current sequencing and status live in
+> [`ROADMAP.md`](../ROADMAP.md); the project's priorities were reordered after
+> this audit was written (see
+> [`.omc/specs/deep-interview-vibewear-strategic-vision.md`](../.omc/specs/deep-interview-vibewear-strategic-vision.md)).
+
 Scope: this document addresses only the UX/Navigation facet of the Site Audit
 and Recommendations effort (PRD story US-005). It is a written audit only —
 no navigation restructure or other source code was changed to produce it.

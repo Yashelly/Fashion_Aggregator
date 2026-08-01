@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Holds `locale_e2e.py`, a Playwright-driven browser regression suite that verifies VIBEWEAR's EN/LT locale contract end-to-end against a running server. It is invoked via `npm run test:locale` (defined in `package.json` as `python scripts/locale_e2e.py`) and requires `BASE_URL` to point at a live dev/production server — it does not start the server itself.
+Holds `locale_e2e.py`, a Playwright-driven browser regression suite that verifies Weft's EN/LT locale contract end-to-end against a running server. It is invoked via `npm run test:locale` (defined in `package.json` as `python scripts/locale_e2e.py`) and requires `BASE_URL` to point at a live dev/production server — it does not start the server itself.
 
 ## Key Files
 
@@ -19,13 +19,13 @@ Holds `locale_e2e.py`, a Playwright-driven browser regression suite that verifie
 Run with: `BASE_URL=http://127.0.0.1:3000 python scripts/locale_e2e.py` (or `npm run test:locale`). Uses `playwright.sync_api` (Chromium, headless). Report is written to `LOCALE_REPORT` env var path, default `.omx/artifacts/qa/locale-summary.json`.
 
 Constants:
-- `LOCALE_COOKIE = "vibewear-locale"` — the preference cookie name asserted throughout.
+- `LOCALE_COOKIE = "weft-locale"` — the preference cookie name asserted throughout.
 - `PUBLIC_ROUTES` — 12 routes: `/`, `/search?query=black`, `/stores`, `/how-it-works`, `/about`, `/contact`, `/data-sources`, `/affiliate-disclosure`, `/privacy`, `/terms`, `/out/MOCK-001`, `/out/UNKNOWN`. `expected_status()` returns 404 only for `/out/UNKNOWN`, 200 otherwise.
 - `LINK_SOURCE_ROUTES` — the same routes with `?lang=lt` appended, used as starting points for the internal-link-crawl matrix.
 
 Helper functions:
 - `route_with_lang(route, lang)` — rewrites a route's `lang` query param.
-- `cookie_value(context)` / `seed_locale(context, locale)` — read/write the `vibewear-locale` cookie directly via Playwright's context API (bypassing the UI) to test cookie-precedence paths.
+- `cookie_value(context)` / `seed_locale(context, locale)` — read/write the `weft-locale` cookie directly via Playwright's context API (bypassing the UI) to test cookie-precedence paths.
 - `wait_for_locale(page, locale)` — waits for `<html lang>`, the header search label text (`"Search"`/`"Paieška"`), the language-switcher `aria-label` (`"Language"`/`"Kalba"`), and the locale cookie to all agree, before any assertion runs.
 - `assert_locale(page, context, locale)` — wraps `wait_for_locale` plus a hard cookie-value assertion.
 - `assert_public_out_path(page, product_id)` — for `/out/:id` pages, asserts the URL path stays `/out/:id` (no internal preview-route leakage) and that every link inside `.language-switcher` also points at `/out/:id` (never a different internal rewrite path).

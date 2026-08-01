@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Moon, Palette, Sun, UserRound } from "lucide-react";
+import { Menu, Moon, Sun, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -13,7 +13,7 @@ function languageHref(pathname: string, params: URLSearchParams, locale: Locale)
 }
 
 function publicPathname(pathname: string) {
-  const missingPreviewPrefix = "/__vibewear-missing-preview/";
+  const missingPreviewPrefix = "/__weft-missing-preview/";
   return pathname.startsWith(missingPreviewPrefix)
     ? `/out/${pathname.slice(missingPreviewPrefix.length)}`
     : pathname;
@@ -21,7 +21,7 @@ function publicPathname(pathname: string) {
 
 function persistLocale(locale: Locale) {
   document.documentElement.lang = locale;
-  document.cookie = `vibewear-locale=${locale}; Path=/; Max-Age=31536000; SameSite=Lax`;
+  document.cookie = `weft-locale=${locale}; Path=/; Max-Age=31536000; SameSite=Lax`;
 }
 
 function ThemeToggle({ locale }: { locale: Locale }) {
@@ -39,7 +39,7 @@ function ThemeToggle({ locale }: { locale: Locale }) {
     document.documentElement.style.colorScheme = nextTheme;
     setTheme(nextTheme);
     try {
-      localStorage.setItem("vibewear-theme", nextTheme);
+      localStorage.setItem("weft-theme", nextTheme);
     } catch {
       // The visible toggle still works for the current page session.
     }
@@ -67,49 +67,6 @@ function ThemeToggle({ locale }: { locale: Locale }) {
       ) : (
         <Moon aria-hidden="true" size={18} />
       )}
-    </button>
-  );
-}
-
-function VariantToggle({ locale }: { locale: Locale }) {
-  const [variant, setVariant] = useState<"a" | "b">("a");
-
-  useEffect(() => {
-    const current =
-      document.documentElement.dataset.visualVariant === "b" ? "b" : "a";
-    setVariant(current);
-  }, []);
-
-  const toggleVariant = () => {
-    const nextVariant = variant === "b" ? "a" : "b";
-    document.documentElement.dataset.visualVariant = nextVariant;
-    setVariant(nextVariant);
-    try {
-      localStorage.setItem("vibewear-visual-variant", nextVariant);
-    } catch {
-      // The visible toggle still works for the current page session.
-    }
-  };
-
-  const label =
-    locale === "lt"
-      ? variant === "b"
-        ? "Grįžti prie A varianto"
-        : "Peržiūrėti B variantą"
-      : variant === "b"
-        ? "Switch to variant A"
-        : "Preview variant B";
-
-  return (
-    <button
-      aria-label={label}
-      aria-pressed={variant === "b"}
-      className="theme-toggle variant-toggle"
-      onClick={toggleVariant}
-      title={label}
-      type="button"
-    >
-      <Palette aria-hidden="true" size={18} />
     </button>
   );
 }
@@ -145,8 +102,8 @@ export function SiteHeader() {
     <>
       <a className="skip-link" href="#main-content">{copy[locale].common.skipToContent}</a>
       <header className="site-header">
-        <Link className="brand" href={withLocale("/", locale)} aria-label={locale === "lt" ? "VIBEWEAR pradinis puslapis" : "VIBEWEAR home"}>
-          VIBEWEAR
+        <Link className="brand" href={withLocale("/", locale)} aria-label={locale === "lt" ? "Weft pradinis puslapis" : "Weft home"}>
+          WEFT
         </Link>
         <nav className="desktop-nav" aria-label={t.mainNavAria}>
           {nav.map(({ href, label, temporary }) => (
@@ -172,7 +129,6 @@ export function SiteHeader() {
             <UserRound aria-hidden="true" size={19} />
           </Link>
           <ThemeToggle locale={locale} />
-          <VariantToggle locale={locale} />
           <nav className="language-switcher" aria-label={t.languageAria}>
             <a
               aria-current={locale === "en" ? "true" : undefined}
