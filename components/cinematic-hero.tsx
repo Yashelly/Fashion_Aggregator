@@ -10,6 +10,26 @@ export function CinematicHero({ locale }: { locale: Locale }) {
 
   return (
     <section className="discovery-hero" aria-labelledby="home-title">
+      {/*
+        Decorative wardrobe loop. aria-hidden and unfocusable: it carries no
+        information the copy does not already give, so a screen reader gains
+        nothing from it. `poster` paints frame one immediately, and CSS drops
+        the video entirely under prefers-reduced-motion, leaving that still.
+      */}
+      <div className="hero-media" aria-hidden="true">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster="/hero-assets/hero-poster.jpg"
+          preload="metadata"
+          tabIndex={-1}
+        >
+          <source src="/hero-assets/hero-loop.webm" type="video/webm" />
+          <source src="/hero-assets/hero-loop.mp4" type="video/mp4" />
+        </video>
+      </div>
       <div className="hero-copy">
         <p className="preview-kicker">
           <Sparkles aria-hidden="true" size={16} />
