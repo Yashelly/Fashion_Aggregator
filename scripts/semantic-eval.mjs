@@ -18,6 +18,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { DEV_SET, HELDOUT_SET } from "./search-queries.mjs";
 
 const require = createRequire(import.meta.url);
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -94,232 +95,6 @@ function loadProducts() {
 }
 
 /**
- * Labelled query set: 24 queries across the intent classes the catalog can
- * actually answer — season, weather, occasion, activity, material, colour
- * family, price, department, exact-name recall, and Lithuanian equivalents.
- *
- * `relevant` is the full set a shopper would accept. `mustRank` (optional) are
- * the items that have to appear in the top 5 for the query to count as passing
- * — for broad queries, ordering is the whole product.
- *
- * `maxResults` (optional) caps how much may come back at all. This exists
- * because precision@k only inspects the top of the list and is blind to a
- * bloated tail: "what should i wear to the office" once returned 38 of 64
- * products — sweatpants and graphic tees included — while scoring a clean
- * 25/25 here. The caps are judgements about what a shopper should be shown,
- * set independently of what the code currently returns.
- */
-const QUERY_SET = [
-  {
-    query: "something warm for winter",
-    intent: "season",
-    relevant: ["MOCK-013", "MOCK-044", "MOCK-054", "MOCK-048", "MOCK-006", "MOCK-019", "MOCK-056", "MOCK-011", "MOCK-032", "MOCK-007"],
-  },
-  {
-    query: "šilta striukė žiemai",
-    intent: "season / lt",
-    relevant: ["MOCK-013", "MOCK-044", "MOCK-054", "MOCK-011", "MOCK-019", "MOCK-003", "MOCK-034", "MOCK-042", "MOCK-007", "MOCK-052"],
-  },
-  {
-    query: "what should i wear to the office",
-    maxResults: 20,
-    intent: "occasion",
-    relevant: ["MOCK-007", "MOCK-052", "MOCK-002", "MOCK-049", "MOCK-063", "MOCK-001", "MOCK-055", "MOCK-013", "MOCK-044", "MOCK-009"],
-  },
-  {
-    query: "outfit for a night out",
-    maxResults: 12,
-    intent: "occasion",
-    relevant: ["MOCK-045", "MOCK-053", "MOCK-023", "MOCK-010", "MOCK-051", "MOCK-043", "MOCK-025"],
-  },
-  {
-    query: "dress for a summer date",
-    maxResults: 6,
-    intent: "occasion",
-    relevant: ["MOCK-023", "MOCK-045", "MOCK-061", "MOCK-053"],
-  },
-  {
-    query: "clothes for the gym",
-    intent: "activity",
-    relevant: ["MOCK-021", "MOCK-038", "MOCK-026", "MOCK-035", "MOCK-034", "MOCK-004"],
-  },
-  {
-    // The subject is "shoes". An earlier draft of this label also listed the
-    // technical parka, which was a labelling error: it answers "rain" but it is
-    // not what was asked for.
-    query: "shoes for hiking in the rain",
-    maxResults: 6,
-    intent: "weather / activity",
-    relevant: ["MOCK-041", "MOCK-050", "MOCK-043"],
-    mustRank: ["MOCK-041"],
-  },
-  {
-    // Trail sneakers were on this label in an earlier draft. They are
-    // waterproof, but they are not a jacket, so the garment rule now excludes
-    // them and it is right to — the label was the thing that was wrong.
-    query: "waterproof jacket",
-    maxResults: 8,
-    intent: "material",
-    relevant: ["MOCK-054", "MOCK-034", "MOCK-042"],
-  },
-  {
-    // "knit" names the subject, and the catalog holds exactly two knitted
-    // pieces. An earlier draft of this label also listed hoodies and
-    // sweatpants, which is what "cosy" alone would justify — not "knit".
-    query: "cosy knit for the sofa",
-    maxResults: 4,
-    intent: "mood + garment",
-    relevant: ["MOCK-006", "MOCK-048"],
-    mustRank: ["MOCK-006", "MOCK-048"],
-  },
-  {
-    // The same mood with no garment named, which should stay open.
-    query: "something cosy to wear at home",
-    intent: "mood",
-    relevant: ["MOCK-006", "MOCK-048", "MOCK-008", "MOCK-057", "MOCK-032", "MOCK-026", "MOCK-056", "MOCK-015"],
-  },
-  {
-    query: "streetwear hoodie",
-    maxResults: 6,
-    intent: "style + garment",
-    relevant: ["MOCK-057", "MOCK-008", "MOCK-032", "MOCK-015"],
-    mustRank: ["MOCK-057", "MOCK-008", "MOCK-032"],
-  },
-  {
-    query: "black boots",
-    maxResults: 4,
-    intent: "colour + garment",
-    relevant: ["MOCK-043"],
-    mustRank: ["MOCK-043"],
-  },
-  {
-    query: "white sneakers",
-    maxResults: 8,
-    intent: "colour + garment",
-    relevant: ["MOCK-029", "MOCK-046", "MOCK-062", "MOCK-037"],
-    mustRank: ["MOCK-029", "MOCK-046", "MOCK-062"],
-  },
-  {
-    query: "bag for travelling",
-    intent: "occasion + garment",
-    relevant: ["MOCK-060", "MOCK-024", "MOCK-027", "MOCK-064", "MOCK-047", "MOCK-016", "MOCK-040"],
-  },
-  {
-    query: "bag for my laptop",
-    maxResults: 6,
-    intent: "use case",
-    relevant: ["MOCK-024", "MOCK-047", "MOCK-060"],
-  },
-  {
-    query: "jeans under 40",
-    maxResults: 4,
-    intent: "price ceiling",
-    relevant: ["MOCK-017"],
-    mustRank: ["MOCK-017"],
-  },
-  {
-    // "kelnės" covers all legwear, jeans included — an earlier draft of this
-    // label excluded them, which no Lithuanian shopper would.
-    query: "kelnės iki 45",
-    intent: "price ceiling / lt",
-    relevant: ["MOCK-002", "MOCK-005", "MOCK-017", "MOCK-021", "MOCK-026", "MOCK-035", "MOCK-058"],
-  },
-  {
-    query: "cheap accessories",
-    intent: "price direction",
-    relevant: ["MOCK-020", "MOCK-031", "MOCK-036", "MOCK-009", "MOCK-055", "MOCK-051", "MOCK-040", "MOCK-056"],
-  },
-  {
-    query: "what is on sale",
-    intent: "commercial",
-    relevant: ["MOCK-002", "MOCK-005", "MOCK-007", "MOCK-010", "MOCK-013", "MOCK-015", "MOCK-017", "MOCK-019", "MOCK-023", "MOCK-026", "MOCK-029", "MOCK-032", "MOCK-034", "MOCK-037", "MOCK-040", "MOCK-042", "MOCK-043", "MOCK-044", "MOCK-047", "MOCK-049", "MOCK-052", "MOCK-054", "MOCK-056", "MOCK-057", "MOCK-060", "MOCK-061", "MOCK-063"],
-  },
-  {
-    query: "minimal neutral basics",
-    intent: "aesthetic",
-    relevant: ["MOCK-012", "MOCK-001", "MOCK-004", "MOCK-046", "MOCK-024", "MOCK-018", "MOCK-006", "MOCK-048"],
-  },
-  {
-    query: "graphic tee",
-    maxResults: 6,
-    intent: "print + garment",
-    relevant: ["MOCK-022", "MOCK-039"],
-    mustRank: ["MOCK-022", "MOCK-039"],
-  },
-  {
-    query: "moteriškas sijonas",
-    maxResults: 6,
-    intent: "department + garment / lt",
-    relevant: ["MOCK-010", "MOCK-014", "MOCK-025", "MOCK-028"],
-    mustRank: ["MOCK-010", "MOCK-014", "MOCK-025", "MOCK-028"],
-  },
-  {
-    query: "sportbačiai",
-    intent: "garment / lt",
-    relevant: ["MOCK-029", "MOCK-030", "MOCK-033", "MOCK-037", "MOCK-041", "MOCK-046", "MOCK-062"],
-  },
-  {
-    query: "Emerald Satin Midi Dress",
-    maxResults: 6,
-    intent: "exact title recall",
-    relevant: ["MOCK-045"],
-    mustRank: ["MOCK-045"],
-  },
-  // Motif and construction queries.
-  //
-  // Every one of these is unanswerable from the base catalog: nothing in
-  // mock_products.csv records that the hoodie print contains circles or that
-  // the scarf has fringing. They work only because data/product_attributes.csv
-  // describes each product photo, and they fail the moment that join is
-  // dropped — verified by deleting the file and re-running.
-  //
-  // An earlier draft of this block used "floral dress", "quilted bag" and
-  // "pleated skirt", which passed with the attributes file deleted: those
-  // words are already in the product titles, so the queries tested nothing.
-  {
-    query: "hoodie with circles",
-    maxResults: 3,
-    intent: "motif detail + garment",
-    relevant: ["MOCK-057"],
-    mustRank: ["MOCK-057"],
-  },
-  {
-    query: "tee with triangles",
-    maxResults: 3,
-    intent: "motif detail + garment",
-    relevant: ["MOCK-039"],
-    mustRank: ["MOCK-039"],
-  },
-  {
-    query: "bauhaus print",
-    maxResults: 4,
-    intent: "motif style",
-    relevant: ["MOCK-022", "MOCK-039", "MOCK-057"],
-    mustRank: ["MOCK-022", "MOCK-039", "MOCK-057"],
-  },
-  {
-    query: "scarf with fringe",
-    maxResults: 3,
-    intent: "construction detail + garment",
-    relevant: ["MOCK-056"],
-    mustRank: ["MOCK-056"],
-  },
-  {
-    query: "cowl neck dress",
-    maxResults: 4,
-    intent: "construction detail + garment",
-    relevant: ["MOCK-045", "MOCK-053"],
-    mustRank: ["MOCK-045", "MOCK-053"],
-  },
-  {
-    query: "snekaers",
-    maxResults: 10,
-    intent: "typo tolerance",
-    relevant: ["MOCK-029", "MOCK-030", "MOCK-033", "MOCK-037", "MOCK-041", "MOCK-046", "MOCK-062"],
-  },
-];
-
-/**
  * Precision is measured at k = min(5, |relevant|), not a flat @5.
  *
  * A flat @5 is unmeasurable for a narrow query: "black boots" has exactly one
@@ -332,12 +107,10 @@ const PRECISION_TARGET = 0.6;
 const PASS_RATE_TARGET = 0.8;
 const MAX_K = 5;
 
-function evaluate({ verbose }) {
-  const { semanticSearch, interpretQuery } = loadSemanticSearch();
-  const products = loadProducts();
+function scoreSet(name, queries, { semanticSearch, interpretQuery }, products) {
   const rows = [];
 
-  for (const testCase of QUERY_SET) {
+  for (const testCase of queries) {
     // Mirror `searchProducts` in lib/mock-products.ts: a price ceiling parsed
     // out of the query is a hard filter applied before ranking, not a ranking
     // signal. Scoring the raw catalog here would test a path the app never runs.
@@ -345,41 +118,50 @@ function evaluate({ verbose }) {
     const candidates = maxPrice
       ? products.filter((product) => Number(product.price_eur) <= maxPrice)
       : products;
-    const { matches } = semanticSearch(candidates, testCase.query);
-    const ranked = matches.map((match) => match.product.mock_product_id);
-    const relevant = new Set(testCase.relevant);
-    const k = Math.min(MAX_K, relevant.size);
-    const topK = ranked.slice(0, k);
-
-    const hits = topK.filter((id) => relevant.has(id)).length;
-    const precision = k === 0 ? 0 : hits / k;
-    const recall = relevant.size === 0 ? 1 : ranked.filter((id) => relevant.has(id)).length / relevant.size;
-    const missingRequired = (testCase.mustRank ?? []).filter(
-      (id) => !ranked.slice(0, Math.max(k, testCase.mustRank.length)).includes(id),
+    const ranked = semanticSearch(candidates, testCase.query).matches.map(
+      (match) => match.product.mock_product_id,
     );
-    const overCap = testCase.maxResults !== undefined && ranked.length > testCase.maxResults;
-    const passed = precision >= PRECISION_TARGET && missingRequired.length === 0 && !overCap;
 
-    rows.push({ ...testCase, ranked, k, precision, recall, missingRequired, overCap, passed, returned: ranked.length });
+    const relevant = new Set(testCase.relevant);
+    const overCap = testCase.maxResults !== undefined && ranked.length > testCase.maxResults;
+
+    // A query with no relevant products is asserting the catalog does not
+    // stock the thing. Precision is then simply "did we resist inventing an
+    // answer" — the cap carries the whole judgement.
+    const isNegative = relevant.size === 0;
+    const k = isNegative ? 0 : Math.min(MAX_K, relevant.size);
+    const topK = ranked.slice(0, k);
+    const precision = isNegative ? (overCap ? 0 : 1) : topK.filter((id) => relevant.has(id)).length / k;
+    const recall = isNegative ? 1 : ranked.filter((id) => relevant.has(id)).length / relevant.size;
+
+    const required = testCase.mustRank ?? [];
+    const missingRequired = required.filter(
+      (id) => !ranked.slice(0, Math.max(k, required.length)).includes(id),
+    );
+
+    const passed = precision >= PRECISION_TARGET && missingRequired.length === 0 && !overCap;
+    rows.push({ ...testCase, name, ranked, k, precision, recall, missingRequired, overCap, passed, returned: ranked.length });
   }
 
+  return rows;
+}
+
+function summarise(name, rows, { verbose }) {
   const passCount = rows.filter((row) => row.passed).length;
-  const passRate = passCount / rows.length;
+  const passRate = rows.length === 0 ? 1 : passCount / rows.length;
   const meanPrecision = rows.reduce((sum, row) => sum + row.precision, 0) / rows.length;
   const meanRecall = rows.reduce((sum, row) => sum + row.recall, 0) / rows.length;
 
-  console.log("Semantic search evaluation");
+  console.log(`${name}`);
   console.log(`  queries          ${rows.length}`);
   console.log(`  passing          ${passCount}/${rows.length}  (${(passRate * 100).toFixed(1)}%)`);
-  console.log(`  mean precision@k ${meanPrecision.toFixed(3)}   (k = min(5, relevant))`);
+  console.log(`  mean precision@k ${meanPrecision.toFixed(3)}   (k = min(${MAX_K}, relevant))`);
   console.log(`  mean recall      ${meanRecall.toFixed(3)}`);
-  console.log(`  target           pass rate >= ${(PASS_RATE_TARGET * 100).toFixed(0)}%, precision@k >= ${PRECISION_TARGET} per query`);
   console.log("");
 
   for (const row of rows) {
     if (!verbose && row.passed) continue;
-    const mark = row.passed ? "PASS" : "FAIL";
-    console.log(`${mark}  ${row.query}   [${row.intent}]`);
+    console.log(`${row.passed ? "PASS" : "FAIL"}  ${row.query}   [${row.intent}]`);
     console.log(`      precision@${row.k} ${row.precision.toFixed(2)}  recall ${row.recall.toFixed(2)}  returned ${row.returned}`);
     console.log(`      top${MAX_K}: ${row.ranked.slice(0, MAX_K).join(", ") || "(none)"}`);
     if (row.missingRequired.length > 0) {
@@ -389,11 +171,29 @@ function evaluate({ verbose }) {
       console.log(`      too many results: ${row.returned} returned, cap is ${row.maxResults}`);
     }
   }
+  if (rows.some((row) => !row.passed)) console.log("");
 
-  const overallPass = passRate >= PASS_RATE_TARGET;
-  console.log("");
+  return { passRate, meanPrecision, meanRecall };
+}
+
+function evaluate({ verbose, which }) {
+  const engine = loadSemanticSearch();
+  const products = loadProducts();
+
+  const results = [];
+  if (which !== "holdout") {
+    results.push(summarise("DEV set (tuning is allowed against this)", scoreSet("dev", DEV_SET, engine, products), { verbose }));
+  }
+  if (which !== "dev") {
+    results.push(summarise("HELD-OUT set (sealed; scored once)", scoreSet("holdout", HELDOUT_SET, engine, products), { verbose }));
+  }
+
+  console.log(`target             pass rate >= ${(PASS_RATE_TARGET * 100).toFixed(0)}%, precision@k >= ${PRECISION_TARGET} per query`);
+  const overallPass = results.every((result) => result.passRate >= PASS_RATE_TARGET);
   console.log(overallPass ? "RESULT: threshold met" : "RESULT: below threshold");
   return overallPass;
 }
 
-process.exit(evaluate({ verbose: process.argv.includes("--verbose") }) ? 0 : 1);
+const args = process.argv.slice(2);
+const which = args.find((arg) => arg.startsWith("--set="))?.split("=")[1] ?? "all";
+process.exit(evaluate({ verbose: args.includes("--verbose"), which }) ? 0 : 1);
