@@ -1,29 +1,53 @@
 :root {
   color-scheme: light;
-  --color-canvas: #f4efe7;
-  --color-surface: #fffdf8;
-  --color-surface-soft: #e9e2d8;
+  /*
+   * Light mode, Phase 3: crisp white canvas over near-black ink, replacing the
+   * warm paper/espresso it launched with (decided in
+   * .omc/specs/deep-interview-vibewear-strategic-vision.md §5).
+   *
+   * The neutrals are deliberately NEUTRAL. The Variant B block those values
+   * came from carried a lavender cast — its greys ran 13 to 24 points bluer
+   * than red — which was a side effect of that comparison rather than part of
+   * what was chosen, and a default blue-purple palette with no brand reason
+   * behind it is exactly what DESIGN.md tells us to question.
+   */
+  --color-canvas: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f4f4f5;
   --color-surface-elevated: #ffffff;
-  --color-ink: #171412;
-  --color-ink-muted: #625b54;
-  --color-line: #c7bdb1;
-  --color-accent: #a72e22;
-  --color-focus: #2847c7;
-  --color-acid: #d4ee70;
-  --color-success: #176447;
-  --color-warning: #775207;
-  --color-error: #ad2a20;
+  --color-ink: #0d0d0d;
+  --color-ink-muted: #5a5a60;
+  --color-line: #dcdcdf;
+  /*
+   * Two accent roles, not one. `accent` is drawn as text and borders, so it is
+   * held to 4.5:1 on white. `acid` is a FILL sitting under near-black text —
+   * inverse buttons, demo-store chips, category hovers — so it has to stay
+   * light enough for `--color-on-acid` to clear the same bar. The acid-lime
+   * this replaces was rejected; the fill is now a tint of the accent hue so
+   * the two cannot drift apart.
+   *
+   * Rust was chosen by the owner on 2026-08-01 over magenta, teal and cobalt,
+   * judged on rendered pages rather than swatches. It carries the textile
+   * reading of the name and is the closest in temperature to the coral the
+   * dark theme already uses, so switching themes does not lurch.
+   */
+  --color-accent: #b7410e;
+  --color-acid: #ffd9c2;
+  --color-on-acid: #0d0d0d;
+  --color-focus: #3150ff;
+  --color-success: #0a7a4f;
+  --color-warning: #8a5a00;
+  --color-error: #c81c10;
   --color-on-dark: #fffaf2;
   --color-dark-surface: #1a1816;
   --color-dark-muted: #c9c1b7;
   --color-dark-line: #514b45;
-  --color-on-acid: #171412;
-  --color-placeholder-a: #ddd4c8;
+  --color-placeholder-a: #e4e4e7;
   --color-placeholder-b: #3150c1;
   --color-placeholder-c: #d9a18b;
-  --color-placeholder-d: #d4ee70;
-  --color-product-media: #f2ede6;
-  --shadow: 0 18px 45px rgba(30, 24, 20, 0.12);
+  --color-placeholder-d: #ffd9c2;
+  --color-product-media: #f4f4f5;
+  --shadow: 0 18px 45px rgba(0, 0, 0, 0.10);
   --gutter: clamp(16px, 3.35vw, 48px);
   --max: 1376px;
   --radius-sm: 3px;
@@ -380,7 +404,47 @@ summary {
   border-inline: 1px solid var(--color-line);
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.65fr);
+  isolation: isolate;
   min-height: calc(100svh - 76px);
+  position: relative;
+}
+
+/*
+ * The wardrobe loop sits behind everything in the hero. Its frames are shot
+ * with the figures on the right and the left half deliberately empty, so the
+ * copy lands on bare studio floor rather than on top of a garment.
+ */
+.hero-media {
+  inset: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+.hero-media video {
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  width: 100%;
+}
+
+/*
+ * Scrim. The studio backdrop is a mid grey and the copy is near-black, which
+ * is not a safe pairing on its own — this fades the canvas colour across the
+ * text column so the headline keeps its contrast, then clears before it
+ * reaches the figures.
+ */
+.hero-media::after {
+  background: linear-gradient(
+    100deg,
+    var(--color-canvas) 0%,
+    var(--color-canvas) 28%,
+    color-mix(in srgb, var(--color-canvas) 82%, transparent) 46%,
+    transparent 66%
+  );
+  content: "";
+  inset: 0;
+  position: absolute;
 }
 
 .hero-copy {
@@ -409,9 +473,15 @@ summary {
   margin: 0 0 20px;
 }
 
+/*
+ * The eyebrow is a brand moment, so it follows the accent. It used to be
+ * painted with --color-focus, which is the keyboard focus-ring colour: a
+ * functional token borrowed for decoration. That is why the label read blue
+ * next to every accent we tried.
+ */
 .preview-kicker,
 .route-eyebrow {
-  color: var(--color-focus);
+  color: var(--color-accent);
 }
 
 .hero-copy h1,
@@ -519,7 +589,9 @@ summary {
 }
 
 .runway-links {
-  background: var(--color-dark-surface);
+  /* Translucent so the wardrobe keeps showing through behind the links. */
+  background: color-mix(in srgb, var(--color-dark-surface) 82%, transparent);
+  backdrop-filter: blur(6px);
   color: var(--color-on-dark);
   display: flex;
   flex-direction: column;
@@ -1612,6 +1684,24 @@ summary {
 }
 
 @media (max-width: 1023px) {
+  /*
+   * The wardrobe frames are composed for a wide hero: figures on the right,
+   * bare floor on the left for the copy. Once the hero is a single column that
+   * composition no longer exists — `cover` crops to one figure directly behind
+   * the paragraph, and the lead text ends up sitting on a lit garment. Drop it
+   * rather than fight it with a heavier scrim that would hide the video anyway.
+   */
+  .hero-media {
+    display: none;
+  }
+
+  /* With no video behind it, the translucency has nothing to reveal and just
+     lightens the panel to grey. */
+  .runway-links {
+    backdrop-filter: none;
+    background: var(--color-dark-surface);
+  }
+
   .discovery-hero {
     grid-template-columns: 1fr;
     min-height: auto;
@@ -1962,6 +2052,20 @@ summary {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  /*
+   * Drop the wardrobe loop entirely rather than pausing it. The `poster` frame
+   * stays behind as a still, so the hero keeps its image without any motion.
+   */
+  .hero-media video {
+    display: none;
+  }
+
+  .hero-media {
+    background-image: url("/hero-assets/hero-poster.jpg");
+    background-position: right center;
+    background-size: cover;
   }
 
   *,
