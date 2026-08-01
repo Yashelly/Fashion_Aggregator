@@ -77,8 +77,9 @@ The two things that make this different from Google or a brand's own site.
         labelled queries across season, weather, occasion, activity, material,
         colour, price, department, exact recall, typos, and Lithuanian.
         **Proposed threshold: 80% of queries passing, where a query passes if
-        precision@k ≥ 0.6 (k = min(5, relevant)) and every required item ranks.
-        Current: 25/25 (100%), mean precision 0.908, mean recall 0.990.**
+        precision@k ≥ 0.6 (k = min(5, relevant)), every required item ranks,
+        and the result set stays under the query's cap.
+        Current: 25/25 (100%), mean precision 0.918, mean recall 0.990.**
         *Owner sign-off on the threshold is still outstanding* — the number is
         measured and reproducible, but it was set by the assistant.
   - [ ] **Visual** search (match by image content) is NOT built. The catalog
