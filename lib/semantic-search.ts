@@ -39,6 +39,11 @@ export type SearchableProduct = {
   old_price_eur: string;
   availability: string;
   price_eur: string;
+  /** Visual attributes read off the product photo (see lib/product-attributes.ts). */
+  motif?: string;
+  surface?: string;
+  visual_details?: string;
+  visual_description?: string;
 };
 
 export type QueryInterpretation = {
@@ -136,6 +141,29 @@ const LEXICON: Record<string, string[]> = {
   trail: ["trail"],
   utility: ["utility", "cargo", "tactical", "darbinis"],
   graphic: ["graphic", "print", "printed", "logo", "piesinys", "printas", "spauda"],
+
+  // Motifs and construction read off the product photos. Only vocabulary the
+  // catalog actually contains is listed — there are no stars, stripes, checks
+  // or animal prints in these 64 products, so those words stay unknown and
+  // honestly return nothing rather than a near-miss.
+  geometric: ["geometric", "geometry", "bauhaus", "geometrinis", "geometrija"],
+  abstract: ["abstract", "abstraktus", "abstrakcija"],
+  floral: ["floral", "flower", "flowers", "blossom", "gelete", "geles", "geliu", "geletas"],
+  circle: ["circle", "circles", "round", "dot", "dots", "apskritimas", "apskritimai", "taskai"],
+  square: ["square", "squares", "rectangle", "rectangles", "kvadratas", "kvadratai", "staciakampis"],
+  triangle: ["triangle", "triangles", "trikampis", "trikampiai"],
+  hood: ["hood", "hooded", "gobtuvu"],
+  drawstring: ["drawstring", "drawcord", "raiscia", "virvute"],
+  zip: ["zip", "zipper", "zipped", "uztrauktukas", "uztrauktuku"],
+  pocket: ["pocket", "pockets", "kisene", "kisenes", "kiseniu"],
+  pleated: ["pleat", "pleats", "pleated", "klostes", "klostuotas"],
+  laceup: ["lace", "laces", "laced", "lacing", "raisteliai", "sunerti"],
+  fringe: ["fringe", "fringed", "tassels", "kutai", "kutais"],
+  cowl: ["cowl", "draped", "draping", "kriokle"],
+  wrap: ["wrap", "wrapped", "apvyniojamas"],
+  canvas: ["canvas", "drobe", "drobinis"],
+  fleece: ["fleece", "flisas", "flisinis"],
+  jersey: ["jersey", "trikotazas"],
 
   // Colours and colour families
   black: ["black", "juoda", "juodas", "juodi", "juodos", "juoduma"],
@@ -294,6 +322,7 @@ const ASSOCIATIONS: Record<string, Array<[string, number]>> = {
   // bag still reaches the results through the shopper's own word "bag".
   laptop: [["tote", 1], ["backpack", 1]],
   hoodie: [["sweatshirt", 0.75]],
+  hood: [["hoodie", 0.85], ["sweatshirt", 0.5]],
   sweatshirt: [["hoodie", 0.75]],
   sweater: [["knitwear", 0.9], ["cardigan", 0.6]],
   knitwear: [["sweater", 0.9], ["cardigan", 0.85]],
@@ -346,6 +375,13 @@ const FIELD_WEIGHTS = {
   gender: 0.7,
   sale: 0.6,
   brand: 0.45,
+  // What is printed on a garment is as distinguishing as its subcategory.
+  motif: 0.95,
+  surface: 0.8,
+  visualDetail: 0.7,
+  // The prose sentence repeats what the fields above already say; it is here to
+  // catch wording the tag lists missed, so it must not outweigh them.
+  visualDescription: 0.5,
 } as const;
 
 /**
@@ -567,7 +603,27 @@ export function buildProductTerms(product: SearchableProduct): Map<string, numbe
   for (const tag of product.style_tags.split("|")) add(tag, FIELD_WEIGHTS.styleTag);
   if (product.old_price_eur) add("sale", FIELD_WEIGHTS.sale);
 
+  // Visual attributes describe *qualities*, never identity. A shirt dress has
+  // a "self_tie_belt" and a cargo skirt has "belt_loops" — if those fed the
+  // garment vocabulary, a search for "black belt" would return dresses and
+  // skirts. Identity stays the job of subcategory, category and title.
+  addQualitiesOnly(terms, product.motif, FIELD_WEIGHTS.motif);
+  addQualitiesOnly(terms, product.surface, FIELD_WEIGHTS.surface);
+  addQualitiesOnly(terms, product.visual_details, FIELD_WEIGHTS.visualDetail);
+  addQualitiesOnly(terms, product.visual_description, FIELD_WEIGHTS.visualDescription);
+
   return terms;
+}
+
+function addQualitiesOnly(terms: Map<string, number>, value: string | undefined, weight: number) {
+  if (!value) return;
+
+  for (const token of tokenize(normalizeText(value))) {
+    const canonical = canonicalize(token) ?? token;
+    if (GARMENT_TERMS.has(canonical)) continue;
+    const existing = terms.get(canonical) ?? 0;
+    if (weight > existing) terms.set(canonical, weight);
+  }
 }
 
 /**

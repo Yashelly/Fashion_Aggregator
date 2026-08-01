@@ -60,16 +60,37 @@ function parseCsvLine(line) {
   return values;
 }
 
-function loadProducts() {
-  const csv = fs.readFileSync(path.join(rootDir, "data", "mock_products.csv"), "utf8").trim();
-  const [headerLine, ...rows] = csv.split(/\r?\n/);
+function readCsv(fileName) {
+  const filePath = path.join(rootDir, "data", fileName);
+  if (!fs.existsSync(filePath)) return [];
+  const [headerLine, ...rows] = fs.readFileSync(filePath, "utf8").trim().split(/\r?\n/);
   const headers = parseCsvLine(headerLine);
-  return rows
-    .map((row) => {
-      const values = parseCsvLine(row);
-      return Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""]));
-    })
-    .filter((product) => product.source_status === "mock_not_live");
+  return rows.map((row) => {
+    const values = parseCsvLine(row);
+    return Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""]));
+  });
+}
+
+/**
+ * Joins the visual attributes onto the catalog exactly as `getMockProducts`
+ * does. Scoring the bare CSV here would test a product the site does not serve
+ * — every motif query would silently fail.
+ */
+function loadProducts() {
+  const attributes = new Map(readCsv("product_attributes.csv").map((row) => [row.mock_product_id, row]));
+
+  return readCsv("mock_products.csv")
+    .filter((product) => product.source_status === "mock_not_live")
+    .map((product) => {
+      const visual = attributes.get(product.mock_product_id);
+      return {
+        ...product,
+        motif: visual?.motif ?? "",
+        surface: visual?.surface ?? "",
+        visual_details: visual?.details ?? "",
+        visual_description: visual?.visual_description ?? "",
+      };
+    });
 }
 
 /**
@@ -243,6 +264,52 @@ const QUERY_SET = [
     intent: "exact title recall",
     relevant: ["MOCK-045"],
     mustRank: ["MOCK-045"],
+  },
+  // Motif and construction queries.
+  //
+  // Every one of these is unanswerable from the base catalog: nothing in
+  // mock_products.csv records that the hoodie print contains circles or that
+  // the scarf has fringing. They work only because data/product_attributes.csv
+  // describes each product photo, and they fail the moment that join is
+  // dropped — verified by deleting the file and re-running.
+  //
+  // An earlier draft of this block used "floral dress", "quilted bag" and
+  // "pleated skirt", which passed with the attributes file deleted: those
+  // words are already in the product titles, so the queries tested nothing.
+  {
+    query: "hoodie with circles",
+    maxResults: 3,
+    intent: "motif detail + garment",
+    relevant: ["MOCK-057"],
+    mustRank: ["MOCK-057"],
+  },
+  {
+    query: "tee with triangles",
+    maxResults: 3,
+    intent: "motif detail + garment",
+    relevant: ["MOCK-039"],
+    mustRank: ["MOCK-039"],
+  },
+  {
+    query: "bauhaus print",
+    maxResults: 4,
+    intent: "motif style",
+    relevant: ["MOCK-022", "MOCK-039", "MOCK-057"],
+    mustRank: ["MOCK-022", "MOCK-039", "MOCK-057"],
+  },
+  {
+    query: "scarf with fringe",
+    maxResults: 3,
+    intent: "construction detail + garment",
+    relevant: ["MOCK-056"],
+    mustRank: ["MOCK-056"],
+  },
+  {
+    query: "cowl neck dress",
+    maxResults: 4,
+    intent: "construction detail + garment",
+    relevant: ["MOCK-045", "MOCK-053"],
+    mustRank: ["MOCK-045", "MOCK-053"],
   },
   {
     query: "snekaers",
