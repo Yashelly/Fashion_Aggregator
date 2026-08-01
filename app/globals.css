@@ -400,19 +400,67 @@ summary {
   max-width: var(--max);
 }
 
-.discovery-hero {
+/* ---- Title page (/) --------------------------------------------------- */
+
+.title-page {
+  align-items: center;
   border-inline: 1px solid var(--color-line);
   display: grid;
-  grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.65fr);
   isolation: isolate;
   min-height: calc(100svh - 76px);
+  padding: clamp(40px, 7vw, 96px) clamp(24px, 5vw, 72px);
   position: relative;
 }
 
+.title-page-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 640px;
+}
+
+.title-page h1 {
+  font-family: var(--font-display);
+  /*
+   * Sized to stay inside the copy column rather than to be as large as
+   * possible. Syne's caps are wide — a four-letter wordmark runs roughly 1.2em
+   * per glyph — so 208px ran the "T" over the mannequins on desktop and pushed
+   * the whole word off-screen at 375px.
+   */
+  font-size: clamp(44px, 12vw, 132px);
+  max-width: 100%;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.86;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.title-page-slogan {
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 16px 0 0;
+}
+
+.title-page-lead {
+  color: var(--color-ink-muted);
+  font-size: clamp(16px, 1.5vw, 19px);
+  margin: 20px 0 0;
+  max-width: 46ch;
+}
+
+.title-page-cta {
+  margin-top: 36px;
+}
+
 /*
- * The wardrobe loop sits behind everything in the hero. Its frames are shot
- * with the figures on the right and the left half deliberately empty, so the
- * copy lands on bare studio floor rather than on top of a garment.
+ * The wardrobe loop sits behind the title page. Its frames are shot with the
+ * figures on the right and the left half deliberately empty, so the copy lands
+ * on bare studio floor rather than on top of a garment.
  */
 .hero-media {
   inset: 0;
@@ -438,21 +486,14 @@ summary {
   background: linear-gradient(
     100deg,
     var(--color-canvas) 0%,
-    var(--color-canvas) 28%,
-    color-mix(in srgb, var(--color-canvas) 82%, transparent) 46%,
-    transparent 66%
+    var(--color-canvas) 32%,
+    color-mix(in srgb, var(--color-canvas) 78%, transparent) 52%,
+    color-mix(in srgb, var(--color-canvas) 30%, transparent) 72%,
+    transparent 88%
   );
   content: "";
   inset: 0;
   position: absolute;
-}
-
-.hero-copy {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-  padding: clamp(48px, 7vw, 96px) clamp(24px, 5vw, 72px);
 }
 
 .preview-kicker,
@@ -493,29 +534,11 @@ summary {
   margin: 0;
 }
 
-.hero-copy h1 {
-  font-size: clamp(3.5rem, 9.2vw, 8.5rem);
-  line-height: 0.82;
-}
-
-.hero-copy h1 em {
-  color: var(--color-accent);
-  font-style: normal;
-}
-
 .hero-lead,
 .lead {
   color: var(--color-ink-muted);
   font-size: clamp(16px, 1.4vw, 20px);
   max-width: 650px;
-}
-
-.hero-lead {
-  margin: 28px 0 32px;
-}
-
-.hero-search {
-  max-width: 760px;
 }
 
 .hero-search > label,
@@ -580,101 +603,6 @@ summary {
 .query-field button:hover {
   background: var(--color-focus);
   color: var(--color-on-dark);
-}
-
-.hero-search small {
-  color: var(--color-ink-muted);
-  display: block;
-  margin-top: 8px;
-}
-
-.runway-links {
-  /* Translucent so the wardrobe keeps showing through behind the links. */
-  background: color-mix(in srgb, var(--color-dark-surface) 82%, transparent);
-  backdrop-filter: blur(6px);
-  color: var(--color-on-dark);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 20px;
-}
-
-.runway-links a {
-  align-items: center;
-  border-top: 1px solid var(--color-dark-line);
-  display: grid;
-  gap: 16px;
-  grid-template-columns: 1fr auto;
-  min-height: 92px;
-  padding: 16px 4px;
-  transition: color var(--transition), padding-left var(--transition);
-}
-
-.runway-links a:hover {
-  color: var(--color-acid);
-  padding-left: 8px;
-}
-
-.runway-links strong {
-  font-family: var(--font-display);
-  font-size: clamp(18px, 2vw, 28px);
-  line-height: 1;
-}
-
-.home-section {
-  border-top: 1px solid var(--color-ink);
-  display: grid;
-  grid-template-columns: 180px 1fr;
-}
-
-.section-label {
-  border-right: 1px solid var(--color-line);
-  padding: 32px 24px;
-}
-
-.section-label p {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  margin: 0;
-  text-transform: uppercase;
-}
-
-.category-links {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  padding: 16px 32px;
-}
-
-.category-links a {
-  align-items: center;
-  border-bottom: 1px solid var(--color-line);
-  display: grid;
-  font-family: var(--font-display);
-  font-size: clamp(18px, 2vw, 26px);
-  font-weight: 700;
-  gap: 12px;
-  grid-template-columns: 1fr auto;
-  min-height: 76px;
-  padding: 10px 12px;
-  transition: background-color var(--transition);
-}
-
-.category-links a:hover {
-  background: var(--color-acid);
-  color: var(--color-on-acid);
-}
-
-.section-content {
-  min-width: 0;
-  padding: 48px 32px 72px;
-}
-
-.section-heading {
-  align-items: end;
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 28px;
 }
 
 .section-heading h2,
@@ -890,21 +818,6 @@ summary {
 
 .availability-out_of_stock {
   color: var(--color-error);
-}
-
-.trust-band {
-  align-items: center;
-  background: var(--color-dark-surface);
-  color: var(--color-on-dark);
-  display: grid;
-  gap: 36px;
-  grid-template-columns: 1fr auto;
-  padding: 64px clamp(24px, 5vw, 64px);
-}
-
-.trust-band p {
-  color: var(--color-dark-muted);
-  max-width: 720px;
 }
 
 .button {
@@ -1685,50 +1598,29 @@ summary {
 
 @media (max-width: 1023px) {
   /*
-   * The wardrobe frames are composed for a wide hero: figures on the right,
-   * bare floor on the left for the copy. Once the hero is a single column that
-   * composition no longer exists — `cover` crops to one figure directly behind
-   * the paragraph, and the lead text ends up sitting on a lit garment. Drop it
-   * rather than fight it with a heavier scrim that would hide the video anyway.
+   * Narrow screens stack instead of splitting left/right, so the loop is
+   * re-composed rather than dropped: the figures are pushed to the bottom of
+   * the frame and the scrim runs top-to-bottom, putting the copy on clear
+   * canvas above them. The earlier version hid the video here because the old
+   * hero carried a search field and quick links whose text landed straight on
+   * a lit garment; the title page has four elements and room to spare.
    */
-  .hero-media {
-    display: none;
+  .title-page {
+    align-items: start;
   }
 
-  /* With no video behind it, the translucency has nothing to reveal and just
-     lightens the panel to grey. */
-  .runway-links {
-    backdrop-filter: none;
-    background: var(--color-dark-surface);
+  .hero-media video {
+    object-position: bottom center;
   }
 
-  .discovery-hero {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-
-  .hero-copy {
-    min-height: 640px;
-  }
-
-  .runway-links {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    padding: 0 20px;
-  }
-
-  .runway-links a {
-    border-left: 1px solid var(--color-dark-line);
-    border-top: 0;
-    min-height: 104px;
-  }
-
-  .home-section {
-    grid-template-columns: 160px 1fr;
-  }
-
-  .category-links {
-    grid-template-columns: repeat(2, 1fr);
+  .hero-media::after {
+    background: linear-gradient(
+      to bottom,
+      var(--color-canvas) 0%,
+      var(--color-canvas) 42%,
+      color-mix(in srgb, var(--color-canvas) 70%, transparent) 60%,
+      transparent 82%
+    );
   }
 
   .product-grid {
@@ -1758,15 +1650,6 @@ summary {
 }
 
 @media (max-width: 900px) {
-  .home-section {
-    display: block;
-  }
-
-  .section-label {
-    border-bottom: 1px solid var(--color-line);
-    border-right: 0;
-    padding: 20px var(--gutter);
-  }
 
   .site-footer {
     gap: 40px;
@@ -1791,79 +1674,14 @@ summary {
     gap: 6px;
   }
 
-  .discovery-hero {
-    border: 0;
-  }
-
-  .hero-copy {
-    min-height: auto;
-    padding: 56px 24px;
-  }
-
-  .hero-copy h1 {
-    font-size: clamp(3.1rem, 15vw, 6.2rem);
-    max-width: 100%;
-  }
-
-  .hero-search-row {
-    grid-template-columns: auto 1fr;
-  }
-
   .query-field > div {
     grid-template-columns: auto 1fr;
-  }
-
-  .hero-search-row button {
-    grid-column: 1 / -1;
-    justify-content: center;
-    min-height: 52px;
   }
 
   .query-field button {
     grid-column: 1 / -1;
     justify-content: center;
     min-height: 52px;
-  }
-
-  .runway-links {
-    display: flex;
-    padding: 12px 16px;
-  }
-
-  .runway-links a {
-    border-left: 0;
-    border-top: 1px solid var(--color-dark-line);
-    min-height: 72px;
-    width: 100%;
-  }
-
-  .home-section {
-    display: block;
-  }
-
-  .section-label {
-    border-bottom: 1px solid var(--color-line);
-    border-right: 0;
-    padding: 20px 16px;
-  }
-
-  .category-links {
-    grid-template-columns: 1fr;
-    padding: 8px 16px;
-  }
-
-  .category-links a {
-    min-height: 62px;
-  }
-
-  .section-content {
-    padding: 36px 16px 56px;
-  }
-
-  .section-heading {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 16px;
   }
 
   .product-grid {
@@ -1881,11 +1699,6 @@ summary {
 
   .product-facts dd {
     text-align: left;
-  }
-
-  .trust-band {
-    grid-template-columns: 1fr;
-    padding: 44px 20px;
   }
 
   .trust-band .button {

@@ -114,6 +114,12 @@ The two things that make this different from Google or a brand's own site.
       drawn as text/borders at 5.6:1 on white, and `--color-acid` is the fill
       under near-black text (inverse buttons, store chips), now a peach tint
       of the same hue so the pair cannot drift. Acid-lime is gone.
+- [x] **`/` is now a title page** (2026-08-01) — wordmark, slogan, one line of
+      what this is, one button into search, and the wardrobe loop behind it.
+      The category nav, product edit and trust band were removed: all three
+      duplicated `/search`, which is one click away. The demo label stays —
+      the synthetic-catalog boundary is a hard rule and this is now the first
+      thing anyone sees.
 - [x] Hero loop shipped — 13s dissolve between five wardrobe keyframes,
       `hero-loop.mp4` 0.89 MB / `.webm` 0.68 MB, poster for first paint,
       removed entirely under `prefers-reduced-motion` and below 1024px where
