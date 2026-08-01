@@ -216,83 +216,11 @@ export const copy = {
         terms: "Terms",
       },
     },
-    hero: {
-      proof: ["New in", "Style search", "Stores"],
-      title: "Shop by vibe",
-      lead: "Explore fashion by mood, item, brand, or occasion.",
-      searchAria: "Search fashion catalog",
-      searchPlaceholder: "black sneakers under 100",
-      submit: "Go",
-      departments: [
-        { label: "Woman", href: "/search?gender=women" },
-        { label: "Man", href: "/search?gender=men" },
-        { label: "Unisex", href: "/search?gender=unisex" },
-        { label: "Sneakers", href: "/search?query=sneakers" },
-      ],
-    },
-    home: {
-      editorialAria: "Featured edits",
-      catalogAria: "Catalog navigation",
-      editorialLinks: [
-        { number: "01", title: "New in", href: "/search" },
-        { number: "02", title: "Trending now", href: "/search?query=streetwear" },
-        { number: "03", title: "Sneakers", href: "/search?query=sneakers" },
-        { number: "04", title: "Summer edit", href: "/search?query=summer" },
-        { number: "05", title: "Sale edit", href: "/search?sale=on" },
-      ],
-      categoryColumns: [
-        {
-          title: "Discover",
-          links: [
-            { label: "New in", href: "/search" },
-            { label: "City black", href: "/search?query=black" },
-            { label: "Soft office", href: "/search?query=office" },
-            { label: "Summer minimal", href: "/search?query=summer minimal" },
-            { label: "Stores", href: "/stores" },
-          ],
-        },
-        {
-          title: "Collection",
-          links: [
-            { label: "Dresses", href: "/search?query=dress" },
-            { label: "T-shirts", href: "/search?query=tshirt" },
-            { label: "Trousers", href: "/search?category=bottoms" },
-            { label: "Hoodies", href: "/search?query=hoodie" },
-            { label: "Jackets", href: "/search?query=jacket" },
-          ],
-        },
-        {
-          title: "Shoes | Accessories",
-          links: [
-            { label: "Trainers", href: "/search?query=sneakers" },
-            { label: "Bags", href: "/search?category=bags" },
-            { label: "Belts", href: "/search?query=belt" },
-            { label: "Socks", href: "/search?query=socks" },
-            { label: "Jewelry", href: "/search?query=jewelry" },
-          ],
-        },
-        {
-          title: "Stores",
-          links: [
-            { label: "Stores", href: "/stores" },
-            { label: "How product data works", href: "/data-sources" },
-            { label: "Corrections & contact", href: "/contact" },
-          ],
-        },
-      ],
-      collection: {
-        eyebrow: "Curated edit",
-        title: "Streetwear selection",
-        text: "Sneakers, layers, and clean everyday pieces.",
-        cta: "View all",
-        href: "/search?query=sneakers",
-      },
-      trust: {
-        aria: "Shopping transparency",
-        text:
-          "Purchases are not enabled yet. When retailer links are added, checkout will stay on retailer websites.",
-        cta: "How product data works",
-      },
+    titlePage: {
+      demoLabel: "DEMO · SYNTHETIC CATALOG",
+      slogan: "Find your vibe.",
+      lead: "Search fashion the way you actually think about it — by mood, by occasion, by the thing you half-remember seeing.",
+      cta: "Start searching",
     },
     search: {
       title: "Search Weft",
@@ -512,83 +440,11 @@ export const copy = {
         terms: "Naudojimo sąlygos",
       },
     },
-    hero: {
-      proof: ["Naujienos", "Stiliaus paieška", "Parduotuvės"],
-      title: "Rask savo stilių",
-      lead: "Naršyk madą pagal nuotaiką, prekę, ženklą ar progą.",
-      searchAria: "Ieškoti mados kataloge",
-      searchPlaceholder: "juodi sportbačiai iki 100",
-      submit: "Ieškoti",
-      departments: [
-        { label: "Moterims", href: "/search?gender=women" },
-        { label: "Vyrams", href: "/search?gender=men" },
-        { label: "Unisex", href: "/search?gender=unisex" },
-        { label: "Sportbačiai", href: "/search?query=sneakers" },
-      ],
-    },
-    home: {
-      editorialAria: "Atrinktos kolekcijos",
-      catalogAria: "Katalogo navigacija",
-      editorialLinks: [
-        { number: "01", title: "Naujienos", href: "/search" },
-        { number: "02", title: "Šiuo metu populiaru", href: "/search?query=streetwear" },
-        { number: "03", title: "Sportbačiai", href: "/search?query=sneakers" },
-        { number: "04", title: "Vasaros atranka", href: "/search?query=summer" },
-        { number: "05", title: "Išpardavimas", href: "/search?sale=on" },
-      ],
-      categoryColumns: [
-        {
-          title: "Atrask",
-          links: [
-            { label: "Naujienos", href: "/search" },
-            { label: "Juoda miestui", href: "/search?query=black" },
-            { label: "Rami biuro apranga", href: "/search?query=office" },
-            { label: "Vasaros minimalizmas", href: "/search?query=summer minimal" },
-            { label: "Parduotuvės", href: "/stores" },
-          ],
-        },
-        {
-          title: "Kolekcija",
-          links: [
-            { label: "Suknelės", href: "/search?query=dress" },
-            { label: "Marškinėliai", href: "/search?query=tshirt" },
-            { label: "Kelnės", href: "/search?category=bottoms" },
-            { label: "Džemperiai", href: "/search?query=hoodie" },
-            { label: "Striukės", href: "/search?query=jacket" },
-          ],
-        },
-        {
-          title: "Avalynė | Aksesuarai",
-          links: [
-            { label: "Sportbačiai", href: "/search?query=sneakers" },
-            { label: "Rankinės", href: "/search?category=bags" },
-            { label: "Diržai", href: "/search?query=belt" },
-            { label: "Kojinės", href: "/search?query=socks" },
-            { label: "Papuošalai", href: "/search?query=jewelry" },
-          ],
-        },
-        {
-          title: "Parduotuvės",
-          links: [
-            { label: "Parduotuvės", href: "/stores" },
-            { label: "Kaip naudojami prekių duomenys", href: "/data-sources" },
-            { label: "Pataisymai ir kontaktai", href: "/contact" },
-          ],
-        },
-      ],
-      collection: {
-        eyebrow: "Atrinkta redakcija",
-        title: "Gatvės stiliaus atranka",
-        text: "Sportbačiai, sluoksniai ir kasdieniai deriniai.",
-        cta: "Peržiūrėti viską",
-        href: "/search?query=sneakers",
-      },
-      trust: {
-        aria: "Apsipirkimo skaidrumas",
-        text:
-          "Pirkimas dar neįjungtas. Atsiradus parduotuvių nuorodoms, atsiskaitymas vyks jų svetainėse.",
-        cta: "Kaip naudojami duomenys",
-      },
+    titlePage: {
+      demoLabel: "DEMO · SINTETINIS KATALOGAS",
+      slogan: "Rask savo stilių.",
+      lead: "Ieškok mados taip, kaip apie ją galvoji — pagal nuotaiką, progą ar tai, ką vos prisimeni mačiusi.",
+      cta: "Pradėti paiešką",
     },
     search: {
       title: "Weft paieška",
