@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "test:locale": "python scripts/locale_e2e.py",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:search": "node scripts/semantic-eval.mjs",
+    "data:listings": "node scripts/generate-listings.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "latest",

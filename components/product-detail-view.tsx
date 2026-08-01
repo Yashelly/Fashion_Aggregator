@@ -13,11 +13,13 @@ import {
   UsersRound,
 } from "lucide-react";
 import type { MockProduct } from "@/lib/mock-products";
+import type { ProductComparison } from "@/lib/product-listings";
 import {
   formatAvailabilityLabel,
   formatCategoryLabel,
   formatColorLabel,
   formatGenderLabel,
+  getCopy,
   withLocale,
   type Locale,
 } from "@/lib/i18n";
@@ -70,6 +72,82 @@ function productDescription(category: string, locale: Locale) {
       : "A versatile piece that fits naturally into an everyday wardrobe.");
 }
 
+function StoreComparison({
+  comparison,
+  locale,
+  viewingStoreId,
+}: {
+  comparison: ProductComparison;
+  locale: Locale;
+  viewingStoreId: string;
+}) {
+  const t = getCopy(locale).comparison;
+  const currency = comparison.listings[0].currency;
+  const money = (amount: number) => price(String(amount), currency, locale);
+
+  return (
+    <section aria-label={t.aria} className="store-comparison">
+      <div className="store-comparison-head">
+        <h2>{t.title}</h2>
+        <p>{t.storeCount(comparison.storeCount)}</p>
+      </div>
+
+      <p className="store-comparison-saving">
+        {comparison.spread > 0 ? t.saving(money(comparison.spread)) : t.samePrice}
+      </p>
+
+      <div className="store-comparison-scroll">
+        <table className="store-comparison-table">
+          <thead>
+            <tr>
+              <th scope="col">{t.columnStore}</th>
+              <th scope="col">{t.columnPrice}</th>
+              <th scope="col">{t.columnSizes}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {comparison.listings.map((listing) => {
+              const isLowest = listing.priceEur === comparison.lowestPrice;
+              return (
+                <tr className={isLowest ? "is-lowest" : undefined} key={listing.listingId}>
+                  {/* Availability sits under the store name rather than in a
+                      fourth column — the detail card is too narrow for four,
+                      and a clipped column is worse than a stacked one. */}
+                  <th scope="row">
+                    <Link href={withLocale(`/search?store=${listing.store.id}`, locale)}>
+                      {listing.store.label[locale]}
+                    </Link>
+                    {listing.store.id === viewingStoreId ? (
+                      <span className="store-comparison-tag">{t.thisStore}</span>
+                    ) : null}
+                    <span className={`availability availability-${listing.availability}`}>
+                      <span className="sr-only">{t.columnAvailability}: </span>
+                      {formatAvailabilityLabel(listing.availability, locale)}
+                    </span>
+                  </th>
+                  <td>
+                    <strong>{money(listing.priceEur)}</strong>
+                    {listing.oldPriceEur ? <del>{money(listing.oldPriceEur)}</del> : null}
+                    {isLowest ? <span className="store-comparison-best">{t.best}</span> : null}
+                  </td>
+                  <td className="store-comparison-sizes-cell">{listing.sizes.join(" · ")}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {comparison.sizesNotEverywhere.length > 0 ? (
+        <p className="store-comparison-sizes">
+          {t.partialSizes(comparison.sizesNotEverywhere.join(", "))}
+        </p>
+      ) : null}
+      <p className="store-comparison-note">{t.syntheticNote}</p>
+    </section>
+  );
+}
+
 function ProductSummary({
   className,
   locale,
@@ -108,9 +186,11 @@ function ProductSummary({
 }
 
 export function ProductDetailView({
+  comparison,
   product,
   storeLabels,
 }: {
+  comparison: ProductComparison | null;
   product: MockProduct;
   storeLabels: { en: string; lt: string } | null;
 }) {
@@ -194,6 +274,14 @@ export function ProductDetailView({
                 : "Use the two images to compare the item on its own and in a styled look."}
             </p>
           </section>
+
+          {comparison ? (
+            <StoreComparison
+              comparison={comparison}
+              locale={locale}
+              viewingStoreId={product.public_store_id}
+            />
+          ) : null}
 
           <section className="product-size-section">
             <div>
