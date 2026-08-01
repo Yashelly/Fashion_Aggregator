@@ -91,7 +91,7 @@ const LEXICON: Record<string, string[]> = {
   overshirt: ["overshirt", "overshirts", "shacket"],
   vest: ["vest", "vests", "gilet", "liemene"],
   trousers: ["trousers", "trouser", "pants", "kelnes", "kelniu", "kelnems", "kelniuku"],
-  jeans: ["jeans", "denim", "dzinsai", "dzinsu", "dzinsus"],
+  jeans: ["jeans", "dzinsai", "dzinsu", "dzinsus"],
   joggers: ["joggers", "jogger", "sportines"],
   sweatpants: ["sweatpants", "trackpants", "sportkelnes"],
   leggings: ["leggings", "legging", "tamprios", "tampres"],
@@ -135,11 +135,16 @@ const LEXICON: Record<string, string[]> = {
   waterproof: ["waterproof", "weatherproof", "neperslampamas", "neperslampami", "neperlyjamas"],
   ribbed: ["ribbed", "rumbuotas"],
   quilted: ["quilted", "puffer", "padded", "dygsniuotas", "pukine"],
+  // A fabric, deliberately not a surface form of `jeans`: "denim jacket"
+  // asks for a jacket made of denim, and treating the word as the garment
+  // let every pair of jeans through the garment gate.
+  denim: ["denim", "dzinsinis", "dzinsine"],
   // "trail" is a property of the product; "hiking" is what the shopper is
   // doing. They must stay separate canonicals — the whole fix depends on the
   // intent reaching the property rather than being the same token.
   trail: ["trail"],
   utility: ["utility", "cargo", "tactical", "darbinis"],
+  tracksuit: ["tracksuit", "tracksuits", "sportkostiumas"],
   graphic: ["graphic", "print", "printed", "logo", "piesinys", "printas", "spauda"],
 
   // Motifs and construction read off the product photos. Only vocabulary the
@@ -327,19 +332,23 @@ const ASSOCIATIONS: Record<string, Array<[string, number]>> = {
   sweater: [["knitwear", 0.9], ["cardigan", 0.6]],
   knitwear: [["sweater", 0.9], ["cardigan", 0.85]],
   cardigan: [["knitwear", 0.9]],
-  top: [["tee", 0.8], ["shirt", 0.75], ["tank", 0.75]],
+  top: [["tee", 0.8], ["shirt", 0.75], ["tank", 0.75], ["sweatshirt", 0.6]],
   tee: [["top", 0.7]],
   outerwear: [["jacket", 0.9], ["coat", 0.9], ["parka", 0.85], ["windbreaker", 0.8], ["vest", 0.7]],
   jacket: [["outerwear", 0.8]],
   coat: [["outerwear", 0.8]],
   accessories: [["belt", 0.8], ["cap", 0.8], ["scarf", 0.8], ["socks", 0.75], ["jewelry", 0.8], ["bag", 0.4]],
-  jewelry: [["accessories", 0.8]],
-  denim: [["jeans", 0.95]],
-  jeans: [["denim", 0.9]],
+  // A tracksuit is a set, not a row in this catalog; it resolves to the
+  // pieces that make one up.
+  tracksuit: [["sweatpants", 0.9], ["joggers", 0.9], ["jacket", 0.7], ["sport", 0.8]],
+  denim: [["jeans", 0.9]],
+  jeans: [["denim", 0.85]],
   // "kelnės" is the general Lithuanian word for legwear, so trousers has to
   // reach its siblings. English "trousers" is narrower but shares the entry;
   // the weights keep actual trousers ahead.
   trousers: [["jeans", 0.7], ["joggers", 0.7], ["sweatpants", 0.65], ["leggings", 0.6], ["shorts", 0.45]],
+  joggers: [["sweatpants", 0.85]],
+  sweatpants: [["joggers", 0.85]],
 
   // Colour families expand to the concrete colours present in the catalog.
   dark: [["black", 0.9], ["grey", 0.7], ["blue", 0.6], ["brown", 0.6], ["green", 0.5]],
@@ -398,7 +407,7 @@ const GARMENT_TERMS = new Set([
   "blazer", "jacket", "coat", "parka", "windbreaker", "overshirt", "vest", "trousers", "jeans",
   "joggers", "sweatpants", "leggings", "shorts", "skirt", "dress", "sneakers", "boots", "shoes",
   "bag", "tote", "backpack", "crossbody", "belt", "cap", "scarf", "socks", "jewelry",
-  "accessories", "outerwear",
+  "accessories", "outerwear", "tracksuit",
 ]);
 
 /**
@@ -422,7 +431,7 @@ const EXPANSION_FLOOR = 0.2;
 const SECOND_HOP_DECAY = 0.7;
 
 /** Absolute relevance a product must clear to be shown at all. */
-export const RELEVANCE_FLOOR = 0.2;
+export const RELEVANCE_FLOOR = 0.25;
 /** …and it must also be within this fraction of the best result. */
 export const RELEVANCE_RATIO = 0.55;
 
@@ -475,15 +484,23 @@ function editDistanceWithin(a: string, b: string, limit: number): number {
 }
 
 /**
- * Resolve a typed token to a canonical term. Exact hits win; only tokens of 5+
- * characters get a one-edit rescue, because at four characters a single edit
- * turns real words into different real words ("tank" → "tan").
+ * Resolve a token to a canonical term.
+ *
+ * `allowFuzzy` must be false for catalog text. The one-edit rescue exists for
+ * what a shopper types, where "snekaers" is obviously "sneakers"; applied to
+ * product data it silently rewrites the catalog. It read the "dropped_shoulder"
+ * on a shirt as "cropped" — one letter — and every dropped-shoulder garment in
+ * the catalog then answered "cropped top" as well as the actual cropped ones.
+ *
+ * Only tokens of 5+ characters are rescued even for queries: at four
+ * characters a single edit turns real words into different real words
+ * ("tank" → "tan").
  */
-function canonicalize(token: string): string | undefined {
+function canonicalize(token: string, allowFuzzy = true): string | undefined {
   const direct = surfaceToCanonical.get(token);
   if (direct) return direct;
 
-  if (token.length >= 5) {
+  if (allowFuzzy && token.length >= 5) {
     let best: string | undefined;
     let bestDistance = 2;
     for (const candidate of vocabulary) {
@@ -574,6 +591,13 @@ function buildQueryConcepts(terms: string[]): QueryConcept[] {
 
     for (const [firstHop, firstWeight] of ASSOCIATIONS[term] ?? []) {
       raise(firstHop, firstWeight);
+
+      // Naming a kind of thing ends the walk. "Office" reaching "trousers" is
+      // the point of the graph; carrying on from trousers to its siblings made
+      // jeans a good answer to "smart trousers for the office". A garment is
+      // where a concept lands, not somewhere it passes through.
+      if (GARMENT_TERMS.has(firstHop)) continue;
+
       for (const [secondHop, secondWeight] of ASSOCIATIONS[firstHop] ?? []) {
         raise(secondHop, firstWeight * secondWeight * SECOND_HOP_DECAY);
       }
@@ -588,7 +612,7 @@ export function buildProductTerms(product: SearchableProduct): Map<string, numbe
   const terms = new Map<string, number>();
   const add = (value: string, weight: number) => {
     for (const token of tokenize(normalizeText(value))) {
-      const canonical = canonicalize(token) ?? token;
+      const canonical = canonicalize(token, false) ?? token;
       const existing = terms.get(canonical) ?? 0;
       if (weight > existing) terms.set(canonical, weight);
     }
@@ -619,7 +643,7 @@ function addQualitiesOnly(terms: Map<string, number>, value: string | undefined,
   if (!value) return;
 
   for (const token of tokenize(normalizeText(value))) {
-    const canonical = canonicalize(token) ?? token;
+    const canonical = canonicalize(token, false) ?? token;
     if (GARMENT_TERMS.has(canonical)) continue;
     const existing = terms.get(canonical) ?? 0;
     if (weight > existing) terms.set(canonical, weight);
