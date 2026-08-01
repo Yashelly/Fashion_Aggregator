@@ -1,29 +1,48 @@
 :root {
   color-scheme: light;
-  --color-canvas: #f4efe7;
-  --color-surface: #fffdf8;
-  --color-surface-soft: #e9e2d8;
+  /*
+   * Light mode, Phase 3: crisp white canvas over near-black ink, replacing the
+   * warm paper/espresso it launched with (decided in
+   * .omc/specs/deep-interview-vibewear-strategic-vision.md §5).
+   *
+   * The neutrals are deliberately NEUTRAL. The Variant B block those values
+   * came from carried a lavender cast — its greys ran 13 to 24 points bluer
+   * than red — which was a side effect of that comparison rather than part of
+   * what was chosen, and a default blue-purple palette with no brand reason
+   * behind it is exactly what DESIGN.md tells us to question.
+   */
+  --color-canvas: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f4f4f5;
   --color-surface-elevated: #ffffff;
-  --color-ink: #171412;
-  --color-ink-muted: #625b54;
-  --color-line: #c7bdb1;
-  --color-accent: #a72e22;
-  --color-focus: #2847c7;
-  --color-acid: #d4ee70;
-  --color-success: #176447;
-  --color-warning: #775207;
-  --color-error: #ad2a20;
+  --color-ink: #0d0d0d;
+  --color-ink-muted: #5a5a60;
+  --color-line: #dcdcdf;
+  /*
+   * Two accent roles, not one. `accent` is drawn as text and borders, so it is
+   * held to 4.5:1 on white. `acid` is a FILL sitting under near-black text —
+   * inverse buttons, demo-store chips, category hovers — so it has to stay
+   * light enough for `--color-on-acid` to clear the same bar. The acid-lime
+   * this replaces was rejected; the fill is now a tint of the accent hue so
+   * the two cannot drift apart.
+   */
+  --color-accent: #b7410e;
+  --color-acid: #ffd9c2;
+  --color-on-acid: #0d0d0d;
+  --color-focus: #3150ff;
+  --color-success: #0a7a4f;
+  --color-warning: #8a5a00;
+  --color-error: #c81c10;
   --color-on-dark: #fffaf2;
   --color-dark-surface: #1a1816;
   --color-dark-muted: #c9c1b7;
   --color-dark-line: #514b45;
-  --color-on-acid: #171412;
-  --color-placeholder-a: #ddd4c8;
+  --color-placeholder-a: #e4e4e7;
   --color-placeholder-b: #3150c1;
   --color-placeholder-c: #d9a18b;
-  --color-placeholder-d: #d4ee70;
-  --color-product-media: #f2ede6;
-  --shadow: 0 18px 45px rgba(30, 24, 20, 0.12);
+  --color-placeholder-d: #ffd9c2;
+  --color-product-media: #f4f4f5;
+  --shadow: 0 18px 45px rgba(0, 0, 0, 0.10);
   --gutter: clamp(16px, 3.35vw, 48px);
   --max: 1376px;
   --radius-sm: 3px;
@@ -409,9 +428,15 @@ summary {
   margin: 0 0 20px;
 }
 
+/*
+ * The eyebrow is a brand moment, so it follows the accent. It used to be
+ * painted with --color-focus, which is the keyboard focus-ring colour: a
+ * functional token borrowed for decoration. That is why the label read blue
+ * next to every accent we tried.
+ */
 .preview-kicker,
 .route-eyebrow {
-  color: var(--color-focus);
+  color: var(--color-accent);
 }
 
 .hero-copy h1,
