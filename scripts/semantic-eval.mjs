@@ -80,6 +80,13 @@ function loadProducts() {
  * `relevant` is the full set a shopper would accept. `mustRank` (optional) are
  * the items that have to appear in the top 5 for the query to count as passing
  * — for broad queries, ordering is the whole product.
+ *
+ * `maxResults` (optional) caps how much may come back at all. This exists
+ * because precision@k only inspects the top of the list and is blind to a
+ * bloated tail: "what should i wear to the office" once returned 38 of 64
+ * products — sweatpants and graphic tees included — while scoring a clean
+ * 25/25 here. The caps are judgements about what a shopper should be shown,
+ * set independently of what the code currently returns.
  */
 const QUERY_SET = [
   {
@@ -94,16 +101,19 @@ const QUERY_SET = [
   },
   {
     query: "what should i wear to the office",
+    maxResults: 20,
     intent: "occasion",
     relevant: ["MOCK-007", "MOCK-052", "MOCK-002", "MOCK-049", "MOCK-063", "MOCK-001", "MOCK-055", "MOCK-013", "MOCK-044", "MOCK-009"],
   },
   {
     query: "outfit for a night out",
+    maxResults: 12,
     intent: "occasion",
     relevant: ["MOCK-045", "MOCK-053", "MOCK-023", "MOCK-010", "MOCK-051", "MOCK-043", "MOCK-025"],
   },
   {
     query: "dress for a summer date",
+    maxResults: 6,
     intent: "occasion",
     relevant: ["MOCK-023", "MOCK-045", "MOCK-061", "MOCK-053"],
   },
@@ -117,20 +127,26 @@ const QUERY_SET = [
     // technical parka, which was a labelling error: it answers "rain" but it is
     // not what was asked for.
     query: "shoes for hiking in the rain",
+    maxResults: 6,
     intent: "weather / activity",
     relevant: ["MOCK-041", "MOCK-050", "MOCK-043"],
     mustRank: ["MOCK-041"],
   },
   {
+    // Trail sneakers were on this label in an earlier draft. They are
+    // waterproof, but they are not a jacket, so the garment rule now excludes
+    // them and it is right to — the label was the thing that was wrong.
     query: "waterproof jacket",
+    maxResults: 8,
     intent: "material",
-    relevant: ["MOCK-054", "MOCK-034", "MOCK-042", "MOCK-041"],
+    relevant: ["MOCK-054", "MOCK-034", "MOCK-042"],
   },
   {
     // "knit" names the subject, and the catalog holds exactly two knitted
     // pieces. An earlier draft of this label also listed hoodies and
     // sweatpants, which is what "cosy" alone would justify — not "knit".
     query: "cosy knit for the sofa",
+    maxResults: 4,
     intent: "mood + garment",
     relevant: ["MOCK-006", "MOCK-048"],
     mustRank: ["MOCK-006", "MOCK-048"],
@@ -143,18 +159,21 @@ const QUERY_SET = [
   },
   {
     query: "streetwear hoodie",
+    maxResults: 6,
     intent: "style + garment",
     relevant: ["MOCK-057", "MOCK-008", "MOCK-032", "MOCK-015"],
     mustRank: ["MOCK-057", "MOCK-008", "MOCK-032"],
   },
   {
     query: "black boots",
+    maxResults: 4,
     intent: "colour + garment",
     relevant: ["MOCK-043"],
     mustRank: ["MOCK-043"],
   },
   {
     query: "white sneakers",
+    maxResults: 8,
     intent: "colour + garment",
     relevant: ["MOCK-029", "MOCK-046", "MOCK-062", "MOCK-037"],
     mustRank: ["MOCK-029", "MOCK-046", "MOCK-062"],
@@ -166,11 +185,13 @@ const QUERY_SET = [
   },
   {
     query: "bag for my laptop",
+    maxResults: 6,
     intent: "use case",
     relevant: ["MOCK-024", "MOCK-047", "MOCK-060"],
   },
   {
     query: "jeans under 40",
+    maxResults: 4,
     intent: "price ceiling",
     relevant: ["MOCK-017"],
     mustRank: ["MOCK-017"],
@@ -199,12 +220,14 @@ const QUERY_SET = [
   },
   {
     query: "graphic tee",
+    maxResults: 6,
     intent: "print + garment",
     relevant: ["MOCK-022", "MOCK-039"],
     mustRank: ["MOCK-022", "MOCK-039"],
   },
   {
     query: "moteriškas sijonas",
+    maxResults: 6,
     intent: "department + garment / lt",
     relevant: ["MOCK-010", "MOCK-014", "MOCK-025", "MOCK-028"],
     mustRank: ["MOCK-010", "MOCK-014", "MOCK-025", "MOCK-028"],
@@ -216,12 +239,14 @@ const QUERY_SET = [
   },
   {
     query: "Emerald Satin Midi Dress",
+    maxResults: 6,
     intent: "exact title recall",
     relevant: ["MOCK-045"],
     mustRank: ["MOCK-045"],
   },
   {
     query: "snekaers",
+    maxResults: 10,
     intent: "typo tolerance",
     relevant: ["MOCK-029", "MOCK-030", "MOCK-033", "MOCK-037", "MOCK-041", "MOCK-046", "MOCK-062"],
   },
@@ -265,9 +290,10 @@ function evaluate({ verbose }) {
     const missingRequired = (testCase.mustRank ?? []).filter(
       (id) => !ranked.slice(0, Math.max(k, testCase.mustRank.length)).includes(id),
     );
-    const passed = precision >= PRECISION_TARGET && missingRequired.length === 0;
+    const overCap = testCase.maxResults !== undefined && ranked.length > testCase.maxResults;
+    const passed = precision >= PRECISION_TARGET && missingRequired.length === 0 && !overCap;
 
-    rows.push({ ...testCase, ranked, k, precision, recall, missingRequired, passed, returned: ranked.length });
+    rows.push({ ...testCase, ranked, k, precision, recall, missingRequired, overCap, passed, returned: ranked.length });
   }
 
   const passCount = rows.filter((row) => row.passed).length;
@@ -291,6 +317,9 @@ function evaluate({ verbose }) {
     console.log(`      top${MAX_K}: ${row.ranked.slice(0, MAX_K).join(", ") || "(none)"}`);
     if (row.missingRequired.length > 0) {
       console.log(`      missing required: ${row.missingRequired.join(", ")}`);
+    }
+    if (row.overCap) {
+      console.log(`      too many results: ${row.returned} returned, cap is ${row.maxResults}`);
     }
   }
 

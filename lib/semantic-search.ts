@@ -130,6 +130,11 @@ const LEXICON: Record<string, string[]> = {
   waterproof: ["waterproof", "weatherproof", "neperslampamas", "neperslampami", "neperlyjamas"],
   ribbed: ["ribbed", "rumbuotas"],
   quilted: ["quilted", "puffer", "padded", "dygsniuotas", "pukine"],
+  // "trail" is a property of the product; "hiking" is what the shopper is
+  // doing. They must stay separate canonicals — the whole fix depends on the
+  // intent reaching the property rather than being the same token.
+  trail: ["trail"],
+  utility: ["utility", "cargo", "tactical", "darbinis"],
   graphic: ["graphic", "print", "printed", "logo", "piesinys", "printas", "spauda"],
 
   // Colours and colour families
@@ -163,7 +168,7 @@ const LEXICON: Record<string, string[]> = {
   retro: ["retro", "vintage", "nineties", "y2k", "senovinis"],
   sport: ["sport", "sporty", "athletic", "active", "sportas", "sportinis", "sportiniai"],
   gym: ["gym", "training", "workout", "run", "running", "sportsale", "treniruote", "treniruotei", "begimas"],
-  outdoor: ["outdoor", "hiking", "trail", "lauko", "zygis", "zygiui", "gamta"],
+  outdoor: ["outdoor", "hiking", "hike", "lauko", "zygis", "zygiui", "zygiams", "zygio", "gamta"],
   travel: ["travel", "trip", "commute", "kelione", "kelionei", "keliauti"],
   campus: ["campus", "school", "university", "student", "mokykla", "universitetas", "studentas"],
   festival: ["festival", "festivalis", "festivaliui"],
@@ -235,8 +240,13 @@ const ASSOCIATIONS: Record<string, Array<[string, number]>> = {
   spring: [["jacket", 0.75], ["overshirt", 0.7], ["shirt", 0.7], ["windbreaker", 0.7], ["layering", 0.6]],
   summer: [["tank", 0.9], ["shorts", 0.9], ["linen", 0.9], ["tee", 0.85], ["dress", 0.8], ["skirt", 0.75], ["sneakers", 0.5]],
   beach: [["summer", 0.9], ["shorts", 0.85], ["tank", 0.85], ["linen", 0.8], ["dress", 0.75]],
-  rain: [["waterproof", 0.95], ["nylon", 0.9], ["parka", 0.9], ["windbreaker", 0.9], ["coat", 0.7], ["boots", 0.7], ["outerwear", 0.8]],
-  waterproof: [["nylon", 0.9], ["parka", 0.9], ["windbreaker", 0.9], ["outdoor", 0.7], ["outerwear", 0.7]],
+  // Same reasoning: leather boots keep rain off your feet, but they are a much
+  // weaker answer than a waterproof upper, so they must not outrank one.
+  rain: [["waterproof", 0.95], ["nylon", 0.9], ["parka", 0.9], ["windbreaker", 0.9], ["outerwear", 0.8], ["coat", 0.7], ["boots", 0.45]],
+  // No edge to `outerwear`: that would make every wool coat and blazer in the
+  // catalog a 70% answer to "waterproof", which is how wool coats used to rank
+  // in a waterproof search. The garment word already supplies the category.
+  waterproof: [["nylon", 0.9], ["parka", 0.9], ["windbreaker", 0.9], ["trail", 0.85], ["outdoor", 0.7]],
 
   office: [["blazer", 0.95], ["formal", 0.9], ["trousers", 0.85], ["shirt", 0.85], ["minimal", 0.6], ["coat", 0.6], ["belt", 0.6], ["boots", 0.5]],
   formal: [["blazer", 0.95], ["trousers", 0.85], ["dress", 0.7], ["shirt", 0.75], ["boots", 0.55], ["office", 0.7]],
@@ -246,13 +256,21 @@ const ASSOCIATIONS: Record<string, Array<[string, number]>> = {
   // dress; the pieces actually tagged party/evening/satin have to win, and
   // a plain shirt dress has to place below them.
   wedding: [["formal", 0.9], ["evening", 0.85], ["satin", 0.8], ["dress", 0.7], ["blazer", 0.7], ["jewelry", 0.6]],
-  party: [["evening", 0.95], ["satin", 0.85], ["velvet", 0.85], ["jewelry", 0.7], ["mini", 0.7], ["dress", 0.6], ["boots", 0.5], ["bright", 0.5]],
+  // "mini" is weak here on purpose: it means a short hem on a dress, but the
+  // same word means "small" on a bag, and the ranker cannot tell them apart
+  // from the title alone. At 0.7 it put a mini backpack in "night out".
+  party: [["evening", 0.95], ["satin", 0.85], ["velvet", 0.85], ["jewelry", 0.7], ["dress", 0.6], ["boots", 0.5], ["bright", 0.5], ["mini", 0.45]],
   evening: [["satin", 0.8], ["velvet", 0.8], ["jewelry", 0.7], ["dress", 0.6], ["formal", 0.6], ["boots", 0.5]],
   date: [["evening", 0.8], ["satin", 0.7], ["dress", 0.6], ["skirt", 0.5], ["jewelry", 0.6]],
 
   gym: [["sport", 0.95], ["leggings", 0.9], ["shorts", 0.85], ["joggers", 0.8], ["sweatpants", 0.75], ["tank", 0.7], ["sneakers", 0.7]],
   sport: [["leggings", 0.85], ["shorts", 0.8], ["joggers", 0.8], ["sneakers", 0.75], ["sweatpants", 0.7], ["cap", 0.5]],
-  outdoor: [["nylon", 0.85], ["parka", 0.8], ["sneakers", 0.75], ["boots", 0.75], ["windbreaker", 0.75], ["vest", 0.6]],
+  // Hiking is answered by trail/weatherproof construction, NOT by footwear in
+  // general. An earlier version pointed outdoor → sneakers at 0.75, which told
+  // the ranker that every platform sneaker in the catalog was a 75% answer to
+  // "hiking". The garment type is already carried by the word "shoes"; this
+  // edge only has to supply the qualities.
+  outdoor: [["trail", 0.95], ["waterproof", 0.9], ["nylon", 0.8], ["utility", 0.7], ["parka", 0.6], ["windbreaker", 0.6], ["boots", 0.5], ["vest", 0.5], ["sneakers", 0.35]],
   travel: [["backpack", 0.9], ["crossbody", 0.8], ["tote", 0.75], ["nylon", 0.7], ["sneakers", 0.6], ["cozy", 0.5]],
   campus: [["backpack", 0.85], ["hoodie", 0.8], ["sneakers", 0.75], ["jeans", 0.7], ["tee", 0.65], ["casual", 0.7]],
   festival: [["streetwear", 0.8], ["shorts", 0.6], ["cap", 0.6], ["graphic", 0.6]],
@@ -272,7 +290,9 @@ const ASSOCIATIONS: Record<string, Array<[string, number]>> = {
   // black sneakers alongside actual boots.
   shoes: [["sneakers", 0.9], ["boots", 0.9]],
   bag: [["tote", 0.85], ["backpack", 0.8], ["crossbody", 0.6]],
-  laptop: [["tote", 1], ["backpack", 1], ["bag", 0.7]],
+  // Likewise no generic `bag` edge — a waist bag does not hold a laptop. Any
+  // bag still reaches the results through the shopper's own word "bag".
+  laptop: [["tote", 1], ["backpack", 1]],
   hoodie: [["sweatshirt", 0.75]],
   sweatshirt: [["hoodie", 0.75]],
   sweater: [["knitwear", 0.9], ["cardigan", 0.6]],
@@ -345,18 +365,30 @@ const GARMENT_TERMS = new Set([
   "accessories", "outerwear",
 ]);
 
-/** How much a product is damped when it is not the kind of thing that was asked for. */
-const OFF_SUBJECT_PENALTY = 0.55;
+/**
+ * Naming a garment excludes other garments outright — it does not merely push
+ * them down. A shopper asking for shoes is not offered a slightly-less-good
+ * parka; the parka is a wrong answer, and burying it at position 10 still puts
+ * it on the page. Damping was tried first and let jackets through under the
+ * relative cut whenever the top result scored high enough.
+ */
+const EXCLUDE_OFF_SUBJECT = true;
 /** Expansion weight at which a garment still counts as answering the subject. */
 const GARMENT_TARGET_FLOOR = 0.5;
+
+/**
+ * Floor of the coverage multiplier — how much a product keeps when it answers
+ * only one of several concepts. Lower is stricter about partial answers.
+ */
+const COVERAGE_FLOOR = 0.4;
 
 const EXPANSION_FLOOR = 0.2;
 const SECOND_HOP_DECAY = 0.7;
 
 /** Absolute relevance a product must clear to be shown at all. */
-export const RELEVANCE_FLOOR = 0.12;
+export const RELEVANCE_FLOOR = 0.2;
 /** …and it must also be within this fraction of the best result. */
-export const RELEVANCE_RATIO = 0.32;
+export const RELEVANCE_RATIO = 0.55;
 
 const surfaceToCanonical = new Map<string, string>();
 for (const [canonical, surfaces] of Object.entries(LEXICON)) {
@@ -571,6 +603,7 @@ export function scoreProduct(
 ): ProductScore {
   let matched = 0;
   let total = 0;
+  let answered = 0;
   const matchedTerms: string[] = [];
 
   // Each concept contributes its single best answer. Listing "parka" and "coat"
@@ -586,6 +619,7 @@ export function scoreProduct(
     }
     if (best > 0) {
       matched += best;
+      answered += 1;
       matchedTerms.push(concept.term);
     }
   }
@@ -616,6 +650,16 @@ export function scoreProduct(
 
   let score = matched / total;
 
+  // Ignoring a word outright costs more than answering it badly.
+  //
+  // A plain average treats "waterproof jacket" as half-answered by a wool coat
+  // — it nails "jacket" and scores 0.6, which used to clear the cut and put
+  // wool coats in a waterproof search. Weighting by how many of the shopper's
+  // concepts got *any* answer separates "partly right" from "right about one
+  // half and silent on the other".
+  const coverage = total === 0 ? 1 : answered / total;
+  score *= COVERAGE_FLOOR + (1 - COVERAGE_FLOOR) * coverage;
+
   if (interpretation.wantsSale && product.old_price_eur) score += 0.08;
   if (interpretation.pricePreference) {
     const price = Number(product.price_eur);
@@ -625,8 +669,12 @@ export function scoreProduct(
     }
   }
 
-  if (garmentTargets && ![...garmentTargets].some((term) => productTerms.has(term))) {
-    score *= OFF_SUBJECT_PENALTY;
+  if (
+    EXCLUDE_OFF_SUBJECT &&
+    garmentTargets &&
+    ![...garmentTargets].some((term) => productTerms.has(term))
+  ) {
+    return { score: 0, matchedTerms };
   }
 
   return { score: Math.min(score, 1), matchedTerms };
