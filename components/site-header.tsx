@@ -74,6 +74,15 @@ function ThemeToggle({ locale }: { locale: Locale }) {
 export function SiteHeader() {
   const pathname = usePathname();
   const visiblePathname = publicPathname(pathname);
+  /*
+   * The title page states the brand once, in an h1 up to 132px tall. Repeating
+   * it in the header — and again in the footer, which `/` also drops — put
+   * three all-caps wordmarks on one screen. So `/` gets the utilities only.
+   * The language switcher is the reason this bar survives at all: a Lithuanian
+   * shopper landing here has to be able to reach LT without first navigating
+   * into the app. Everything else is one CTA away on /search.
+   */
+  const isTitlePage = visiblePathname === "/";
   const params = useSearchParams();
   const locale = getLocale({ lang: params.get("lang") ?? undefined });
   const t = copy[locale].header;
@@ -101,33 +110,39 @@ export function SiteHeader() {
   return (
     <>
       <a className="skip-link" href="#main-content">{copy[locale].common.skipToContent}</a>
-      <header className="site-header">
-        <Link className="brand" href={withLocale("/", locale)} aria-label={locale === "lt" ? "Weft pradinis puslapis" : "Weft home"}>
-          WEFT
-        </Link>
-        <nav className="desktop-nav" aria-label={t.mainNavAria}>
-          {nav.map(({ href, label, temporary }) => (
-            <Link
-              aria-current={visiblePathname === href ? "page" : undefined}
-              className={temporary ? "nav-temporary" : undefined}
-              href={withLocale(href, locale)}
-              key={href}
-              title={temporary ? (locale === "lt" ? "Laikinas puslapis" : "Temporary page") : undefined}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
-        <div className="header-tools">
-          <Link
-            aria-current={visiblePathname === "/account" ? "page" : undefined}
-            aria-label={accountLabel}
-            className="account-link"
-            href={withLocale("/account", locale)}
-            title={accountLabel}
-          >
-            <UserRound aria-hidden="true" size={19} />
+      <header className={isTitlePage ? "site-header site-header-title" : "site-header"}>
+        {!isTitlePage && (
+          <Link className="brand" href={withLocale("/", locale)} aria-label={locale === "lt" ? "Weft pradinis puslapis" : "Weft home"}>
+            WEFT
           </Link>
+        )}
+        {!isTitlePage && (
+          <nav className="desktop-nav" aria-label={t.mainNavAria}>
+            {nav.map(({ href, label, temporary }) => (
+              <Link
+                aria-current={visiblePathname === href ? "page" : undefined}
+                className={temporary ? "nav-temporary" : undefined}
+                href={withLocale(href, locale)}
+                key={href}
+                title={temporary ? (locale === "lt" ? "Laikinas puslapis" : "Temporary page") : undefined}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        )}
+        <div className="header-tools">
+          {!isTitlePage && (
+            <Link
+              aria-current={visiblePathname === "/account" ? "page" : undefined}
+              aria-label={accountLabel}
+              className="account-link"
+              href={withLocale("/account", locale)}
+              title={accountLabel}
+            >
+              <UserRound aria-hidden="true" size={19} />
+            </Link>
+          )}
           <ThemeToggle locale={locale} />
           <nav className="language-switcher" aria-label={t.languageAria}>
             <a
@@ -146,6 +161,7 @@ export function SiteHeader() {
               LT
             </a>
           </nav>
+          {!isTitlePage && (
           <details className="mobile-menu">
             <summary aria-label={locale === "lt" ? "Atverti navigaciją" : "Open navigation"}><Menu aria-hidden="true" size={20} /></summary>
             <nav aria-label={t.mainNavAria}>
@@ -187,6 +203,7 @@ export function SiteHeader() {
               </div>
             </nav>
           </details>
+          )}
         </div>
       </header>
     </>

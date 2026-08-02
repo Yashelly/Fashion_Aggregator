@@ -81,13 +81,21 @@
 
 ## Design principles
 
-1. **Search first:** The search field is the strongest action on home and search.
+1. **Search first:** Search is the strongest action on every surface that has
+   one. Home is the exception by design: it is a title page whose single CTA
+   leads to search, so search is still the only thing it asks for.
 2. **Fashion editorial, not editorial system:** Use typography, contrast, and
    space for energy; do not use arbitrary issue/index numbers.
 3. **Public-safe by construction:** Only strict neutral store mappings may reach
    public labels or URLs.
 4. **Demo without apology:** State the synthetic boundary clearly once, then let
    shoppers browse normally.
+5. **Say the name once:** The brand appears once per screen. Home states it in
+   its h1 and therefore carries no header wordmark and no footer; every other
+   page states it in the header wordmark, so page titles and repeated card
+   labels must not name it again ("Search", not "Search Weft"; "The edit", not
+   "Weft edit"). Prose on `/about` and the legal pages is exempt — there,
+   naming the service is the content.
 5. **Mobile is first-class:** No clipped display text, hidden actions, tiny type,
    or desktop-only interaction.
 
@@ -132,7 +140,9 @@
 
 - Supported checks: 375/390, 768, 1024, and 1440 CSS pixels.
 - Mobile header keeps brand, theme, and menu visible; language controls move into
-  the menu on narrow screens.
+  the menu on narrow screens. The title page has no brand and no menu, so it is
+  the one place the language control stays visible at every width — otherwise a
+  Lithuanian shopper landing on `/` could not reach LT without entering the app.
 - Home display text must fit within the viewport without horizontal overflow.
 - Results use two columns on normal phones, one below 350px, three on tablet, and
   four on desktop.

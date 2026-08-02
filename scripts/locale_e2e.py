@@ -96,6 +96,29 @@ def seed_locale(context: BrowserContext, locale: str, page: Page | None = None) 
 SEARCH_LINK = '.desktop-nav a[href^="/search"]'
 MOBILE_SEARCH_LINK = '.mobile-menu nav a[href^="/search"]'
 
+# The title page carries no header nav, no burger and no footer: it states the
+# brand once, in its h1, and offers a single way into the app. So on `/` the
+# CTA is both the only navigation and the only element whose copy proves the
+# rendered locale.
+TITLE_PAGE_CTA = ".title-page-cta"
+
+
+def on_title_page(page: Page) -> bool:
+    return urlparse(page.url).path == "/"
+
+
+def locale_probe(page: Page, locale: str) -> dict[str, str]:
+    """Selector plus expected text proving the locale actually rendered."""
+    if on_title_page(page):
+        return {
+            "selector": TITLE_PAGE_CTA,
+            "text": "Pradėti paiešką" if locale == "lt" else "Start searching",
+        }
+    return {
+        "selector": SEARCH_LINK,
+        "text": "Paieška" if locale == "lt" else "Search",
+    }
+
 # Breakpoints from app/globals.css. The header serves the same links from two
 # different places depending on width, so which one is clickable is decided by
 # the viewport, not by probing — `is_visible()` is an instantaneous check and
@@ -117,7 +140,14 @@ def click_search(page: Page) -> None:
     Below the desktop-nav breakpoint the same link is only reachable through
     the collapsed `<details>` menu. Both render the same `nav.search` label, so
     either satisfies the locale assertions.
+
+    The title page has neither: its CTA is the one way in, at every viewport.
     """
+    if on_title_page(page):
+        link = page.locator(TITLE_PAGE_CTA)
+        link.wait_for(state="visible")
+        link.click()
+        return
     if page.viewport_size["width"] >= DESKTOP_NAV_MIN_WIDTH:
         link = page.locator(SEARCH_LINK)
         link.wait_for(state="visible")
@@ -130,7 +160,7 @@ def click_search(page: Page) -> None:
 
 
 def wait_for_locale(page: Page, locale: str) -> None:
-    expected_search = "Paieška" if locale == "lt" else "Search"
+    probe = locale_probe(page, locale)
     expected_aria = "Kalba" if locale == "lt" else "Language"
     page.locator("html").wait_for(state="attached")
     page.wait_for_function(
@@ -145,9 +175,9 @@ def wait_for_locale(page: Page, locale: str) -> None:
             && switcher?.getAttribute('aria-label') === expected.aria;
         }""",
         arg={
-            "search": expected_search,
+            "search": probe["text"],
             "aria": expected_aria,
-            "selector": SEARCH_LINK,
+            "selector": probe["selector"],
         },
     )
     page.wait_for_function(
@@ -181,9 +211,15 @@ def click_language(page: Page, locale: str) -> None:
 
     `.language-switcher` is `display: none` below 640px, where the same two
     links are served from `.mobile-menu-locales` inside the collapsed menu.
+    The title page is the exception: it has no collapsed menu, so globals.css
+    keeps its switcher visible at every width rather than stranding a
+    Lithuanian shopper on an English landing page.
     """
     label = "LT" if locale == "lt" else "EN"
-    if page.viewport_size["width"] >= LANGUAGE_SWITCHER_MIN_WIDTH:
+    if (
+        on_title_page(page)
+        or page.viewport_size["width"] >= LANGUAGE_SWITCHER_MIN_WIDTH
+    ):
         link = page.locator(".language-switcher a", has_text=label)
     else:
         open_mobile_menu(page)
@@ -425,6 +461,11 @@ def run_history_and_stress_matrix(browser) -> int:
 
     page.goto(BASE_URL + "/", wait_until="domcontentloaded")
     click_language(page, "lt")
+    # The title page has no header nav, so the app is entered through its CTA;
+    # the header links only exist from /search onwards.
+    click_search(page)
+    page.wait_for_function("() => location.pathname === '/search'")
+    assert_locale(page, context, "lt")
     page.locator('.desktop-nav a[href^="/stores"]').click()
     page.wait_for_function("() => location.pathname === '/stores'")
     assert_locale(page, context, "lt")
@@ -435,7 +476,7 @@ def run_history_and_stress_matrix(browser) -> int:
     assert urlparse(page.url).path == "/stores"
     assert_locale(page, context, "lt")
     page.go_back(wait_until="domcontentloaded")
-    assert urlparse(page.url).path == "/"
+    assert urlparse(page.url).path == "/search"
     assert_locale(page, context, "lt")
     page.go_forward(wait_until="domcontentloaded")
     assert urlparse(page.url).path == "/stores"
@@ -452,7 +493,11 @@ def run_history_and_stress_matrix(browser) -> int:
             ('.desktop-nav a[href^="/stores"]', "/stores"),
             ('.desktop-nav a[href^="/how-it-works"]', "/how-it-works"),
             ('.desktop-nav a[href^="/about"]', "/about"),
-            ('.brand', "/"),
+            # The brand link still exists everywhere except the title page
+            # itself, and still goes home; getting back out of `/` is the CTA's
+            # job now that the header nav and footer are gone from that page.
+            (".brand", "/"),
+            (TITLE_PAGE_CTA, "/search"),
         ):
             page.locator(selector).click()
             page.wait_for_function(
@@ -484,7 +529,7 @@ def run_atomic_switch_matrix(browser) -> int:
             page.evaluate(
                 """() => {
                   document.querySelector('.language-switcher a:last-child').click();
-                  document.querySelector('.desktop-nav a[href^="/search"]').click();
+                  document.querySelector('.title-page-cta').click();
                 }"""
             )
             page.wait_for_function(
@@ -510,7 +555,7 @@ def run_atomic_switch_matrix(browser) -> int:
             page.evaluate(
                 """() => {
                   document.querySelector('.language-switcher a:first-child').click();
-                  document.querySelector('.desktop-nav a[href^="/search"]').click();
+                  document.querySelector('.title-page-cta').click();
                 }"""
             )
             page.wait_for_function(
