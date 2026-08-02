@@ -33,6 +33,7 @@ generated-demo-products/
 public/demo-products/*.png
 .asset-cache/
 .tmp/
+artifacts/
 .codex/*
 !.codex/agents/
 !.codex/agents/**

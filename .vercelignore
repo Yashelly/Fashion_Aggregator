@@ -10,6 +10,11 @@ skills-lock.json
 # Optimized product and matching -tryon WebP files are deployed with the app.
 public/demo-products/*.png
 
+# The hero keyframes are the stills ffmpeg cross-faded into the wardrobe loop.
+# Only the assembled hero-loop.{webm,mp4} and hero-poster.jpg are referenced by
+# the app; the 33 MB of sources behind them are build inputs, not assets.
+public/hero-assets/*.png
+
 # Design-kit transfer artifacts
 CODEX_DESIGN_FIGMA_KIT_INSTALL_AND_USE_PROMPT.md
 codex-design-figma-kit-*.zip
