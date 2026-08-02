@@ -50,6 +50,13 @@
   --shadow: 0 18px 45px rgba(0, 0, 0, 0.10);
   --gutter: clamp(16px, 3.35vw, 48px);
   --max: 1376px;
+  /*
+   * The header height is load-bearing beyond the header: the title page sizes
+   * itself to the remaining viewport from it, the product gallery sticks below
+   * it, and the nav links fill it. It was repeated as a literal in five places
+   * and in a mobile override, so changing it meant changing all six in step.
+   */
+  --header-h: 64px;
   --radius-sm: 3px;
   --radius-md: 10px;
   --transition: 180ms ease;
@@ -198,7 +205,7 @@ summary {
 
 .header-skeleton {
   border-bottom: 1px solid var(--color-line);
-  height: 76px;
+  height: var(--header-h);
 }
 
 .site-header {
@@ -208,7 +215,7 @@ summary {
   border-bottom: 1px solid var(--color-line);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  height: 76px;
+  height: var(--header-h);
   padding: 0 var(--gutter);
   position: sticky;
   top: 0;
@@ -247,7 +254,7 @@ summary {
   align-items: center;
   border-bottom: 3px solid transparent;
   display: flex;
-  height: 76px;
+  height: var(--header-h);
 }
 
 .desktop-nav a:hover,
@@ -407,7 +414,7 @@ summary {
   border-inline: 1px solid var(--color-line);
   display: grid;
   isolation: isolate;
-  min-height: calc(100svh - 76px);
+  min-height: calc(100svh - var(--header-h));
   padding: clamp(40px, 7vw, 96px) clamp(24px, 5vw, 72px);
   position: relative;
 }
@@ -453,8 +460,46 @@ summary {
   max-width: 46ch;
 }
 
-.title-page-cta {
-  margin-top: 36px;
+/*
+ * The one action on the page, so it is the one saturated thing on it — the
+ * hero loop is greyscale and the rest of the copy is ink or muted grey, so
+ * rust is found before anything else without needing to be large.
+ *
+ * The text colour has to flip with the theme. Light mode paints near-white on
+ * rust (#fffaf2 on #b7410e = 5.4:1); dark mode's accent is the lighter coral,
+ * where the same near-white would fall to 2.3:1 and fail, so it takes the
+ * near-black instead (#0d0d0d on #ff7867 = 7.5:1). Both clear the 4.5:1 AA
+ * floor; neither ratio survives if the two are swapped.
+ */
+/*
+ * Written as `.button.title-page-cta`, like `.button.secondary` — `.button`
+ * itself is defined ~390 lines further down, so a single-class selector here
+ * carries equal specificity and loses on source order alone.
+ */
+.button.title-page-cta {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-on-dark);
+  font-size: 17px;
+  margin-top: 40px;
+  min-height: 60px;
+  padding: 16px 30px;
+}
+
+:root[data-theme="dark"] .button.title-page-cta {
+  color: var(--color-on-acid);
+}
+
+.button.title-page-cta:hover {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-canvas);
+}
+
+/* The dark rule above outranks the hover rule, so the hover colour has to be
+   restated at that weight or the hover state keeps the near-black text. */
+:root[data-theme="dark"] .button.title-page-cta:hover {
+  color: var(--color-canvas);
 }
 
 /*
@@ -1270,7 +1315,7 @@ summary {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   min-width: 0;
   position: sticky;
-  top: calc(76px + 24px);
+  top: calc(var(--header-h) + 24px);
 }
 
 .product-gallery figure {
@@ -1658,12 +1703,8 @@ summary {
 }
 
 @media (max-width: 767px) {
-  .site-header {
-    height: 68px;
-  }
-
-  .header-skeleton {
-    height: 68px;
+  :root {
+    --header-h: 56px;
   }
 
   .brand {
