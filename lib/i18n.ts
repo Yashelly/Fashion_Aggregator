@@ -223,7 +223,9 @@ export const copy = {
       cta: "Start searching",
     },
     search: {
-      title: "Search Weft",
+      // Not "Search Weft": the header wordmark sits directly above this h1, so
+      // naming the brand again put two display-size wordmarks on one screen.
+      title: "Search",
       lead:
         "Search by item, mood, color, store, or occasion.",
       labels: {
@@ -382,7 +384,9 @@ export const copy = {
           "Choose a store to see its current selection.",
         browseCta: "Browse products",
         demoNotice: "Purchase links are not enabled yet.",
-        fallbackDescription: "A curated Weft selection.",
+        // Printed once per store card, so the brand name here appeared six
+        // times on /stores. The reader already knows whose site they are on.
+        fallbackDescription: "A curated fashion selection.",
       },
       terms: {
         title: "Terms of Use",
@@ -447,7 +451,7 @@ export const copy = {
       cta: "Pradėti paiešką",
     },
     search: {
-      title: "Weft paieška",
+      title: "Paieška",
       lead:
         "Ieškok pagal prekę, nuotaiką, spalvą, parduotuvę ar progą.",
       labels: {
@@ -606,7 +610,7 @@ export const copy = {
           "Pasirinkite parduotuvę ir peržiūrėkite jos atranką.",
         browseCta: "Naršyti prekes",
         demoNotice: "Pirkimo nuorodos dar neįjungtos.",
-        fallbackDescription: "Weft mados atranka.",
+        fallbackDescription: "Atrinkta mados kolekcija.",
       },
       terms: {
         title: "Naudojimo sąlygos",

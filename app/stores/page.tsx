@@ -48,7 +48,10 @@ export default async function StoresPage({ searchParams }: StoresPageProps) {
                 <ShoppingBag aria-hidden="true" size={24} />
               </div>
               <div className="demo-store-copy">
-                <p className="store-eyebrow">{locale === "lt" ? "WEFT ATRANKA" : "WEFT EDIT"}</p>
+                {/* The brand used to lead this line, which printed it once per
+                    store card. The eyebrow's job is to say the selection is
+                    curated, not to say whose site you are on. */}
+                <p className="store-eyebrow">{locale === "lt" ? "ATRANKA" : "THE EDIT"}</p>
                 <h2>{storeLabel}</h2>
                 <p>{copy.fallbackDescription}</p>
                 <span>

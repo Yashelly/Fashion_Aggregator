@@ -1836,6 +1836,16 @@ summary {
     display: none;
   }
 
+  /*
+   * Except on the title page. Elsewhere the switcher collapses into the burger
+   * menu at this width; `/` has no burger — it carries the utilities alone, so
+   * the wordmark is stated once — and a Lithuanian shopper landing there on a
+   * phone has to be able to reach LT without first entering the app.
+   */
+  .site-header-title .language-switcher {
+    display: flex;
+  }
+
   .mobile-menu-locales {
     display: flex;
   }
