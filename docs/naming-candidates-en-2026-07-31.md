@@ -310,10 +310,48 @@ the primary or a redirect is deferred until there is a second market, but it
 should be registered alongside `weft.lt` rather than after someone else takes
 it.
 
-**Open risk — not cleared.** Two companies already trade under this name:
-Weft Apparel (US, made-to-order clothing manufacturer — Nice class 25) and
-Weft Technologies (digital product consultancy — different sector). This
-product is retail search and comparison (class 35), and both use compound
-domains rather than bare "weft", so the classes appear to differ. That is a
-reading of public web results, NOT a legal clearance. Run EUIPO TMview before
-any spend on logo, packaging or print.
+**Open risk — partially cleared 2026-08-04.** The original note here read from
+public web results only and asked for a TMview run before any spend. That run
+has now been done, via TMview (EUIPO + all EU national registries + WIPO +
+non-EU offices). 455 records contain "weft"; **8 are the exact mark "WEFT"**:
+
+| Office | Status | Nice classes | Filed | Holder |
+|---|---|---|---|---|
+| EUIPO | Ended | 24 | 1998-12-31 | WEFT S.r.l. |
+| US | Ended | 35 | 2010-07-20 | VISMO, LLC |
+| Germany | Expired | 16, 41, 42 | 2015-05-07 | Universität Paderborn |
+| UK | Expired | 14 | 2002-08-16 | Theo Fennell plc |
+| China | Registered | 11 | 2018-07-25 | 纬创照明科技(深圳)有限公司 |
+| China | Registered | 7 | 2023-05-08 | 上海纬起科技发展有限公司 |
+| **UK** | **Registered** | **35, 42** | **2026-03-09** | **WEFT Limited** |
+| US | Registered | 42 | 2017-07-11 | Computational Textiles, Inc. |
+
+**The EU is clear.** The only European "WEFT" marks are the Italian class-24
+registration (Ended) and the German one (Expired). There is no Lithuanian mark
+at all. Nothing currently blocks an EUTM application in **class 35** (retail /
+comparison services) or **class 42** (software), which are this product's
+classes. Note the useful asymmetry: "weft" is a textile word, so a mark in
+class 24/25 would likely be refused as descriptive — but for a search and
+comparison *service* it is arbitrary, and therefore registrable.
+
+**The UK is not clear.** WEFT Limited registered classes 35 *and* 42 on
+2026-03-09 — precisely this product's classes. Post-Brexit a UK mark does not
+block an EUTM, so the EU route stays open, but any future UK expansion runs
+straight into it.
+
+**Read this alongside the domain losses.** `weft.eu` and `weft.io` were both
+verified free on 2026-07-31 and were both registered by third parties by
+2026-08-04 (`weft.eu` now sits with SuperHosting.BG, registrant undisclosed).
+Together with the March UK filing, the name is being actively claimed by
+others. The EU window is open now and is not guaranteed to stay open.
+
+`weft.com` is **not** obtainable by waiting: registered 1999-02-20, renewed
+2026-02-19, paid through 2027-02-20, transfer-locked, on retail registrar
+nameservers (Hover/Tucows) rather than any brokerage — the profile of a
+long-term private holder, not a listed asset. Acquisition would mean
+approaching the owner through the registrar, at four-letter-dictionary-`.com`
+prices. Deferred, not ruled out — unchanged from the original note.
+
+This is a registry extract and a reading of it, **NOT a legal clearance**.
+Have the class specification reviewed by an attorney before paying the EUIPO
+fee, since what the mark can be enforced against depends on that wording.
