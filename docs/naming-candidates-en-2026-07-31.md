@@ -262,9 +262,35 @@ No winner picked here — evidence only.
 **Chosen: WEFT.** Domain: **weft.lt**.
 
 The weft is the crosswise thread in weaving — the one that actually crosses
-and binds the warp. It is a real textile term, short, spellable, has no
-hostile letters for a Lithuanian speaker, and promises nothing the product
-can't deliver. Scour, Trawl and Prowl were the runners-up.
+and binds the warp. It is a real textile term, short, spellable, and promises
+nothing the product can't deliver. Scour, Trawl and Prowl were the runners-up.
+
+> **Correction — 2026-08-04.** This paragraph originally claimed the name "has
+> no hostile letters for a Lithuanian speaker." **That was factually wrong and
+> is retracted.** The Lithuanian alphabet has 32 letters and contains no Q, W
+> or X; those appear only in unassimilated foreign proper names. The claim also
+> contradicted this document's own criterion — "no w/q/x" is cited as an
+> explicit *advantage* in the rationales for Glimpse, Lens, Gathero, Alika and
+> Mirror above.
+>
+> The name is kept anyway, as a **deliberate trade decided by the owner on
+> 2026-08-04**: Lithuania is the beachhead, not the final market, and an
+> EU-wide rollout is intended. A Lithuanian-rooted name (Lygina, Pritaik,
+> Drabuva — the LT shortlist in the companion document) would become baggage
+> outside Lithuania, and Lithuanian companies export English-form names
+> routinely (Vinted, Hostinger, Nord, Omnisend, Whatagraph — the last also on
+> a W). What is being bought with the W is international legibility; what is
+> being paid is below.
+>
+> **What the W actually costs, so it is on the record rather than denied:**
+> - A Lithuanian reader resolves W as "dviguba vė" or defaults to V, so the
+>   name is spoken "veft". Word-of-mouth is lossy: someone told the name may
+>   type `veft.lt`. **Registering `veft.lt` as a defensive redirect is cheap
+>   (~EUR 10-15/yr) and is the one concrete mitigation — not yet done.**
+> - The textile metaphor above is invisible to the target shopper. "Weft" is
+>   *ataudai* in Lithuanian; the rationale for the name only lands in English.
+>   Shopper-facing copy must therefore never lean on the weaving meaning to
+>   explain the product — it has to stand on its own.
 
 Also verified free at decision time: `weft.eu`, `weft.io`, `weft.co`,
 `weft.shop`. `weft.store` and `weft.ai` are taken. `weft.com` is registered
@@ -275,6 +301,14 @@ tech-product domains to a general shopper; `.ai` is also ~$70-150/yr versus
 ~EUR 10-15 for `.lt`, and every candidate name was already taken there
 anyway. The buyer here is a Lithuanian consumer arriving from Instagram or
 Google, and for a shopping site local familiarity beats international polish.
+
+That reasoning is scoped to the beachhead phase. Under the 2026-08-04 decision
+above, an EU rollout is intended, and a `.lt` primary does not travel — it
+reads as a national site to a shopper in Warsaw or Berlin. `weft.eu` was
+verified free at decision time and is the natural successor; whether it becomes
+the primary or a redirect is deferred until there is a second market, but it
+should be registered alongside `weft.lt` rather than after someone else takes
+it.
 
 **Open risk — not cleared.** Two companies already trade under this name:
 Weft Apparel (US, made-to-order clothing manufacturer — Nice class 25) and
