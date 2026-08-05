@@ -24,10 +24,11 @@ export default async function AiFittingRoomPage({ searchParams }: AiFittingRoomP
       return 0;
     })
     .slice(0, 12)
-    .map(({ mock_product_id, title, category, image_path, price_eur, currency }) => ({
+    .map(({ mock_product_id, title, category, color, image_path, price_eur, currency }) => ({
       id: mock_product_id,
       title,
       category,
+      color,
       imagePath: image_path,
       price: price_eur,
       currency,
@@ -43,8 +44,8 @@ export default async function AiFittingRoomPage({ searchParams }: AiFittingRoomP
           <h1>{locale === "lt" ? "AI matavimosi kabina" : "AI fitting room"}</h1>
           <p className="lead">
             {locale === "lt"
-              ? "Įkelkite savo nuotrauką, pasirinkite drabužį ir pradėkite virtualų pasimatavimą."
-              : "Upload your photo, choose an item, and start a virtual try-on."}
+              ? "Pridėkite išmatavimus, pasirinkite drabužį ir pasukite apytikslį 3D manekeną."
+              : "Add measurements, choose an item, and rotate an approximate 3D mannequin."}
           </p>
         </div>
       </header>
