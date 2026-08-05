@@ -97,6 +97,77 @@ function sampleSkinColor(imageUrl: string) {
   });
 }
 
+function sampleDominantColor(imageUrl: string) {
+  return new Promise<string | undefined>((resolve) => {
+    const image = document.createElement("img");
+    image.onload = () => {
+      try {
+        const scale = Math.min(64 / image.naturalWidth, 64 / image.naturalHeight, 1);
+        const width = Math.max(1, Math.round(image.naturalWidth * scale));
+        const height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        if (!context) {
+          resolve(undefined);
+          return;
+        }
+        context.drawImage(image, 0, 0, width, height);
+        const pixels = context.getImageData(0, 0, width, height).data;
+        type ColorBucket = { red: number; green: number; blue: number; count: number; saturation: number };
+        const buckets = new Map<string, ColorBucket>();
+
+        for (let index = 0; index < pixels.length; index += 4) {
+          const red = pixels[index];
+          const green = pixels[index + 1];
+          const blue = pixels[index + 2];
+          const alpha = pixels[index + 3];
+          const maximum = Math.max(red, green, blue);
+          const minimum = Math.min(red, green, blue);
+          const chroma = maximum - minimum;
+          if (alpha < 128 || (maximum > 224 && chroma < 24) || (red > 242 && green > 242 && blue > 242)) continue;
+
+          const key = `${red >> 5}-${green >> 5}-${blue >> 5}`;
+          const bucket = buckets.get(key) ?? { red: 0, green: 0, blue: 0, count: 0, saturation: 0 };
+          bucket.red += red;
+          bucket.green += green;
+          bucket.blue += blue;
+          bucket.count += 1;
+          bucket.saturation += maximum ? chroma / maximum : 0;
+          buckets.set(key, bucket);
+        }
+
+        let selected: ColorBucket | undefined;
+        let selectedScore = -1;
+        let mostCommon = 0;
+        buckets.forEach((bucket) => {
+          mostCommon = Math.max(mostCommon, bucket.count);
+        });
+        buckets.forEach((bucket) => {
+          if (bucket.count < mostCommon * 0.22) return;
+          const averageSaturation = bucket.saturation / bucket.count;
+          const score = bucket.count * (0.72 + averageSaturation * 0.7);
+          if (score > selectedScore) {
+            selected = bucket;
+            selectedScore = score;
+          }
+        });
+
+        if (!selected?.count) {
+          resolve(undefined);
+          return;
+        }
+        resolve(`#${toHex(selected.red / selected.count)}${toHex(selected.green / selected.count)}${toHex(selected.blue / selected.count)}`);
+      } catch {
+        resolve(undefined);
+      }
+    };
+    image.onerror = () => resolve(undefined);
+    image.src = imageUrl;
+  });
+}
+
 export function AiFittingRoom({
   initialProductId,
   locale,
@@ -109,12 +180,14 @@ export function AiFittingRoom({
   const isLt = locale === "lt";
   const inputRef = useRef<HTMLInputElement>(null);
   const photoSampleRef = useRef(0);
+  const garmentSampleRef = useRef(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fileName, setFileName] = useState("");
   const [selectedId, setSelectedId] = useState(initialProductId ?? products[0]?.id ?? "");
   const [fileError, setFileError] = useState("");
   const [measurements, setMeasurements] = useState(measurementDefaults);
   const [skinColor, setSkinColor] = useState<string>();
+  const [garmentColorSample, setGarmentColorSample] = useState<{ color?: string; imagePath: string }>();
 
   useEffect(() => {
     try {
@@ -182,9 +255,26 @@ export function AiFittingRoom({
   const garment = useMemo(() => selectedProduct ? {
     category: selectedProduct.category,
     color: selectedProduct.color,
-    textureUrl: selectedProduct.imagePath,
     title: selectedProduct.title,
   } : null, [selectedProduct]);
+  const garmentColor = garmentColorSample && garmentColorSample.imagePath === selectedProduct?.imagePath
+    ? garmentColorSample.color
+    : undefined;
+
+  useEffect(() => {
+    const sampleId = garmentSampleRef.current + 1;
+    garmentSampleRef.current = sampleId;
+    setGarmentColorSample(undefined);
+    if (!selectedProduct?.imagePath) return;
+    const imagePath = selectedProduct.imagePath;
+    let cancelled = false;
+    void sampleDominantColor(imagePath).then((color) => {
+      if (!cancelled && garmentSampleRef.current === sampleId) setGarmentColorSample({ color, imagePath });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedProduct?.imagePath]);
 
   return (
     <div className="fitting-room">
@@ -261,7 +351,7 @@ export function AiFittingRoom({
           <div><h2>{isLt ? "3D pasimatavimo peržiūra" : "3D fitting preview"}</h2><p>{isLt ? "Pasukite manekeną ir apžiūrėkite apytikslę drabužio formą." : "Rotate the mannequin to inspect the approximate garment shape."}</p></div>
         </div>
         <div className="result-preview">
-          <FittingRoomAvatar garment={garment} isLt={isLt} measurements={measurements} skinColor={skinColor} />
+          <FittingRoomAvatar garment={garment} garmentColor={garmentColor} isLt={isLt} measurements={measurements} skinColor={skinColor} />
         </div>
         <p className="fitting-disclaimer"><Sparkles aria-hidden="true" size={17} />{isLt ? "Tai sintetinė, apytikslė 3D peržiūra — ne fotorealistinis rezultatas ir ne dydžio garantija." : "This is a synthetic, approximate 3D preview — not a photorealistic result or a fit guarantee."}</p>
       </section>
