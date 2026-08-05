@@ -17,13 +17,13 @@ type Measurements = {
 type Garment = {
   category: string;
   color: string;
-  textureUrl: string;
   title: string;
 };
 
 type FittingRoomAvatarProps = {
   measurements: Measurements;
   garment: Garment | null;
+  garmentColor?: string;
   skinColor?: string;
   isLt: boolean;
 };
@@ -74,9 +74,10 @@ function clamp(value: number, minimum: number, maximum: number) {
   return Math.min(Math.max(value, minimum), maximum);
 }
 
-function garmentColor(color: string) {
+function resolveGarmentColor(color: string, sampledColor?: string) {
+  if (sampledColor?.trim()) return sampledColor;
   const normalized = color.trim().toLowerCase();
-  return colorMap[normalized] ?? colorMap.grey;
+  return colorMap[normalized] ?? "#77777a";
 }
 
 function disposeObject(object: THREE.Object3D) {
@@ -88,8 +89,6 @@ function disposeObject(object: THREE.Object3D) {
     materials.forEach((material) => {
       if (disposedMaterials.has(material)) return;
       disposedMaterials.add(material);
-      const mappedMaterial = material as THREE.Material & { map?: THREE.Texture | null };
-      mappedMaterial.map?.dispose();
       material.dispose();
     });
   });
@@ -120,6 +119,21 @@ function addCapsule(
 ) {
   const direction = new THREE.Vector3().subVectors(end, start);
   const geometry = new THREE.CapsuleGeometry(radius, Math.max(0.01, direction.length() - radius * 2), 8, 16);
+  const mesh = addMesh(group, geometry, material, new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5));
+  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+  return mesh;
+}
+
+function addTaperedCylinder(
+  group: THREE.Group,
+  start: THREE.Vector3,
+  end: THREE.Vector3,
+  startRadius: number,
+  endRadius: number,
+  material: THREE.Material,
+) {
+  const direction = new THREE.Vector3().subVectors(end, start);
+  const geometry = new THREE.CylinderGeometry(endRadius, startRadius, direction.length(), 20);
   const mesh = addMesh(group, geometry, material, new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5));
   mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
   return mesh;
@@ -167,55 +181,11 @@ function getDimensions(measurements: Measurements): AvatarDimensions {
   };
 }
 
-function loadGarmentTexture(
-  material: THREE.MeshStandardMaterial,
-  garment: Garment,
-  isActive: () => boolean,
-) {
-  if (!garment.textureUrl) return;
-  new THREE.TextureLoader().load(
-    garment.textureUrl,
-    (texture) => {
-      if (!isActive()) {
-        texture.dispose();
-        return;
-      }
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.anisotropy = 4;
-      material.map = texture;
-      material.color.setRGB(1, 1, 1);
-      material.needsUpdate = true;
-    },
-    undefined,
-    () => {
-      // A solid garment color remains when a demo texture cannot be loaded.
-    },
-  );
-}
-
-function addTexturePanel(
-  group: THREE.Group,
-  garment: Garment,
-  width: number,
-  height: number,
-  position: THREE.Vector3,
-  isActive: () => boolean,
-) {
-  const material = new THREE.MeshStandardMaterial({
-    color: garmentColor(garment.color),
-    roughness: 0.78,
-    metalness: 0,
-  });
-  const panel = addMesh(group, new THREE.PlaneGeometry(width, height), material, position);
-  panel.castShadow = false;
-  loadGarmentTexture(material, garment, isActive);
-}
-
 function buildAvatar(
   measurements: Measurements,
   garment: Garment | null,
   skinColor: string,
-  isActive: () => boolean,
+  sampledGarmentColor?: string,
 ) {
   const group = new THREE.Group();
   const dimensions = getDimensions(measurements);
@@ -223,7 +193,7 @@ function buildAvatar(
   const d = dimensions;
   const headRadius = d.height * 0.063;
   const headY = d.height - headRadius;
-  const neckHeight = d.height * 0.035;
+  const neckHeight = d.height * 0.04;
   const neckRadius = d.height * 0.026;
   const leftShoulder = new THREE.Vector3(-d.shoulderWidth / 2, d.shoulderY, 0);
   const rightShoulder = new THREE.Vector3(d.shoulderWidth / 2, d.shoulderY, 0);
@@ -246,7 +216,7 @@ function buildAvatar(
     new THREE.Vector3(0, headY, 0),
     new THREE.Vector3(0.9, 1, 0.88),
   );
-  addMesh(group, new THREE.CylinderGeometry(neckRadius, neckRadius * 1.08, neckHeight, 20), skinMaterial, new THREE.Vector3(0, d.torsoTopY + neckHeight / 2, 0));
+  addMesh(group, new THREE.CylinderGeometry(neckRadius, neckRadius * 1.08, neckHeight, 20), skinMaterial, new THREE.Vector3(0, d.torsoTopY + neckHeight * 0.42, 0));
   addMesh(
     group,
     new THREE.CylinderGeometry(d.chestWidth / 2, d.waistWidth / 2, d.torsoHeight, 32),
@@ -266,8 +236,8 @@ function buildAvatar(
   addCapsule(group, leftElbow, leftWrist, d.armRadius * 0.86, skinMaterial);
   addCapsule(group, rightShoulder, rightElbow, d.armRadius, skinMaterial);
   addCapsule(group, rightElbow, rightWrist, d.armRadius * 0.86, skinMaterial);
-  addMesh(group, new THREE.SphereGeometry(d.armRadius * 0.94, 16, 12), skinMaterial, leftWrist, new THREE.Vector3(0.85, 1.25, 0.75));
-  addMesh(group, new THREE.SphereGeometry(d.armRadius * 0.94, 16, 12), skinMaterial, rightWrist, new THREE.Vector3(0.85, 1.25, 0.75));
+  addMesh(group, new THREE.SphereGeometry(d.armRadius * 0.76, 16, 12), skinMaterial, leftWrist, new THREE.Vector3(0.82, 1.2, 0.72));
+  addMesh(group, new THREE.SphereGeometry(d.armRadius * 0.76, 16, 12), skinMaterial, rightWrist, new THREE.Vector3(0.82, 1.2, 0.72));
   addCapsule(group, leftHip, leftKnee, d.legRadius, skinMaterial);
   addCapsule(group, leftKnee, leftAnkle, d.legRadius * 0.82, skinMaterial);
   addCapsule(group, rightHip, rightKnee, d.legRadius, skinMaterial);
@@ -286,61 +256,76 @@ function buildAvatar(
   if (!garment) return { group, height: d.height };
 
   const clothingMaterial = new THREE.MeshStandardMaterial({
-    color: garmentColor(garment.color),
-    roughness: 0.74,
+    color: resolveGarmentColor(garment.color, sampledGarmentColor),
+    roughness: 0.82,
     metalness: 0,
   });
   const category = garment.category.toLowerCase();
-  const shell = category === "outerwear" ? d.height * 0.018 : d.height * 0.011;
-  if (category === "shoes" || category === "bags" || category === "accessories") {
-    loadGarmentTexture(clothingMaterial, garment, isActive);
-  }
+  const shell = category === "outerwear" ? d.height * 0.012 : d.height * 0.007;
 
   if (category === "tops" || category === "outerwear") {
-    const length = category === "outerwear" ? d.torsoHeight * 1.06 : d.torsoHeight * 0.78;
-    const centerY = d.torsoTopY - length / 2;
+    const hemY = category === "outerwear"
+      ? d.crotchY + d.pelvisHeight * 0.18
+      : d.pelvisCenterY;
+    const necklineY = d.torsoTopY - d.height * 0.008;
+    const length = necklineY - hemY;
+    const topRadius = d.chestWidth / 2 + shell;
+    const bottomRadius = (category === "outerwear" ? d.hipWidth : (d.waistWidth + d.hipWidth) / 2) / 2 + shell;
+    const depthScale = (Math.max(d.chestDepth, d.hipDepth * 0.92) + shell * 2) / (topRadius * 2);
     addMesh(
       group,
-      new THREE.CylinderGeometry(d.chestWidth / 2 + shell, d.waistWidth / 2 + shell, length, 32, 1, true),
+      new THREE.CylinderGeometry(topRadius, bottomRadius, length, 32),
       clothingMaterial,
-      new THREE.Vector3(0, centerY, 0),
-      new THREE.Vector3(1, 1, (d.chestDepth + shell * 2) / (d.chestWidth + shell * 2)),
+      new THREE.Vector3(0, hemY + length / 2, 0),
+      new THREE.Vector3(1, 1, depthScale),
     );
-    addCapsule(group, leftShoulder, leftElbow, d.armRadius + shell, clothingMaterial);
-    addCapsule(group, rightShoulder, rightElbow, d.armRadius + shell, clothingMaterial);
-    addTexturePanel(group, garment, d.chestWidth * 0.66, length * 0.68, new THREE.Vector3(0, centerY, d.chestDepth / 2 + shell * 1.2), isActive);
+    const collar = addMesh(
+      group,
+      new THREE.TorusGeometry(neckRadius * 1.22, d.height * 0.006, 8, 28),
+      clothingMaterial,
+      new THREE.Vector3(0, necklineY + d.height * 0.004, 0),
+    );
+    collar.rotation.x = Math.PI / 2;
+    const sleeveEndLeft = category === "outerwear" ? leftWrist : leftElbow;
+    const sleeveEndRight = category === "outerwear" ? rightWrist : rightElbow;
+    addTaperedCylinder(group, leftShoulder, sleeveEndLeft, d.armRadius + shell, (category === "outerwear" ? d.armRadius * 0.86 : d.armRadius * 0.94) + shell, clothingMaterial);
+    addTaperedCylinder(group, rightShoulder, sleeveEndRight, d.armRadius + shell, (category === "outerwear" ? d.armRadius * 0.86 : d.armRadius * 0.94) + shell, clothingMaterial);
   } else if (category === "bottoms") {
+    const waistbandTopY = d.crotchY + d.pelvisHeight;
+    const waistbandBottomY = d.crotchY + d.pelvisHeight * 0.18;
+    const waistbandHeight = waistbandTopY - waistbandBottomY;
     addMesh(
       group,
-      new THREE.CylinderGeometry(d.waistWidth / 2 + shell, d.hipWidth / 2 + shell, d.pelvisHeight * 1.06, 32, 1, true),
+      new THREE.CylinderGeometry(d.waistWidth / 2 + shell, d.hipWidth / 2 + shell, waistbandHeight, 32),
       clothingMaterial,
-      new THREE.Vector3(0, d.pelvisCenterY, 0),
+      new THREE.Vector3(0, waistbandBottomY + waistbandHeight / 2, 0),
       new THREE.Vector3(1, 1, (d.hipDepth + shell * 2) / (d.hipWidth + shell * 2)),
     );
-    [
-      [leftHip, leftKnee],
-      [leftKnee, leftAnkle],
-      [rightHip, rightKnee],
-      [rightKnee, rightAnkle],
-    ].forEach(([start, end], index) => addCapsule(group, start, end, (index % 2 === 0 ? d.legRadius : d.legRadius * 0.82) + shell, clothingMaterial));
-    addTexturePanel(group, garment, d.hipWidth * 0.55, d.pelvisHeight * 0.7, new THREE.Vector3(0, d.pelvisCenterY, d.hipDepth / 2 + shell * 1.3), isActive);
+    addTaperedCylinder(group, leftHip, leftKnee, d.legRadius + shell, d.legRadius * 0.88 + shell, clothingMaterial);
+    addTaperedCylinder(group, leftKnee, leftAnkle, d.legRadius * 0.88 + shell, d.legRadius * 0.7 + shell, clothingMaterial);
+    addTaperedCylinder(group, rightHip, rightKnee, d.legRadius + shell, d.legRadius * 0.88 + shell, clothingMaterial);
+    addTaperedCylinder(group, rightKnee, rightAnkle, d.legRadius * 0.88 + shell, d.legRadius * 0.7 + shell, clothingMaterial);
   } else if (category === "dresses") {
+    const waistlineY = d.crotchY + d.pelvisHeight;
+    const bodiceHeight = d.torsoTopY - waistlineY;
+    const bodiceTopRadius = d.chestWidth / 2 + shell;
+    const bodiceBottomRadius = d.waistWidth / 2 + shell;
+    const bodiceDepthScale = (d.chestDepth + shell * 2) / (bodiceTopRadius * 2);
     addMesh(
       group,
-      new THREE.CylinderGeometry(d.chestWidth / 2 + shell, d.waistWidth / 2 + shell, d.torsoHeight, 32, 1, true),
+      new THREE.CylinderGeometry(bodiceTopRadius, bodiceBottomRadius, bodiceHeight, 32),
       clothingMaterial,
-      new THREE.Vector3(0, d.torsoCenterY, 0),
-      new THREE.Vector3(1, 1, (d.chestDepth + shell * 2) / (d.chestWidth + shell * 2)),
+      new THREE.Vector3(0, waistlineY + bodiceHeight / 2, 0),
+      new THREE.Vector3(1, 1, bodiceDepthScale),
     );
     const skirtHeight = Math.min(d.height * 0.34, d.crotchY * 0.68);
     addMesh(
       group,
-      new THREE.CylinderGeometry(d.waistWidth * 0.54, d.hipWidth * 0.88, skirtHeight, 32, 1, true),
+      new THREE.CylinderGeometry(bodiceBottomRadius, d.hipWidth * 0.88, skirtHeight, 40),
       clothingMaterial,
-      new THREE.Vector3(0, d.crotchY + d.pelvisHeight - skirtHeight / 2, 0),
-      new THREE.Vector3(1, 1, 0.68),
+      new THREE.Vector3(0, waistlineY - skirtHeight / 2, 0),
+      new THREE.Vector3(1, 1, bodiceDepthScale),
     );
-    addTexturePanel(group, garment, d.chestWidth * 0.66, d.torsoHeight * 0.68, new THREE.Vector3(0, d.torsoCenterY, d.chestDepth / 2 + shell * 1.2), isActive);
   } else if (category === "shoes") {
     [-legOffset, legOffset].forEach((x) => {
       const shoe = addMesh(
@@ -386,7 +371,7 @@ function setCameraView(camera: THREE.PerspectiveCamera, controls: OrbitControls,
   controls.update();
 }
 
-export function FittingRoomAvatar({ measurements, garment, skinColor = "#c8a789", isLt }: FittingRoomAvatarProps) {
+export function FittingRoomAvatar({ measurements, garment, garmentColor, skinColor = "#c8a789", isLt }: FittingRoomAvatarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -490,8 +475,7 @@ export function FittingRoomAvatar({ measurements, garment, skinColor = "#c8a789"
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene) return;
-    let active = true;
-    const avatar = buildAvatar(measurements, garment, skinColor, () => active);
+    const avatar = buildAvatar(measurements, garment, skinColor, garmentColor);
     modelHeightRef.current = avatar.height;
     modelRef.current = avatar.group;
     scene.add(avatar.group);
@@ -503,12 +487,11 @@ export function FittingRoomAvatar({ measurements, garment, skinColor = "#c8a789"
     }
 
     return () => {
-      active = false;
       scene.remove(avatar.group);
       disposeObject(avatar.group);
       if (modelRef.current === avatar.group) modelRef.current = null;
     };
-  }, [garment, measurements, skinColor]);
+  }, [garment, garmentColor, measurements, skinColor]);
 
   useEffect(() => {
     if (controlsRef.current) controlsRef.current.autoRotate = autoRotate && !reducedMotion;
