@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { copy, getLocale, withLocale } from "@/lib/i18n";
+import { Wordmark } from "@/components/wordmark";
 
 export function SiteFooter() {
   const pathname = usePathname();
@@ -28,7 +29,7 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="footer-statement">
-        <Link className="footer-brand" href={withLocale("/", locale)}>WEFT</Link>
+        <Link className="footer-brand" href={withLocale("/", locale)} aria-label="Weft"><Wordmark /></Link>
         <p>{t.text}</p>
       </div>
       <div className="footer-links">
