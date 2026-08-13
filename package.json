@@ -1,7 +1,11 @@
 {
-  "name": "fashion-aggregator",
+  "name": "weft",
   "version": "0.1.0",
   "private": true,
+  "description": "Weft — a bilingual (EN/LT) fashion discovery and search MVP built with Next.js, TypeScript, an explainable concept-graph search, and Supabase/PostgreSQL analytics.",
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,19 +17,19 @@
     "data:listings": "node scripts/generate-listings.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "latest",
+    "@supabase/supabase-js": "^2.106.2",
     "lucide-react": "^1.17.0",
     "next": "^16.2.12",
-    "react": "latest",
-    "react-dom": "latest",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "three": "^0.180.0"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
     "@types/three": "^0.180.0",
-    "typescript": "latest"
+    "typescript": "^6.0.3"
   },
   "overrides": {
     "next": {
