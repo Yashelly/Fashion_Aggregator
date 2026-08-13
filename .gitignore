@@ -34,14 +34,21 @@ public/demo-products/*.png
 .asset-cache/
 .tmp/
 artifacts/
-.codex/*
-!.codex/agents/
-!.codex/agents/**
-!.codex/skills/
-!.codex/skills/**
-.codex/skills/.system/**
-!.codex/prompts/
-!.codex/prompts/**
+
+# Local AI-assistant tooling (Codex/Claude skills, prompts, agent scaffolds).
+# The project's own agent workflow lives in the committed AGENTS.md tree and
+# CLAUDE.md; these directories are vendored, machine-generated tool state and
+# are kept out of the repo so the product code is what a reader sees.
+.codex/
+.agents/
+skills-lock.json
+
+# Design-kit transfer artifacts (binary archive + its install prompt).
+CODEX_DESIGN_FIGMA_KIT_INSTALL_AND_USE_PROMPT.md
+codex-design-figma-kit-*.zip
+
+# Internal business-strategy notes (kept locally, out of the public repo).
+fashion_aggregator_b_2_b_affiliate_strategy_notes_v_2.md
 
 .vercel
 .env*
