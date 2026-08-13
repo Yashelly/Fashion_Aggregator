@@ -235,6 +235,77 @@ summary {
   width: fit-content;
 }
 
+/* ---- wordmark: lowercase `weft`, with an optional `i` reveal that reads
+   "we fit". Works in em so it inherits font-size from whatever surface holds it
+   (header .brand, footer .footer-brand, hero .title-page h1). Its own tracking
+   overrides the tight caps tracking those surfaces set for the old WEFT. ---- */
+.wordmark {
+  font-family: var(--font-display), Arial Black, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  white-space: nowrap;
+  line-height: 1;
+  display: inline-block;
+}
+.wordmark .wm-fit {
+  color: var(--color-accent);
+}
+/* `w` reads a hair loose against `e`; pull it back for an even w–e–f–t rhythm */
+.wm-lead {
+  display: inline-block;
+  vertical-align: baseline;
+  margin-right: -0.03em;
+}
+/* the gap: resting max-width 0 = f and t sit as a normal pair ("weft"); on
+   reveal it opens to one measured i-advance, sliding t right. The i is pinned
+   left (flush after f) so it only ever moves vertically. A small resting margin
+   gives f/t the same gap as every other pair; open drops it to 0 so the i
+   inherits that even spacing. */
+.wm-islot {
+  display: inline-block;
+  max-width: 0;
+  overflow: visible;
+  text-align: left;
+  vertical-align: baseline;
+  margin: 0 0.018em;
+  transition:
+    max-width 0.28s cubic-bezier(0.2, 0.72, 0.3, 1),
+    margin 0.28s cubic-bezier(0.2, 0.72, 0.3, 1);
+}
+.wm-islot.is-open {
+  max-width: var(--wm-iw, 0.34em);
+  margin: 0;
+}
+.wm-islot.is-shut {
+  transition: max-width 0.3s cubic-bezier(0.4, 0, 1, 1);
+}
+.wm-ichar {
+  display: inline-block;
+  transform: translateY(-0.9em);
+  opacity: 0;
+  transition:
+    transform 0.28s cubic-bezier(0.2, 0.72, 0.3, 1),
+    opacity 0.2s ease;
+}
+.wm-ichar.is-in {
+  transform: translateY(0);
+  opacity: 1;
+}
+.wm-ichar.is-out {
+  transform: translateY(0.9em);
+  opacity: 0;
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 1, 1),
+    opacity 0.24s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wm-islot,
+  .wm-ichar {
+    transition: none !important;
+  }
+}
+
 .desktop-nav {
   display: flex;
   gap: clamp(14px, 1.7vw, 28px);

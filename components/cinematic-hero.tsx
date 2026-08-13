@@ -1,6 +1,7 @@
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { getCopy, type Locale, withLocale } from "@/lib/i18n";
+import { Wordmark } from "@/components/wordmark";
 
 /**
  * The title page: the whole of `/`.
@@ -45,7 +46,7 @@ export function CinematicHero({ locale }: { locale: Locale }) {
           <Sparkles aria-hidden="true" size={16} />
           {t.demoLabel}
         </p>
-        <h1 id="home-title">WEFT</h1>
+        <h1 id="home-title"><Wordmark animate trigger="load" /></h1>
         <p className="title-page-slogan">{t.slogan}</p>
         <p className="title-page-lead">{t.lead}</p>
         <Link className="button title-page-cta" href={withLocale("/search", locale)}>
