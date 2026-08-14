@@ -24,8 +24,8 @@ type WordmarkProps = {
   className?: string;
   /** Play the i-reveal. Off = static `weft` (header, footer). */
   animate?: boolean;
-  /** When an animated mark plays: on mount, or when it scrolls into view. */
-  trigger?: "load" | "inview";
+  /** When an animated mark plays: on mount, when it scrolls into view, or on click. */
+  trigger?: "load" | "inview" | "click";
 };
 
 export function Wordmark({ className, animate = false, trigger = "load" }: WordmarkProps) {
@@ -80,10 +80,24 @@ export function Wordmark({ className, animate = false, trigger = "load" }: Wordm
     };
 
     let cleanup = () => {};
+    const onKey = (e: KeyboardEvent) => {
+      // Activate the reveal from the keyboard when the mark is a click target.
+      if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+        e.preventDefault();
+        play();
+      }
+    };
     const start = () => {
       measure();
       if (!animate) return;
-      if (trigger === "inview" && "IntersectionObserver" in window) {
+      if (trigger === "click") {
+        root.addEventListener("click", play);
+        root.addEventListener("keydown", onKey);
+        cleanup = () => {
+          root.removeEventListener("click", play);
+          root.removeEventListener("keydown", onKey);
+        };
+      } else if (trigger === "inview" && "IntersectionObserver" in window) {
         const io = new IntersectionObserver(
           (entries) => {
             if (entries.some((e) => e.isIntersecting)) {
@@ -116,8 +130,16 @@ export function Wordmark({ className, animate = false, trigger = "load" }: Wordm
     };
   }, [animate, trigger]);
 
+  const clickable = animate && trigger === "click";
+
   return (
-    <span ref={ref} className={["wordmark", className].filter(Boolean).join(" ")} role="img" aria-label="weft">
+    <span
+      ref={ref}
+      className={["wordmark", clickable && "wm-clickable", className].filter(Boolean).join(" ")}
+      role="img"
+      aria-label="weft"
+      {...(clickable ? { tabIndex: 0, title: "we fit" } : {})}
+    >
       <span className="wm-lead">w</span>e<span className="wm-fit">f<span className="wm-islot"><span className="wm-ichar">i</span></span>t</span>
     </span>
   );
