@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { copy, getLocale, type Locale, withLocale } from "@/lib/i18n";
+import { Wordmark } from "@/components/wordmark";
 
 function languageHref(pathname: string, params: URLSearchParams, locale: Locale) {
   const next = new URLSearchParams(params.toString());
@@ -113,7 +114,7 @@ export function SiteHeader() {
       <header className={isTitlePage ? "site-header site-header-title" : "site-header"}>
         {!isTitlePage && (
           <Link className="brand" href={withLocale("/", locale)} aria-label={locale === "lt" ? "Weft pradinis puslapis" : "Weft home"}>
-            WEFT
+            <Wordmark />
           </Link>
         )}
         {!isTitlePage && (

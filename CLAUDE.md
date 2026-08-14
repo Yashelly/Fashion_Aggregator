@@ -31,11 +31,13 @@ Search relevance suite (no server needed):
 npm run test:search    # node scripts/semantic-eval.mjs
 ```
 
-25 labelled queries against `lib/semantic-search.ts`; a query passes at
-precision@k ≥ 0.6 (k = min(5, relevant)) with every required item ranked, and
-the suite passes at ≥ 80% of queries. Exits non-zero below the threshold. The
-labels are relevance judgements — if one looks wrong, argue with the label
-rather than tuning the graph around it.
+74 labelled queries against `lib/semantic-search.ts`, split into a **dev set**
+(tuning is allowed against it) and a **sealed held-out set** (scored once); the
+two live in `scripts/search-queries.mjs`. A query passes at precision@k ≥ 0.6
+(k = min(5, relevant)) with every required item ranked, and each set passes at
+≥ 80% of queries. Exits non-zero below the threshold. The labels are relevance
+judgements — if one looks wrong, argue with the label rather than tuning the
+graph around it.
 
 Regenerating the synthetic multi-store listings (only when the base catalog
 changes — the output is committed):
