@@ -251,6 +251,16 @@ summary {
 .wordmark .wm-fit {
   color: var(--color-accent);
 }
+/* On the title page the mark is a toy: click (or focus + Enter) to replay the
+   "we fit" reveal. Signal that it is pressable without changing its look. */
+.wm-clickable {
+  cursor: pointer;
+  border-radius: 0.08em;
+}
+.wm-clickable:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 0.12em;
+}
 /* `w` reads a hair loose against `e`; pull it back for an even w–e–f–t rhythm */
 .wm-lead {
   display: inline-block;
@@ -574,7 +584,7 @@ summary {
 }
 
 /*
- * The wardrobe loop sits behind the title page. Its frames are shot with the
+ * The wardrobe still sits behind the title page. The frame is shot with the
  * figures on the right and the left half deliberately empty, so the copy lands
  * on bare studio floor rather than on top of a garment.
  */
@@ -585,11 +595,21 @@ summary {
   z-index: -1;
 }
 
-.hero-media video {
-  height: 100%;
-  object-fit: cover;
-  object-position: right center;
-  width: 100%;
+/*
+ * The image lives on its own blurred layer, not on `.hero-media` itself, so the
+ * scrim (`::after`) stays sharp on top of it. The layer is over-scanned
+ * (negative inset + scale) because `blur()` samples past the box edge and would
+ * otherwise feather the canvas colour in around the frame.
+ */
+.hero-media::before {
+  background-image: url("/hero-assets/hero-poster.jpg");
+  background-position: right center;
+  background-size: cover;
+  content: "";
+  filter: blur(22px) saturate(0.92);
+  inset: -48px;
+  position: absolute;
+  transform: scale(1.1);
 }
 
 /*
@@ -1725,8 +1745,8 @@ summary {
     align-items: start;
   }
 
-  .hero-media video {
-    object-position: bottom center;
+  .hero-media::before {
+    background-position: bottom center;
   }
 
   .hero-media::after {
@@ -1987,20 +2007,6 @@ summary {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-
-  /*
-   * Drop the wardrobe loop entirely rather than pausing it. The `poster` frame
-   * stays behind as a still, so the hero keeps its image without any motion.
-   */
-  .hero-media video {
-    display: none;
-  }
-
-  .hero-media {
-    background-image: url("/hero-assets/hero-poster.jpg");
-    background-position: right center;
-    background-size: cover;
   }
 
   *,

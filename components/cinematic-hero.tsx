@@ -21,32 +21,20 @@ export function CinematicHero({ locale }: { locale: Locale }) {
   return (
     <section className="title-page" aria-labelledby="home-title">
       {/*
-        Decorative wardrobe loop. aria-hidden and unfocusable: it carries no
-        information the copy does not already give. `poster` paints frame one
-        immediately, and CSS drops the video entirely under
-        prefers-reduced-motion, leaving that still behind.
+        Decorative wardrobe still, softly blurred so it reads as texture behind
+        the copy rather than a photo competing with it. aria-hidden and purely
+        a background image (no video, no motion); the scrim over it keeps the
+        headline's contrast.
       */}
-      <div className="hero-media" aria-hidden="true">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          poster="/hero-assets/hero-poster.jpg"
-          preload="metadata"
-          tabIndex={-1}
-        >
-          <source src="/hero-assets/hero-loop.webm" type="video/webm" />
-          <source src="/hero-assets/hero-loop.mp4" type="video/mp4" />
-        </video>
-      </div>
+      <div className="hero-media" aria-hidden="true" />
 
       <div className="title-page-copy">
         <p className="preview-kicker">
           <Sparkles aria-hidden="true" size={16} />
           {t.demoLabel}
         </p>
-        <h1 id="home-title"><Wordmark animate trigger="load" /></h1>
+        {/* Click (or Enter/Space) the mark to reveal the hidden `i` — "we fit". */}
+        <h1 id="home-title"><Wordmark animate trigger="click" /></h1>
         <p className="title-page-slogan">{t.slogan}</p>
         <p className="title-page-lead">{t.lead}</p>
         <Link className="button title-page-cta" href={withLocale("/search", locale)}>

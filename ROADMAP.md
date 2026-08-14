@@ -120,10 +120,11 @@ The two things that make this different from Google or a brand's own site.
       duplicated `/search`, which is one click away. The demo label stays —
       the synthetic-catalog boundary is a hard rule and this is now the first
       thing anyone sees.
-- [x] Hero loop shipped — 13s dissolve between five wardrobe keyframes,
-      `hero-loop.mp4` 0.89 MB / `.webm` 0.68 MB, poster for first paint,
-      removed entirely under `prefers-reduced-motion` and below 1024px where
-      the two-column composition it was shot for no longer exists.
+- [x] Hero loop shipped (2026-08-01), then retired (2026-08-14) — it was a 13s
+      dissolve between five wardrobe keyframes (`hero-loop.mp4`/`.webm`). The
+      title page now shows a single wardrobe still, softly blurred behind the
+      copy, and the wordmark plays its "we fit" reveal on click instead of on
+      load. The video files were removed; `hero-poster.jpg` is the still.
   - **One keyframe was excluded on purpose:** `wardrobe-keyframe-04` carries
     recognisable branding (a Diesel-style buckle, Stan-Smith-style sneakers, a
     logo tee), which the demo-data boundary forbids in shopper-facing imagery.
