@@ -17,23 +17,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { createRequire } from "node:module";
 import { DEV_SET, HELDOUT_SET } from "./search-queries.mjs";
+import { loadSemanticSearch } from "./load-search.mjs";
 
-const require = createRequire(import.meta.url);
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-
-// The engine is TypeScript with a path alias; strip both so plain node can run
-// it without pulling in a bundler for a test script.
-function loadSemanticSearch() {
-  const source = fs.readFileSync(path.join(rootDir, "lib", "semantic-search.ts"), "utf8");
-  const transpiled = require("typescript").transpileModule(source, {
-    compilerOptions: { module: "CommonJS", target: "ES2022" },
-  }).outputText;
-  const moduleScope = { exports: {} };
-  new Function("exports", "module", "require", transpiled)(moduleScope.exports, moduleScope, require);
-  return moduleScope.exports;
-}
 
 function parseCsvLine(line) {
   const values = [];
