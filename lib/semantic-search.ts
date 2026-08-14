@@ -19,7 +19,7 @@
  *   2. Results are *ranked* by relevance rather than filtered by presence, so
  *      a partial match still surfaces instead of collapsing to "no results".
  *   3. Every match is explainable. `matchedTerms` records which concepts fired,
- *      which is what makes the eval harness in `scripts/semantic_eval.mjs`
+ *      which is what makes the eval harness in `scripts/semantic-eval.mjs`
  *      meaningful — a regression points at a specific edge, not at a black box.
  *
  * When a real retailer feed replaces the synthetic catalog, this graph becomes
