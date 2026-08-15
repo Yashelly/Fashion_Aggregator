@@ -17,7 +17,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { DEV_SET, HELDOUT_SET } from "./search-queries.mjs";
+import { DEV_SET, REGRESSION_SET, BLIND_SET } from "./search-queries.mjs";
 import { loadSemanticSearch } from "./load-search.mjs";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -167,16 +167,29 @@ function evaluate({ verbose, which }) {
   const engine = loadSemanticSearch();
   const products = loadProducts();
 
-  const results = [];
-  if (which !== "holdout") {
-    results.push(summarise("DEV set (tuning is allowed against this)", scoreSet("dev", DEV_SET, engine, products), { verbose }));
+  // Only DEV and REGRESSION gate the build. DEV proves the graph can express the
+  // answers; REGRESSION is the tripwire that must not drop when an edge is
+  // retuned. BLIND is measured and reported but deliberately NOT a gate: a gate
+  // is a target, and tuning to hit a target is precisely what would burn the
+  // set's one honest reading. See scripts/search-queries.mjs.
+  const gating = [];
+  if (which === "all" || which === "dev") {
+    gating.push(summarise("DEV set — tuning allowed; fit ceiling, not generalization", scoreSet("dev", DEV_SET, engine, products), { verbose }));
   }
-  if (which !== "dev") {
-    results.push(summarise("HELD-OUT set (sealed; scored once)", scoreSet("holdout", HELDOUT_SET, engine, products), { verbose }));
+  if (which === "all" || which === "regression") {
+    gating.push(summarise("REGRESSION set — previously inspected; benchmark, not unseen", scoreSet("regression", REGRESSION_SET, engine, products), { verbose }));
   }
 
-  console.log(`target             pass rate >= ${(PASS_RATE_TARGET * 100).toFixed(0)}%, precision@k >= ${PRECISION_TARGET} per query`);
-  const overallPass = results.every((result) => result.passRate >= PASS_RATE_TARGET);
+  let blind;
+  if (which === "all" || which === "blind") {
+    blind = summarise("BLIND set — sealed 2026-08-15, scored once; generalization signal (reported, not gated)", scoreSet("blind", BLIND_SET, engine, products), { verbose });
+  }
+
+  console.log(`target             pass rate >= ${(PASS_RATE_TARGET * 100).toFixed(0)}%, precision@k >= ${PRECISION_TARGET} per query  (gated: dev, regression)`);
+  const overallPass = gating.every((result) => result.passRate >= PASS_RATE_TARGET);
+  if (blind) {
+    console.log(`blind (reported)   pass rate ${(blind.passRate * 100).toFixed(1)}% — the honest generalization estimate; not a gate by design`);
+  }
   console.log(overallPass ? "RESULT: threshold met" : "RESULT: below threshold");
   return overallPass;
 }

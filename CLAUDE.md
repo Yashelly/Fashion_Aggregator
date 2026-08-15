@@ -31,13 +31,20 @@ Search relevance suite (no server needed):
 npm run test:search    # node scripts/semantic-eval.mjs
 ```
 
-74 labelled queries against `lib/semantic-search.ts`, split into a **dev set**
-(tuning is allowed against it) and a **sealed held-out set** (scored once); the
-two live in `scripts/search-queries.mjs`. A query passes at precision@k ≥ 0.6
-(k = min(5, relevant)) with every required item ranked, and each set passes at
-≥ 80% of queries. Exits non-zero below the threshold. The labels are relevance
-judgements — if one looks wrong, argue with the label rather than tuning the
-graph around it.
+92 labelled queries against `lib/semantic-search.ts`, split three ways in
+`scripts/search-queries.mjs`: a **dev set** (44, tuning allowed — a fit ceiling,
+not generalization), a **regression set** (30, formerly held-out; scored blind
+once at 24/30, then inspected and fixed to 26/30, so it is now a benchmark and
+**not** an unbiased unseen-query signal), and a **blind set** (18, sealed
+2026-08-15, scored exactly once — the honest generalization estimate). Only dev
+and regression gate the build; the blind set is reported, never gated, and must
+never be tuned against (doing so burns it into a second regression set). A query
+passes at precision@k ≥ 0.6 (k = min(5, relevant)) with every required item
+ranked, and each gated set passes at ≥ 80% of queries. Exits non-zero below the
+threshold. Labels are relevance judgements — on the dev set, if one looks wrong,
+argue with the label rather than tuning the graph around it; on the regression
+and blind sets, editing a label to force a pass is the dishonesty the split
+exists to prevent. Full methodology: `docs/search-engine.md`.
 
 Regenerating the synthetic multi-store listings (only when the base catalog
 changes — the output is committed):
