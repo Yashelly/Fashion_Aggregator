@@ -1,14 +1,34 @@
 /**
  * Labelled query sets for `scripts/semantic-eval.mjs`.
  *
- * TWO SETS, AND THE SPLIT IS THE POINT.
+ * THREE SETS, AND THE SPLIT IS THE POINT. Each has a different job and a
+ * different level of trust — conflating them is how a search suite lies to you.
  *
- * `DEV_SET` is what the concept graph may be tuned against. `HELDOUT_SET` is
- * not looked at while tuning — it is written first, sealed, and scored once at
- * the end. Without that discipline the number measures how well the graph was
- * fitted to the questions rather than how well it answers new ones, which is
- * exactly how this suite came to report a clean 25/25 while the site returned
- * 38 of 64 products for "what should i wear to the office".
+ *   DEV_SET (44)        Tuning is allowed against these. Their score is a fit
+ *                       ceiling, not a generalization estimate — the graph has
+ *                       been shaped to answer them, so a high number here only
+ *                       proves the graph can express the answers, not find new
+ *                       ones. Without a dev set the engine could not be tuned at
+ *                       all; treating its score as "how good is search" is the
+ *                       classic train-on-the-test-set mistake.
+ *
+ *   REGRESSION_SET (30) Was the held-out set. Written before tuning and scored
+ *                       blind ONCE (24/30). Its failures were then inspected and
+ *                       two real defects fixed, which took it to 26/30. Because
+ *                       it has now been looked at, 26/30 is NO LONGER an unbiased
+ *                       generalization estimate — it is a regression benchmark:
+ *                       a number that must not drop when an edge is retuned. See
+ *                       the note above the set for the full history. Presenting
+ *                       it as "sealed / unseen" today would be false; it isn't.
+ *
+ *   BLIND_SET (18)      Written 2026-08-15 against the catalog, sealed, and
+ *                       scored exactly ONCE. The engine was NOT changed and no
+ *                       label was edited in response to its results — that is the
+ *                       whole point of the split, and the moment it is tuned
+ *                       against it stops being blind and becomes a second
+ *                       regression set. This is the current best generalization
+ *                       signal in the repo. It is still one author's labels (see
+ *                       below), so it is a floor on honesty, not a ceiling on it.
  *
  * WHAT THESE LABELS ARE WORTH. They are one person's relevance judgements,
  * written by the same author as the engine. That is a real ceiling: two humans
@@ -16,10 +36,12 @@
  * here can be more trustworthy than the labels underneath it. A set labelled by
  * the product owner — or better, real click data — is what replaces this.
  *
- * If a label looks wrong, argue with the label first. Three have already been
- * corrected this way: trail sneakers are not a "waterproof jacket", "kelnės"
+ * If a DEV_SET label looks wrong, argue with the label first. Three have already
+ * been corrected this way: trail sneakers are not a "waterproof jacket", "kelnės"
  * includes jeans, and "cosy knit" means the two knitted pieces rather than
- * every soft thing in the catalog.
+ * every soft thing in the catalog. This licence applies to DEV_SET only —
+ * editing a REGRESSION_SET or BLIND_SET label to make a query pass is exactly
+ * the dishonesty the split exists to prevent.
  *
  * Fields:
  *   relevant    every product a shopper would accept. Empty means the honest
@@ -340,6 +362,9 @@ export const DEV_SET = [
 ];
 
 /**
+ * REGRESSION_SET — formerly the held-out set (renamed 2026-08-15 so the name
+ * stops implying it is still unseen; it is not).
+ *
  * CONSUMED as of 2026-08-01. Written before tuning and scored blind once:
  * 24/30, precision 0.903, recall 0.967, against 0.941 on dev — a ~4-point
  * generalisation gap, which is the honest cost of fitting.
@@ -347,12 +372,14 @@ export const DEV_SET = [
  * Two bugs it exposed were then fixed (the word "tracksuit" was missing from
  * the lexicon entirely, and `jewelry -> accessories` let every belt and sock
  * answer "earrings"), taking it to 26/30 / 0.926. That second number is no
- * longer a generalisation estimate — the set has been looked at.
+ * longer a generalisation estimate — the set has been looked at. Its job now is
+ * to be a regression tripwire: it must never drop below 26/30 without a reason.
  *
  * A further honest measurement needs a NEW set, sealed and ideally labelled by
- * someone who did not write the engine.
+ * someone who did not write the engine. `BLIND_SET` below is the first step
+ * toward that — sealed and scored once, though still one author's labels.
  */
-export const HELDOUT_SET = [
+export const REGRESSION_SET = [
   { query: "warm coat for men", maxResults: 5, intent: "season + department", relevant: ["MOCK-044", "MOCK-013"] },
   { query: "linen dress for summer", maxResults: 4, intent: "material + occasion", relevant: ["MOCK-061"], mustRank: ["MOCK-061"] },
   { query: "velvet dress", maxResults: 3, intent: "material + garment", relevant: ["MOCK-053"], mustRank: ["MOCK-053"] },
@@ -383,4 +410,45 @@ export const HELDOUT_SET = [
   { query: "kuprinė", maxResults: 3, intent: "garment / lt", relevant: ["MOCK-060"], mustRank: ["MOCK-060"] },
   { query: "dovana moteriai", maxResults: 10, intent: "occasion / lt", relevant: ["MOCK-051", "MOCK-056", "MOCK-020"] },
   { query: "juodos kelnės", maxResults: 6, intent: "colour + garment / lt", relevant: ["MOCK-002", "MOCK-021"] },
+];
+
+/**
+ * BLIND_SET — sealed 2026-08-15, scored ONCE.
+ *
+ * Written by reading the 64-row catalog, not by watching the engine's output.
+ * The rule that makes the number mean anything: neither the engine nor a single
+ * label in this array may be changed in response to how it scores. If a query
+ * fails, that failure is the measurement — it is reported, not tuned away. The
+ * first time a weight is nudged to lift this score, the set is burned and moves
+ * to REGRESSION_SET, exactly as the held-out set did.
+ *
+ * Deliberately concrete (garment + colour/material, a few Lithuanian forms, two
+ * honest negatives): the DEV and REGRESSION sets already stress fuzzy intent
+ * heavily, so this set measures whether the plumbing generalizes to unseen but
+ * ordinary shopper phrasings rather than re-testing the graph's cleverest edges.
+ */
+export const BLIND_SET = [
+  // ---- garment + colour / material ----
+  { query: "brown jacket", maxResults: 4, intent: "colour + garment", relevant: ["MOCK-011"], mustRank: ["MOCK-011"] },
+  { query: "navy blazer", maxResults: 4, intent: "colour + garment", relevant: ["MOCK-007"], mustRank: ["MOCK-007"] },
+  { query: "wide leg trousers", maxResults: 6, intent: "cut + garment", relevant: ["MOCK-002", "MOCK-049", "MOCK-063"] },
+  { query: "cotton shirt", maxResults: 4, intent: "material + garment", relevant: ["MOCK-001"], mustRank: ["MOCK-001"] },
+  { query: "training shorts", maxResults: 3, intent: "activity + garment", relevant: ["MOCK-038"], mustRank: ["MOCK-038"] },
+  { query: "grey hoodie", maxResults: 4, intent: "colour + garment", relevant: ["MOCK-008"], mustRank: ["MOCK-008"] },
+  { query: "orange tee", maxResults: 3, intent: "colour + garment", relevant: ["MOCK-039"], mustRank: ["MOCK-039"] },
+  { query: "merino sweater", maxResults: 4, intent: "material + garment", relevant: ["MOCK-048"], mustRank: ["MOCK-048"] },
+  { query: "graphic hoodie", maxResults: 4, intent: "print + garment", relevant: ["MOCK-057"], mustRank: ["MOCK-057"] },
+  { query: "black crossbody bag", maxResults: 4, intent: "colour + garment", relevant: ["MOCK-016", "MOCK-064"] },
+  { query: "chelsea boots", maxResults: 4, intent: "style + garment", relevant: ["MOCK-050"], mustRank: ["MOCK-050"] },
+  { query: "socks", maxResults: 3, intent: "garment", relevant: ["MOCK-031"], mustRank: ["MOCK-031"] },
+  { query: "waist bag", maxResults: 3, intent: "garment", relevant: ["MOCK-040"], mustRank: ["MOCK-040"] },
+
+  // ---- honest negatives: the catalog does not stock these ----
+  { query: "beige coat", maxResults: 3, intent: "negative / not stocked", relevant: [] },
+  { query: "yellow dress", maxResults: 3, intent: "negative / not stocked", relevant: [] },
+
+  // ---- Lithuanian surface forms ----
+  { query: "ruda striukė", maxResults: 4, intent: "colour + garment / lt", relevant: ["MOCK-011"], mustRank: ["MOCK-011"] },
+  { query: "megztinis", maxResults: 4, intent: "garment / lt", relevant: ["MOCK-048"], mustRank: ["MOCK-048"] },
+  { query: "juodas diržas", maxResults: 4, intent: "colour + garment / lt", relevant: ["MOCK-009", "MOCK-055"] },
 ];
