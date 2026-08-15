@@ -15,7 +15,20 @@ npm run build        # next build
 npm run start        # next start
 npm run lint         # tsc --noEmit (there is no separate ESLint script)
 npm run typecheck    # tsc --noEmit (same as lint)
+npm run test:unit    # node --test — search-engine invariants
 ```
+
+Full-stack HTTP integration smoke (needs a production build; boots `next start`
+on port 3111 itself, then tears it down):
+
+```bash
+npm run build && npm run test:integration
+```
+
+`scripts/integration-smoke.mjs` asserts the frontend/backend boundary — search
+rendering real results, the `/out/:id` guard (200 valid / 404 unknown), and the
+`/api/analytics/click` security contract (202 same-origin, 403 cross-origin, 404
+unknown product, 413 oversized). It is a pre-merge check, not a required CI gate.
 
 Locale regression suite (Python Playwright, requires the dev server running):
 
@@ -110,9 +123,12 @@ Supabase's service-role key is used exclusively for anonymous analytics writes
 
 ## CI/CD and deployment
 
-No CI pipeline is configured in this repo (no `.github/workflows`) and there is
-no Dockerfile. Verification before merging is manual: `npm run build` +
-`npm run test:locale`. Deployment history shows Vercel usage (local `.vercel/`
+CI runs on push to `main` and on every PR via `.github/workflows/ci.yml`
+(`verify` job): `npm ci` → typecheck → `test:unit` → `test:search` → production
+build. Two suites are deliberately **not** in the required gates because they need
+a live server: the Playwright locale suite (`test:locale`, flaky by history — see
+project memory) and the HTTP `test:integration` smoke; run both before merging.
+There is no Dockerfile. Deployment history shows Vercel usage (local `.vercel/`
 artifacts, gitignored) and a reverted "Sites deployment integration" — check
 recent commits before assuming a particular deploy path is active.
 
