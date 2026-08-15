@@ -85,13 +85,17 @@ summed — otherwise broad concepts would penalize themselves). Terms that name 
 the rain"* can't answer with a parka. Every ranking decision is inspectable,
 which is the reason it can be evaluated rather than eyeballed.
 
-**2. A real search-evaluation harness with a sealed held-out set.**
-`scripts/semantic-eval.mjs` scores 74 hand-labelled queries — a **dev set** that
-tuning is allowed to touch and a **held-out set** that is scored once — reporting
+**2. A search-evaluation harness with an honest three-way split.**
+`scripts/semantic-eval.mjs` scores 92 hand-labelled queries across three sets
+with three different levels of trust: a **dev set** tuning may touch (a fit
+ceiling, not a generalization estimate), a **regression set** that was once
+held-out but has since been inspected and so is now a benchmark rather than an
+unbiased signal, and a **blind set** sealed and scored exactly once. It reports
 precision@k (`k = min(5, |relevant|)`, so narrow queries aren't unfairly capped),
-recall, and a per-query pass/fail. It includes *negative* queries (the catalog
-doesn't stock the thing, so the win is resisting a made-up answer) and
-`mustRank` constraints. See [Search evaluation](#search-evaluation).
+recall, and a per-query pass/fail, and includes *negative* queries (the catalog
+doesn't stock the thing, so the win is resisting a made-up answer) and `mustRank`
+constraints. Why this split, and why 26/30 is *not* "unseen", is spelled out in
+[Search relevance and evaluation](#search-relevance-and-evaluation).
 
 **3. A demo-data boundary enforced in code.**
 Public store identity is decoupled from internal retailer identity: internal
@@ -122,20 +126,41 @@ Three incremental migrations (`sql/00N_*.sql`) model the pre-affiliate schema an
 the synthetic-click analytics boundary; row-level security grants access only to
 `service_role`, blocking `anon`/`authenticated` entirely.
 
-## Search evaluation
+## Search relevance and evaluation
 
 Run `npm run test:search`. Current measured results against the 64-item synthetic
-catalog:
+catalog (`k = min(5, |relevant|)`; passing bar ≥ 80% of queries per set at
+precision@k ≥ 0.6):
 
-| Set | Queries | Passing | Mean precision@k | Mean recall | Interpretation |
-|-----|--------:|--------:|-----------------:|------------:|----------------|
-| **Dev** (tuning allowed) | 44 | 44/44 (100%) | 0.941 | 0.981 | Optimistic — the graph is tuned against these, so treat it as a fit ceiling, **not** a generalization estimate. |
-| **Held-out** (sealed, scored once) | 30 | 26/30 (86.7%) | 0.926 | 1.000 | The honest signal: unseen queries, no tuning. |
+| Set | Queries | Passing | Mean p@k | Recall | What the number is worth |
+|-----|--------:|--------:|---------:|-------:|--------------------------|
+| **Dev** — tuning allowed | 44 | 44/44 (100%) | 0.941 | 0.981 | A **fit ceiling**, not generalization: the graph was shaped to answer these. High here only proves the graph *can express* the answers. |
+| **Regression** — previously inspected | 30 | 26/30 (86.7%) | 0.926 | 1.000 | A **benchmark, not an unseen signal** (see below). Its job is to be a tripwire that must not drop when an edge is retuned. |
+| **Blind** — sealed 2026-08-15, scored once | 18 | 17/18 (94.4%) | 0.944 | 1.000 | The **current best generalization estimate**. Reported, deliberately *not* a CI gate. |
 
-The held-out number is the one that matters. It is reported *after* tuning on the
-dev set and is deliberately **not** presented as unbiased dev performance — the
-harness keeps the two sets separate for exactly that reason. Passing bar: ≥ 80%
-of queries per set at precision@k ≥ 0.6.
+**Why the regression set is not "unseen", and why that's stated plainly.** It was
+written before tuning and scored blind exactly once — **24/30**. Its four failures
+were then inspected, and two exposed two real defects: the word *tracksuit* was
+missing from the lexicon entirely, and a `jewelry → accessories` edge let every
+belt and sock answer *"earrings"*. Fixing those took the same set to **26/30**.
+That second number is a useful regression benchmark, but it is **no longer an
+unbiased estimate of unseen-query performance** — the set has been looked at.
+Calling it "sealed / unseen" today would be false, so the repo doesn't.
+
+**The blind set is the replacement, and it is only scored once.** Neither the
+engine nor a single label may be changed in response to how the blind set scores;
+the first time a weight is nudged to lift it, it is burned and becomes a second
+regression set. On its one sealed run it passed **17/18** and — usefully —
+immediately caught a real limitation the tuned sets did not: `"yellow dress"`
+should answer *"not stocked"* (there is nothing yellow in the catalog) but returns
+four non-yellow dresses, because an **unknown** colour token doesn't constrain the
+result the way a *known* one does (`"beige coat"`, with *beige* in the lexicon,
+correctly returns nothing). That failure is reported, not patched — patching it
+would defeat the purpose of a blind set. It's logged in
+[`docs/search-engine.md`](docs/search-engine.md#known-limitations).
+
+The full methodology, and the split's rationale, lives in
+[`docs/search-engine.md`](docs/search-engine.md).
 
 ## Technology
 
@@ -210,7 +235,8 @@ Tracked in [`ROADMAP.md`](ROADMAP.md). Near-term technical direction:
 1. Connect a first real affiliate feed behind the existing `/out` validation gate.
 2. Move the base catalog from CSV to PostgreSQL once a feed exists.
 3. Wire the fitting-room prototype to an image-generation backend.
-4. Broaden the search lexicon and grow the held-out evaluation set.
+4. Broaden the search lexicon and grow the blind evaluation set — ideally
+   labelled by someone other than the engine's author, or from real click data.
 
 ---
 
