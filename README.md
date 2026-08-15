@@ -207,13 +207,24 @@ and fill in the optional Supabase/PostHog values.
 ## Validation
 
 ```bash
-npm run typecheck    # tsc --noEmit
-npm run build        # next build
-npm run test:search  # semantic-search eval (no server needed)
+npm run typecheck        # tsc --noEmit
+npm run test:unit        # search-engine invariants (node:test)
+npm run test:search      # semantic-search relevance eval (no server needed)
+npm run build            # next build
+
+# full-stack HTTP smoke: search render + /out guard + click-endpoint security
+npm run build && npm run test:integration
 
 # locale/browser regression (needs the app running + Python Playwright)
 BASE_URL=http://127.0.0.1:3000 npm run test:locale
 ```
+
+`test:integration` boots the production server and asserts the frontend/backend
+boundary: a search renders real results, `/out/:id` guards valid ids and 404s
+unknown ones, and `POST /api/analytics/click` returns `202` same-origin but `403`
+cross-origin, `404` for an unknown product, and `413` for an oversized body. It's
+run before merging, not in the required CI gates (it needs a build and a live
+port).
 
 ## Current limitations
 

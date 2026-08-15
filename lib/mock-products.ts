@@ -79,13 +79,25 @@ function parseCsvLine(line: string): string[] {
   return values;
 }
 
+let productCache: { mtimeMs: number; products: MockProduct[] } | null = null;
+
 export function getMockProducts(): MockProduct[] {
+  // The synthetic catalog is a static, committed file, but this function is
+  // called on every request and does real work: read + parse the CSV and run
+  // ~130 fs.existsSync image probes. Memoise the result on the CSV's mtime — the
+  // hot path becomes a single stat, and the cache auto-invalidates if the file
+  // is edited (so `npm run dev` stays live). Determinism is unaffected: the
+  // output is a pure function of the file's bytes, and callers treat the array
+  // as read-only (filter/sort both copy before mutating).
+  const { mtimeMs } = fs.statSync(csvPath);
+  if (productCache && productCache.mtimeMs === mtimeMs) return productCache.products;
+
   const csv = fs.readFileSync(csvPath, "utf8").trim();
   const [headerLine, ...rows] = csv.split(/\r?\n/);
   const headers = parseCsvLine(headerLine) as Array<keyof CsvMockProduct>;
   const attributes = getProductAttributes();
 
-  return rows
+  const products = rows
     .map((row, index) => {
       const values = parseCsvLine(row);
       const csvProduct = headers.reduce((product, header, valueIndex) => {
@@ -113,6 +125,9 @@ export function getMockProducts(): MockProduct[] {
       };
     })
     .filter((product) => product.source_status === "mock_not_live");
+
+  productCache = { mtimeMs, products };
+  return products;
 }
 
 export function getStoreOptions(

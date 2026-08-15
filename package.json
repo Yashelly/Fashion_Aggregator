@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit",
     "test:unit": "node --test scripts/semantic-search.test.mjs",
     "test:search": "node scripts/semantic-eval.mjs",
+    "test:integration": "node scripts/integration-smoke.mjs",
     "data:listings": "node scripts/generate-listings.mjs"
   },
   "dependencies": {
