@@ -3,6 +3,12 @@
 **A bilingual fashion discovery and search platform, built end-to-end as a full-stack MVP.**
 Next.js (App Router) · TypeScript · an explainable concept-graph search engine · Supabase/PostgreSQL analytics · EN/LT localization · Playwright regression suite · Vercel.
 
+**[▶ Live demo](https://fashion-aggregator-flame.vercel.app)** — no login, runs entirely on the synthetic catalog.
+
+[![Weft ranking a synthetic catalog by meaning: "something warm for winter" returns coats, a parka and a knit](docs/screenshots/search.png)](https://fashion-aggregator-flame.vercel.app/search?query=something%20warm%20for%20winter)
+
+<sub>*"something warm for winter"* — the concept graph reaches coats, a technical parka and a merino knit from a query that matches no product's literal text.</sub>
+
 > Weft is a **synthetic demo product**. It serves a hand-built catalog of fictional
 > items — there is no live retailer data, no checkout, and no real merchant links.
 > That boundary is enforced in code, not just documented (see [Demo-data boundary](#demo-data-boundary)).
@@ -23,6 +29,10 @@ aggregator has signed retailer feeds. Everything a live version would need
 (search, ranking, product/detail/compare flows, click-intent analytics, a
 localized UI, a hardened schema) is implemented against a **synthetic catalog**,
 so the product is fully explorable without a single real merchant integration.
+
+![Product detail with cross-store price comparison across neutral demo stores](docs/screenshots/product.png)
+
+<sub>Product detail and the synthetic cross-store price comparison — stores are neutral `Store NN` public identities, never real retailer names (see [Demo-data boundary](#demo-data-boundary)).</sub>
 
 ## What it demonstrates
 
@@ -243,6 +253,8 @@ These are intentional for a pre-affiliate MVP and are called out honestly:
   (`dynamic(… ssr:false)`) so it never loads on other routes, and when WebGL is
   unavailable or the GPU context is lost it degrades to a labelled fallback that
   still shows the applied measurements — never a dead black canvas.
+
+  ![The 3D fitting-room prototype: a measurement-driven Three.js mannequin wearing an approximated garment, with rotate and reset controls](docs/screenshots/fitting-room.png)
 - **Supabase and PostHog are optional.** Analytics and persistence degrade to
   no-ops without credentials; the product is fully usable without them.
 
