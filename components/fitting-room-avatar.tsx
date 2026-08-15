@@ -380,6 +380,11 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
   const modelHeightRef = useRef(clamp(measurements.height, 130, 220) / 100);
   const [autoRotate, setAutoRotate] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
+  // A device with no WebGL (or a lost GPU context) must not leave a dead black
+  // rectangle. `webglError` swaps the canvas for a useful textual fallback;
+  // `retryKey` lets the shopper re-initialise after the context is restored.
+  const [webglError, setWebglError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -396,15 +401,36 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
     const container = containerRef.current;
     if (!container) return;
 
+    // Constructing the renderer is the one step that can throw on a device
+    // without a usable WebGL context. Catch it here and fall back rather than
+    // letting the error bubble and blank the whole panel.
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch {
+      setWebglError(true);
+      return;
+    }
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(34, 1, 0.01, 100);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.domElement.setAttribute("aria-hidden", "true");
     container.appendChild(renderer.domElement);
+
+    // The GPU can drop the context at any time (tab backgrounded, driver reset,
+    // too many live contexts). Without this the canvas would freeze black;
+    // preventDefault keeps the browser from making the loss permanent, and we
+    // surface the fallback with its retry affordance.
+    const handleContextLost = (event: Event) => {
+      event.preventDefault();
+      window.cancelAnimationFrame(animationFrame);
+      setWebglError(true);
+    };
+    renderer.domElement.addEventListener("webglcontextlost", handleContextLost, false);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -459,6 +485,7 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
 
     return () => {
       window.cancelAnimationFrame(animationFrame);
+      renderer.domElement.removeEventListener("webglcontextlost", handleContextLost);
       resizeObserver.disconnect();
       controls.dispose();
       scene.remove(studio);
@@ -470,7 +497,7 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
       cameraRef.current = null;
       controlsRef.current = null;
     };
-  }, []);
+  }, [retryKey]);
 
   useEffect(() => {
     const scene = sceneRef.current;
@@ -491,7 +518,8 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
       disposeObject(avatar.group);
       if (modelRef.current === avatar.group) modelRef.current = null;
     };
-  }, [garment, garmentColor, measurements, skinColor]);
+    // retryKey re-adds the avatar into the scene rebuilt after a context recovery.
+  }, [garment, garmentColor, measurements, skinColor, retryKey]);
 
   useEffect(() => {
     if (controlsRef.current) controlsRef.current.autoRotate = autoRotate && !reducedMotion;
@@ -501,6 +529,51 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
     const camera = cameraRef.current;
     const controls = controlsRef.current;
     if (camera && controls) setCameraView(camera, controls, modelHeightRef.current);
+  }
+
+  if (webglError) {
+    const specs: Array<[string, string]> = [
+      [isLt ? "Ūgis" : "Height", `${Math.round(measurements.height)} cm`],
+      [isLt ? "Krūtinė" : "Chest", `${Math.round(measurements.chest)} cm`],
+      [isLt ? "Juosmuo" : "Waist", `${Math.round(measurements.waist)} cm`],
+      [isLt ? "Klubai" : "Hips", `${Math.round(measurements.hips)} cm`],
+    ];
+    return (
+      <div
+        aria-label={isLt ? "3D peržiūra nepasiekiama" : "3D preview unavailable"}
+        className="avatar-stage avatar-fallback"
+        ref={containerRef}
+        role="group"
+      >
+        <div className="avatar-fallback-inner">
+          <p className="avatar-fallback-title">{isLt ? "3D peržiūra nepasiekiama" : "3D preview unavailable"}</p>
+          <p className="avatar-fallback-body">
+            {isLt
+              ? "Ši naršyklė arba įrenginys neįjungė WebGL, todėl 3D manekeno nupiešti negalime. Jūsų matmenys ir pasirinktas drabužis vis tiek pritaikyti."
+              : "This browser or device didn't provide WebGL, so the 3D mannequin can't be drawn. Your measurements and selected garment are still applied."}
+          </p>
+          <dl className="avatar-fallback-specs">
+            {specs.map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+            {garment ? (
+              <div className="avatar-fallback-garment">
+                <dt>{isLt ? "Drabužis" : "Garment"}</dt>
+                <dd>{garment.title}</dd>
+              </div>
+            ) : null}
+          </dl>
+          <button onClick={() => { setWebglError(false); setRetryKey((key) => key + 1); }} type="button">
+            <RefreshCcw aria-hidden="true" size={16} />
+            {isLt ? "Bandyti dar kartą" : "Try again"}
+          </button>
+        </div>
+        <style>{avatarStyles}</style>
+      </div>
+    );
   }
 
   return (
@@ -534,6 +607,7 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
 
 const avatarStyles = `
 .avatar-stage{position:relative;min-height:460px;width:100%;overflow:hidden;background:var(--color-surface-soft);border:1px solid var(--color-line);isolation:isolate}.avatar-stage canvas{position:absolute;inset:0;display:block;width:100%;height:100%;z-index:0;touch-action:none}.avatar-controls{position:absolute;z-index:2;top:12px;left:12px;display:flex;flex-wrap:wrap;gap:8px}.avatar-controls button{display:flex;align-items:center;gap:7px;min-height:44px;padding:9px 12px;border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-ink);font:inherit;font-size:12px;font-weight:600;cursor:pointer}.avatar-controls button[aria-pressed="true"]{background:var(--color-ink);border-color:var(--color-ink);color:var(--color-canvas)}.avatar-controls button:disabled{opacity:.45;cursor:not-allowed}.avatar-controls button:focus-visible{outline:3px solid var(--color-accent);outline-offset:2px}.avatar-hint{position:absolute;z-index:2;left:12px;bottom:10px;margin:0;padding:7px 9px;background:var(--color-surface);color:var(--color-ink-muted);font-size:11px}
+.avatar-fallback{display:grid;place-items:center;padding:28px}.avatar-fallback-inner{max-width:340px;text-align:center}.avatar-fallback-title{font-family:var(--font-display);font-size:18px;margin:0 0 8px}.avatar-fallback-body{color:var(--color-ink-muted);font-size:13px;line-height:1.5;margin:0 0 18px}.avatar-fallback-specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 18px;text-align:left}.avatar-fallback-specs>div{border:1px solid var(--color-line);padding:8px 10px}.avatar-fallback-garment{grid-column:1/-1}.avatar-fallback-specs dt{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--color-ink-muted)}.avatar-fallback-specs dd{margin:3px 0 0;font-size:13px;font-weight:600}.avatar-fallback button{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:9px 16px;border:1px solid var(--color-ink);background:var(--color-ink);color:var(--color-canvas);font:inherit;font-size:12px;font-weight:600;cursor:pointer}.avatar-fallback button:focus-visible{outline:3px solid var(--color-accent);outline-offset:2px}
 @media(max-width:520px){.avatar-stage{min-height:380px}.avatar-controls{right:12px}.avatar-controls button{flex:1;justify-content:center}.avatar-hint{right:12px;text-align:center}}
 @media(prefers-reduced-motion:reduce){.avatar-controls button{transition:none}}
 `;

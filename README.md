@@ -123,8 +123,12 @@ and `/out` success/404 across both locales.
 
 **6. Feed-oriented PostgreSQL schema with RLS.**
 Three incremental migrations (`sql/00N_*.sql`) model the pre-affiliate schema and
-the synthetic-click analytics boundary; row-level security grants access only to
-`service_role`, blocking `anon`/`authenticated` entirely.
+the synthetic-click analytics boundary: an auditable feed-import lifecycle
+(`feed_import_runs` + `raw_feed_items` with jsonb payloads and validation state),
+content-hash change detection, variants, per-relationship `on delete` rules, and
+FK/GIN indexes chosen for real query patterns. Row-level security grants access
+only to `service_role`, blocking `anon`/`authenticated` entirely. The full ER
+diagram and rationale are in [`docs/data-model.md`](docs/data-model.md).
 
 ## Search relevance and evaluation
 
@@ -224,7 +228,10 @@ These are intentional for a pre-affiliate MVP and are called out honestly:
   approximate skin tone and **never leaves the device**, and the result is a
   rotatable, deliberately approximate garment preview. There is no image model,
   no generation call, and no server round-trip — photorealistic image-based
-  try-on is on the roadmap, not built.
+  try-on is on the roadmap, not built. The Three.js bundle is code-split
+  (`dynamic(… ssr:false)`) so it never loads on other routes, and when WebGL is
+  unavailable or the GPU context is lost it degrades to a labelled fallback that
+  still shows the applied measurements — never a dead black canvas.
 - **Supabase and PostHog are optional.** Analytics and persistence degrade to
   no-ops without credentials; the product is fully usable without them.
 
