@@ -3,6 +3,12 @@
 **A bilingual fashion discovery and search platform, built end-to-end as a full-stack MVP.**
 Next.js (App Router) · TypeScript · an explainable concept-graph search engine · Supabase/PostgreSQL analytics · EN/LT localization · Playwright regression suite · Vercel.
 
+**[▶ Live demo](https://fashion-aggregator-flame.vercel.app)** — no login, runs entirely on the synthetic catalog.
+
+[![Weft ranking a synthetic catalog by meaning: "something warm for winter" returns coats, a parka and a knit](docs/screenshots/search.png)](https://fashion-aggregator-flame.vercel.app/search?query=something%20warm%20for%20winter)
+
+<sub>*"something warm for winter"* — the concept graph reaches coats, a technical parka and a merino knit from a query that matches no product's literal text.</sub>
+
 > Weft is a **synthetic demo product**. It serves a hand-built catalog of fictional
 > items — there is no live retailer data, no checkout, and no real merchant links.
 > That boundary is enforced in code, not just documented (see [Demo-data boundary](#demo-data-boundary)).
@@ -23,6 +29,10 @@ aggregator has signed retailer feeds. Everything a live version would need
 (search, ranking, product/detail/compare flows, click-intent analytics, a
 localized UI, a hardened schema) is implemented against a **synthetic catalog**,
 so the product is fully explorable without a single real merchant integration.
+
+![Product detail with cross-store price comparison across neutral demo stores](docs/screenshots/product.png)
+
+<sub>Product detail and the synthetic cross-store price comparison — stores are neutral `Store NN` public identities, never real retailer names (see [Demo-data boundary](#demo-data-boundary)).</sub>
 
 ## What it demonstrates
 
@@ -85,13 +95,17 @@ summed — otherwise broad concepts would penalize themselves). Terms that name 
 the rain"* can't answer with a parka. Every ranking decision is inspectable,
 which is the reason it can be evaluated rather than eyeballed.
 
-**2. A real search-evaluation harness with a sealed held-out set.**
-`scripts/semantic-eval.mjs` scores 74 hand-labelled queries — a **dev set** that
-tuning is allowed to touch and a **held-out set** that is scored once — reporting
+**2. A search-evaluation harness with an honest three-way split.**
+`scripts/semantic-eval.mjs` scores 92 hand-labelled queries across three sets
+with three different levels of trust: a **dev set** tuning may touch (a fit
+ceiling, not a generalization estimate), a **regression set** that was once
+held-out but has since been inspected and so is now a benchmark rather than an
+unbiased signal, and a **blind set** sealed and scored exactly once. It reports
 precision@k (`k = min(5, |relevant|)`, so narrow queries aren't unfairly capped),
-recall, and a per-query pass/fail. It includes *negative* queries (the catalog
-doesn't stock the thing, so the win is resisting a made-up answer) and
-`mustRank` constraints. See [Search evaluation](#search-evaluation).
+recall, and a per-query pass/fail, and includes *negative* queries (the catalog
+doesn't stock the thing, so the win is resisting a made-up answer) and `mustRank`
+constraints. Why this split, and why 26/30 is *not* "unseen", is spelled out in
+[Search relevance and evaluation](#search-relevance-and-evaluation).
 
 **3. A demo-data boundary enforced in code.**
 Public store identity is decoupled from internal retailer identity: internal
@@ -119,23 +133,48 @@ and `/out` success/404 across both locales.
 
 **6. Feed-oriented PostgreSQL schema with RLS.**
 Three incremental migrations (`sql/00N_*.sql`) model the pre-affiliate schema and
-the synthetic-click analytics boundary; row-level security grants access only to
-`service_role`, blocking `anon`/`authenticated` entirely.
+the synthetic-click analytics boundary: an auditable feed-import lifecycle
+(`feed_import_runs` + `raw_feed_items` with jsonb payloads and validation state),
+content-hash change detection, variants, per-relationship `on delete` rules, and
+FK/GIN indexes chosen for real query patterns. Row-level security grants access
+only to `service_role`, blocking `anon`/`authenticated` entirely. The full ER
+diagram and rationale are in [`docs/data-model.md`](docs/data-model.md).
 
-## Search evaluation
+## Search relevance and evaluation
 
 Run `npm run test:search`. Current measured results against the 64-item synthetic
-catalog:
+catalog (`k = min(5, |relevant|)`; passing bar ≥ 80% of queries per set at
+precision@k ≥ 0.6):
 
-| Set | Queries | Passing | Mean precision@k | Mean recall | Interpretation |
-|-----|--------:|--------:|-----------------:|------------:|----------------|
-| **Dev** (tuning allowed) | 44 | 44/44 (100%) | 0.941 | 0.981 | Optimistic — the graph is tuned against these, so treat it as a fit ceiling, **not** a generalization estimate. |
-| **Held-out** (sealed, scored once) | 30 | 26/30 (86.7%) | 0.926 | 1.000 | The honest signal: unseen queries, no tuning. |
+| Set | Queries | Passing | Mean p@k | Recall | What the number is worth |
+|-----|--------:|--------:|---------:|-------:|--------------------------|
+| **Dev** — tuning allowed | 44 | 44/44 (100%) | 0.941 | 0.981 | A **fit ceiling**, not generalization: the graph was shaped to answer these. High here only proves the graph *can express* the answers. |
+| **Regression** — previously inspected | 30 | 26/30 (86.7%) | 0.926 | 1.000 | A **benchmark, not an unseen signal** (see below). Its job is to be a tripwire that must not drop when an edge is retuned. |
+| **Blind** — sealed 2026-08-15, scored once | 18 | 17/18 (94.4%) | 0.944 | 1.000 | The **current best generalization estimate**. Reported, deliberately *not* a CI gate. |
 
-The held-out number is the one that matters. It is reported *after* tuning on the
-dev set and is deliberately **not** presented as unbiased dev performance — the
-harness keeps the two sets separate for exactly that reason. Passing bar: ≥ 80%
-of queries per set at precision@k ≥ 0.6.
+**Why the regression set is not "unseen", and why that's stated plainly.** It was
+written before tuning and scored blind exactly once — **24/30**. Its four failures
+were then inspected, and two exposed two real defects: the word *tracksuit* was
+missing from the lexicon entirely, and a `jewelry → accessories` edge let every
+belt and sock answer *"earrings"*. Fixing those took the same set to **26/30**.
+That second number is a useful regression benchmark, but it is **no longer an
+unbiased estimate of unseen-query performance** — the set has been looked at.
+Calling it "sealed / unseen" today would be false, so the repo doesn't.
+
+**The blind set is the replacement, and it is only scored once.** Neither the
+engine nor a single label may be changed in response to how the blind set scores;
+the first time a weight is nudged to lift it, it is burned and becomes a second
+regression set. On its one sealed run it passed **17/18** and — usefully —
+immediately caught a real limitation the tuned sets did not: `"yellow dress"`
+should answer *"not stocked"* (there is nothing yellow in the catalog) but returns
+four non-yellow dresses, because an **unknown** colour token doesn't constrain the
+result the way a *known* one does (`"beige coat"`, with *beige* in the lexicon,
+correctly returns nothing). That failure is reported, not patched — patching it
+would defeat the purpose of a blind set. It's logged in
+[`docs/search-engine.md`](docs/search-engine.md#known-limitations).
+
+The full methodology, and the split's rationale, lives in
+[`docs/search-engine.md`](docs/search-engine.md).
 
 ## Technology
 
@@ -178,13 +217,24 @@ and fill in the optional Supabase/PostHog values.
 ## Validation
 
 ```bash
-npm run typecheck    # tsc --noEmit
-npm run build        # next build
-npm run test:search  # semantic-search eval (no server needed)
+npm run typecheck        # tsc --noEmit
+npm run test:unit        # search-engine invariants (node:test)
+npm run test:search      # semantic-search relevance eval (no server needed)
+npm run build            # next build
+
+# full-stack HTTP smoke: search render + /out guard + click-endpoint security
+npm run build && npm run test:integration
 
 # locale/browser regression (needs the app running + Python Playwright)
 BASE_URL=http://127.0.0.1:3000 npm run test:locale
 ```
+
+`test:integration` boots the production server and asserts the frontend/backend
+boundary: a search renders real results, `/out/:id` guards valid ids and 404s
+unknown ones, and `POST /api/analytics/click` returns `202` same-origin but `403`
+cross-origin, `404` for an unknown product, and `413` for an oversized body. It's
+run before merging, not in the required CI gates (it needs a build and a live
+port).
 
 ## Current limitations
 
@@ -199,7 +249,12 @@ These are intentional for a pre-affiliate MVP and are called out honestly:
   approximate skin tone and **never leaves the device**, and the result is a
   rotatable, deliberately approximate garment preview. There is no image model,
   no generation call, and no server round-trip — photorealistic image-based
-  try-on is on the roadmap, not built.
+  try-on is on the roadmap, not built. The Three.js bundle is code-split
+  (`dynamic(… ssr:false)`) so it never loads on other routes, and when WebGL is
+  unavailable or the GPU context is lost it degrades to a labelled fallback that
+  still shows the applied measurements — never a dead black canvas.
+
+  ![The 3D fitting-room prototype: a measurement-driven Three.js mannequin wearing an approximated garment, with rotate and reset controls](docs/screenshots/fitting-room.png)
 - **Supabase and PostHog are optional.** Analytics and persistence degrade to
   no-ops without credentials; the product is fully usable without them.
 
@@ -210,7 +265,8 @@ Tracked in [`ROADMAP.md`](ROADMAP.md). Near-term technical direction:
 1. Connect a first real affiliate feed behind the existing `/out` validation gate.
 2. Move the base catalog from CSV to PostgreSQL once a feed exists.
 3. Wire the fitting-room prototype to an image-generation backend.
-4. Broaden the search lexicon and grow the held-out evaluation set.
+4. Broaden the search lexicon and grow the blind evaluation set — ideally
+   labelled by someone other than the engine's author, or from real click data.
 
 ---
 
