@@ -41,9 +41,11 @@ export function Wordmark({ className, animate = false, trigger = "load" }: Wordm
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // Open the gap to exactly one glyph advance, measured from the real font.
+    // Set on the root so both the slot and its sibling `.wm-tail` inherit it —
+    // the tail is what actually slides right by this amount.
     const measure = () => {
       const w = ichar.getBoundingClientRect().width;
-      if (w) slot.style.setProperty("--wm-iw", `${w.toFixed(2)}px`);
+      if (w) root.style.setProperty("--wm-iw", `${w.toFixed(2)}px`);
     };
 
     let timers: ReturnType<typeof setTimeout>[] = [];
@@ -149,7 +151,7 @@ export function Wordmark({ className, animate = false, trigger = "load" }: Wordm
       aria-label="weft"
       {...(clickable ? { tabIndex: 0, title: "we fit" } : {})}
     >
-      <span className="wm-lead">w</span>e<span className="wm-fit">f<span className="wm-islot"><span className="wm-ichar">i</span></span>t</span>
+      <span className="wm-lead">w</span>e<span className="wm-fit">f<span className="wm-islot"><span className="wm-ichar">i</span></span><span className="wm-tail">t</span></span>
     </span>
   );
 }
