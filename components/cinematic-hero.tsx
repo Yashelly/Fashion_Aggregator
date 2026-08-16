@@ -21,10 +21,11 @@ export function CinematicHero({ locale }: { locale: Locale }) {
   return (
     <section className="title-page" aria-labelledby="home-title">
       {/*
-        Decorative wardrobe still, softly blurred so it reads as texture behind
-        the copy rather than a photo competing with it. aria-hidden and purely
-        a background image (no video, no motion); the scrim over it keeps the
-        headline's contrast.
+        A soft, slowly drifting wash of brand tones, heavily blurred so it reads
+        as atmosphere behind the copy rather than a picture competing with it.
+        aria-hidden and decorative; a faint canvas halo (::after) sits behind the
+        centred copy for contrast, and the drift is disabled under
+        prefers-reduced-motion by the global guard.
       */}
       <div className="hero-media" aria-hidden="true" />
 

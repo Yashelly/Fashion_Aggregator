@@ -509,8 +509,10 @@ summary {
 .title-page-copy {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   max-width: 640px;
+  margin-inline: auto;
+  text-align: center;
 }
 
 .title-page h1 {
@@ -590,9 +592,10 @@ summary {
 }
 
 /*
- * The wardrobe still sits behind the title page. The frame is shot with the
- * figures on the right and the left half deliberately empty, so the copy lands
- * on bare studio floor rather than on top of a garment.
+ * The atmospheric wash behind the title page. No photo: a set of brand-tinted
+ * radial blobs bled together and blurred, so it reads as coloured light rather
+ * than an image. `overflow: hidden` clips the over-scanned, drifting inner
+ * layer back to the section.
  */
 .hero-media {
   inset: 0;
@@ -602,40 +605,67 @@ summary {
 }
 
 /*
- * The image lives on its own blurred layer, not on `.hero-media` itself, so the
- * scrim (`::after`) stays sharp on top of it. The layer is over-scanned
- * (negative inset + scale) because `blur()` samples past the box edge and would
- * otherwise feather the canvas colour in around the frame.
+ * The colour lives on its own layer so the ::after halo stays sharp on top of
+ * it. It is over-scanned well past the box (inset: -35%) because it both blurs
+ * — which samples past the edge — and slowly rotates/scales; the extra margin
+ * keeps the section corners from ever showing bare canvas mid-drift. The blobs
+ * are pushed toward the corners so the centre stays lightest for the copy.
  */
 .hero-media::before {
-  background-image: url("/hero-assets/hero-poster.jpg");
-  background-position: right center;
-  background-size: cover;
+  background:
+    radial-gradient(38% 46% at 22% 26%, color-mix(in srgb, var(--color-accent) 52%, transparent), transparent 70%),
+    radial-gradient(42% 52% at 80% 24%, color-mix(in srgb, var(--color-focus) 34%, transparent), transparent 72%),
+    radial-gradient(46% 56% at 74% 82%, color-mix(in srgb, var(--color-accent) 44%, transparent), transparent 70%),
+    radial-gradient(40% 48% at 18% 82%, color-mix(in srgb, var(--color-focus) 26%, transparent), transparent 72%);
   content: "";
-  filter: blur(22px) saturate(0.92);
-  inset: -48px;
+  filter: blur(72px) saturate(1.08);
+  inset: -35%;
   position: absolute;
-  transform: scale(1.1);
+  transform-origin: center;
+  will-change: transform;
+  animation: hero-drift 26s ease-in-out infinite alternate;
 }
 
 /*
- * Scrim. The studio backdrop is a mid grey and the copy is near-black, which
- * is not a safe pairing on its own — this fades the canvas colour across the
- * text column so the headline keeps its contrast, then clears before it
- * reaches the figures.
+ * A soft canvas halo behind the centred copy. The blobs are semi-transparent
+ * over canvas so the middle is already the lightest region; this just guarantees
+ * the headline's contrast without flattening the colour around it.
  */
 .hero-media::after {
-  background: linear-gradient(
-    100deg,
-    var(--color-canvas) 0%,
-    var(--color-canvas) 32%,
-    color-mix(in srgb, var(--color-canvas) 78%, transparent) 52%,
-    color-mix(in srgb, var(--color-canvas) 30%, transparent) 72%,
-    transparent 88%
+  background: radial-gradient(
+    58% 54% at 50% 46%,
+    color-mix(in srgb, var(--color-canvas) 55%, transparent) 0%,
+    color-mix(in srgb, var(--color-canvas) 22%, transparent) 45%,
+    transparent 72%
   );
   content: "";
   inset: 0;
   position: absolute;
+}
+
+/*
+ * The drift: a slow, continuous glide + breath + turn on the colour layer.
+ * `alternate` between the two extremes so there is no seam on repeat. The
+ * global prefers-reduced-motion guard collapses the duration to ~0, holding it
+ * on the first frame for anyone who asked for reduced motion.
+ */
+@keyframes hero-drift {
+  from {
+    transform: translate3d(-3%, -2%, 0) scale(1.04) rotate(-7deg);
+  }
+  to {
+    transform: translate3d(3%, 2%, 0) scale(1.18) rotate(7deg);
+  }
+}
+
+/* Same drift, smaller travel — see the narrow-screen note below. */
+@keyframes hero-drift-narrow {
+  from {
+    transform: translate3d(-1.5%, -1%, 0) scale(1.06) rotate(-4deg);
+  }
+  to {
+    transform: translate3d(1.5%, 1%, 0) scale(1.14) rotate(4deg);
+  }
 }
 
 .preview-kicker,
@@ -1882,29 +1912,13 @@ summary {
 
 @media (max-width: 1023px) {
   /*
-   * Narrow screens stack instead of splitting left/right, so the loop is
-   * re-composed rather than dropped: the figures are pushed to the bottom of
-   * the frame and the scrim runs top-to-bottom, putting the copy on clear
-   * canvas above them. The earlier version hid the video here because the old
-   * hero carried a search field and quick links whose text landed straight on
-   * a lit garment; the title page has four elements and room to spare.
+   * The title page is centred at every width now, so the colour wash and its
+   * halo need no narrow-screen recomposition — the base rules carry over. Only
+   * the drift is toned down: a smaller viewport magnifies the same percentage
+   * translate, so a gentler sweep keeps the blobs from swinging offscreen.
    */
-  .title-page {
-    align-items: start;
-  }
-
   .hero-media::before {
-    background-position: bottom center;
-  }
-
-  .hero-media::after {
-    background: linear-gradient(
-      to bottom,
-      var(--color-canvas) 0%,
-      var(--color-canvas) 42%,
-      color-mix(in srgb, var(--color-canvas) 70%, transparent) 60%,
-      transparent 82%
-    );
+    animation-name: hero-drift-narrow;
   }
 
   .product-grid {
