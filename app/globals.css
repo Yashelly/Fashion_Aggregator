@@ -143,6 +143,12 @@
 }
 
 html {
+  /* Paint the theme canvas on the root element, not just <body>. During a hard
+     navigation (language switch, first paint) the browser repaints before body
+     renders; without this it flashes the default white — harsh in dark mode.
+     The inline theme script in the layout sets data-theme synchronously in
+     <head>, so --color-canvas already resolves to the active theme here. */
+  background-color: var(--color-canvas);
   scroll-behavior: smooth;
 }
 
@@ -843,6 +849,62 @@ summary {
 @keyframes search-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Product-preview loading skeleton (app/out/[productId]/loading.tsx). Shown only
+   on a cold/slow navigation; the static pages are usually prefetched. */
+.detail-skeleton {
+  padding-block: 24px;
+}
+
+.skeleton {
+  background: color-mix(in srgb, var(--color-ink) 9%, var(--color-surface));
+  border-radius: 2px;
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
+
+.skeleton::after {
+  animation: skeleton-shimmer 1.3s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-ink) 7%, transparent),
+    transparent
+  );
+  content: "";
+  inset: 0;
+  position: absolute;
+  transform: translateX(-100%);
+}
+
+.skeleton-media {
+  aspect-ratio: 4 / 5;
+  width: 100%;
+}
+
+.skeleton-media-secondary {
+  aspect-ratio: 16 / 9;
+  margin-top: 16px;
+}
+
+.skeleton-line {
+  height: 18px;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.skeleton-back { height: 14px; margin-bottom: 28px; width: 120px; }
+.skeleton-line-sm { height: 12px; width: 35%; }
+.skeleton-line-lg { height: 34px; width: 80%; }
+.skeleton-line-md { width: 60%; }
+.skeleton-cta { height: 52px; margin-top: 8px; width: 100%; }
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
   }
 }
 
