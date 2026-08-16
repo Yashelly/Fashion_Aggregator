@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { RotateCcw, Search } from "lucide-react";
 import { ProductGrid } from "@/components/product-grid";
 import { FilterDisclosure } from "@/components/filter-disclosure";
+import { SearchForm } from "@/components/search-form";
 import { SearchAnalyticsTracker } from "@/components/search-analytics-tracker";
 import {
   formatAvailabilityLabel, formatCategoryLabel, formatColorLabel, formatGenderLabel,
@@ -94,7 +96,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <div><h1>{t.title}</h1><p className="lead">{t.lead}</p></div>
       </header>
 
-      <form action="/search" className="catalog-form" role="search">
+      <SearchForm action="/search" className="catalog-form" role="search">
         {locale === "lt" && <input name="lang" type="hidden" value="lt" />}
         <input name="perPage" type="hidden" value={perPage} />
         <label className="query-field" htmlFor="catalog-query"><span>{t.labels.search}</span><div><Search aria-hidden="true" size={22}/><input id="catalog-query" defaultValue={params.query ?? ""} name="query" placeholder={t.placeholders.search}/><button type="submit">{t.actions.showResults}</button></div></label>
@@ -113,11 +115,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             <label><span>{t.labels.status}</span><select defaultValue={status} name="status"><option value="">{t.options.allItems}</option><option value="in_stock">{formatAvailabilityLabel("in_stock",locale)}</option><option value="limited">{formatAvailabilityLabel("limited",locale)}</option><option value="sale">{formatAvailabilityLabel("sale",locale)}</option></select></label>
           </div>
         </FilterDisclosure>
-      </form>
+      </SearchForm>
 
       <div className="results-toolbar">
         <p role="status" aria-live="polite" aria-atomic="true"><strong>{results.length}</strong> {locale === "lt" ? "prekių" : results.length === 1 ? "product" : "products"}</p>
-        <div className="active-filters" aria-label={t.active.aria}>{active.map(([key,label])=><a href={removeUrl(key)} key={key}>{label}<span aria-hidden="true">×</span></a>)}{active.length>0&&<a className="clear-link" href={withLocale("/search",locale)}><RotateCcw aria-hidden="true" size={15}/>{t.actions.clearAll}</a>}</div>
+        <div className="active-filters" aria-label={t.active.aria}>{active.map(([key,label])=><Link href={removeUrl(key)} key={key}>{label}<span aria-hidden="true">×</span></Link>)}{active.length>0&&<Link className="clear-link" href={withLocale("/search",locale)}><RotateCcw aria-hidden="true" size={15}/>{t.actions.clearAll}</Link>}</div>
       </div>
       {interpretation && results.length > 0 ? (
         <p aria-label={t.interpretation.aria} className="search-interpretation">
@@ -143,13 +145,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <nav aria-label={locale === "lt" ? "Prekių skaičius puslapyje" : "Products per page"}>
           <span>{locale === "lt" ? "Rodyti" : "Show"}</span>
           {pageSizes.map((size) => (
-            <a
+            <Link
               aria-current={perPage === size ? "page" : undefined}
               href={searchHref(params, { page: undefined, perPage: String(size) })}
               key={size}
             >
               {size}
-            </a>
+            </Link>
           ))}
         </nav>
       </div>
@@ -172,6 +174,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             ? `Produktų rezultatai ${pageStart + 1}–${visibleEnd} iš ${results.length}`
             : `Product results ${pageStart + 1}–${visibleEnd} of ${results.length}`
         }
+        key={`${params.query ?? ""}|${params.store ?? ""}|${params.category ?? ""}|${params.color ?? ""}|${params.gender ?? ""}|${status}|${params.sort ?? ""}|${page}`}
         locale={locale}
         products={visibleResults}
       />
@@ -182,15 +185,15 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               {locale === "lt" ? "Ankstesnis" : "Previous"}
             </span>
           ) : (
-            <a href={searchHref(params, { page: page - 1 === 1 ? undefined : String(page - 1), perPage: String(perPage) })}>
+            <Link href={searchHref(params, { page: page - 1 === 1 ? undefined : String(page - 1), perPage: String(perPage) })}>
               {locale === "lt" ? "Ankstesnis" : "Previous"}
-            </a>
+            </Link>
           )}
           <div>
             {pageLinks.map((pageNumber, index) => (
               <span className="pagination-item" key={pageNumber}>
                 {index > 0 && pageNumber - pageLinks[index - 1] > 1 ? <span aria-hidden="true">…</span> : null}
-                <a
+                <Link
                   aria-current={page === pageNumber ? "page" : undefined}
                   href={searchHref(params, {
                     page: pageNumber === 1 ? undefined : String(pageNumber),
@@ -198,7 +201,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                   })}
                 >
                   {pageNumber}
-                </a>
+                </Link>
               </span>
             ))}
           </div>
@@ -207,13 +210,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               {locale === "lt" ? "Kitas" : "Next"}
             </span>
           ) : (
-            <a href={searchHref(params, { page: String(page + 1), perPage: String(perPage) })}>
+            <Link href={searchHref(params, { page: String(page + 1), perPage: String(perPage) })}>
               {locale === "lt" ? "Kitas" : "Next"}
-            </a>
+            </Link>
           )}
         </nav>
       ) : null}
-      <aside className="source-note" aria-label={t.sourceNoteAria}><div><strong>{t.sourceNoteTitle}</strong><p>{t.sourceNote}</p></div><a href={withLocale("/data-sources",locale)}>{t.sourceNoteCta}</a></aside>
+      <aside className="source-note" aria-label={t.sourceNoteAria}><div><strong>{t.sourceNoteTitle}</strong><p>{t.sourceNote}</p></div><Link href={withLocale("/data-sources",locale)}>{t.sourceNoteCta}</Link></aside>
     </div>
   );
 }

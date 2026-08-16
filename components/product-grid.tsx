@@ -57,7 +57,7 @@ export function ProductGrid({
         <div>
           <h2>{t.noResults}</h2>
           <p>{locale === "lt" ? "Pabandykite platesnį terminą arba pašalinkite filtrą." : "Try a broader phrase or remove a filter."}</p>
-          <a className="button secondary" href={locale === "lt" ? "/search?lang=lt" : "/search"}>{t.clearFilters}</a>
+          <Link className="button secondary" href={locale === "lt" ? "/search?lang=lt" : "/search"}>{t.clearFilters}</Link>
         </div>
       </section>
     );
@@ -104,7 +104,7 @@ export function ProductGrid({
                 )}
               </div>
             ) : (
-              <a className={`product-media${product.image_available ? " has-image" : ""}`} href={href} aria-label={mediaAlt}>
+              <Link className={`product-media${product.image_available ? " has-image" : ""}`} href={href} aria-label={mediaAlt}>
                 {product.image_available ? (
                   <Image
                     alt={mediaAlt}
@@ -119,7 +119,7 @@ export function ProductGrid({
                     <span className="media-category">{categoryLabel}</span>
                   </>
                 )}
-              </a>
+              </Link>
             )}
             <div className="product-body">
               <p className="product-kicker">{categoryLabel}</p>
@@ -163,7 +163,7 @@ export function ProductGrid({
               {unavailable ? (
                 <span className="product-link disabled" aria-disabled="true">{t.soldOut}</span>
               ) : (
-                <a aria-label={`${locale === "lt" ? "Peržiūrėti prekę" : "View product"}: ${product.title}`} className="product-link" href={href}>{locale === "lt" ? "Peržiūrėti" : "View details"}<ArrowRight aria-hidden="true" size={16} /></a>
+                <Link aria-label={`${locale === "lt" ? "Peržiūrėti prekę" : "View product"}: ${product.title}`} className="product-link" href={href}>{locale === "lt" ? "Peržiūrėti" : "View details"}<ArrowRight aria-hidden="true" size={16} /></Link>
               )}
             </div>
           </article>

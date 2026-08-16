@@ -90,13 +90,21 @@ export function Wordmark({ className, animate = false, trigger = "load" }: Wordm
     const start = () => {
       measure();
       if (!animate) return;
+
+      // An animated mark is always replayable by click (or Enter/Space) — the
+      // reveal is a small delight, and letting people trigger it again is the
+      // point. `trigger` only decides how it *first* fires on its own.
+      root.addEventListener("click", play);
+      root.addEventListener("keydown", onKey);
+      let disconnectObserver = () => {};
+      cleanup = () => {
+        root.removeEventListener("click", play);
+        root.removeEventListener("keydown", onKey);
+        disconnectObserver();
+      };
+
       if (trigger === "click") {
-        root.addEventListener("click", play);
-        root.addEventListener("keydown", onKey);
-        cleanup = () => {
-          root.removeEventListener("click", play);
-          root.removeEventListener("keydown", onKey);
-        };
+        // Click handler above is the whole behaviour; no auto-fire.
       } else if (trigger === "inview" && "IntersectionObserver" in window) {
         const io = new IntersectionObserver(
           (entries) => {
@@ -108,8 +116,9 @@ export function Wordmark({ className, animate = false, trigger = "load" }: Wordm
           { threshold: 0.6 },
         );
         io.observe(root);
-        cleanup = () => io.disconnect();
+        disconnectObserver = () => io.disconnect();
       } else {
+        // "load": auto-play shortly after mount, once the display font is laid out.
         const id = setTimeout(play, 400);
         timers.push(id);
       }
@@ -130,7 +139,7 @@ export function Wordmark({ className, animate = false, trigger = "load" }: Wordm
     };
   }, [animate, trigger]);
 
-  const clickable = animate && trigger === "click";
+  const clickable = animate;
 
   return (
     <span

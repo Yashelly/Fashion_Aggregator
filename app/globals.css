@@ -143,6 +143,12 @@
 }
 
 html {
+  /* Paint the theme canvas on the root element, not just <body>. During a hard
+     navigation (language switch, first paint) the browser repaints before body
+     renders; without this it flashes the default white — harsh in dark mode.
+     The inline theme script in the layout sets data-theme synchronously in
+     <head>, so --color-canvas already resolves to the active theme here. */
+  background-color: var(--color-canvas);
   scroll-behavior: smooth;
 }
 
@@ -791,6 +797,147 @@ summary {
   min-width: 0;
 }
 
+/* Results animate in on each search/filter/page change. The grid is remounted
+   with a new key on the server (see app/search/page.tsx), so this replays every
+   time the result set changes, giving the soft navigation a visible response.
+   The global prefers-reduced-motion guard collapses the duration to ~0, so the
+   tiles appear instantly for users who ask for reduced motion. */
+@keyframes tile-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.product-grid .product-tile {
+  animation: tile-in 0.42s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.product-grid .product-tile:nth-child(2) { animation-delay: 40ms; }
+.product-grid .product-tile:nth-child(3) { animation-delay: 80ms; }
+.product-grid .product-tile:nth-child(4) { animation-delay: 120ms; }
+.product-grid .product-tile:nth-child(5) { animation-delay: 160ms; }
+.product-grid .product-tile:nth-child(6) { animation-delay: 200ms; }
+.product-grid .product-tile:nth-child(7) { animation-delay: 240ms; }
+.product-grid .product-tile:nth-child(n + 8) { animation-delay: 280ms; }
+
+/* While a search is running the form carries data-pending, so the submit
+   button shows a spinner — feedback the old native full-page reload never gave.
+   Paired with the .search-progress sweep below. */
+.catalog-form[data-pending] {
+  cursor: progress;
+}
+
+.catalog-form[data-pending] .query-field button {
+  position: relative;
+}
+
+.catalog-form[data-pending] .query-field button::after {
+  animation: search-spin 0.7s linear infinite;
+  border: 2px solid color-mix(in srgb, var(--color-canvas) 40%, transparent);
+  border-radius: 50%;
+  border-top-color: var(--color-canvas);
+  content: "";
+  height: 15px;
+  width: 15px;
+}
+
+@keyframes search-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* The pre-navigation "searching" animation. On submit the form carries
+   data-pending for a deliberate ~620ms (see components/search-form.tsx), and
+   this bar sweeps across the top of the form before the results load — the
+   visible cue that a search was triggered. Kept in sync with REVEAL_MS. */
+.search-progress {
+  background: var(--color-focus);
+  height: 3px;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  top: -2px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  width: 100%;
+}
+
+.catalog-form[data-pending] .search-progress {
+  animation: search-progress-sweep 0.62s cubic-bezier(0.3, 0.1, 0.2, 1) forwards;
+  opacity: 1;
+}
+
+@keyframes search-progress-sweep {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Product-preview loading skeleton (app/out/[productId]/loading.tsx). Shown only
+   on a cold/slow navigation; the static pages are usually prefetched. */
+.detail-skeleton {
+  padding-block: 24px;
+}
+
+.skeleton {
+  background: color-mix(in srgb, var(--color-ink) 9%, var(--color-surface));
+  border-radius: 2px;
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
+
+.skeleton::after {
+  animation: skeleton-shimmer 1.3s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-ink) 7%, transparent),
+    transparent
+  );
+  content: "";
+  inset: 0;
+  position: absolute;
+  transform: translateX(-100%);
+}
+
+.skeleton-media {
+  aspect-ratio: 4 / 5;
+  width: 100%;
+}
+
+.skeleton-media-secondary {
+  aspect-ratio: 16 / 9;
+  margin-top: 16px;
+}
+
+.skeleton-line {
+  height: 18px;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.skeleton-back { height: 14px; margin-bottom: 28px; width: 120px; }
+.skeleton-line-sm { height: 12px; width: 35%; }
+.skeleton-line-lg { height: 34px; width: 80%; }
+.skeleton-line-md { width: 60%; }
+.skeleton-cta { height: 52px; margin-top: 8px; width: 100%; }
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 .product-media {
   align-items: center;
   aspect-ratio: 4 / 5;
@@ -1017,6 +1164,7 @@ summary {
 .catalog-form {
   border-block: 2px solid var(--color-ink);
   padding: 24px 0;
+  position: relative;
 }
 
 .primary-filters {
