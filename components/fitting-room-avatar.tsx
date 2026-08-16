@@ -4,6 +4,9 @@ import { RefreshCcw, Rotate3D } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { FontLoader, type Font } from "three/examples/jsm/loaders/FontLoader.js";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 
 type Measurements = {
   height: number;
@@ -189,7 +192,7 @@ function buildAvatar(
 ) {
   const group = new THREE.Group();
   const dimensions = getDimensions(measurements);
-  const skinMaterial = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.86, metalness: 0 });
+  const skinMaterial = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.72, metalness: 0 });
   const d = dimensions;
   const headRadius = d.height * 0.063;
   const headY = d.height - headRadius;
@@ -255,12 +258,20 @@ function buildAvatar(
 
   if (!garment) return { group, height: d.height };
 
+  const category = garment.category.toLowerCase();
+  // Fabric feel via roughness: satin dresses/tops catch a soft highlight, wool
+  // outerwear stays matte. The env map (scene.environment) supplies the sheen.
+  const clothingRoughness =
+    category === "dresses" ? 0.42
+    : category === "tops" ? 0.55
+    : category === "outerwear" ? 0.74
+    : category === "bags" || category === "shoes" ? 0.5
+    : 0.62;
   const clothingMaterial = new THREE.MeshStandardMaterial({
     color: resolveGarmentColor(garment.color, sampledGarmentColor),
-    roughness: 0.82,
+    roughness: clothingRoughness,
     metalness: 0,
   });
-  const category = garment.category.toLowerCase();
   const shell = category === "outerwear" ? d.height * 0.012 : d.height * 0.007;
 
   if (category === "tops" || category === "outerwear") {
@@ -362,6 +373,34 @@ function buildAvatar(
   return { group, height: d.height };
 }
 
+// The 3D "SOON" wordmark shown in the stage in place of the mannequin. Extruded,
+// bevelled, and given a slightly metallic material so the studio env map catches
+// the edges. Centred at the origin, then lifted so it floats above the shadow
+// floor with a soft contact shadow beneath it.
+function buildSoonText(font: Font, color: string) {
+  const group = new THREE.Group();
+  const geometry = new TextGeometry("SOON", {
+    font,
+    size: 0.52,
+    depth: 0.18,
+    curveSegments: 10,
+    bevelEnabled: true,
+    bevelThickness: 0.022,
+    bevelSize: 0.015,
+    bevelSegments: 4,
+  });
+  geometry.center();
+  const material = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.28 });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.position.y = 1.0;
+  group.add(mesh);
+  // A framing height that lets setCameraView pull back enough to hold the full
+  // four-letter word without clipping.
+  return { group, height: 2.1 };
+}
+
 function setCameraView(camera: THREE.PerspectiveCamera, controls: OrbitControls, height: number) {
   controls.target.set(0, height * 0.5, 0);
   camera.position.set(height * 0.82, height * 0.58, height * 1.85);
@@ -416,6 +455,10 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
     const camera = new THREE.PerspectiveCamera(34, 1, 0.01, 100);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    // Filmic tone mapping + a soft image-based environment (below) is what turns
+    // the flat, plasticky primitives into something that reads as a lit studio.
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.domElement.setAttribute("aria-hidden", "true");
@@ -441,23 +484,48 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
     controls.autoRotateSpeed = 1.25;
     setCameraView(camera, controls, modelHeightRef.current);
 
-    const ambientLight = new THREE.AmbientLight(new THREE.Color(1, 1, 1), 1.7);
-    const directionalLight = new THREE.DirectionalLight(new THREE.Color(1, 1, 1), 2.4);
-    directionalLight.position.set(2.5, 4, 3);
-    directionalLight.castShadow = true;
-    directionalLight.shadow.mapSize.set(1024, 1024);
-    scene.add(ambientLight, directionalLight);
+    // Soft image-based lighting: a neutral room baked to an env map gives every
+    // MeshStandardMaterial gentle reflections and ambient occlusion-like falloff,
+    // the single biggest jump from "grey primitives" to "lit studio".
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const environmentTexture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environment = environmentTexture;
 
-    const surfaceSoft = getComputedStyle(container).getPropertyValue("--color-surface-soft").trim();
-    const studioMaterial = new THREE.MeshStandardMaterial({ color: surfaceSoft, roughness: 1, metalness: 0 });
+    // A soft three-point rig on top of the env: a warm key with a wide soft
+    // shadow, a cool fill to open the shadows, and a back/rim for separation.
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xb7ad9f, 0.5);
+    const keyLight = new THREE.DirectionalLight(0xfff3e6, 2.0);
+    keyLight.position.set(2.6, 4.4, 3.2);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(2048, 2048);
+    keyLight.shadow.radius = 7;
+    keyLight.shadow.bias = -0.0009;
+    keyLight.shadow.normalBias = 0.02;
+    const shadowCamera = keyLight.shadow.camera;
+    shadowCamera.near = 0.5;
+    shadowCamera.far = 14;
+    shadowCamera.left = -1.8;
+    shadowCamera.right = 1.8;
+    shadowCamera.top = 3.2;
+    shadowCamera.bottom = -0.6;
+    shadowCamera.updateProjectionMatrix();
+    const fillLight = new THREE.DirectionalLight(0xdde6ff, 0.45);
+    fillLight.position.set(-3.2, 2.2, 1.8);
+    const rimLight = new THREE.DirectionalLight(0xffffff, 0.85);
+    rimLight.position.set(-1.6, 3.2, -3.6);
+    scene.add(hemiLight, keyLight, fillLight, rimLight);
+
+    // The floor is a transparent shadow catcher, so the figure appears to stand
+    // on the CSS studio gradient with only a soft contact shadow — no hard grey
+    // plane, no boxed-in room corner.
     const studio = new THREE.Group();
-    const ground = addMesh(studio, new THREE.PlaneGeometry(7, 7), studioMaterial, new THREE.Vector3(0, -0.01, 0));
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    ground.castShadow = false;
-    const backdrop = addMesh(studio, new THREE.PlaneGeometry(7, 4), studioMaterial, new THREE.Vector3(0, 1.6, -1.25));
-    backdrop.receiveShadow = true;
-    backdrop.castShadow = false;
+    const shadowGround = new THREE.Mesh(
+      new THREE.PlaneGeometry(16, 16),
+      new THREE.ShadowMaterial({ opacity: 0.17 }),
+    );
+    shadowGround.rotation.x = -Math.PI / 2;
+    shadowGround.receiveShadow = true;
+    studio.add(shadowGround);
     scene.add(studio);
 
     sceneRef.current = scene;
@@ -488,8 +556,12 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
       renderer.domElement.removeEventListener("webglcontextlost", handleContextLost);
       resizeObserver.disconnect();
       controls.dispose();
-      scene.remove(studio);
+      scene.remove(studio, hemiLight, keyLight, fillLight, rimLight);
+      keyLight.shadow.map?.dispose();
       disposeObject(studio);
+      scene.environment = null;
+      environmentTexture.dispose();
+      pmrem.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
       renderer.domElement.remove();
@@ -502,24 +574,42 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene) return;
-    const avatar = buildAvatar(measurements, garment, skinColor, garmentColor);
-    modelHeightRef.current = avatar.height;
-    modelRef.current = avatar.group;
-    scene.add(avatar.group);
 
-    const controls = controlsRef.current;
-    if (controls) {
-      controls.minDistance = avatar.height * 0.72;
-      controls.maxDistance = avatar.height * 3.5;
-    }
+    let group: THREE.Group | null = null;
+    let cancelled = false;
+    const accent =
+      getComputedStyle(containerRef.current ?? document.body)
+        .getPropertyValue("--color-accent")
+        .trim() || "#b7410e";
+
+    new FontLoader().load("/fonts/helvetiker_bold.typeface.json", (font) => {
+      const activeScene = sceneRef.current;
+      if (cancelled || !activeScene) return;
+      const built = buildSoonText(font, accent);
+      group = built.group;
+      modelHeightRef.current = built.height;
+      modelRef.current = group;
+      activeScene.add(group);
+
+      const controls = controlsRef.current;
+      const camera = cameraRef.current;
+      if (controls) {
+        controls.minDistance = built.height * 0.72;
+        controls.maxDistance = built.height * 3.5;
+      }
+      if (camera && controls) setCameraView(camera, controls, built.height);
+    });
 
     return () => {
-      scene.remove(avatar.group);
-      disposeObject(avatar.group);
-      if (modelRef.current === avatar.group) modelRef.current = null;
+      cancelled = true;
+      if (group) {
+        scene.remove(group);
+        disposeObject(group);
+        if (modelRef.current === group) modelRef.current = null;
+      }
     };
-    // retryKey re-adds the avatar into the scene rebuilt after a context recovery.
-  }, [garment, garmentColor, measurements, skinColor, retryKey]);
+    // retryKey re-adds the text into the scene rebuilt after a context recovery.
+  }, [retryKey]);
 
   useEffect(() => {
     if (controlsRef.current) controlsRef.current.autoRotate = autoRotate && !reducedMotion;
@@ -578,7 +668,7 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
 
   return (
     <div
-      aria-label={isLt ? "Interaktyvi apytikslė 3D matavimosi peržiūra" : "Interactive approximate 3D fitting preview"}
+      aria-label={isLt ? "3D peržiūra – netrukus" : "3D preview – coming soon"}
       className="avatar-stage"
       ref={containerRef}
       role="group"
@@ -606,7 +696,7 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
 }
 
 const avatarStyles = `
-.avatar-stage{position:relative;min-height:460px;width:100%;overflow:hidden;background:var(--color-surface-soft);border:1px solid var(--color-line);isolation:isolate}.avatar-stage canvas{position:absolute;inset:0;display:block;width:100%;height:100%;z-index:0;touch-action:none}.avatar-controls{position:absolute;z-index:2;top:12px;left:12px;display:flex;flex-wrap:wrap;gap:8px}.avatar-controls button{display:flex;align-items:center;gap:7px;min-height:44px;padding:9px 12px;border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-ink);font:inherit;font-size:12px;font-weight:600;cursor:pointer}.avatar-controls button[aria-pressed="true"]{background:var(--color-ink);border-color:var(--color-ink);color:var(--color-canvas)}.avatar-controls button:disabled{opacity:.45;cursor:not-allowed}.avatar-controls button:focus-visible{outline:3px solid var(--color-accent);outline-offset:2px}.avatar-hint{position:absolute;z-index:2;left:12px;bottom:10px;margin:0;padding:7px 9px;background:var(--color-surface);color:var(--color-ink-muted);font-size:11px}
+.avatar-stage{position:relative;min-height:460px;width:100%;overflow:hidden;background:radial-gradient(72% 54% at 50% 30%, color-mix(in srgb, var(--color-surface) 96%, transparent) 0%, transparent 68%), linear-gradient(to bottom, var(--color-surface-soft) 0%, var(--color-surface-soft) 52%, color-mix(in srgb, var(--color-surface-soft) 80%, var(--color-ink) 20%) 100%);border:1px solid var(--color-line);isolation:isolate}.avatar-stage canvas{position:absolute;inset:0;display:block;width:100%;height:100%;z-index:0;touch-action:none}.avatar-controls{position:absolute;z-index:2;top:12px;left:12px;display:flex;flex-wrap:wrap;gap:8px}.avatar-controls button{display:flex;align-items:center;gap:7px;min-height:44px;padding:9px 12px;border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-ink);font:inherit;font-size:12px;font-weight:600;cursor:pointer}.avatar-controls button[aria-pressed="true"]{background:var(--color-ink);border-color:var(--color-ink);color:var(--color-canvas)}.avatar-controls button:disabled{opacity:.45;cursor:not-allowed}.avatar-controls button:focus-visible{outline:3px solid var(--color-accent);outline-offset:2px}.avatar-hint{position:absolute;z-index:2;left:12px;bottom:10px;margin:0;padding:7px 9px;background:var(--color-surface);color:var(--color-ink-muted);font-size:11px}
 .avatar-fallback{display:grid;place-items:center;padding:28px}.avatar-fallback-inner{max-width:340px;text-align:center}.avatar-fallback-title{font-family:var(--font-display);font-size:18px;margin:0 0 8px}.avatar-fallback-body{color:var(--color-ink-muted);font-size:13px;line-height:1.5;margin:0 0 18px}.avatar-fallback-specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 18px;text-align:left}.avatar-fallback-specs>div{border:1px solid var(--color-line);padding:8px 10px}.avatar-fallback-garment{grid-column:1/-1}.avatar-fallback-specs dt{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--color-ink-muted)}.avatar-fallback-specs dd{margin:3px 0 0;font-size:13px;font-weight:600}.avatar-fallback button{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:9px 16px;border:1px solid var(--color-ink);background:var(--color-ink);color:var(--color-canvas);font:inherit;font-size:12px;font-weight:600;cursor:pointer}.avatar-fallback button:focus-visible{outline:3px solid var(--color-accent);outline-offset:2px}
 @media(max-width:520px){.avatar-stage{min-height:380px}.avatar-controls{right:12px}.avatar-controls button{flex:1;justify-content:center}.avatar-hint{right:12px;text-align:center}}
 @media(prefers-reduced-motion:reduce){.avatar-controls button{transition:none}}
