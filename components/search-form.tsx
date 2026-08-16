@@ -1,16 +1,26 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition, type ReactNode } from "react";
+import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
+
+/** How long the pre-navigation animation is held before the route changes. */
+const REVEAL_MS = 620;
 
 /**
- * The catalog search/filter form. A plain `<form action="/search">` works with
- * JavaScript disabled (a native GET submit), but that is a *full page reload* —
- * the browser tears down and repaints the whole document, which reads as an
- * abrupt "teleport" with no feedback. When JS is available we progressively
- * enhance it into an App Router soft navigation: same URL, but React swaps only
- * what changed, `useTransition` gives us a pending flag for the button/results,
- * and the results can animate in. `data-pending` is the styling hook.
+ * The catalog search/filter form.
+ *
+ * A plain `<form action="/search">` works with JavaScript disabled (a native GET
+ * submit), but that is a *full page reload* with no feedback. When JS is
+ * available we progressively enhance it: on submit we play a short, deliberate
+ * "searching" animation (a progress bar + button spinner) and only *then*
+ * soft-navigate to the results.
+ *
+ * The deliberate delay is the whole point. An earlier version relied on
+ * `useTransition`'s pending flag alone, but a same-route soft navigation to
+ * /search resolves in a few milliseconds (the catalog is cached in memory), so
+ * the pending state flashed too briefly to ever be seen — "works in the code,
+ * not in practice". Holding the animation for REVEAL_MS guarantees it is
+ * visible before the page changes. `prefers-reduced-motion` skips the hold.
  */
 export function SearchForm({
   action,
@@ -25,6 +35,16 @@ export function SearchForm({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [revealing, setRevealing] = useState(false);
+  // Only one reveal timer is ever alive at a time (each submit clears the
+  // prior). A scalar ref read live in cleanup avoids the stale-snapshot trap of
+  // capturing an array by value at mount — otherwise an away-click within
+  // REVEAL_MS would unmount the form yet still fire a delayed router.push.
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,18 +55,37 @@ export function SearchForm({
       if (text) params.set(key, text);
     }
     const href = `${action}${params.size ? `?${params}` : ""}`;
-    startTransition(() => router.push(href, { scroll: false }));
+
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const delay = reduce ? 0 : REVEAL_MS;
+
+    // Show the animation now; navigate once it has played.
+    if (timer.current) clearTimeout(timer.current);
+    setRevealing(true);
+    timer.current = setTimeout(() => {
+      timer.current = null;
+      // Hand the "busy" look off to the transition's pending flag for the
+      // (brief) fetch, so there is never a stuck spinner even if that flag is
+      // batched away — `revealing` is already cleared here deterministically.
+      startTransition(() => router.push(href, { scroll: false }));
+      setRevealing(false);
+    }, delay);
   }
+
+  const busy = revealing || pending;
 
   return (
     <form
       action={action}
-      aria-busy={pending || undefined}
+      aria-busy={busy || undefined}
       className={className}
-      data-pending={pending || undefined}
+      data-pending={busy || undefined}
       onSubmit={handleSubmit}
       role={role}
     >
+      <span aria-hidden="true" className="search-progress" />
       {children}
     </form>
   );

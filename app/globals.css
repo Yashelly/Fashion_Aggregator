@@ -825,9 +825,9 @@ summary {
 .product-grid .product-tile:nth-child(7) { animation-delay: 240ms; }
 .product-grid .product-tile:nth-child(n + 8) { animation-delay: 280ms; }
 
-/* While a soft navigation is in flight the form carries data-pending, so the
-   submit button shows a spinner and the fields dim — feedback the old native
-   full-page reload never gave. */
+/* While a search is running the form carries data-pending, so the submit
+   button shows a spinner — feedback the old native full-page reload never gave.
+   Paired with the .search-progress sweep below. */
 .catalog-form[data-pending] {
   cursor: progress;
 }
@@ -849,6 +849,36 @@ summary {
 @keyframes search-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* The pre-navigation "searching" animation. On submit the form carries
+   data-pending for a deliberate ~620ms (see components/search-form.tsx), and
+   this bar sweeps across the top of the form before the results load — the
+   visible cue that a search was triggered. Kept in sync with REVEAL_MS. */
+.search-progress {
+  background: var(--color-focus);
+  height: 3px;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  top: -2px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  width: 100%;
+}
+
+.catalog-form[data-pending] .search-progress {
+  animation: search-progress-sweep 0.62s cubic-bezier(0.3, 0.1, 0.2, 1) forwards;
+  opacity: 1;
+}
+
+@keyframes search-progress-sweep {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
   }
 }
 
@@ -1134,6 +1164,7 @@ summary {
 .catalog-form {
   border-block: 2px solid var(--color-ink);
   padding: 24px 0;
+  position: relative;
 }
 
 .primary-filters {
