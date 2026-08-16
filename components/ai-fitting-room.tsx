@@ -144,10 +144,17 @@ function sampleDominantColor(imageUrl: string) {
         buckets.forEach((bucket) => {
           mostCommon = Math.max(mostCommon, bucket.count);
         });
+        // Pick the most present *saturated* colour, not the most present colour
+        // overall — the studio background (cream/grey) covers more pixels than
+        // the garment, so a plain count would return the backdrop. Near-neutral
+        // buckets are skipped; if nothing is saturated enough (a genuinely white/
+        // grey/black garment) we return undefined and let the catalog colour map
+        // decide, which is the correct fallback.
         buckets.forEach((bucket) => {
-          if (bucket.count < mostCommon * 0.22) return;
+          if (bucket.count < mostCommon * 0.12) return;
           const averageSaturation = bucket.saturation / bucket.count;
-          const score = bucket.count * (0.72 + averageSaturation * 0.7);
+          if (averageSaturation < 0.16) return;
+          const score = bucket.count * averageSaturation;
           if (score > selectedScore) {
             selected = bucket;
             selectedScore = score;
