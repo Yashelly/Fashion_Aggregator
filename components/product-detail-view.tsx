@@ -200,8 +200,18 @@ export function ProductDetailView({
   const locale = useClientLocale();
   // The image the shopper tapped to enlarge; null = lightbox closed.
   const [zoom, setZoom] = useState<{ src: string; alt: string } | null>(null);
+  // Second-level zoom inside the lightbox: click the enlarged photo to scale it
+  // up, then it pans to follow the cursor (transform-origin tracks the mouse).
+  const [zoomedIn, setZoomedIn] = useState(false);
+  const [origin, setOrigin] = useState({ x: 50, y: 50 });
   const closeRef = useRef<HTMLButtonElement>(null);
   const restoreFocus = useRef<HTMLElement | null>(null);
+
+  // Every open/close resets the inner zoom so a freshly opened image starts fit.
+  useEffect(() => {
+    setZoomedIn(false);
+    setOrigin({ x: 50, y: 50 });
+  }, [zoom]);
 
   useEffect(() => {
     if (!zoom) return;
@@ -370,10 +380,10 @@ export function ProductDetailView({
       </div>
 
       {zoom ? (
-        // Click-to-enlarge lightbox. Backdrop click, the close button, or Escape
-        // all dismiss it; clicking the image itself does not, so the shopper can
-        // examine it. A plain <img> (not next/image) keeps the overlay simple —
-        // it renders at whatever size the viewport allows, object-fit: contain.
+        // Full-screen lightbox. The image fits the whole viewport (contain, never
+        // cropped). Clicking the backdrop, the close button, or Escape dismisses
+        // it; clicking the IMAGE toggles a second-level zoom that then pans to
+        // follow the cursor. A plain <img> (not next/image) keeps this simple.
         <div
           className="lightbox"
           role="dialog"
@@ -392,11 +402,28 @@ export function ProductDetailView({
           </button>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            className="lightbox-image"
+            className={`lightbox-image${zoomedIn ? " is-zoomed" : ""}`}
             src={zoom.src}
             alt={zoom.alt}
-            onClick={(event) => event.stopPropagation()}
+            draggable={false}
+            style={zoomedIn ? { transformOrigin: `${origin.x}% ${origin.y}%` } : undefined}
+            onClick={(event) => {
+              event.stopPropagation();
+              setZoomedIn((value) => !value);
+            }}
+            onMouseMove={(event) => {
+              if (!zoomedIn) return;
+              const rect = event.currentTarget.getBoundingClientRect();
+              const x = ((event.clientX - rect.left) / rect.width) * 100;
+              const y = ((event.clientY - rect.top) / rect.height) * 100;
+              setOrigin({ x, y });
+            }}
           />
+          <p className="lightbox-hint" aria-hidden="true">
+            {zoomedIn
+              ? locale === "lt" ? "Judinkite pelę · spustelėkite kad sumažintumėte" : "Move to pan · click to zoom out"
+              : locale === "lt" ? "Spustelėkite nuotrauką kad priartintumėte" : "Click the photo to zoom in"}
+          </p>
         </div>
       ) : null}
     </div>

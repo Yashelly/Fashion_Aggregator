@@ -1647,26 +1647,55 @@ summary {
 }
 
 /* The enlarged-image overlay. Deliberately a single dark look in both themes —
-   a photo viewer reads best on a neutral dark scrim. */
+   a photo viewer reads best on a neutral dark scrim. overflow:hidden clips the
+   second-level zoom so it never spawns scrollbars. */
 .lightbox {
   position: fixed;
   inset: 0;
   z-index: 100;
   display: grid;
   place-items: center;
-  padding: clamp(16px, 4vw, 56px);
-  background: rgba(0, 0, 0, 0.82);
+  overflow: hidden;
+  padding: clamp(8px, 2vw, 24px);
+  background: rgba(0, 0, 0, 0.86);
   backdrop-filter: blur(6px);
   cursor: zoom-out;
   animation: lightbox-fade 0.18s ease both;
 }
+/* Fits the whole photo to the viewport — never cropped. Clicking it toggles the
+   second-level zoom; while zoomed, transform-origin (set inline from the mouse)
+   makes the picture pan to follow the cursor. */
 .lightbox-image {
-  max-width: 100%;
-  max-height: 100%;
+  /* Sized in viewport units, not %, so it reliably fits the screen — a grid
+     item's max-height:100% resolves against an auto track and fails to clamp. */
+  max-width: 96vw;
+  max-height: 92vh;
   object-fit: contain;
-  cursor: default;
+  cursor: zoom-in;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
-  animation: lightbox-pop 0.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: transform;
+  /* Entrance fade only — must NOT animate transform, or its fill state would
+     override the .is-zoomed scale below. */
+  animation: lightbox-pop 0.2s ease both;
+}
+.lightbox-image.is-zoomed {
+  cursor: zoom-out;
+  transform: scale(2.4);
+}
+.lightbox-hint {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(12px, 3vw, 28px);
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 7px 14px;
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  pointer-events: none;
 }
 .lightbox-close {
   position: absolute;
@@ -1693,8 +1722,8 @@ summary {
   to { opacity: 1; }
 }
 @keyframes lightbox-pop {
-  from { opacity: 0; transform: scale(0.94); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .product-gallery figcaption {
