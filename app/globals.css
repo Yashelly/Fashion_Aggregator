@@ -273,11 +273,12 @@ summary {
   vertical-align: baseline;
   margin-right: -0.03em;
 }
-/* the gap: resting max-width 0 = f and t sit as a normal pair ("weft"); on
-   reveal it opens to one measured i-advance, sliding t right. The i is pinned
-   left (flush after f) so it only ever moves vertically. A small resting margin
-   gives f/t the same gap as every other pair; open drops it to 0 so the i
-   inherits that even spacing. */
+/* The gap holder. It stays zero-width in layout on purpose: the reveal must NOT
+   reflow the word, because the mark is centred and any width change would shift
+   the whole word sideways (the "flies in from the right" bug). Instead the gap
+   is made by sliding the trailing `t` with a transform (below), which never
+   touches layout — so the word stays put and the i drops straight down. The i
+   is pinned flush after f (text-align:left) and only ever moves vertically. */
 .wm-islot {
   display: inline-block;
   max-width: 0;
@@ -285,16 +286,19 @@ summary {
   text-align: left;
   vertical-align: baseline;
   margin: 0 0.018em;
-  transition:
-    max-width 0.28s cubic-bezier(0.2, 0.72, 0.3, 1),
-    margin 0.28s cubic-bezier(0.2, 0.72, 0.3, 1);
 }
-.wm-islot.is-open {
-  max-width: var(--wm-iw, 0.34em);
-  margin: 0;
+/* `t` slides right by one measured i-advance via transform — no layout change,
+   so the centred word never re-centres mid-reveal. On close it slides back. */
+.wm-tail {
+  display: inline-block;
+  vertical-align: baseline;
+  transition: transform 0.28s cubic-bezier(0.2, 0.72, 0.3, 1);
 }
-.wm-islot.is-shut {
-  transition: max-width 0.3s cubic-bezier(0.4, 0, 1, 1);
+.wm-islot.is-open ~ .wm-tail {
+  transform: translateX(var(--wm-iw, 0.34em));
+}
+.wm-islot.is-shut ~ .wm-tail {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 1, 1);
 }
 .wm-ichar {
   display: inline-block;
@@ -317,7 +321,8 @@ summary {
 }
 @media (prefers-reduced-motion: reduce) {
   .wm-islot,
-  .wm-ichar {
+  .wm-ichar,
+  .wm-tail {
     transition: none !important;
   }
 }
