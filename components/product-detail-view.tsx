@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -11,6 +12,8 @@ import {
   Sparkles,
   Store,
   UsersRound,
+  X,
+  ZoomIn,
 } from "lucide-react";
 import type { MockProduct } from "@/lib/mock-products";
 import type { ProductComparison } from "@/lib/product-listings";
@@ -195,6 +198,40 @@ export function ProductDetailView({
   storeLabels: { en: string; lt: string } | null;
 }) {
   const locale = useClientLocale();
+  // The image the shopper tapped to enlarge; null = lightbox closed.
+  const [zoom, setZoom] = useState<{ src: string; alt: string } | null>(null);
+  // Second-level zoom inside the lightbox: click the enlarged photo to scale it
+  // up, then it pans to follow the cursor (transform-origin tracks the mouse).
+  const [zoomedIn, setZoomedIn] = useState(false);
+  const [origin, setOrigin] = useState({ x: 50, y: 50 });
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const restoreFocus = useRef<HTMLElement | null>(null);
+
+  // Every open/close resets the inner zoom so a freshly opened image starts fit.
+  useEffect(() => {
+    setZoomedIn(false);
+    setOrigin({ x: 50, y: 50 });
+  }, [zoom]);
+
+  useEffect(() => {
+    if (!zoom) return;
+    // Remember what was focused so we can hand focus back on close, trap Escape,
+    // move focus into the dialog, and stop the page behind it from scrolling.
+    restoreFocus.current = document.activeElement as HTMLElement | null;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setZoom(null);
+    };
+    document.addEventListener("keydown", onKey);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeRef.current?.focus();
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+      restoreFocus.current?.focus?.();
+    };
+  }, [zoom]);
+
   const storeLabel = storeLabels
     ? storeLabels[locale]
     : locale === "lt"
@@ -233,7 +270,12 @@ export function ProductDetailView({
 
         <section className="product-gallery" aria-label={locale === "lt" ? "Prekės nuotraukos" : "Product images"}>
           <figure>
-            <div className="product-detail-media">
+            <button
+              type="button"
+              className="product-detail-media product-zoom-trigger"
+              onClick={() => setZoom({ src: product.image_path, alt: productAlt })}
+              aria-label={locale === "lt" ? "Padidinti nuotrauką" : "Enlarge image"}
+            >
               <Image
                 alt={productAlt}
                 fill
@@ -241,18 +283,25 @@ export function ProductDetailView({
                 sizes="(max-width: 767px) 92vw, 42vw"
                 src={product.image_path}
               />
-            </div>
+              <span className="product-zoom-badge" aria-hidden="true"><ZoomIn size={18} /></span>
+            </button>
             <figcaption>{locale === "lt" ? "Prekė" : "Product view"}</figcaption>
           </figure>
           <figure>
-            <div className="product-detail-media">
+            <button
+              type="button"
+              className="product-detail-media product-zoom-trigger"
+              onClick={() => setZoom({ src: product.detail_image_path, alt: styledAlt })}
+              aria-label={locale === "lt" ? "Padidinti nuotrauką" : "Enlarge image"}
+            >
               <Image
                 alt={styledAlt}
                 fill
                 sizes="(max-width: 767px) 92vw, 42vw"
                 src={product.detail_image_path}
               />
-            </div>
+              <span className="product-zoom-badge" aria-hidden="true"><ZoomIn size={18} /></span>
+            </button>
             <figcaption>{locale === "lt" ? "Derinio idėja" : "Styled view"}</figcaption>
           </figure>
         </section>
@@ -329,6 +378,54 @@ export function ProductDetailView({
           </p>
         </article>
       </div>
+
+      {zoom ? (
+        // Full-screen lightbox. The image fits the whole viewport (contain, never
+        // cropped). Clicking the backdrop, the close button, or Escape dismisses
+        // it; clicking the IMAGE toggles a second-level zoom that then pans to
+        // follow the cursor. A plain <img> (not next/image) keeps this simple.
+        <div
+          className="lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label={locale === "lt" ? "Padidinta nuotrauka" : "Enlarged image"}
+          onClick={() => setZoom(null)}
+        >
+          <button
+            ref={closeRef}
+            type="button"
+            className="lightbox-close"
+            onClick={() => setZoom(null)}
+            aria-label={locale === "lt" ? "Uždaryti" : "Close"}
+          >
+            <X aria-hidden="true" size={24} />
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className={`lightbox-image${zoomedIn ? " is-zoomed" : ""}`}
+            src={zoom.src}
+            alt={zoom.alt}
+            draggable={false}
+            style={zoomedIn ? { transformOrigin: `${origin.x}% ${origin.y}%` } : undefined}
+            onClick={(event) => {
+              event.stopPropagation();
+              setZoomedIn((value) => !value);
+            }}
+            onMouseMove={(event) => {
+              if (!zoomedIn) return;
+              const rect = event.currentTarget.getBoundingClientRect();
+              const x = ((event.clientX - rect.left) / rect.width) * 100;
+              const y = ((event.clientY - rect.top) / rect.height) * 100;
+              setOrigin({ x, y });
+            }}
+          />
+          <p className="lightbox-hint" aria-hidden="true">
+            {zoomedIn
+              ? locale === "lt" ? "Judinkite pelę · spustelėkite kad sumažintumėte" : "Move to pan · click to zoom out"
+              : locale === "lt" ? "Spustelėkite nuotrauką kad priartintumėte" : "Click the photo to zoom in"}
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }
