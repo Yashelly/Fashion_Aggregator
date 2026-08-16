@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { RotateCcw, Search } from "lucide-react";
 import { ProductGrid } from "@/components/product-grid";
 import { FilterDisclosure } from "@/components/filter-disclosure";
@@ -118,7 +119,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
       <div className="results-toolbar">
         <p role="status" aria-live="polite" aria-atomic="true"><strong>{results.length}</strong> {locale === "lt" ? "prekių" : results.length === 1 ? "product" : "products"}</p>
-        <div className="active-filters" aria-label={t.active.aria}>{active.map(([key,label])=><a href={removeUrl(key)} key={key}>{label}<span aria-hidden="true">×</span></a>)}{active.length>0&&<a className="clear-link" href={withLocale("/search",locale)}><RotateCcw aria-hidden="true" size={15}/>{t.actions.clearAll}</a>}</div>
+        <div className="active-filters" aria-label={t.active.aria}>{active.map(([key,label])=><Link href={removeUrl(key)} key={key}>{label}<span aria-hidden="true">×</span></Link>)}{active.length>0&&<Link className="clear-link" href={withLocale("/search",locale)}><RotateCcw aria-hidden="true" size={15}/>{t.actions.clearAll}</Link>}</div>
       </div>
       {interpretation && results.length > 0 ? (
         <p aria-label={t.interpretation.aria} className="search-interpretation">
@@ -144,13 +145,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <nav aria-label={locale === "lt" ? "Prekių skaičius puslapyje" : "Products per page"}>
           <span>{locale === "lt" ? "Rodyti" : "Show"}</span>
           {pageSizes.map((size) => (
-            <a
+            <Link
               aria-current={perPage === size ? "page" : undefined}
               href={searchHref(params, { page: undefined, perPage: String(size) })}
               key={size}
             >
               {size}
-            </a>
+            </Link>
           ))}
         </nav>
       </div>
@@ -184,15 +185,15 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               {locale === "lt" ? "Ankstesnis" : "Previous"}
             </span>
           ) : (
-            <a href={searchHref(params, { page: page - 1 === 1 ? undefined : String(page - 1), perPage: String(perPage) })}>
+            <Link href={searchHref(params, { page: page - 1 === 1 ? undefined : String(page - 1), perPage: String(perPage) })}>
               {locale === "lt" ? "Ankstesnis" : "Previous"}
-            </a>
+            </Link>
           )}
           <div>
             {pageLinks.map((pageNumber, index) => (
               <span className="pagination-item" key={pageNumber}>
                 {index > 0 && pageNumber - pageLinks[index - 1] > 1 ? <span aria-hidden="true">…</span> : null}
-                <a
+                <Link
                   aria-current={page === pageNumber ? "page" : undefined}
                   href={searchHref(params, {
                     page: pageNumber === 1 ? undefined : String(pageNumber),
@@ -200,7 +201,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                   })}
                 >
                   {pageNumber}
-                </a>
+                </Link>
               </span>
             ))}
           </div>
@@ -209,13 +210,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               {locale === "lt" ? "Kitas" : "Next"}
             </span>
           ) : (
-            <a href={searchHref(params, { page: String(page + 1), perPage: String(perPage) })}>
+            <Link href={searchHref(params, { page: String(page + 1), perPage: String(perPage) })}>
               {locale === "lt" ? "Kitas" : "Next"}
-            </a>
+            </Link>
           )}
         </nav>
       ) : null}
-      <aside className="source-note" aria-label={t.sourceNoteAria}><div><strong>{t.sourceNoteTitle}</strong><p>{t.sourceNote}</p></div><a href={withLocale("/data-sources",locale)}>{t.sourceNoteCta}</a></aside>
+      <aside className="source-note" aria-label={t.sourceNoteAria}><div><strong>{t.sourceNoteTitle}</strong><p>{t.sourceNote}</p></div><Link href={withLocale("/data-sources",locale)}>{t.sourceNoteCta}</Link></aside>
     </div>
   );
 }

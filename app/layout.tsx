@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Sans, Syne } from "next/font/google";
 import { Suspense } from "react";
 import { SiteFooter } from "@/components/site-footer";
@@ -12,6 +12,16 @@ const plex = IBM_Plex_Sans({ subsets: ["latin", "latin-ext"], weight: ["400", "5
 export const metadata: Metadata = {
   title: "Weft — Fashion discovery",
   description: "Discover fashion by item, mood, colour, price, and category.",
+};
+
+// Tint the mobile browser chrome to the theme canvas so it matches the page
+// instead of defaulting to white. The site theme is attribute-driven rather
+// than prefers-color-scheme, so these media entries are a best-effort match.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#161412" },
+  ],
 };
 
 const themeScript = `
