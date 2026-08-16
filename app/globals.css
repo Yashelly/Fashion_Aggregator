@@ -1608,6 +1608,95 @@ summary {
   object-fit: contain;
 }
 
+/* Each gallery image is a button that opens the lightbox. Strip the button
+   chrome so it reads as the image, and hint the zoom with the cursor + a badge
+   that fades in on hover/focus. */
+.product-zoom-trigger {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--color-product-media);
+  color: inherit;
+  font: inherit;
+  cursor: zoom-in;
+}
+.product-zoom-badge {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: color-mix(in srgb, var(--color-ink) 76%, transparent);
+  color: var(--color-canvas);
+  opacity: 0;
+  transition: opacity var(--transition);
+  pointer-events: none;
+}
+.product-zoom-trigger:hover .product-zoom-badge,
+.product-zoom-trigger:focus-visible .product-zoom-badge {
+  opacity: 1;
+}
+.product-zoom-trigger:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* The enlarged-image overlay. Deliberately a single dark look in both themes —
+   a photo viewer reads best on a neutral dark scrim. */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 4vw, 56px);
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(6px);
+  cursor: zoom-out;
+  animation: lightbox-fade 0.18s ease both;
+}
+.lightbox-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  cursor: default;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  animation: lightbox-pop 0.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.lightbox-close {
+  position: absolute;
+  top: clamp(12px, 2.5vw, 24px);
+  right: clamp(12px, 2.5vw, 24px);
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+}
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+.lightbox-close:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+@keyframes lightbox-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes lightbox-pop {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+
 .product-gallery figcaption {
   color: var(--color-ink-muted);
   font-size: 11px;
