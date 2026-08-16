@@ -34,8 +34,9 @@ export function CinematicHero({ locale }: { locale: Locale }) {
           <Sparkles aria-hidden="true" size={16} />
           {t.demoLabel}
         </p>
-        {/* Click (or Enter/Space) the mark to reveal the hidden `i` — "we fit". */}
-        <h1 id="home-title"><Wordmark animate trigger="click" /></h1>
+        {/* Plays the hidden-`i` reveal on entry — "we fit" — so the mark is alive
+            the moment the page loads; still click/Enter/Space to replay it. */}
+        <h1 id="home-title"><Wordmark animate trigger="load" /></h1>
         <p className="title-page-slogan">{t.slogan}</p>
         <p className="title-page-lead">{t.lead}</p>
         <Link className="button title-page-cta" href={withLocale("/search", locale)}>
