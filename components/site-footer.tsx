@@ -2,22 +2,14 @@
 
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { copy, getLocale, withLocale } from "@/lib/i18n";
 import { Wordmark } from "@/components/wordmark";
 
 export function SiteFooter() {
-  const pathname = usePathname();
   const params = useSearchParams();
   const locale = getLocale({ lang: params.get("lang") ?? undefined });
   const t = copy[locale].footer;
-
-  /*
-   * The title page is one screen: wordmark, slogan, one way in. A footer
-   * carrying a second WEFT and eight links is the "everything else" it was
-   * built to leave out. Every one of those links is one click away on /search.
-   */
-  if (pathname === "/") return null;
 
   const links = [
     ["/how-it-works", t.links.howItWorks], ["/about", t.links.about],

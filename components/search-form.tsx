@@ -46,9 +46,8 @@ export function SearchForm({
     if (timer.current) clearTimeout(timer.current);
   }, []);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+  function submitForm(form: HTMLFormElement) {
+    const formData = new FormData(form);
     const params = new URLSearchParams();
     for (const [key, value] of formData.entries()) {
       const text = typeof value === "string" ? value.trim() : "";
@@ -74,6 +73,20 @@ export function SearchForm({
     }, delay);
   }
 
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    submitForm(event.currentTarget);
+  }
+
+  // Dropdown filters apply on change — shoppers expect a filter to take effect
+  // the moment they pick it, not only after pressing "Show results" (which the
+  // free-text query still uses, so typing does not fire a search per keystroke).
+  function handleChange(event: React.ChangeEvent<HTMLFormElement>) {
+    if (event.target instanceof HTMLSelectElement) {
+      submitForm(event.currentTarget);
+    }
+  }
+
   const busy = revealing || pending;
 
   return (
@@ -82,6 +95,7 @@ export function SearchForm({
       aria-busy={busy || undefined}
       className={className}
       data-pending={busy || undefined}
+      onChange={handleChange}
       onSubmit={handleSubmit}
       role={role}
     >

@@ -27,6 +27,18 @@ import {
   type Locale,
 } from "@/lib/i18n";
 import { useClientLocale } from "@/lib/use-client-locale";
+import { WishlistButton } from "@/components/wishlist-button";
+
+export type RelatedItem = {
+  id: string;
+  title: string;
+  category: string;
+  priceEur: string;
+  oldPriceEur: string;
+  currency: string;
+  image: string | null;
+  storeLabel: { en: string; lt: string } | null;
+};
 
 function price(amount: string, currency: string, locale: Locale) {
   return new Intl.NumberFormat(locale === "lt" ? "lt-LT" : "en-IE", {
@@ -92,60 +104,41 @@ function StoreComparison({
     <section aria-label={t.aria} className="store-comparison">
       <div className="store-comparison-head">
         <h2>{t.title}</h2>
-        <p>{t.storeCount(comparison.storeCount)}</p>
+        <p className="store-comparison-saving">
+          {comparison.spread > 0 ? t.saving(money(comparison.spread)) : t.samePrice}
+        </p>
       </div>
 
-      <p className="store-comparison-saving">
-        {comparison.spread > 0 ? t.saving(money(comparison.spread)) : t.samePrice}
-      </p>
-
-      <div className="store-comparison-scroll">
-        <table className="store-comparison-table">
-          <thead>
-            <tr>
-              <th scope="col">{t.columnStore}</th>
-              <th scope="col">{t.columnPrice}</th>
-              <th scope="col">{t.columnSizes}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {comparison.listings.map((listing) => {
-              const isLowest = listing.priceEur === comparison.lowestPrice;
-              return (
-                <tr className={isLowest ? "is-lowest" : undefined} key={listing.listingId}>
-                  {/* Availability sits under the store name rather than in a
-                      fourth column — the detail card is too narrow for four,
-                      and a clipped column is worse than a stacked one. */}
-                  <th scope="row">
+      <table className="store-comparison-table">
+        <tbody>
+          {comparison.listings.map((listing) => {
+            const isLowest = listing.priceEur === comparison.lowestPrice;
+            return (
+              <tr className={isLowest ? "is-lowest" : undefined} key={listing.listingId}>
+                <th scope="row">
+                  <span className="store-comparison-store">
                     <Link href={withLocale(`/search?store=${listing.store.id}`, locale)}>
                       {listing.store.label[locale]}
                     </Link>
                     {listing.store.id === viewingStoreId ? (
                       <span className="store-comparison-tag">{t.thisStore}</span>
                     ) : null}
-                    <span className={`availability availability-${listing.availability}`}>
-                      <span className="sr-only">{t.columnAvailability}: </span>
-                      {formatAvailabilityLabel(listing.availability, locale)}
-                    </span>
-                  </th>
-                  <td>
-                    <strong>{money(listing.priceEur)}</strong>
-                    {listing.oldPriceEur ? <del>{money(listing.oldPriceEur)}</del> : null}
-                    {isLowest ? <span className="store-comparison-best">{t.best}</span> : null}
-                  </td>
-                  <td className="store-comparison-sizes-cell">{listing.sizes.join(" · ")}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                  </span>
+                  <span className={`availability availability-${listing.availability}`}>
+                    <span className="sr-only">{t.columnAvailability}: </span>
+                    {formatAvailabilityLabel(listing.availability, locale)}
+                  </span>
+                </th>
+                <td>
+                  <strong>{money(listing.priceEur)}</strong>
+                  {isLowest ? <span className="store-comparison-best">{t.best}</span> : null}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
 
-      {comparison.sizesNotEverywhere.length > 0 ? (
-        <p className="store-comparison-sizes">
-          {t.partialSizes(comparison.sizesNotEverywhere.join(", "))}
-        </p>
-      ) : null}
       <p className="store-comparison-note">{t.syntheticNote}</p>
     </section>
   );
@@ -191,10 +184,12 @@ function ProductSummary({
 export function ProductDetailView({
   comparison,
   product,
+  related,
   storeLabels,
 }: {
   comparison: ProductComparison | null;
   product: MockProduct;
+  related: RelatedItem[];
   storeLabels: { en: string; lt: string } | null;
 }) {
   const locale = useClientLocale();
@@ -378,6 +373,48 @@ export function ProductDetailView({
           </p>
         </article>
       </div>
+
+      {related.length > 0 ? (
+        <section className="related-products" aria-label={locale === "lt" ? "Panašios prekės" : "Related products"}>
+          <h2>{locale === "lt" ? "Taip pat gali patikti" : "You may also like"}</h2>
+          <div className="product-grid">
+            {related.map((item) => {
+              const itemHref = withLocale(`/out/${item.id}`, locale);
+              const itemStore = item.storeLabel
+                ? item.storeLabel[locale]
+                : locale === "lt" ? "Parduotuvė" : "Store";
+              const itemCategory = formatCategoryLabel(item.category, locale);
+              const itemAlt = `${item.title}, ${itemCategory}, ${itemStore}`;
+              return (
+                <article className="product-tile" key={item.id}>
+                  <div className="product-media-wrap">
+                    <Link className={`product-media${item.image ? " has-image" : ""}`} href={itemHref} aria-label={itemAlt}>
+                      {item.image ? (
+                        <Image alt={itemAlt} fill sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw" src={item.image} />
+                      ) : (
+                        <span className="media-category">{itemCategory}</span>
+                      )}
+                    </Link>
+                    <WishlistButton locale={locale} label={item.title} productId={item.id} />
+                  </div>
+                  <div className="product-body">
+                    <p className="product-kicker">{itemCategory}</p>
+                    <h3 className="product-title"><Link href={itemHref}>{item.title}</Link></h3>
+                    <div className="product-price-row">
+                      <span className="price">
+                        <data value={item.priceEur}>{price(item.priceEur, item.currency, locale)}</data>
+                      </span>
+                      {item.oldPriceEur ? (
+                        <span className="old-price"><del>{price(item.oldPriceEur, item.currency, locale)}</del></span>
+                      ) : null}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       {zoom ? (
         // Full-screen lightbox. The image fits the whole viewport (contain, never
