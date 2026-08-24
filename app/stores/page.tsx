@@ -1,4 +1,5 @@
 import { ArrowRight, ShoppingBag } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   getPublicDemoStoreLabel,
@@ -36,6 +37,9 @@ export default async function StoresPage({ searchParams }: StoresPageProps) {
             storeProducts.map((product) => product.category),
           ).size;
           const href = withLocale(`/search?store=${store.id}`, locale);
+          const collage = storeProducts
+            .filter((product) => product.image_available)
+            .slice(0, 3);
 
           return (
             <Link
@@ -44,9 +48,6 @@ export default async function StoresPage({ searchParams }: StoresPageProps) {
               href={href}
               key={store.id}
             >
-              <div className="demo-store-icon">
-                <ShoppingBag aria-hidden="true" size={24} />
-              </div>
               <div className="demo-store-copy">
                 {/* The brand used to lead this line, which printed it once per
                     store card. The eyebrow's job is to say the selection is
@@ -59,8 +60,21 @@ export default async function StoresPage({ searchParams }: StoresPageProps) {
                     ? `${storeProducts.length} prekių · ${categoryCount} kategorijos`
                     : `${storeProducts.length} products · ${categoryCount} categories`}
                 </span>
+                <ArrowRight aria-hidden="true" className="demo-store-arrow" size={22} />
               </div>
-              <ArrowRight aria-hidden="true" className="demo-store-arrow" size={22} />
+              {collage.length > 0 ? (
+                <div className="demo-store-collage" aria-hidden="true">
+                  {collage.map((product) => (
+                    <span className="demo-store-thumb" key={product.mock_product_id}>
+                      <Image alt="" fill sizes="180px" src={product.image_path} />
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="demo-store-icon">
+                  <ShoppingBag aria-hidden="true" size={24} />
+                </div>
+              )}
             </Link>
           );
         })}

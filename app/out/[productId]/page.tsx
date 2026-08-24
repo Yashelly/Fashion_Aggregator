@@ -43,10 +43,32 @@ export default async function OutPage({ params }: OutPageProps) {
   // view is a client component.
   const comparison = compareProductAcrossStores(product);
 
+  // "You may also like": same category first, then anything else, four items.
+  // The store label is resolved here (demo-stores reads a CSV and cannot run in
+  // the client detail view) and passed down as plain, serialisable data.
+  const products = getMockProducts();
+  const pool = products.filter((item) => item.mock_product_id !== product.mock_product_id);
+  const related = [
+    ...pool.filter((item) => item.category === product.category),
+    ...pool.filter((item) => item.category !== product.category),
+  ]
+    .slice(0, 4)
+    .map((item) => ({
+      id: item.mock_product_id,
+      title: item.title,
+      category: item.category,
+      priceEur: item.price_eur,
+      oldPriceEur: item.old_price_eur,
+      currency: item.currency,
+      image: item.image_available ? item.image_path : null,
+      storeLabel: getPublicDemoStoreById(item.public_store_id)?.label ?? null,
+    }));
+
   return (
     <ProductDetailView
       comparison={comparison}
       product={product}
+      related={related}
       storeLabels={store?.label ?? null}
     />
   );
