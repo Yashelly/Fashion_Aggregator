@@ -96,26 +96,42 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <div><h1>{t.title}</h1><p className="lead">{t.lead}</p></div>
       </header>
 
-      <SearchForm action="/search" className="catalog-form" role="search">
+      <SearchForm
+        action="/search"
+        className="catalog-form"
+        role="search"
+        key={`${params.query ?? ""}|${params.gender ?? ""}|${params.category ?? ""}|${params.store ?? ""}|${params.color ?? ""}|${status}|${params.sort ?? ""}`}
+      >
         {locale === "lt" && <input name="lang" type="hidden" value="lt" />}
         <input name="perPage" type="hidden" value={perPage} />
         <label className="query-field" htmlFor="catalog-query"><span>{t.labels.search}</span><div><Search aria-hidden="true" size={22}/><input id="catalog-query" defaultValue={params.query ?? ""} name="query" placeholder={t.placeholders.search}/><button type="submit">{t.actions.showResults}</button></div></label>
         <div className="primary-filters">
-          <label><span>{t.labels.store}</span><select defaultValue={params.store ?? ""} name="store"><option value="">{t.options.allStores}</option>{stores.map((x)=><option key={x.value} value={x.value}>{x.label}</option>)}</select></label>
+          <label><span>{t.labels.department}</span><select defaultValue={params.gender ?? ""} name="gender"><option value="">{t.options.allDepartments}</option>{genders.map((x)=><option key={x} value={x}>{formatGenderLabel(x,locale)}</option>)}</select></label>
           <label><span>{t.labels.category}</span><select defaultValue={params.category ?? ""} name="category"><option value="">{t.options.allCategories}</option>{categories.map((x)=><option key={x} value={x}>{formatCategoryLabel(x,locale)}</option>)}</select></label>
+          <label><span>{t.labels.store}</span><select defaultValue={params.store ?? ""} name="store"><option value="">{t.options.allStores}</option>{stores.map((x)=><option key={x.value} value={x.value}>{x.label}</option>)}</select></label>
           <label><span>{t.labels.sort}</span><select defaultValue={params.sort ?? ""} name="sort"><option value="">{t.options.availableFirst}</option><option value="price-low">{t.options.priceLow}</option><option value="price-high">{t.options.priceHigh}</option><option value="sale">{t.options.bestSale}</option></select></label>
         </div>
         <FilterDisclosure
           label={t.labels.advanced}
-          defaultOpen={Boolean(params.gender || params.color || status)}
+          defaultOpen={Boolean(params.color || status)}
         >
           <div className="primary-filters">
-            <label><span>{t.labels.department}</span><select defaultValue={params.gender ?? ""} name="gender"><option value="">{t.options.allDepartments}</option>{genders.map((x)=><option key={x} value={x}>{formatGenderLabel(x,locale)}</option>)}</select></label>
             <label><span>{t.labels.color}</span><select defaultValue={params.color ?? ""} name="color"><option value="">{t.options.allColors}</option>{colors.map((x)=><option key={x} value={x}>{formatColorLabel(x,locale)}</option>)}</select></label>
             <label><span>{t.labels.status}</span><select defaultValue={status} name="status"><option value="">{t.options.allItems}</option><option value="in_stock">{formatAvailabilityLabel("in_stock",locale)}</option><option value="limited">{formatAvailabilityLabel("limited",locale)}</option><option value="sale">{formatAvailabilityLabel("sale",locale)}</option></select></label>
           </div>
         </FilterDisclosure>
       </SearchForm>
+
+      <nav className="browse-categories" aria-label={locale === "lt" ? "Naršyti kategorijas" : "Browse categories"}>
+        <Link aria-current={!params.category ? "page" : undefined} href={searchHref(params, { category: undefined, page: undefined })}>
+          {t.options.allCategories}
+        </Link>
+        {categories.map((cat) => (
+          <Link aria-current={params.category === cat ? "page" : undefined} href={searchHref(params, { category: cat, page: undefined })} key={cat}>
+            {formatCategoryLabel(cat, locale)}
+          </Link>
+        ))}
+      </nav>
 
       <div className="results-toolbar">
         <p role="status" aria-live="polite" aria-atomic="true"><strong>{results.length}</strong> {locale === "lt" ? "prekių" : results.length === 1 ? "product" : "products"}</p>

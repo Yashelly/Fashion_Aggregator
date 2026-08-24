@@ -1,14 +1,13 @@
 import type { MockProduct } from "@/lib/mock-products";
-import { ArrowRight, Footprints, ImageOff, Shirt, ShoppingBag } from "lucide-react";
+import { Footprints, ImageOff, Shirt, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { getPublicDemoStoreById, getPublicDemoStoreLabel } from "@/lib/demo-stores";
 import { summariseAvailability } from "@/lib/product-listings";
+import { WishlistButton } from "@/components/wishlist-button";
 import {
   formatAvailabilityLabel,
   formatCategoryLabel,
-  formatColorLabel,
-  formatGenderLabel,
   getCopy,
   type Locale,
 } from "@/lib/i18n";
@@ -27,11 +26,6 @@ function ProductGlyph({ category }: { category: string }) {
   if (category === "bags" || category === "accessories") return <ShoppingBag aria-hidden="true" />;
   if (["tops", "outerwear", "knitwear", "sweats", "dresses"].includes(category)) return <Shirt aria-hidden="true" />;
   return <ImageOff aria-hidden="true" />;
-}
-
-function sizes(value: string) {
-  const list = value.split("|").filter(Boolean);
-  return list.length > 5 ? `${list[0]}–${list[list.length - 1]}` : list.join(" · ");
 }
 
 export function ProductGrid({
@@ -82,45 +76,60 @@ export function ProductGrid({
             : `${product.title}, ${categoryLabel}, ${storeLabel}`;
         return (
           <article className={`product-tile tone-${index % 4}${unavailable ? " is-sold-out" : ""}`} key={product.mock_product_id}>
-            {unavailable ? (
-              <div
-                aria-label={product.image_available ? undefined : mediaAlt}
-                className={`product-media${product.image_available ? " has-image" : ""}`}
-                role={product.image_available ? undefined : "img"}
-              >
-                {product.image_available ? (
-                  <Image
-                    alt={mediaAlt}
-                    fill
-                    sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                    src={product.image_path}
-                  />
-                ) : (
-                  <>
-                    <span className="demo-media-label">{locale === "lt" ? "VIETA NUOTRAUKAI" : "IMAGE PLACEHOLDER"}</span>
-                    <ProductGlyph category={product.category} />
-                    <span className="media-category">{categoryLabel}</span>
-                  </>
-                )}
-              </div>
-            ) : (
-              <Link className={`product-media${product.image_available ? " has-image" : ""}`} href={href} aria-label={mediaAlt}>
-                {product.image_available ? (
-                  <Image
-                    alt={mediaAlt}
-                    fill
-                    sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                    src={product.image_path}
-                  />
-                ) : (
-                  <>
-                    <span className="demo-media-label">{locale === "lt" ? "VIETA NUOTRAUKAI" : "IMAGE PLACEHOLDER"}</span>
-                    <span aria-hidden="true" className="product-glyph"><ProductGlyph category={product.category} /></span>
-                    <span className="media-category">{categoryLabel}</span>
-                  </>
-                )}
-              </Link>
-            )}
+            <div className="product-media-wrap">
+              {unavailable ? (
+                <div
+                  aria-label={product.image_available ? undefined : mediaAlt}
+                  className={`product-media${product.image_available ? " has-image" : ""}`}
+                  role={product.image_available ? undefined : "img"}
+                >
+                  {product.image_available ? (
+                    <Image
+                      alt={mediaAlt}
+                      fill
+                      sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
+                      src={product.image_path}
+                    />
+                  ) : (
+                    <>
+                      <span className="demo-media-label">{locale === "lt" ? "VIETA NUOTRAUKAI" : "IMAGE PLACEHOLDER"}</span>
+                      <ProductGlyph category={product.category} />
+                      <span className="media-category">{categoryLabel}</span>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <Link className={`product-media${product.image_available ? " has-image" : ""}`} href={href} aria-label={mediaAlt}>
+                  {product.image_available ? (
+                    <>
+                      <Image
+                        alt={mediaAlt}
+                        fill
+                        sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
+                        src={product.image_path}
+                      />
+                      {product.detail_image_available ? (
+                        <Image
+                          alt=""
+                          aria-hidden="true"
+                          className="product-media-hover"
+                          fill
+                          sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
+                          src={product.detail_image_path}
+                        />
+                      ) : null}
+                    </>
+                  ) : (
+                    <>
+                      <span className="demo-media-label">{locale === "lt" ? "VIETA NUOTRAUKAI" : "IMAGE PLACEHOLDER"}</span>
+                      <span aria-hidden="true" className="product-glyph"><ProductGlyph category={product.category} /></span>
+                      <span className="media-category">{categoryLabel}</span>
+                    </>
+                  )}
+                </Link>
+              )}
+              <WishlistButton locale={locale} label={product.title} productId={product.mock_product_id} />
+            </div>
             <div className="product-body">
               <p className="product-kicker">{categoryLabel}</p>
               <h2 className="product-title">
@@ -154,17 +163,11 @@ export function ProductGrid({
                   </data>
                 </p>
               ) : null}
-              <dl className="product-facts">
-                <div><dt>{locale === "lt" ? "Spalva" : "Colour"}</dt><dd>{formatColorLabel(product.color, locale)}</dd></div>
-                <div><dt>{locale === "lt" ? "Dydžiai" : "Sizes"}</dt><dd>{sizes(product.size_options)}</dd></div>
-                <div><dt>{locale === "lt" ? "Skirta" : "For"}</dt><dd>{formatGenderLabel(product.gender, locale)}</dd></div>
-              </dl>
-              <p className={`availability availability-${product.availability}`}>{formatAvailabilityLabel(product.availability, locale)}</p>
-              {unavailable ? (
-                <span className="product-link disabled" aria-disabled="true">{t.soldOut}</span>
-              ) : (
-                <Link aria-label={`${locale === "lt" ? "Peržiūrėti prekę" : "View product"}: ${product.title}`} className="product-link" href={href}>{locale === "lt" ? "Peržiūrėti" : "View details"}<ArrowRight aria-hidden="true" size={16} /></Link>
-              )}
+              {product.availability !== "in_stock" ? (
+                <p className={`availability availability-${product.availability}`}>
+                  {unavailable ? t.soldOut : formatAvailabilityLabel(product.availability, locale)}
+                </p>
+              ) : null}
             </div>
           </article>
         );
