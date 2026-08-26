@@ -54,6 +54,12 @@ Ownership across the whole stack, not one slice of it:
   captured in a hierarchical `AGENTS.md` tree and `CLAUDE.md`, used with tests
   and human-directed decisions rather than as a code generator.
 
+## Engineering approach
+
+This project follows the same engineering principles I use across software and AI-assisted development: ground truth over assumptions, root cause over local patches, measurable changes, adversarial verification, bounded failure modes, and explainable decisions.
+
+**[Read my Engineering Principles →](https://github.com/Yashelly/Yashelly/blob/main/ENGINEERING_PRINCIPLES.md)**
+
 ## Architecture
 
 ```mermaid
