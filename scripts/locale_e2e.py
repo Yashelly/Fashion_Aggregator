@@ -27,6 +27,8 @@ PUBLIC_ROUTES = [
     "/",
     "/search?query=black",
     "/stores",
+    "/ai-fitting-room",
+    "/account",
     "/how-it-works",
     "/about",
     "/contact",
@@ -41,6 +43,8 @@ LINK_SOURCE_ROUTES = [
     "/?lang=lt",
     "/search?query=black&category=shoes&lang=lt",
     "/stores?lang=lt",
+    "/ai-fitting-room?lang=lt",
+    "/account?lang=lt",
     "/how-it-works?lang=lt",
     "/about?lang=lt",
     "/contact?lang=lt",
@@ -90,34 +94,12 @@ def seed_locale(context: BrowserContext, locale: str, page: Page | None = None) 
     )
 
 
-# The header's search entry point used to be a dedicated `.header-search`
-# element. It was replaced by an ordinary nav link in commit c3069b9; these
-# selectors track the current markup.
+# The header now renders on every route, including `/` (the old headerless
+# "title page" was replaced by a storefront home in the navigation rework).
+# The nav's search entry points are the department/category links, which all
+# start with `/search`; `.first` resolves the several that now match.
 SEARCH_LINK = '.desktop-nav a[href^="/search"]'
 MOBILE_SEARCH_LINK = '.mobile-menu nav a[href^="/search"]'
-
-# The title page carries no header nav, no burger and no footer: it states the
-# brand once, in its h1, and offers a single way into the app. So on `/` the
-# CTA is both the only navigation and the only element whose copy proves the
-# rendered locale.
-TITLE_PAGE_CTA = ".title-page-cta"
-
-
-def on_title_page(page: Page) -> bool:
-    return urlparse(page.url).path == "/"
-
-
-def locale_probe(page: Page, locale: str) -> dict[str, str]:
-    """Selector plus expected text proving the locale actually rendered."""
-    if on_title_page(page):
-        return {
-            "selector": TITLE_PAGE_CTA,
-            "text": "Pradėti paiešką" if locale == "lt" else "Start searching",
-        }
-    return {
-        "selector": SEARCH_LINK,
-        "text": "Paieška" if locale == "lt" else "Search",
-    }
 
 # Breakpoints from app/globals.css. The header serves the same links from two
 # different places depending on width, so which one is clickable is decided by
@@ -137,48 +119,37 @@ def open_mobile_menu(page: Page) -> None:
 def click_search(page: Page) -> None:
     """Reach /search through the header, at any viewport.
 
-    Below the desktop-nav breakpoint the same link is only reachable through
-    the collapsed `<details>` menu. Both render the same `nav.search` label, so
-    either satisfies the locale assertions.
-
-    The title page has neither: its CTA is the one way in, at every viewport.
+    The header renders on every route now (including `/`). Above the desktop-nav
+    breakpoint the department links are visible directly; below it the same links
+    are reached through the collapsed `<details>` menu. Several nav links start
+    with `/search`, so `.first` picks the leading department entry — any of them
+    lands on `/search` and satisfies the locale assertions.
     """
-    if on_title_page(page):
-        link = page.locator(TITLE_PAGE_CTA)
-        link.wait_for(state="visible")
-        link.click()
-        return
     if page.viewport_size["width"] >= DESKTOP_NAV_MIN_WIDTH:
-        link = page.locator(SEARCH_LINK)
+        link = page.locator(SEARCH_LINK).first
         link.wait_for(state="visible")
         link.click()
         return
     open_mobile_menu(page)
-    link = page.locator(MOBILE_SEARCH_LINK)
+    link = page.locator(MOBILE_SEARCH_LINK).first
     link.wait_for(state="visible")
     link.click()
 
 
 def wait_for_locale(page: Page, locale: str) -> None:
-    probe = locale_probe(page, locale)
     expected_aria = "Kalba" if locale == "lt" else "Language"
     page.locator("html").wait_for(state="attached")
     page.wait_for_function(
         "expected => document.documentElement.lang === expected",
         arg=locale,
     )
+    # The language switcher's aria-label is localized copy rendered in the header
+    # on every route, so it proves the locale actually reached rendered output —
+    # not just the <html lang> attribute — without depending on any viewport-
+    # specific nav link or the obsolete title-page CTA.
     page.wait_for_function(
-        """expected => {
-          const label = document.querySelector(expected.selector);
-          const switcher = document.querySelector('.language-switcher');
-          return label?.textContent?.trim() === expected.search
-            && switcher?.getAttribute('aria-label') === expected.aria;
-        }""",
-        arg={
-            "search": probe["text"],
-            "aria": expected_aria,
-            "selector": probe["selector"],
-        },
+        "expected => document.querySelector('.language-switcher')?.getAttribute('aria-label') === expected",
+        arg=expected_aria,
     )
     page.wait_for_function(
         "expected => document.cookie.includes(`weft-locale=${expected}`)",
@@ -210,16 +181,11 @@ def click_language(page: Page, locale: str) -> None:
     """Switch locale through the header, at any viewport.
 
     `.language-switcher` is `display: none` below 640px, where the same two
-    links are served from `.mobile-menu-locales` inside the collapsed menu.
-    The title page is the exception: it has no collapsed menu, so globals.css
-    keeps its switcher visible at every width rather than stranding a
-    Lithuanian shopper on an English landing page.
+    links are served from `.mobile-menu-locales` inside the collapsed menu. The
+    header (and this behaviour) is now identical on every route, including `/`.
     """
     label = "LT" if locale == "lt" else "EN"
-    if (
-        on_title_page(page)
-        or page.viewport_size["width"] >= LANGUAGE_SWITCHER_MIN_WIDTH
-    ):
+    if page.viewport_size["width"] >= LANGUAGE_SWITCHER_MIN_WIDTH:
         link = page.locator(".language-switcher a", has_text=label)
     else:
         open_mobile_menu(page)
@@ -461,8 +427,8 @@ def run_history_and_stress_matrix(browser) -> int:
 
     page.goto(BASE_URL + "/", wait_until="domcontentloaded")
     click_language(page, "lt")
-    # The title page has no header nav, so the app is entered through its CTA;
-    # the header links only exist from /search onwards.
+    # The header (with its nav) renders on `/` too, so search is reached the same
+    # way here as on any other route.
     click_search(page)
     page.wait_for_function("() => location.pathname === '/search'")
     assert_locale(page, context, "lt")
@@ -488,18 +454,17 @@ def run_history_and_stress_matrix(browser) -> int:
 
     click_language(page, "lt")
     for _ in range(5):
+        # Current desktop nav: department/category search links, the store list,
+        # and the AI fitting room; the brand mark returns home. (How it works /
+        # About moved to the footer in the navigation rework.) `.first` resolves
+        # the several links that start with `/search`.
         for selector, path in (
             (SEARCH_LINK, "/search"),
             ('.desktop-nav a[href^="/stores"]', "/stores"),
-            ('.desktop-nav a[href^="/how-it-works"]', "/how-it-works"),
-            ('.desktop-nav a[href^="/about"]', "/about"),
-            # The brand link still exists everywhere except the title page
-            # itself, and still goes home; getting back out of `/` is the CTA's
-            # job now that the header nav and footer are gone from that page.
+            ('.desktop-nav a[href^="/ai-fitting-room"]', "/ai-fitting-room"),
             (".brand", "/"),
-            (TITLE_PAGE_CTA, "/search"),
         ):
-            page.locator(selector).click()
+            page.locator(selector).first.click()
             page.wait_for_function(
                 "expected => location.pathname === expected",
                 arg=path,
