@@ -41,12 +41,14 @@ Small follow-up: pins `set_updated_at()`'s `search_path` to `pg_catalog` (harden
 
 One change: `alter table public.outbound_clicks alter column store_id drop not null;` plus a column comment explaining why — `store_id` must be nullable to record **blocked synthetic-preview clicks** (i.e. clickouts on the current demo catalog, which has no real store to attribute to) and will only be required again once an approved live merchant redirect is being recorded. This directly matches `lib/analytics-storage.ts`'s `saveBlockedPreviewClick()`, which explicitly inserts `store_id: null`.
 
+> **History note:** in the current baseline, `001` already defines `outbound_clicks.store_id` as nullable (`references public.stores(id) on delete restrict`, no `not null`). So on a clean `001 → 003` apply, `003`'s `drop not null` is a defensive no-op. It only does real work against a database that received an *earlier* revision of `001` where `store_id` was `not null`. Do not describe `003` as the migration that "introduced" nullability — `001` did.
+
 ## For AI Agents
 
 ### Working In This Directory
 
-- **Apply migrations manually and in numeric order** (001 → 002 → 003) against Supabase — there is no automated runner in this repo to do it for you. Use the Supabase MCP tool (`mcp__supabase__apply_migration`) or the SQL editor/CLI directly.
-- All three files use `create ... if not exists` / idempotent-trigger-check patterns, so re-running an already-applied migration should be safe, but always confirm against the target project's current schema (`mcp__supabase__list_tables`) before applying blind.
+- **Apply migrations manually and in numeric order** (001 → 002 → 003) against Supabase — there is no automated runner or schema-version table in this repo to do it for you. Use the Supabase MCP tool (`mcp__supabase__apply_migration`) or the SQL editor/CLI directly.
+- **Treat applied migrations as immutable and apply each once.** The files use `create ... if not exists` / idempotent-trigger-check patterns, so a rerun is *usually* harmless — but do not rely on rerunning as a workflow. (`001` now pins `set_updated_at`'s `search_path`, so a stray rerun no longer reverts `002`'s hardening; before that fix it did.) Always confirm against the target project's current schema (`mcp__supabase__list_tables`) before applying blind. There is no feed importer yet, so the `feed_import_runs` status machine, cross-store integrity, and hash-based idempotency described in `docs/data-model.md` are **planned, not DB-enforced** guarantees.
 - If you add a `004_*.sql` migration, follow the existing conventions: wrap in `begin;`/`commit;`, keep RLS enabled with `service_role`-only grants (this app writes exclusively through the server-side Supabase client — see `lib/supabase-server.ts` — never client-side), and add a short top-of-file or column comment explaining *why*, matching the style of `003`'s comment on `store_id`.
 - `lib/analytics-storage.ts` treats all Supabase writes as best-effort with a 1-second timeout and silent (console-warned) failure — schema changes here should stay backward-compatible with that fire-and-forget write pattern, or that code needs to be updated in tandem.
 

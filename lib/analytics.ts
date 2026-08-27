@@ -29,6 +29,30 @@ function getPostHogConfig() {
   }
 }
 
+export function isPostHogConfigured() {
+  return getPostHogConfig() !== null;
+}
+
+/**
+ * One structured line per analytics event recording each sink's outcome, so an
+ * operator can tell disabled from failed from delivered. `after()` runs post-
+ * response, so the HTTP status cannot carry this — the log is the only signal.
+ */
+export function logAnalyticsOutcome(
+  event: AnalyticsEvent,
+  outcomes: Record<string, string>,
+) {
+  const parts = Object.entries(outcomes)
+    .map(([sink, status]) => `${sink}=${status}`)
+    .join(" ");
+  const line = `[analytics] ${event} ${parts}`;
+  if (Object.values(outcomes).includes("failed")) {
+    console.warn(line);
+  } else {
+    console.info(line);
+  }
+}
+
 export function createAnonymousId() {
   return `anon_${crypto.randomUUID()}`;
 }

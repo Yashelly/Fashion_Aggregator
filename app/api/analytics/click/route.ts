@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse, after } from "next/server";
 import {
   captureAnalyticsEvent,
+  logAnalyticsOutcome,
   normalizeAnonymousId,
 } from "@/lib/analytics";
 import { saveBlockedPreviewClick } from "@/lib/analytics-storage";
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
   const userAgent = cleanText(request.headers.get("user-agent"), 500);
 
   after(async () => {
-    const [, analyticsStatus] = await Promise.all([
+    const [supabaseStatus, posthogStatus] = await Promise.all([
       saveBlockedPreviewClick({
         anonymousUserId: anonymousId,
         clickId,
@@ -88,10 +89,14 @@ export async function POST(request: NextRequest) {
       }),
     ]);
 
-    if (analyticsStatus === "failed") {
-      console.warn("[analytics] outbound-click capture failed");
-    }
+    logAnalyticsOutcome("outbound_click_intent", {
+      supabase: supabaseStatus,
+      posthog: posthogStatus,
+    });
   });
 
-  return NextResponse.json({ analytics: "scheduled" }, { status: 202 });
+  // 202 means the request was accepted for best-effort delivery — NOT that either
+  // sink persisted it. `after()` runs after this response, so delivery cannot be
+  // reflected here; see the per-sink log above for the actual outcome.
+  return NextResponse.json({ analytics: "accepted_best_effort" }, { status: 202 });
 }
