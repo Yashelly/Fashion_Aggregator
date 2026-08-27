@@ -1,5 +1,5 @@
-import fs from "node:fs";
 import path from "node:path";
+import { readCsvFile } from "@/lib/csv";
 
 export type DemoStoreLocale = "lt" | "en";
 
@@ -35,56 +35,12 @@ const publicDemoStoreCount = 6;
  */
 const SYNTHETIC_STORE_SLUGS = new Set<string>(["vibewear_demo"]);
 
-function parseCsvLine(line: string): string[] {
-  const values: string[] = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-    const next = line[index + 1];
-
-    if (char === '"' && inQuotes && next === '"') {
-      current += '"';
-      index += 1;
-      continue;
-    }
-
-    if (char === '"') {
-      inQuotes = !inQuotes;
-      continue;
-    }
-
-    if (char === "," && !inQuotes) {
-      values.push(current);
-      current = "";
-      continue;
-    }
-
-    current += char;
-  }
-
-  values.push(current);
-  return values;
-}
-
 function getAllInternalStoreRecords(): InternalStoreRecord[] {
-  const csv = fs.readFileSync(storeTrackerPath, "utf8").trim();
-  const [headerLine, ...rows] = csv.split(/\r?\n/);
-  const headers = parseCsvLine(headerLine);
-
-  return rows
-    .map((row) => {
-      const values = parseCsvLine(row);
-      const record = Object.fromEntries(
-        headers.map((header, index) => [header, values[index] ?? ""]),
-      );
-
-      return {
-        store_slug: record.store_slug,
-        source_status: record.source_status,
-      };
-    })
+  return readCsvFile<Record<string, string>>(storeTrackerPath)
+    .map((record) => ({
+      store_slug: record.store_slug,
+      source_status: record.source_status,
+    }))
     .filter((store) => store.store_slug);
 }
 
