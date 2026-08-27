@@ -76,6 +76,33 @@ function baseStoreIndex(productId) {
   return (Math.max(1, numeric) - 1) % PUBLIC_STORE_COUNT;
 }
 
+// Source of truth for this rule is `isPublishableStoreSlug` in lib/demo-stores.ts
+// (kept in sync manually — this script is plain .mjs and cannot import the TS
+// module). A product is publishable if its store is an active tracked retailer
+// or an approved synthetic source; suspended/unknown stores are excluded.
+const SYNTHETIC_STORE_SLUGS = new Set(["vibewear_demo"]);
+
+function loadPublishableStoreSlugs() {
+  const trackerCsv = fs
+    .readFileSync(path.join(rootDir, "data", "store_tracker.csv"), "utf8")
+    .trim();
+  const [trackerHeader, ...trackerRows] = trackerCsv.split(/\r?\n/);
+  const trackerHeaders = parseCsvLine(trackerHeader);
+  const active = new Set(SYNTHETIC_STORE_SLUGS);
+  for (const row of trackerRows) {
+    const values = parseCsvLine(row);
+    const record = Object.fromEntries(
+      trackerHeaders.map((header, index) => [header, values[index] ?? ""]),
+    );
+    if (record.store_slug && record.source_status !== "market_suspended") {
+      active.add(record.store_slug);
+    }
+  }
+  return active;
+}
+
+const publishableStoreSlugs = loadPublishableStoreSlugs();
+
 function storeId(index) {
   return `demo-store-${String(index + 1).padStart(2, "0")}`;
 }
@@ -88,7 +115,11 @@ const products = rows
     const values = parseCsvLine(row);
     return Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""]));
   })
-  .filter((product) => product.source_status === "mock_not_live");
+  .filter(
+    (product) =>
+      product.source_status === "mock_not_live" &&
+      publishableStoreSlugs.has(product.store_slug),
+  );
 
 const random = mulberry32(20260801);
 const listings = [];

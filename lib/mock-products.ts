@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   filterProductsByPublicDemoStore,
+  filterPublishableProducts,
   getPublicDemoStoreForProduct,
   getPublicDemoStores,
   type DemoStoreLocale,
@@ -126,8 +127,13 @@ export function getMockProducts(): MockProduct[] {
     })
     .filter((product) => product.source_status === "mock_not_live");
 
-  productCache = { mtimeMs, products };
-  return products;
+  // Reject products attached to suspended or unknown internal stores. Only
+  // active retailers and approved synthetic sources may render publicly; without
+  // this a suspended slug would silently fall through to a neutral demo store.
+  const publishable = filterPublishableProducts(products);
+
+  productCache = { mtimeMs, products: publishable };
+  return publishable;
 }
 
 export function getStoreOptions(
