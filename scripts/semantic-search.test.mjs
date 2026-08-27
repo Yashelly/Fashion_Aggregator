@@ -127,3 +127,31 @@ test("regression: catalog fuzzy is off — 'dropped_shoulder' is not 'cropped'",
   const croppedTerms = buildProductTerms(product({ subcategory: "top", style_tags: "cropped" }));
   assert.ok(croppedTerms.has("cropped"), "an actual 'cropped' tag still canonicalises to cropped");
 });
+
+// 8. Negative query: an unstocked, unrecognised item invents no answer. This is
+//    a FRESH synthetic negative — deliberately not "yellow dress", which lives in
+//    the sealed blind set and is left untuned on purpose (see docs/search-engine.md).
+//    It guards the "resist a made-up answer" property we DO rely on, without
+//    touching the blind set's integrity.
+test("negative query: an item the catalog does not stock returns nothing", () => {
+  const dress = product({ mock_product_id: "dress", subcategory: "dress", category: "dresses", title: "Slip Dress" });
+  const shoe = product({ mock_product_id: "shoe", subcategory: "sneakers", category: "shoes", title: "Court Sneaker" });
+
+  assert.deepEqual(idsFor([dress, shoe], "wetsuit"), [], "an unstocked, unlearned item must not invent a result");
+});
+
+// 9. A stocked colour is a real constraint: it ranks the matching colour first
+//    and never lets a colour mismatch outrank it. (The complementary gap — an
+//    *unsatisfiable* colour failing to exclude, e.g. "yellow dress" — is the
+//    documented blind-set limitation left unpatched on purpose.)
+test("a stocked colour constrains: 'black dress' ranks the black dress first", () => {
+  const black = product({ mock_product_id: "black-dress", subcategory: "dress", category: "dresses", color: "black", title: "Black Dress" });
+  const blue = product({ mock_product_id: "blue-dress", subcategory: "dress", category: "dresses", color: "blue", title: "Blue Dress" });
+
+  const ids = idsFor([black, blue], "black dress");
+  assert.equal(ids[0], "black-dress", "the black dress is the best answer to 'black dress'");
+  const blueIdx = ids.indexOf("blue-dress");
+  if (blueIdx !== -1) {
+    assert.ok(ids.indexOf("black-dress") < blueIdx, "a colour mismatch must not outrank the colour match");
+  }
+});
