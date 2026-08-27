@@ -156,18 +156,24 @@ is a set labelled by someone else, or drawn from real click data.
 
 ## Known limitations
 
-- **Unknown colour tokens don't constrain results.** The blind run caught this:
-  `"yellow dress"` should answer *"not stocked"* (nothing yellow exists in the
-  catalog) but returns four non-yellow dresses. The cause is precise — *yellow* is
-  not in the lexicon, so it becomes an `unknownTerm` matched literally against raw
-  rows; it fails to match anything but also doesn't *exclude* anything, so the
-  "dress" subject carries the result. A *known* colour negative behaves correctly:
-  `"beige coat"` (with *beige* in the lexicon) returns nothing, because *beige* is
-  a real concept that no coat satisfies. The fix would be to treat an
-  unmatched-but-known-category constraint (colour, material) as a soft filter — but
-  it is **left unpatched on purpose**, because it was surfaced by the blind set and
-  patching it would burn that set's integrity. It is a scoped, understood gap, not
-  a mystery.
+- **A wholly-unsatisfied colour constraint doesn't filter.** The blind run caught
+  this: `"yellow dress"` should answer *"not stocked"* (nothing yellow exists in
+  the catalog) but returns four non-yellow dresses. The cause is precise — the
+  "dress" subject selects the dresses, and *yellow* only lightly penalises each of
+  them (it is an `unknownTerm`, matched literally against the row and matching
+  nothing), so no dress is *excluded* and the subject carries the result.
+  **Lexicon membership is not the operative factor** (an earlier version of this
+  note claimed it was): an in-lexicon colour that no product in the subject
+  satisfies behaves identically — `"beige dress"` also returns four dresses @0.35
+  (verified), and `"beige coat"` returns a result only because the catalog actually
+  stocks a beige coat (MOCK-019), not because *beige* is "known". The real fix would
+  be to treat a wholly-unsatisfied category constraint (colour, material) as a soft
+  filter that *excludes* rather than lightly penalises — but it is **left unpatched
+  on purpose**, because `yellow dress` was surfaced by the blind set and patching it
+  would burn that set's integrity. The behaviour we *do* rely on (a stocked colour
+  constrains; an unstocked/unknown item invents no answer) is guarded by fresh
+  synthetic negatives in `scripts/semantic-search.test.mjs`. It is a scoped,
+  understood gap, not a mystery.
 - **Single-author labels.** See above.
 - **No morphological stemming for Lithuanian.** Inflected endings are enumerated
   explicitly in the lexicon rather than stemmed. At this vocabulary size an
