@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { recordRecentSearch } from "@/lib/recent-searches";
 
 const FILTER_KEYS = ["availability", "category", "color", "gender", "sale", "status", "store"] as const;
 
@@ -33,6 +34,9 @@ export function SearchAnalyticsTracker({ resultCount }: { resultCount: number })
         return value ? [[key, value]] : [];
       }),
     );
+
+    // Remember the free-text query for the account "Recent searches" card.
+    recordRecentSearch(params.get("query"));
 
     const timer = window.setTimeout(() => {
       void fetch("/api/analytics/search", {
