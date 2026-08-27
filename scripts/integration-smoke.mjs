@@ -120,6 +120,29 @@ async function run() {
   });
   check("POST /api/analytics/click cross-origin → 403", crossOrigin.status === 403, `status ${crossOrigin.status}`);
 
+  const missingOrigin = await fetch(`${ORIGIN}/api/analytics/click`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ productId: "MOCK-045" }),
+  });
+  check("POST /api/analytics/click missing origin → 403", missingOrigin.status === 403, `status ${missingOrigin.status}`);
+
+  const spoofedForwardedHost = await fetch(`${ORIGIN}/api/analytics/click`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      origin: "https://evil.example",
+      "x-forwarded-host": "evil.example",
+      "x-forwarded-proto": "https",
+    },
+    body: JSON.stringify({ productId: "MOCK-045" }),
+  });
+  check(
+    "POST /api/analytics/click hostile origin + spoofed x-forwarded-* → 403",
+    spoofedForwardedHost.status === 403,
+    `status ${spoofedForwardedHost.status}`,
+  );
+
   const unknownProduct = await fetch(`${ORIGIN}/api/analytics/click`, {
     method: "POST",
     headers: sameOrigin,

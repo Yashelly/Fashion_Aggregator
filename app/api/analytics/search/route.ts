@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import {
   captureAnalyticsEvent,
+  isPostHogConfigured,
+  logAnalyticsOutcome,
   normalizeAnonymousId,
 } from "@/lib/analytics";
-import { saveSearchEvent } from "@/lib/analytics-storage";
+import {
+  isSupabaseAnalyticsEnabled,
+  saveSearchEvent,
+} from "@/lib/analytics-storage";
 import { isSameOrigin } from "@/lib/request-security";
 
 export const runtime = "nodejs";
@@ -89,6 +94,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid result count" }, { status: 400 });
   }
 
+  // No configured sink → a genuine no-op: persist nothing and issue no identifier
+  // cookie. (Consent-based gating is a deferred follow-up; today "enabled" means a
+  // provider is configured.) This makes the documented "disabled" state literal.
+  if (!isPostHogConfigured() && !isSupabaseAnalyticsEnabled()) {
+    return NextResponse.json(
+      { analytics: "disabled", searchEventId: null },
+      { status: 202 },
+    );
+  }
+
   const anonymousId = normalizeAnonymousId(body.anonymousId);
   const query = cleanText(body.query, 200);
   const filters = cleanFilters(body.filters);
@@ -97,7 +112,7 @@ export async function POST(request: Request) {
   const referrerUrl = cleanText(request.headers.get("referer"), 500);
   const userAgent = cleanText(request.headers.get("user-agent"), 500);
 
-  const [searchEventId, analyticsStatus] = await Promise.all([
+  const [searchResult, posthogStatus] = await Promise.all([
     saveSearchEvent({
       anonymousUserId: anonymousId,
       filters,
@@ -118,9 +133,16 @@ export async function POST(request: Request) {
     }),
   ]);
 
+  const searchEventId = searchResult.id;
+
+  logAnalyticsOutcome("search_performed", {
+    supabase: searchResult.status,
+    posthog: posthogStatus,
+  });
+
   const response = NextResponse.json(
     {
-      analytics: analyticsStatus,
+      analytics: posthogStatus,
       searchEventId,
     },
     {
