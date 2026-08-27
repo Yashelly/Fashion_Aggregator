@@ -1,5 +1,5 @@
-import fs from "node:fs";
 import path from "node:path";
+import { readCsvFile } from "@/lib/csv";
 
 /**
  * Visual attributes read off each product photo.
@@ -34,36 +34,6 @@ export type ProductAttributes = {
 
 const attributesPath = path.join(process.cwd(), "data", "product_attributes.csv");
 
-function parseCsvLine(line: string): string[] {
-  const values: string[] = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-
-    if (char === '"' && inQuotes && line[index + 1] === '"') {
-      current += '"';
-      index += 1;
-      continue;
-    }
-    if (char === '"') {
-      inQuotes = !inQuotes;
-      continue;
-    }
-    if (char === "," && !inQuotes) {
-      values.push(current);
-      current = "";
-      continue;
-    }
-
-    current += char;
-  }
-
-  values.push(current);
-  return values;
-}
-
 let cached: Map<string, ProductAttributes> | null = null;
 
 /**
@@ -76,18 +46,10 @@ export function getProductAttributes(): Map<string, ProductAttributes> {
 
   const byProduct = new Map<string, ProductAttributes>();
 
-  if (!fs.existsSync(attributesPath)) {
-    cached = byProduct;
-    return byProduct;
-  }
-
-  const csv = fs.readFileSync(attributesPath, "utf8").trim();
-  const [headerLine, ...rows] = csv.split(/\r?\n/);
-  const headers = parseCsvLine(headerLine);
-
-  for (const row of rows) {
-    const values = parseCsvLine(row);
-    const record = Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""]));
+  // The file is optional — `readCsvFile` returns [] when it is absent, and
+  // search falls back to the base catalog fields, exactly how the product
+  // behaved before enrichment.
+  for (const record of readCsvFile<Record<string, string>>(attributesPath)) {
     if (!record.mock_product_id) continue;
 
     byProduct.set(record.mock_product_id, {
