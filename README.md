@@ -109,19 +109,29 @@ constraints. Why this split, and why 26/30 is *not* "unseen", is spelled out in
 
 **3. A demo-data boundary enforced in code.**
 Public store identity is decoupled from internal retailer identity: internal
-slugs map to six neutral public IDs (`demo-store-01…06`) via a stable hash
-(`lib/demo-stores.ts`), and only synthetic rows (`source_status ===
-"mock_not_live"`) ever render. `/out/:productId` **never** redirects to a
-merchant — it renders an on-site synthetic-preview guard and posts a click-intent
-event. The boundary is a hard rule the code upholds, so the demo can't
-accidentally imply real partnerships.
+slugs map to six neutral public IDs (`demo-store-01…06`) in `lib/demo-stores.ts`.
+Active tracked retailers map via a stable hash; the current synthetic catalog
+(every row uses the `vibewear_demo` demo source) is distributed across the six
+stores by product id. Only synthetic rows (`source_status === "mock_not_live"`)
+whose store slug is an **active retailer or an approved synthetic source** ever
+render — products attached to a **suspended or unknown** store are rejected at the
+product boundary, not silently reassigned. `/out/:productId` **never** redirects
+to a merchant — it renders an on-site synthetic-preview guard and posts a
+click-intent event. The boundary is a hard rule the code upholds, so the demo
+can't accidentally imply real partnerships.
 
-**4. Hardened, non-blocking analytics endpoints.**
-`POST /api/analytics/click` validates the request is same-origin
-(`lib/request-security.ts`), validates the product ID, reads correlation only
-from **HttpOnly** cookies, schedules bounded server-side capture, and returns
-`202` without delaying navigation. Both analytics routes degrade to a "disabled"
-no-op when PostHog isn't configured.
+**4. Same-origin, non-blocking analytics endpoints.**
+`POST /api/analytics/click` requires a same-origin `Origin` header
+(`lib/request-security.ts` — a missing `Origin` is rejected, and `X-Forwarded-Host`
+is not trusted; set `APP_CANONICAL_ORIGIN` for a strict production check),
+validates the product ID, reads correlation only from **HttpOnly** cookies,
+schedules bounded best-effort server-side capture, and returns `202`. The `202`
+means the request was *accepted*, not that either sink persisted it — `after()`
+runs post-response, so the per-sink outcome (`supabase=… posthog=…`) is emitted to
+the server log, not the HTTP status. Both routes are a genuine no-op (no persist,
+no identifier cookie) when **no** sink is configured — i.e. neither
+`POSTHOG_PROJECT_API_KEY` nor Supabase env is set. (Consent-based gating of an
+*enabled* pipeline is a documented follow-up, not yet wired.)
 
 **5. Localization that's proven, not assumed.**
 EN/LT is selected by a canonical `?lang` param with a `weft-locale` cookie
@@ -133,12 +143,16 @@ and `/out` success/404 across both locales.
 
 **6. Feed-oriented PostgreSQL schema with RLS.**
 Three incremental migrations (`sql/00N_*.sql`) model the pre-affiliate schema and
-the synthetic-click analytics boundary: an auditable feed-import lifecycle
+the synthetic-click analytics boundary: a feed-import lifecycle
 (`feed_import_runs` + `raw_feed_items` with jsonb payloads and validation state),
-content-hash change detection, variants, per-relationship `on delete` rules, and
-FK/GIN indexes chosen for real query patterns. Row-level security grants access
-only to `service_role`, blocking `anon`/`authenticated` entirely. The full ER
-diagram and rationale are in [`docs/data-model.md`](docs/data-model.md).
+content-hash columns, variants, per-relationship `on delete` rules, and FK/GIN
+indexes chosen for real query patterns. **The lifecycle's auditability and
+hash-based idempotency are schema *intent*, not enforced guarantees** — there is
+no feed importer yet, and `status`/counters/hashes are unconstrained metadata (see
+`docs/data-model.md` and `sql/AGENTS.md`). Row-level security grants access only
+to `service_role`, blocking `anon`/`authenticated` entirely. Migrations are
+applied manually in numeric order (no runner). The full ER diagram and rationale
+are in [`docs/data-model.md`](docs/data-model.md).
 
 ## Search relevance and evaluation
 

@@ -2,6 +2,13 @@ import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 const STORAGE_TIMEOUT_MS = 1_000;
 
+export type SinkOutcome = "ok" | "failed" | "disabled";
+
+/** True when Supabase analytics persistence is actually configured. */
+export function isSupabaseAnalyticsEnabled() {
+  return getSupabaseServerClient() !== null;
+}
+
 type SearchEventInput = {
   anonymousUserId: string;
   filters: Record<string, boolean | number | string>;
@@ -32,9 +39,11 @@ function reportStorageFailure(operation: string, timedOut: boolean) {
   );
 }
 
-export async function saveSearchEvent(input: SearchEventInput) {
+export async function saveSearchEvent(
+  input: SearchEventInput,
+): Promise<{ id: string | null; status: SinkOutcome }> {
   const supabase = getSupabaseServerClient();
-  if (!supabase) return null;
+  if (!supabase) return { id: null, status: "disabled" };
 
   const controller = new AbortController();
   const timeout = setTimeout(
@@ -62,24 +71,26 @@ export async function saveSearchEvent(input: SearchEventInput) {
 
     if (error) {
       reportStorageFailure("search-event persistence", false);
-      return null;
+      return { id: null, status: "failed" };
     }
 
-    return data.id as string;
+    return { id: data.id as string, status: "ok" };
   } catch (error) {
     reportStorageFailure(
       "search-event persistence",
       error instanceof Error && error.name === "AbortError",
     );
-    return null;
+    return { id: null, status: "failed" };
   } finally {
     clearTimeout(timeout);
   }
 }
 
-export async function saveBlockedPreviewClick(input: PreviewClickInput) {
+export async function saveBlockedPreviewClick(
+  input: PreviewClickInput,
+): Promise<SinkOutcome> {
   const supabase = getSupabaseServerClient();
-  if (!supabase) return false;
+  if (!supabase) return "disabled";
 
   const controller = new AbortController();
   const timeout = setTimeout(
@@ -108,16 +119,16 @@ export async function saveBlockedPreviewClick(input: PreviewClickInput) {
 
     if (error) {
       reportStorageFailure("preview-click persistence", false);
-      return false;
+      return "failed";
     }
 
-    return true;
+    return "ok";
   } catch (error) {
     reportStorageFailure(
       "preview-click persistence",
       error instanceof Error && error.name === "AbortError",
     );
-    return false;
+    return "failed";
   } finally {
     clearTimeout(timeout);
   }

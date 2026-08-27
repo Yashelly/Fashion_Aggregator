@@ -9,12 +9,13 @@
  * because that is the point at which consent stops being optional.
  *
  * DECISION — this banner does NOT gate the analytics endpoints.
- * `app/api/analytics/search` and `app/api/analytics/click` already return a
- * "disabled" status unless `POSTHOG_PROJECT_API_KEY` is set, and that key is
- * deliberately unset until there is real traffic. That no-op is the interim
- * mitigation. Wiring the choice recorded here into those endpoints is required
- * before analytics is switched on for real — it is not done yet, and this
- * comment is the record that it was a decision rather than an oversight.
+ * `app/api/analytics/search` and `app/api/analytics/click` are a genuine no-op
+ * (no persistence, no identifier cookie) unless a sink is configured — neither
+ * `POSTHOG_PROJECT_API_KEY` nor Supabase env — and both are deliberately unset
+ * until there is real traffic. That no-op is the current cover. But once a sink
+ * IS enabled, the choice recorded here still does not gate collection; wiring it
+ * in is required before analytics is switched on for real. It is not done yet,
+ * and this comment is the record that it was a decision rather than an oversight.
  *
  * The reject action is given the same weight as accept, which EU guidance
  * requires: refusing must not be harder than consenting.

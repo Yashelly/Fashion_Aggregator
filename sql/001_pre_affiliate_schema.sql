@@ -5,6 +5,9 @@ create extension if not exists pgcrypto;
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
+-- Pinned here (not only in 002) so re-running 001 cannot revert 002's
+-- search-path hardening back to an unpinned definition.
+set search_path = pg_catalog
 as $$
 begin
   new.updated_at = now();

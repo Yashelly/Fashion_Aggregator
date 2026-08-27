@@ -82,8 +82,13 @@
 ## Design principles
 
 1. **Search first:** Search is the strongest action on every surface that has
-   one. Home is the exception by design: it is a title page whose single CTA
-   leads to search, so search is still the only thing it asks for.
+   one, and it is always reachable from the site header. Home is a storefront —
+   a cinematic hero over "Shop by category" tiles and a "Popular now" grid
+   (`app/page.tsx`) — where every tile and product is an entry into search, and
+   the header keeps search one action away. (This supersedes the earlier
+   "home is a single title page with no header/footer" contract, which the
+   navigation/storefront rework replaced; the layout now renders the shared
+   header and footer on every route.)
 2. **Fashion editorial, not editorial system:** Use typography, contrast, and
    space for energy; do not use arbitrary issue/index numbers.
 3. **Public-safe by construction:** Only strict neutral store mappings may reach

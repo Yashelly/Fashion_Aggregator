@@ -96,15 +96,21 @@ erDiagram
 
 ## Why it's shaped this way
 
-**The feed lifecycle is auditable, not a black box.** A `feed_import_runs` row is
-opened per import with a `status` machine (`started → downloaded → parsed →
-completed`/`failed`/`cancelled`) and per-run counters (`inserted_count`,
-`updated_count`, `unchanged_count`, `out_of_stock_count`, `error_count`). Every
-input row is preserved in `raw_feed_items` with its `raw_payload` (jsonb), its
-`normalized_payload`, and a `validation_status` + `validation_errors` — so a bad
-import can be explained and replayed rather than guessed at. `products.content_hash`
-/ `raw_hash` make re-imports idempotent: unchanged rows are detected and skipped,
-which is what the counters above measure.
+**The feed lifecycle is *designed* to be auditable — but the guarantees below are
+planned, not yet enforced.** There is no feed importer in this repo, so the
+following describe the schema's intent, not behavior the database currently
+guarantees. A `feed_import_runs` row is meant to be opened per import with a
+`status` machine (`started → downloaded → parsed → completed`/`failed`/
+`cancelled`) and per-run counters (`inserted_count`, `updated_count`,
+`unchanged_count`, `out_of_stock_count`, `error_count`). Note that `status` is
+only a `CHECK` value — the DB does **not** enforce valid transitions, that
+`completed_at` is set on completion, or that counters are consistent; an importer
+must uphold those. Every input row is intended to be preserved in `raw_feed_items`
+with its `raw_payload` (jsonb), `normalized_payload`, and `validation_status` +
+`validation_errors`. `products.content_hash` / `raw_hash` are **intended** to make
+re-imports idempotent (detect and skip unchanged rows) once an importer uses them —
+today they are nullable metadata with no uniqueness constraint, so they are not a
+DB-level idempotency guarantee. See `sql/AGENTS.md` for what is actually enforced.
 
 **On-delete behavior is chosen per relationship, not defaulted.**
 

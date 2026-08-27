@@ -29,8 +29,11 @@ overlooked.
       real affiliate link. Affiliate-tracking language stays out of the live
       pages until there is an actual affiliate relationship to describe.
       **Still open before going live:** wire the recorded consent into
-      `app/api/analytics/*` (they no-op today without a PostHog key, which is
-      the interim cover), and fill `[CONTACT_EMAIL]`, `[DOMAIN]`,
+      `app/api/analytics/*`. The routes now no-op (no persistence, no
+      identifier cookie) unless a sink is configured — neither
+      `POSTHOG_PROJECT_API_KEY` nor Supabase env — so the default state is a
+      true no-op; but once a sink *is* enabled, the banner choice does not yet
+      gate collection. Also fill `[CONTACT_EMAIL]`, `[DOMAIN]`,
       `[OWNER_NAME_OR_COMPANY]` in `docs/legal/`.
 
 ## Phase 1 — Name
