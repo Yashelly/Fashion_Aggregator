@@ -459,6 +459,12 @@ summary {
   top: 50px;
 }
 
+/* Tap-to-close scrim behind the open mobile menu. Hidden until the phone
+   breakpoint turns the menu into a full-width sheet (below). */
+.mobile-menu-scrim {
+  display: none;
+}
+
 .mobile-menu > nav > a {
   align-items: center;
   border-bottom: 1px solid var(--color-line);
@@ -2346,12 +2352,85 @@ summary {
     --header-h: 56px;
   }
 
+  /* Solid, not frosted, on phones. `backdrop-filter` also makes it the
+     containing block for `position: fixed` descendants, which would anchor the
+     full-width menu sheet to the 56px header box instead of the viewport —
+     dropping the blur lets the sheet and its scrim resolve against the screen. */
+  .site-header {
+    backdrop-filter: none;
+    background: var(--color-canvas);
+  }
+
   .brand {
     font-size: 23px;
   }
 
   .header-tools {
     gap: 6px;
+  }
+
+  /*
+   * Mobile navigation as a full-width sheet, not the narrow desktop dropdown
+   * that floated in the top-right corner and overlapped the page. It drops the
+   * full width of the screen from under the sticky header, over a tap-to-close
+   * scrim, with comfortable full-row targets — the layout a phone expects.
+   */
+  .mobile-menu-scrim {
+    display: block;
+    position: fixed;
+    inset: var(--header-h) 0 0;
+    z-index: 1;
+    background: color-mix(in srgb, var(--color-ink) 34%, transparent);
+    animation: mobile-scrim-in 0.2s ease both;
+  }
+
+  .mobile-menu > nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--header-h);
+    z-index: 2;
+    min-width: 0;
+    max-height: calc(100dvh - var(--header-h));
+    overflow-y: auto;
+    padding: 8px var(--gutter) calc(16px + env(safe-area-inset-bottom));
+    border-inline: 0;
+    border-top: 0;
+    box-shadow: var(--shadow);
+    animation: mobile-menu-in 0.24s cubic-bezier(0.2, 0.72, 0.3, 1) both;
+  }
+
+  .mobile-menu > nav > a {
+    font-size: 16px;
+    min-height: 56px;
+  }
+
+  .mobile-menu > nav > a[aria-current="page"] {
+    box-shadow: inset 3px 0 0 var(--color-accent);
+  }
+
+  .mobile-menu > nav > .mobile-account-link {
+    margin-top: 4px;
+  }
+
+  @keyframes mobile-menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes mobile-scrim-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   .query-field > div {
@@ -2365,7 +2444,7 @@ summary {
   }
 
   .product-grid {
-    gap: 38px 10px;
+    gap: 30px 14px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -2403,8 +2482,12 @@ summary {
     overflow-wrap: break-word;
   }
 
+  /* Two filters per row instead of one full-width stack, so the four dropdowns
+     read as a compact 2×2 block rather than a tall wall the shopper has to
+     scroll past before any product appears. */
   .primary-filters {
-    grid-template-columns: 1fr;
+    gap: 12px;
+    grid-template-columns: 1fr 1fr;
   }
 
   .results-toolbar {

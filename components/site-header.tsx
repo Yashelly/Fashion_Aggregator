@@ -153,6 +153,11 @@ export function SiteHeader() {
           </nav>
           <details className="mobile-menu">
             <summary aria-label={locale === "lt" ? "Atverti navigaciją" : "Open navigation"}><Menu aria-hidden="true" size={20} /></summary>
+            <span
+              aria-hidden="true"
+              className="mobile-menu-scrim"
+              onClick={(event) => event.currentTarget.closest("details")?.removeAttribute("open")}
+            />
             <nav aria-label={t.mainNavAria}>
               {nav.map(({ href, label, active, highlight }) => (
                 <Link
