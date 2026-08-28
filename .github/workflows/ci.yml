@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   verify:
-    name: typecheck · unit · search eval · build
+    name: typecheck · unit · search eval · build · smoke
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,3 +40,14 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      # Deterministic HTTP smoke against a production server the script boots on
+      # port 3111 itself: home/search render real catalog results, the /out guard
+      # (200 valid / 404 unknown, no external redirect), and the analytics
+      # same-origin security contract (202 same-origin, 403 cross-origin / missing
+      # origin / spoofed forwarded headers, 404 unknown, 413 oversized). Node-only,
+      # no browser — closes the "green PR but broken frontend/backend boundary" gap
+      # without importing Playwright flakiness. (Leaves APP_CANONICAL_ORIGIN unset,
+      # so isSameOrigin falls back to the request host and same-origin stays 202.)
+      - name: Integration smoke
+        run: npm run test:integration

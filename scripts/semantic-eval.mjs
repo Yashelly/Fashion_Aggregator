@@ -17,46 +17,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseCsvRecords } from "./csv.mjs";
 import { DEV_SET, REGRESSION_SET, BLIND_SET } from "./search-queries.mjs";
 import { loadSemanticSearch } from "./load-search.mjs";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-function parseCsvLine(line) {
-  const values = [];
-  let current = "";
-  let inQuotes = false;
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-    if (char === '"' && inQuotes && line[index + 1] === '"') {
-      current += '"';
-      index += 1;
-      continue;
-    }
-    if (char === '"') {
-      inQuotes = !inQuotes;
-      continue;
-    }
-    if (char === "," && !inQuotes) {
-      values.push(current);
-      current = "";
-      continue;
-    }
-    current += char;
-  }
-  values.push(current);
-  return values;
-}
-
 function readCsv(fileName) {
   const filePath = path.join(rootDir, "data", fileName);
   if (!fs.existsSync(filePath)) return [];
-  const [headerLine, ...rows] = fs.readFileSync(filePath, "utf8").trim().split(/\r?\n/);
-  const headers = parseCsvLine(headerLine);
-  return rows.map((row) => {
-    const values = parseCsvLine(row);
-    return Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""]));
-  });
+  return parseCsvRecords(fs.readFileSync(filePath, "utf8"));
 }
 
 /**
@@ -182,7 +152,7 @@ function evaluate({ verbose, which }) {
 
   let blind;
   if (which === "all" || which === "blind") {
-    blind = summarise("BLIND set — sealed 2026-08-15, scored once; generalization signal (reported, not gated)", scoreSet("blind", BLIND_SET, engine, products), { verbose });
+    blind = summarise("BLIND set — sealed 2026-08-27, scored once; generalization signal (reported, not gated)", scoreSet("blind", BLIND_SET, engine, products), { verbose });
   }
 
   console.log(`target             pass rate >= ${(PASS_RATE_TARGET * 100).toFixed(0)}%, precision@k >= ${PRECISION_TARGET} per query  (gated: dev, regression)`);

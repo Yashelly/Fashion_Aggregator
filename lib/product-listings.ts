@@ -1,5 +1,5 @@
-import fs from "node:fs";
 import path from "node:path";
+import { readCsvFile } from "@/lib/csv";
 import { getPublicDemoStoreById, type PublicDemoStore } from "@/lib/demo-stores";
 import type { MockProduct } from "@/lib/mock-products";
 
@@ -60,35 +60,6 @@ type ListingRow = {
 
 const listingsPath = path.join(process.cwd(), "data", "mock_listings.csv");
 
-function parseCsvLine(line: string): string[] {
-  const values: string[] = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-
-    if (char === '"' && inQuotes && line[index + 1] === '"') {
-      current += '"';
-      index += 1;
-      continue;
-    }
-    if (char === '"') {
-      inQuotes = !inQuotes;
-      continue;
-    }
-    if (char === "," && !inQuotes) {
-      values.push(current);
-      current = "";
-      continue;
-    }
-    current += char;
-  }
-
-  values.push(current);
-  return values;
-}
-
 let cachedListings: Map<string, ListingRow[]> | null = null;
 
 function loadListings(): Map<string, ListingRow[]> {
@@ -96,24 +67,10 @@ function loadListings(): Map<string, ListingRow[]> {
 
   const byProduct = new Map<string, ListingRow[]>();
 
-  // The file is optional: without it every product simply reports one store,
-  // which is the truthful answer for a catalog with no overlap.
-  if (!fs.existsSync(listingsPath)) {
-    cachedListings = byProduct;
-    return byProduct;
-  }
-
-  const csv = fs.readFileSync(listingsPath, "utf8").trim();
-  const [headerLine, ...rows] = csv.split(/\r?\n/);
-  const headers = parseCsvLine(headerLine) as Array<keyof ListingRow>;
-
-  for (const row of rows) {
-    const values = parseCsvLine(row);
-    const listing = headers.reduce((accumulator, header, index) => {
-      accumulator[header] = values[index] ?? "";
-      return accumulator;
-    }, {} as ListingRow);
-
+  // The file is optional: `readCsvFile` returns [] when it is absent, in which
+  // case every product simply reports one store — the truthful answer for a
+  // catalog with no overlap.
+  for (const listing of readCsvFile<ListingRow>(listingsPath)) {
     // A listing pointing at a store id we do not publish is dropped rather than
     // rendered, so the public store vocabulary stays closed.
     if (!getPublicDemoStoreById(listing.demo_store_id)) continue;
