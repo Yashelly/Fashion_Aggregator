@@ -30,6 +30,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseCsvRecords } from "./csv.mjs";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUBLIC_STORE_COUNT = 6;
@@ -42,32 +43,6 @@ function mulberry32(seed) {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-}
-
-function parseCsvLine(line) {
-  const values = [];
-  let current = "";
-  let inQuotes = false;
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-    if (char === '"' && inQuotes && line[index + 1] === '"') {
-      current += '"';
-      index += 1;
-      continue;
-    }
-    if (char === '"') {
-      inQuotes = !inQuotes;
-      continue;
-    }
-    if (char === "," && !inQuotes) {
-      values.push(current);
-      current = "";
-      continue;
-    }
-    current += char;
-  }
-  values.push(current);
-  return values;
 }
 
 /** Mirrors `getPublicDemoStoreForProduct`'s fallback in lib/demo-stores.ts. */
@@ -83,17 +58,11 @@ function baseStoreIndex(productId) {
 const SYNTHETIC_STORE_SLUGS = new Set(["vibewear_demo"]);
 
 function loadPublishableStoreSlugs() {
-  const trackerCsv = fs
-    .readFileSync(path.join(rootDir, "data", "store_tracker.csv"), "utf8")
-    .trim();
-  const [trackerHeader, ...trackerRows] = trackerCsv.split(/\r?\n/);
-  const trackerHeaders = parseCsvLine(trackerHeader);
   const active = new Set(SYNTHETIC_STORE_SLUGS);
-  for (const row of trackerRows) {
-    const values = parseCsvLine(row);
-    const record = Object.fromEntries(
-      trackerHeaders.map((header, index) => [header, values[index] ?? ""]),
-    );
+  const records = parseCsvRecords(
+    fs.readFileSync(path.join(rootDir, "data", "store_tracker.csv"), "utf8"),
+  );
+  for (const record of records) {
     if (record.store_slug && record.source_status !== "market_suspended") {
       active.add(record.store_slug);
     }
@@ -107,19 +76,13 @@ function storeId(index) {
   return `demo-store-${String(index + 1).padStart(2, "0")}`;
 }
 
-const csv = fs.readFileSync(path.join(rootDir, "data", "mock_products.csv"), "utf8").trim();
-const [headerLine, ...rows] = csv.split(/\r?\n/);
-const headers = parseCsvLine(headerLine);
-const products = rows
-  .map((row) => {
-    const values = parseCsvLine(row);
-    return Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""]));
-  })
-  .filter(
-    (product) =>
-      product.source_status === "mock_not_live" &&
-      publishableStoreSlugs.has(product.store_slug),
-  );
+const products = parseCsvRecords(
+  fs.readFileSync(path.join(rootDir, "data", "mock_products.csv"), "utf8"),
+).filter(
+  (product) =>
+    product.source_status === "mock_not_live" &&
+    publishableStoreSlugs.has(product.store_slug),
+);
 
 const random = mulberry32(20260801);
 const listings = [];

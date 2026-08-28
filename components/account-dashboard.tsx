@@ -15,7 +15,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import type { Locale } from "@/lib/i18n";
+import { type Locale, withLocale } from "@/lib/i18n";
+import { readRecentSearches, type RecentSearch } from "@/lib/recent-searches";
 
 type Profile = {
   name: string;
@@ -37,6 +38,8 @@ type Profile = {
 };
 
 const storageKey = "weft-account-preferences";
+const wishlistKey = "weft-wishlist";
+const STORAGE_VERSION = 1;
 const defaults: Profile = {
   name: "",
   email: "",
@@ -54,6 +57,37 @@ const defaults: Profile = {
   inseam: "",
 };
 
+/**
+ * Coerce persisted JSON into a valid Profile field-by-field. Older or corrupted
+ * state (e.g. `{"style": null}`, missing keys, wrong types) must never reach the
+ * render — a null `style` would break `.includes()`. Anything invalid falls back
+ * to its default, so the page always has a well-formed profile.
+ */
+function sanitizeProfile(raw: unknown): Profile {
+  if (!raw || typeof raw !== "object") return defaults;
+  const value = raw as Record<string, unknown>;
+  const str = (v: unknown, fallback: string) => (typeof v === "string" ? v : fallback);
+  const bool = (v: unknown, fallback: boolean) => (typeof v === "boolean" ? v : fallback);
+  return {
+    name: str(value.name, defaults.name),
+    email: str(value.email, defaults.email),
+    style: Array.isArray(value.style)
+      ? value.style.filter((item): item is string => typeof item === "string")
+      : defaults.style,
+    topSize: str(value.topSize, defaults.topSize),
+    bottomSize: str(value.bottomSize, defaults.bottomSize),
+    shoeSize: str(value.shoeSize, defaults.shoeSize),
+    budget: str(value.budget, defaults.budget),
+    saleAlerts: bool(value.saleAlerts, defaults.saleAlerts),
+    priceAlerts: bool(value.priceAlerts, defaults.priceAlerts),
+    detailedSizes: bool(value.detailedSizes, defaults.detailedSizes),
+    chest: str(value.chest, defaults.chest),
+    waist: str(value.waist, defaults.waist),
+    hips: str(value.hips, defaults.hips),
+    inseam: str(value.inseam, defaults.inseam),
+  };
+}
+
 // EU shoe sizes in half steps — half sizes are common here (42.5 is a real
 // size), so a whole-number list left those shoppers unable to pick their own.
 const shoeSizes = Array.from({ length: 21 }, (_, i) => (36 + i * 0.5).toString());
@@ -62,14 +96,30 @@ export function AccountDashboard({ locale }: { locale: Locale }) {
   const isLt = locale === "lt";
   const [profile, setProfile] = useState(defaults);
   const [saved, setSaved] = useState(false);
+  const [savedCount, setSavedCount] = useState(0);
+  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
 
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(storageKey);
-      if (stored) setProfile({ ...defaults, ...(JSON.parse(stored) as Partial<Profile>) });
+      if (stored) setProfile(sanitizeProfile(JSON.parse(stored)));
     } catch {
       // Storage can be unavailable in privacy-restricted browser contexts.
     }
+
+    try {
+      const rawWishlist = window.localStorage.getItem(wishlistKey);
+      const parsed = rawWishlist ? JSON.parse(rawWishlist) : [];
+      setSavedCount(
+        Array.isArray(parsed)
+          ? parsed.filter((item) => typeof item === "string").length
+          : 0,
+      );
+    } catch {
+      // Ignore unreadable/incompatible wishlist state.
+    }
+
+    setRecentSearches(readRecentSearches());
   }, []);
 
   function update<K extends keyof Profile>(key: K, value: Profile[K]) {
@@ -79,7 +129,10 @@ export function AccountDashboard({ locale }: { locale: Locale }) {
 
   function save() {
     try {
-      window.localStorage.setItem(storageKey, JSON.stringify(profile));
+      window.localStorage.setItem(
+        storageKey,
+        JSON.stringify({ __v: STORAGE_VERSION, ...profile }),
+      );
       setSaved(true);
     } catch {
       setSaved(false);
@@ -163,16 +216,44 @@ export function AccountDashboard({ locale }: { locale: Locale }) {
           <section className="account-card">
             <div className="account-card-title"><Euro aria-hidden="true" /><div><h2>{isLt ? "Biudžetas" : "Budget"}</h2><p>{isLt ? "Vienai prekei" : "Per item"}</p></div></div>
             <label className="budget-field"><span>€</span><input min="0" step="10" type="number" value={profile.budget} onChange={(event) => update("budget", event.target.value)} /></label>
-            <p className="account-hint">{isLt ? "Naudosime kaip numatytąjį kainos filtrą." : "Used as your default price filter."}</p>
+            <p className="account-hint">{isLt ? "Išsaugoma jūsų profilyje. Kainos filtras paieškoje – netrukus." : "Saved to your profile. Price filtering in search is coming soon."}</p>
           </section>
         </div>
 
         <div className="account-card-grid">
           <section className="account-card account-link-card">
-            <Bookmark aria-hidden="true" /><div><h2>{isLt ? "Išsaugotos prekės" : "Saved items"}</h2><p>{isLt ? "Kol kas nieko neišsaugojote." : "You have not saved anything yet."}</p></div><Link href={isLt ? "/search?lang=lt" : "/search"} aria-label={isLt ? "Naršyti prekes" : "Browse products"}><ChevronRight aria-hidden="true" /></Link>
+            <Bookmark aria-hidden="true" />
+            <div>
+              <h2>{isLt ? "Išsaugotos prekės" : "Saved items"}</h2>
+              <p>
+                {savedCount > 0
+                  ? isLt
+                    ? `Išsaugota prekių: ${savedCount}.`
+                    : `${savedCount} saved item${savedCount === 1 ? "" : "s"}.`
+                  : isLt
+                    ? "Kol kas nieko neišsaugojote."
+                    : "You have not saved anything yet."}
+              </p>
+            </div>
+            <Link href={withLocale("/search", locale)} aria-label={isLt ? "Naršyti prekes" : "Browse products"}><ChevronRight aria-hidden="true" /></Link>
           </section>
           <section className="account-card account-link-card">
-            <History aria-hidden="true" /><div><h2>{isLt ? "Naujausios paieškos" : "Recent searches"}</h2><p>{isLt ? "Paieškos istorija šioje naršyklėje tuščia." : "Search history in this browser is empty."}</p></div><Link href={isLt ? "/search?lang=lt" : "/search"} aria-label={isLt ? "Atidaryti paiešką" : "Open search"}><ChevronRight aria-hidden="true" /></Link>
+            <History aria-hidden="true" />
+            <div>
+              <h2>{isLt ? "Naujausios paieškos" : "Recent searches"}</h2>
+              {recentSearches.length > 0 ? (
+                <ul className="recent-search-list">
+                  {recentSearches.slice(0, 5).map((entry) => (
+                    <li key={entry.query}>
+                      <Link href={withLocale(`/search?query=${encodeURIComponent(entry.query)}`, locale)}>{entry.query}</Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>{isLt ? "Paieškos istorija šioje naršyklėje tuščia." : "Search history in this browser is empty."}</p>
+              )}
+            </div>
+            <Link href={withLocale("/search", locale)} aria-label={isLt ? "Atidaryti paiešką" : "Open search"}><ChevronRight aria-hidden="true" /></Link>
           </section>
         </div>
 
@@ -212,6 +293,7 @@ const accountStyles = `
 .account-fields.measure-fields{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:16px}.measure-hint{grid-column:1/-1}
 .account-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.budget-field{position:relative}.budget-field span{position:absolute;left:14px;top:14px;font-weight:600}.budget-field input{padding-left:34px}.account-hint{font-size:12px;color:var(--color-ink-muted);margin:10px 0 0}
 .account-link-card{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start}.account-link-card>svg{color:var(--color-accent)}.account-link-card a{display:grid;place-items:center;min-width:44px;min-height:44px;border:1px solid var(--color-line)}
+.recent-search-list{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}.recent-search-list a{display:inline-flex;min-width:0;min-height:auto;place-items:unset;border:1px solid var(--color-line);padding:5px 11px;font-size:13px;color:var(--color-ink);text-decoration:none}.recent-search-list a:hover{border-color:var(--color-ink)}
 .account-toggle{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:16px 0;border-top:1px solid var(--color-line)}.account-toggle>span{display:flex;gap:12px;align-items:flex-start}.account-toggle strong,.account-toggle small{display:block}.account-toggle small{color:var(--color-ink-muted);margin-top:4px}.account-toggle input{width:20px;height:20px;accent-color:var(--color-accent)}
 .account-actions{display:flex;align-items:center;gap:18px;justify-content:flex-end;padding-top:8px}.account-actions p{font-size:12px;color:var(--color-ink-muted)}
 @media(max-width:800px){.account-layout{grid-template-columns:1fr}.account-summary{position:static}.account-card-grid{grid-template-columns:1fr}}

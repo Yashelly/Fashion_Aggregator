@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { assertUniqueBy, parseCsvRecords } from "@/lib/csv";
 import {
   filterProductsByPublicDemoStore,
   filterPublishableProducts,
@@ -47,39 +48,6 @@ export type MockProduct = CsvMockProduct & {
 const csvPath = path.join(process.cwd(), "data", "mock_products.csv");
 const demoProductDirectory = path.join(process.cwd(), "public", "demo-products");
 
-function parseCsvLine(line: string): string[] {
-  const values: string[] = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-    const next = line[index + 1];
-
-    if (char === '"' && inQuotes && next === '"') {
-      current += '"';
-      index += 1;
-      continue;
-    }
-
-    if (char === '"') {
-      inQuotes = !inQuotes;
-      continue;
-    }
-
-    if (char === "," && !inQuotes) {
-      values.push(current);
-      current = "";
-      continue;
-    }
-
-    current += char;
-  }
-
-  values.push(current);
-  return values;
-}
-
 let productCache: { mtimeMs: number; products: MockProduct[] } | null = null;
 
 export function getMockProducts(): MockProduct[] {
@@ -93,18 +61,17 @@ export function getMockProducts(): MockProduct[] {
   const { mtimeMs } = fs.statSync(csvPath);
   if (productCache && productCache.mtimeMs === mtimeMs) return productCache.products;
 
-  const csv = fs.readFileSync(csvPath, "utf8").trim();
-  const [headerLine, ...rows] = csv.split(/\r?\n/);
-  const headers = parseCsvLine(headerLine) as Array<keyof CsvMockProduct>;
+  const rawRecords = parseCsvRecords<CsvMockProduct>(fs.readFileSync(csvPath, "utf8"));
+
+  // Catalog integrity: a duplicate product id makes every id lookup ambiguous
+  // (`/out/:id`, click analytics, listings join), so reject it loudly at load
+  // rather than serve a silently wrong row.
+  assertUniqueBy(rawRecords, "mock_product_id", "product id");
+
   const attributes = getProductAttributes();
 
-  const products = rows
-    .map((row, index) => {
-      const values = parseCsvLine(row);
-      const csvProduct = headers.reduce((product, header, valueIndex) => {
-        product[header] = values[valueIndex] ?? "";
-        return product;
-      }, {} as CsvMockProduct);
+  const products = rawRecords
+    .map((csvProduct, index) => {
       const imagePath =
         csvProduct.image_url || `/demo-products/product-${String(index + 1).padStart(2, "0")}.webp`;
       const detailImagePath = `/demo-products/product-${String(index + 1).padStart(2, "0")}-tryon.webp`;
@@ -126,6 +93,17 @@ export function getMockProducts(): MockProduct[] {
       };
     })
     .filter((product) => product.source_status === "mock_not_live");
+
+  // Price integrity: sort/compare/format all treat price_eur as a number, so a
+  // blank or non-numeric price would surface as NaN in the UI. Reject it at load
+  // with the offending id rather than render a broken price.
+  for (const product of products) {
+    if (!Number.isFinite(Number(product.price_eur))) {
+      throw new Error(
+        `[mock-products] ${product.mock_product_id} has a non-numeric price_eur: "${product.price_eur}"`,
+      );
+    }
+  }
 
   // Reject products attached to suspended or unknown internal stores. Only
   // active retailers and approved synthetic sources may render publicly; without

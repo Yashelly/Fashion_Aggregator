@@ -44,14 +44,16 @@ Search relevance suite (no server needed):
 npm run test:search    # node scripts/semantic-eval.mjs
 ```
 
-92 labelled queries against `lib/semantic-search.ts`, split three ways in
+110 labelled queries against `lib/semantic-search.ts`, split three ways in
 `scripts/search-queries.mjs`: a **dev set** (44, tuning allowed — a fit ceiling,
-not generalization), a **regression set** (30, formerly held-out; scored blind
-once at 24/30, then inspected and fixed to 26/30, so it is now a benchmark and
-**not** an unbiased unseen-query signal), and a **blind set** (18, sealed
-2026-08-15, scored exactly once — the honest generalization estimate). Only dev
-and regression gate the build; the blind set is reported, never gated, and must
-never be tuned against (doing so burns it into a second regression set). A query
+not generalization), a **regression set** (48, formerly held-out; the original 30
+scored blind once at 24/30 then fixed to 26/30, plus the consumed 2026-08-15 blind
+set of 18 folded in 2026-08-27 — a benchmark, **not** an unbiased unseen-query
+signal), and a **blind set** (18, sealed 2026-08-27 after the colour-constraint
+fix consumed its predecessor, scored exactly once — the honest generalization
+estimate). Only dev and regression gate the build; the blind set is reported,
+never gated, and must never be tuned against (doing so burns it into a second
+regression set). A query
 passes at precision@k ≥ 0.6 (k = min(5, relevant)) with every required item
 ranked, and each gated set passes at ≥ 80% of queries. Exits non-zero below the
 threshold. Labels are relevance judgements — on the dev set, if one looks wrong,
