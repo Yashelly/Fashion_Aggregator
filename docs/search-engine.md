@@ -154,26 +154,31 @@ All labels share a single author (the engine's), which is a real ceiling: two
 people disagree about whether a shirt dress answers "office". The next honest step
 is a set labelled by someone else, or drawn from real click data.
 
+## A named colour is a hard constraint (resolved 2026-08-27)
+
+A directly-named concrete colour now *excludes* the wrong colours, exactly as a
+named garment excludes the wrong categories (`COLOR_TERMS` + `EXCLUDE_OFF_COLOR`
+in `lib/semantic-search.ts`). This closed a gap the 2026-08-15 blind run caught:
+`"yellow dress"` should answer *"not stocked"* (nothing yellow exists) but used to
+return four non-yellow dresses — the "dress" subject selected the dresses and
+*yellow* only *lightly penalised* each, so none were excluded. The same held for
+an in-lexicon colour with no match in the subject (`"beige dress"` also returned
+four); lexicon membership was never the operative factor. Now a product whose
+canonicalised colour is none of the ones the shopper named scores zero, so an
+unstocked colour returns the honest empty result. Colours are matched on the
+exact term (not by expansion), and a product's `color` is already canonicalised
+(olive → green, navy → blue) when its terms are built, so `"green overshirt"`
+still finds the olive one. The *quality* words `neutral`/`bright`/`dark`/`light`
+are deliberately excluded from `COLOR_TERMS` — they describe a range, so "dark
+coat" must not be filtered to literally-dark rows.
+
+Fixing this consumed the 2026-08-15 blind set (it was made in response to that
+set's `yellow dress` failure); those 18 queries moved to `REGRESSION_SET` and a
+fresh blind set was sealed 2026-08-27. See `scripts/search-queries.mjs`. The
+behaviour is guarded by synthetic invariants in `scripts/semantic-search.test.mjs`.
+
 ## Known limitations
 
-- **A wholly-unsatisfied colour constraint doesn't filter.** The blind run caught
-  this: `"yellow dress"` should answer *"not stocked"* (nothing yellow exists in
-  the catalog) but returns four non-yellow dresses. The cause is precise — the
-  "dress" subject selects the dresses, and *yellow* only lightly penalises each of
-  them (it is an `unknownTerm`, matched literally against the row and matching
-  nothing), so no dress is *excluded* and the subject carries the result.
-  **Lexicon membership is not the operative factor** (an earlier version of this
-  note claimed it was): an in-lexicon colour that no product in the subject
-  satisfies behaves identically — `"beige dress"` also returns four dresses @0.35
-  (verified), and `"beige coat"` returns a result only because the catalog actually
-  stocks a beige coat (MOCK-019), not because *beige* is "known". The real fix would
-  be to treat a wholly-unsatisfied category constraint (colour, material) as a soft
-  filter that *excludes* rather than lightly penalises — but it is **left unpatched
-  on purpose**, because `yellow dress` was surfaced by the blind set and patching it
-  would burn that set's integrity. The behaviour we *do* rely on (a stocked colour
-  constrains; an unstocked/unknown item invents no answer) is guarded by fresh
-  synthetic negatives in `scripts/semantic-search.test.mjs`. It is a scoped,
-  understood gap, not a mystery.
 - **Single-author labels.** See above.
 - **No morphological stemming for Lithuanian.** Inflected endings are enumerated
   explicitly in the lexicon rather than stemmed. At this vocabulary size an

@@ -128,11 +128,7 @@ test("regression: catalog fuzzy is off — 'dropped_shoulder' is not 'cropped'",
   assert.ok(croppedTerms.has("cropped"), "an actual 'cropped' tag still canonicalises to cropped");
 });
 
-// 8. Negative query: an unstocked, unrecognised item invents no answer. This is
-//    a FRESH synthetic negative — deliberately not "yellow dress", which lives in
-//    the sealed blind set and is left untuned on purpose (see docs/search-engine.md).
-//    It guards the "resist a made-up answer" property we DO rely on, without
-//    touching the blind set's integrity.
+// 8. Negative query: an unstocked, unrecognised item invents no answer.
 test("negative query: an item the catalog does not stock returns nothing", () => {
   const dress = product({ mock_product_id: "dress", subcategory: "dress", category: "dresses", title: "Slip Dress" });
   const shoe = product({ mock_product_id: "shoe", subcategory: "sneakers", category: "shoes", title: "Court Sneaker" });
@@ -140,18 +136,33 @@ test("negative query: an item the catalog does not stock returns nothing", () =>
   assert.deepEqual(idsFor([dress, shoe], "wetsuit"), [], "an unstocked, unlearned item must not invent a result");
 });
 
-// 9. A stocked colour is a real constraint: it ranks the matching colour first
-//    and never lets a colour mismatch outrank it. (The complementary gap — an
-//    *unsatisfiable* colour failing to exclude, e.g. "yellow dress" — is the
-//    documented blind-set limitation left unpatched on purpose.)
-test("a stocked colour constrains: 'black dress' ranks the black dress first", () => {
+// 9. Naming a colour EXCLUDES the wrong colours outright — it is not merely a
+//    ranking nudge. This is the colour-constraint fix (EXCLUDE_OFF_COLOR): the
+//    black dress is the only answer to "black dress", and the blue one is gone
+//    entirely, not just ranked lower.
+test("a named colour excludes the wrong colours: 'black dress' drops the blue dress", () => {
   const black = product({ mock_product_id: "black-dress", subcategory: "dress", category: "dresses", color: "black", title: "Black Dress" });
   const blue = product({ mock_product_id: "blue-dress", subcategory: "dress", category: "dresses", color: "blue", title: "Blue Dress" });
 
   const ids = idsFor([black, blue], "black dress");
-  assert.equal(ids[0], "black-dress", "the black dress is the best answer to 'black dress'");
-  const blueIdx = ids.indexOf("blue-dress");
-  if (blueIdx !== -1) {
-    assert.ok(ids.indexOf("black-dress") < blueIdx, "a colour mismatch must not outrank the colour match");
-  }
+  assert.deepEqual(ids, ["black-dress"], "only the black dress answers 'black dress'; the blue one is excluded");
+});
+
+// 10. A named-but-unstocked colour on a stocked garment returns the honest empty
+//     result rather than a differently-coloured near-miss. This is exactly the
+//     "yellow dress" class the fix closed (asserted on synthetic rows, so the
+//     sealed blind set is not involved).
+test("colour negative: an unstocked colour on a stocked garment returns nothing", () => {
+  const black = product({ mock_product_id: "black-dress", subcategory: "dress", category: "dresses", color: "black", title: "Black Dress" });
+  const blue = product({ mock_product_id: "blue-dress", subcategory: "dress", category: "dresses", color: "blue", title: "Blue Dress" });
+
+  assert.deepEqual(idsFor([black, blue], "yellow dress"), [], "no dress is yellow, so the honest answer is empty");
+});
+
+// 11. A colour *quality* (dark/light/neutral/bright) describes a range, not one
+//     colour, so it must NOT hard-filter: "dark coat" keeps a brown coat.
+test("a colour quality does not hard-filter: 'dark coat' keeps a brown coat", () => {
+  const brown = product({ mock_product_id: "brown-coat", subcategory: "coat", category: "outerwear", color: "brown", title: "Brown Coat" });
+
+  assert.ok(idsFor([brown], "dark coat").includes("brown-coat"), "'dark' is a range, not a literal colour filter");
 });
