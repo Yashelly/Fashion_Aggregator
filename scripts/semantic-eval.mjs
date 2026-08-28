@@ -152,7 +152,7 @@ function evaluate({ verbose, which }) {
 
   let blind;
   if (which === "all" || which === "blind") {
-    blind = summarise("BLIND set — sealed 2026-08-15, scored once; generalization signal (reported, not gated)", scoreSet("blind", BLIND_SET, engine, products), { verbose });
+    blind = summarise("BLIND set — sealed 2026-08-27, scored once; generalization signal (reported, not gated)", scoreSet("blind", BLIND_SET, engine, products), { verbose });
   }
 
   console.log(`target             pass rate >= ${(PASS_RATE_TARGET * 100).toFixed(0)}%, precision@k >= ${PRECISION_TARGET} per query  (gated: dev, regression)`);
