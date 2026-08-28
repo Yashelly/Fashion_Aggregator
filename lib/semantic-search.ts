@@ -182,6 +182,7 @@ const LEXICON: Record<string, string[]> = {
   brown: ["brown", "chocolate", "camel", "tan", "ruda", "rudas", "rudi"],
   beige: ["beige", "sand", "stone", "nude", "smelio", "bezine", "smelis"],
   orange: ["orange", "oranzine", "oranzinis"],
+  yellow: ["yellow", "mustard", "gold", "golden", "geltona", "geltonas", "geltoni"],
   silver: ["silver", "metallic", "sidabrine", "sidabrinis"],
   neutral: ["neutral", "neutralus", "neutrali", "ramus"],
   bright: ["bright", "bold", "colourful", "colorful", "ryskus", "ryski", "spalvingas"],
@@ -420,6 +421,28 @@ const GARMENT_TERMS = new Set([
 const EXCLUDE_OFF_SUBJECT = true;
 /** Expansion weight at which a garment still counts as answering the subject. */
 const GARMENT_TARGET_FLOOR = 0.5;
+
+/**
+ * Concrete colours — the lexicon terms that name an actual colour a product's
+ * `color` field can hold, as opposed to the *qualities* `neutral`/`bright`/
+ * `dark`/`light`, which describe a range and expand to several colours. A
+ * directly-named concrete colour is a hard constraint (below), so this set must
+ * stay to actual colours: adding `dark` here would wrongly exclude a brown coat
+ * from "dark coat".
+ */
+const COLOR_TERMS = new Set([
+  "black", "white", "grey", "blue", "green", "red", "pink",
+  "purple", "brown", "beige", "orange", "yellow", "silver",
+]);
+
+/**
+ * Naming a colour excludes the wrong colours outright, exactly as naming a
+ * garment excludes the wrong categories. Without this, an unstocked colour only
+ * *lightly* penalises: "yellow dress" scored every dress ~0.35 and returned four
+ * non-yellow dresses instead of the honest "not stocked". A product satisfies
+ * the constraint when its (canonicalised) colour is one the shopper named.
+ */
+const EXCLUDE_OFF_COLOR = true;
 
 /**
  * Floor of the coverage multiplier — how much a product keeps when it answers
@@ -674,12 +697,27 @@ export function resolveGarmentTargets(concepts: QueryConcept[]): Set<string> | n
   return targets.size > 0 ? targets : null;
 }
 
+/**
+ * The concrete colours the shopper named directly, or `null` when they named
+ * none (every colour is then fair game). Unlike garments, colours are matched by
+ * the exact term, not by expansion — "green" means green, and a product's colour
+ * is already canonicalised (olive → green, navy → blue) when its terms are built.
+ */
+export function resolveColorTargets(concepts: QueryConcept[]): Set<string> | null {
+  const targets = new Set<string>();
+  for (const concept of concepts) {
+    if (COLOR_TERMS.has(concept.term)) targets.add(concept.term);
+  }
+  return targets.size > 0 ? targets : null;
+}
+
 export function scoreProduct(
   productTerms: Map<string, number>,
   concepts: QueryConcept[],
   interpretation: QueryInterpretation,
   product: SearchableProduct,
   garmentTargets: Set<string> | null,
+  colorTargets: Set<string> | null = null,
 ): ProductScore {
   let matched = 0;
   let total = 0;
@@ -757,6 +795,18 @@ export function scoreProduct(
     return { score: 0, matchedTerms };
   }
 
+  // Naming a colour is a hard filter: a product whose colour is none of the ones
+  // the shopper named is a wrong answer, not a low-ranked one. This is what makes
+  // an unstocked colour ("yellow dress") return the honest empty result instead
+  // of four differently-coloured dresses.
+  if (
+    EXCLUDE_OFF_COLOR &&
+    colorTargets &&
+    ![...colorTargets].some((term) => productTerms.has(term))
+  ) {
+    return { score: 0, matchedTerms };
+  }
+
   return { score: Math.min(score, 1), matchedTerms };
 }
 
@@ -789,6 +839,7 @@ export function semanticSearch<T extends SearchableProduct>(
 
   const concepts = buildQueryConcepts(interpretation.terms);
   const garmentTargets = resolveGarmentTargets(concepts);
+  const colorTargets = resolveColorTargets(concepts);
   const scored = products
     .map((product) => {
       const { score, matchedTerms } = scoreProduct(
@@ -797,6 +848,7 @@ export function semanticSearch<T extends SearchableProduct>(
         interpretation,
         product,
         garmentTargets,
+        colorTargets,
       );
       return { product, score, matchedTerms };
     })

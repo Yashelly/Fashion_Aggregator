@@ -12,23 +12,27 @@
  *                       all; treating its score as "how good is search" is the
  *                       classic train-on-the-test-set mistake.
  *
- *   REGRESSION_SET (30) Was the held-out set. Written before tuning and scored
- *                       blind ONCE (24/30). Its failures were then inspected and
- *                       two real defects fixed, which took it to 26/30. Because
- *                       it has now been looked at, 26/30 is NO LONGER an unbiased
- *                       generalization estimate — it is a regression benchmark:
- *                       a number that must not drop when an edge is retuned. See
- *                       the note above the set for the full history. Presenting
- *                       it as "sealed / unseen" today would be false; it isn't.
+ *   REGRESSION_SET (48) Was the 30-query held-out set, now with the consumed
+ *                       2026-08-15 blind set (18) folded in. The original 30 were
+ *                       written before tuning and scored blind ONCE (24/30); two
+ *                       real defects were then fixed (26/30). The 18 were folded
+ *                       in on 2026-08-27 when the colour-constraint fix consumed
+ *                       them. Because every query here has now been looked at,
+ *                       this score is NO LONGER an unbiased generalization
+ *                       estimate — it is a regression benchmark: a number that
+ *                       must not drop when an edge is retuned. Presenting it as
+ *                       "sealed / unseen" today would be false; it isn't.
  *
- *   BLIND_SET (18)      Written 2026-08-15 against the catalog, sealed, and
- *                       scored exactly ONCE. The engine was NOT changed and no
- *                       label was edited in response to its results — that is the
- *                       whole point of the split, and the moment it is tuned
- *                       against it stops being blind and becomes a second
- *                       regression set. This is the current best generalization
- *                       signal in the repo. It is still one author's labels (see
- *                       below), so it is a floor on honesty, not a ceiling on it.
+ *   BLIND_SET (18)      Written 2026-08-27 against the catalog, sealed, and
+ *                       scored exactly ONCE (replacing the 2026-08-15 set that
+ *                       the colour-constraint fix consumed). The engine was NOT
+ *                       changed and no label was edited in response to its
+ *                       results — that is the whole point of the split, and the
+ *                       moment it is tuned against it stops being blind and
+ *                       becomes a second regression set. This is the current best
+ *                       generalization signal in the repo. It is still one
+ *                       author's labels (see below), a floor on honesty not a
+ *                       ceiling on it.
  *
  * WHAT THESE LABELS ARE WORTH. They are one person's relevance judgements,
  * written by the same author as the engine. That is a real ceiling: two humans
@@ -362,22 +366,23 @@ export const DEV_SET = [
 ];
 
 /**
- * REGRESSION_SET — formerly the held-out set (renamed 2026-08-15 so the name
- * stops implying it is still unseen; it is not).
+ * REGRESSION_SET — the formerly-held-out 30 plus the consumed 2026-08-15 blind
+ * set (18), 48 queries total. Both groups have been looked at, so this is a
+ * regression tripwire, not an unseen signal.
  *
- * CONSUMED as of 2026-08-01. Written before tuning and scored blind once:
- * 24/30, precision 0.903, recall 0.967, against 0.941 on dev — a ~4-point
- * generalisation gap, which is the honest cost of fitting.
+ * The original 30 (renamed 2026-08-15): written before tuning and scored blind
+ * once (24/30, precision 0.903, recall 0.967, against 0.941 on dev — a ~4-point
+ * generalisation gap). Two bugs it exposed were then fixed ("tracksuit" missing
+ * from the lexicon; `jewelry -> accessories` letting every belt answer
+ * "earrings"), taking it to 26/30.
  *
- * Two bugs it exposed were then fixed (the word "tracksuit" was missing from
- * the lexicon entirely, and `jewelry -> accessories` let every belt and sock
- * answer "earrings"), taking it to 26/30 / 0.926. That second number is no
- * longer a generalisation estimate — the set has been looked at. Its job now is
- * to be a regression tripwire: it must never drop below 26/30 without a reason.
+ * The appended 18 (consumed 2026-08-27): the 2026-08-15 blind set, folded in
+ * when the colour-constraint fix was made in response to its `yellow dress`
+ * failure. Its two colour negatives (`beige coat`, `yellow dress`) now pass
+ * because a named-but-unsatisfied colour excludes rather than lightly penalising.
  *
- * A further honest measurement needs a NEW set, sealed and ideally labelled by
- * someone who did not write the engine. `BLIND_SET` below is the first step
- * toward that — sealed and scored once, though still one author's labels.
+ * Its job now is to be a tripwire: it must not drop below its current pass count
+ * without a reason. A fresh sealed measurement lives in `BLIND_SET` below.
  */
 export const REGRESSION_SET = [
   { query: "warm coat for men", maxResults: 5, intent: "season + department", relevant: ["MOCK-044", "MOCK-013"] },
@@ -410,25 +415,14 @@ export const REGRESSION_SET = [
   { query: "kuprinė", maxResults: 3, intent: "garment / lt", relevant: ["MOCK-060"], mustRank: ["MOCK-060"] },
   { query: "dovana moteriai", maxResults: 10, intent: "occasion / lt", relevant: ["MOCK-051", "MOCK-056", "MOCK-020"] },
   { query: "juodos kelnės", maxResults: 6, intent: "colour + garment / lt", relevant: ["MOCK-002", "MOCK-021"] },
-];
 
-/**
- * BLIND_SET — sealed 2026-08-15, scored ONCE.
- *
- * Written by reading the 64-row catalog, not by watching the engine's output.
- * The rule that makes the number mean anything: neither the engine nor a single
- * label in this array may be changed in response to how it scores. If a query
- * fails, that failure is the measurement — it is reported, not tuned away. The
- * first time a weight is nudged to lift this score, the set is burned and moves
- * to REGRESSION_SET, exactly as the held-out set did.
- *
- * Deliberately concrete (garment + colour/material, a few Lithuanian forms, two
- * honest negatives): the DEV and REGRESSION sets already stress fuzzy intent
- * heavily, so this set measures whether the plumbing generalizes to unseen but
- * ordinary shopper phrasings rather than re-testing the graph's cleverest edges.
- */
-export const BLIND_SET = [
-  // ---- garment + colour / material ----
+  // ---- former BLIND_SET, consumed 2026-08-27 ----
+  // The 2026-08-15 blind set was burned when the colour-constraint fix was made
+  // in response to its `yellow dress` failure (an unsatisfied colour no longer
+  // lightly-penalises — it excludes, so an unstocked colour returns the honest
+  // empty result). Once tuned against, a set stops being an unbiased signal and
+  // becomes a regression tripwire, so its 18 queries move here verbatim. A fresh
+  // BLIND_SET (sealed 2026-08-27) replaces it below.
   { query: "brown jacket", maxResults: 4, intent: "colour + garment", relevant: ["MOCK-011"], mustRank: ["MOCK-011"] },
   { query: "navy blazer", maxResults: 4, intent: "colour + garment", relevant: ["MOCK-007"], mustRank: ["MOCK-007"] },
   { query: "wide leg trousers", maxResults: 6, intent: "cut + garment", relevant: ["MOCK-002", "MOCK-049", "MOCK-063"] },
@@ -442,13 +436,58 @@ export const BLIND_SET = [
   { query: "chelsea boots", maxResults: 4, intent: "style + garment", relevant: ["MOCK-050"], mustRank: ["MOCK-050"] },
   { query: "socks", maxResults: 3, intent: "garment", relevant: ["MOCK-031"], mustRank: ["MOCK-031"] },
   { query: "waist bag", maxResults: 3, intent: "garment", relevant: ["MOCK-040"], mustRank: ["MOCK-040"] },
-
-  // ---- honest negatives: the catalog does not stock these ----
   { query: "beige coat", maxResults: 3, intent: "negative / not stocked", relevant: [] },
   { query: "yellow dress", maxResults: 3, intent: "negative / not stocked", relevant: [] },
-
-  // ---- Lithuanian surface forms ----
   { query: "ruda striukė", maxResults: 4, intent: "colour + garment / lt", relevant: ["MOCK-011"], mustRank: ["MOCK-011"] },
   { query: "megztinis", maxResults: 4, intent: "garment / lt", relevant: ["MOCK-048"], mustRank: ["MOCK-048"] },
   { query: "juodas diržas", maxResults: 4, intent: "colour + garment / lt", relevant: ["MOCK-009", "MOCK-055"] },
+];
+
+/**
+ * BLIND_SET — sealed 2026-08-27, scored ONCE.
+ *
+ * The 2026-08-15 blind set was consumed on 2026-08-27: the colour-constraint fix
+ * (an unsatisfied named colour now excludes rather than lightly penalising) was
+ * made in response to that set's `yellow dress` failure, which burns it as an
+ * unbiased signal. Those 18 queries moved to REGRESSION_SET verbatim, and this
+ * fresh set replaces them.
+ *
+ * Written by reading the 64-row catalog, not by watching the engine's output.
+ * The rule that makes the number mean anything: neither the engine nor a single
+ * label in this array may be changed in response to how it scores. If a query
+ * fails, that failure is the measurement — it is reported, not tuned away. The
+ * first time a weight is nudged to lift this score, the set is burned and moves
+ * to REGRESSION_SET, exactly as its predecessor did.
+ *
+ * Deliberately concrete (garment + colour/material/cut, a few Lithuanian forms,
+ * three honest negatives). The negatives specifically probe the new colour
+ * constraint: an unstocked colour on a stocked garment ("blue dress", "pink
+ * coat", LT "žalias megztinis") must answer "not stocked", not a differently-
+ * coloured near-miss. Queries here do not repeat any DEV or REGRESSION query,
+ * including the consumed 2026-08-15 set now in REGRESSION.
+ */
+export const BLIND_SET = [
+  // ---- garment + colour / material / cut ----
+  { query: "wrap dress", maxResults: 3, intent: "cut + garment", relevant: ["MOCK-023"], mustRank: ["MOCK-023"] },
+  { query: "black leggings", maxResults: 3, intent: "colour + garment", relevant: ["MOCK-021"], mustRank: ["MOCK-021"] },
+  { query: "camel cardigan", maxResults: 4, intent: "colour + garment", relevant: ["MOCK-006"], mustRank: ["MOCK-006"] },
+  { query: "charcoal blazer", maxResults: 4, intent: "colour + garment", relevant: ["MOCK-052"], mustRank: ["MOCK-052"] },
+  { query: "pink sweatshirt", maxResults: 3, intent: "colour + garment", relevant: ["MOCK-015"], mustRank: ["MOCK-015"] },
+  { query: "cargo joggers", maxResults: 4, intent: "construction + garment", relevant: ["MOCK-035"], mustRank: ["MOCK-035"] },
+  { query: "slip skirt", maxResults: 4, intent: "cut + garment", relevant: ["MOCK-010"], mustRank: ["MOCK-010"] },
+  { query: "track jacket", maxResults: 4, intent: "garment", relevant: ["MOCK-034"], mustRank: ["MOCK-034"] },
+  { query: "tote bag", maxResults: 4, intent: "garment", relevant: ["MOCK-024", "MOCK-047"] },
+  { query: "ribbed tank top", maxResults: 3, intent: "cut + garment", relevant: ["MOCK-004"], mustRank: ["MOCK-004"] },
+  { query: "trail sneakers", maxResults: 4, intent: "activity + garment", relevant: ["MOCK-041"], mustRank: ["MOCK-041"] },
+  { query: "silver bag", maxResults: 3, intent: "colour + garment", relevant: ["MOCK-040"], mustRank: ["MOCK-040"] },
+  { query: "faux leather skirt", maxResults: 4, intent: "material + garment", relevant: ["MOCK-025"], mustRank: ["MOCK-025"] },
+  { query: "ivory trousers", maxResults: 4, intent: "colour + garment", relevant: ["MOCK-049"], mustRank: ["MOCK-049"] },
+
+  // ---- honest negatives: the garment is stocked, that colour is not ----
+  { query: "blue dress", maxResults: 3, intent: "colour negative / not stocked", relevant: [] },
+  { query: "pink coat", maxResults: 3, intent: "colour negative / not stocked", relevant: [] },
+
+  // ---- Lithuanian surface forms (incl. one colour negative) ----
+  { query: "juoda kuprinė", maxResults: 3, intent: "colour + garment / lt", relevant: ["MOCK-060"], mustRank: ["MOCK-060"] },
+  { query: "žalias megztinis", maxResults: 3, intent: "colour negative / not stocked / lt", relevant: [] },
 ];
