@@ -25,7 +25,7 @@ function persistLocale(locale: Locale) {
   document.cookie = `weft-locale=${locale}; Path=/; Max-Age=31536000; SameSite=Lax`;
 }
 
-function ThemeToggle({ locale }: { locale: Locale }) {
+function ThemeToggle({ locale, variant = "icon" }: { locale: Locale; variant?: "icon" | "row" }) {
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
@@ -55,6 +55,20 @@ function ThemeToggle({ locale }: { locale: Locale }) {
         ? "Use light mode"
         : "Use night mode";
 
+  const icon =
+    theme === "dark" ? <Sun aria-hidden="true" size={variant === "row" ? 20 : 18} /> : <Moon aria-hidden="true" size={variant === "row" ? 20 : 18} />;
+
+  // Row variant: a full-width labelled control used inside the mobile menu sheet,
+  // where the top-bar's circular icon toggle is hidden on phones.
+  if (variant === "row") {
+    return (
+      <button className="mobile-menu-theme" onClick={toggleTheme} type="button">
+        {icon}
+        <span>{label}</span>
+      </button>
+    );
+  }
+
   return (
     <button
       aria-label={label}
@@ -63,11 +77,7 @@ function ThemeToggle({ locale }: { locale: Locale }) {
       title={label}
       type="button"
     >
-      {theme === "dark" ? (
-        <Sun aria-hidden="true" size={18} />
-      ) : (
-        <Moon aria-hidden="true" size={18} />
-      )}
+      {icon}
     </button>
   );
 }
@@ -179,6 +189,7 @@ export function SiteHeader() {
                 <UserRound aria-hidden="true" size={18} />
                 {accountLabel}
               </Link>
+              <ThemeToggle locale={locale} variant="row" />
               <div className="mobile-menu-locales" aria-label={t.languageAria}>
                 <a
                   aria-current={locale === "en" ? "true" : undefined}

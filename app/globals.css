@@ -79,7 +79,11 @@
      `ft` the same colour everywhere. */
   --color-accent: #b7410e;
   --color-focus: #9eb0ff;
-  --color-acid: #cdea69;
+  /* Warm peach, not acid-lime (owner decision 2026-08-28): the neon-lime fill
+     read as an out-of-place "кислотный" element in dark mode — on the account
+     avatar, the SOON badge, the inverse button and demo-store chips. The acid
+     role is now the same warm tint as light mode, in the rust accent family. */
+  --color-acid: #ffd9c2;
   --color-success: #7bd5a2;
   --color-warning: #efc66b;
   --color-error: #ff8a7d;
@@ -480,6 +484,23 @@ summary {
 
 .mobile-menu > nav > .mobile-account-link {
   gap: 10px;
+}
+
+/* Theme toggle rendered as a full-width menu row (its top-bar circular twin is
+   hidden on phones). Matches the nav-link rows around it. */
+.mobile-menu-theme {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-line);
+  cursor: pointer;
+  display: flex;
+  font-weight: 600;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 12px;
+  text-align: left;
+  width: 100%;
 }
 
 .mobile-menu-locales {
@@ -1225,6 +1246,10 @@ summary {
   font-size: 18px;
   line-height: 1.15;
   margin: 0 0 8px;
+  /* Reserve two lines so a one-line title next to a two-line title doesn't
+     push its store/price row up — keeping the numbers level across the grid
+     columns instead of "one higher, one lower". */
+  min-height: 2.3em;
 }
 
 .product-store {
@@ -2359,14 +2384,28 @@ summary {
   .site-header {
     backdrop-filter: none;
     background: var(--color-canvas);
+    /* Centred wordmark, burger on the right, empty balancing column on the
+       left — the classic phone header. Account + theme move into the menu. */
+    grid-template-columns: 1fr auto 1fr;
   }
 
   .brand {
     font-size: 23px;
+    grid-column: 2;
+    justify-self: center;
   }
 
   .header-tools {
     gap: 6px;
+    grid-column: 3;
+    justify-self: end;
+  }
+
+  /* Account and theme are reachable inside the burger menu on phones, so the
+     top bar carries only the wordmark and the burger. */
+  .header-tools > .account-link,
+  .header-tools > .theme-toggle {
+    display: none;
   }
 
   /*
@@ -2400,7 +2439,8 @@ summary {
     animation: mobile-menu-in 0.24s cubic-bezier(0.2, 0.72, 0.3, 1) both;
   }
 
-  .mobile-menu > nav > a {
+  .mobile-menu > nav > a,
+  .mobile-menu > nav > .mobile-menu-theme {
     font-size: 16px;
     min-height: 56px;
   }
@@ -2437,10 +2477,15 @@ summary {
     grid-template-columns: auto 1fr;
   }
 
+  /* Full-bleed the submit button to both inner edges of the field. The field
+     box carries a left-only 16px pad (for the search icon), which otherwise
+     left-inset the button while it stayed flush right — the "сьехавший" look.
+     Pulling it back by that pad makes it symmetric across the field. */
   .query-field button {
     grid-column: 1 / -1;
     justify-content: center;
     min-height: 52px;
+    margin-left: -16px;
   }
 
   .product-grid {
@@ -2588,14 +2633,14 @@ summary {
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
   .language-switcher {
     display: none;
   }
 
   /*
    * Except on the title page. Elsewhere the switcher collapses into the burger
-   * menu at this width; `/` has no burger — it carries the utilities alone, so
+   * menu on phones; `/` has no burger — it carries the utilities alone, so
    * the wordmark is stated once — and a Lithuanian shopper landing there on a
    * phone has to be able to reach LT without first entering the app.
    */
