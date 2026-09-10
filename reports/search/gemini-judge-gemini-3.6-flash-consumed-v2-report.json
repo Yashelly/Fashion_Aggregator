@@ -1,0 +1,537 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-10T12:34:28.328Z",
+  "purpose": "LLM judge experiment on consumed final-blind v2; not a blind metric",
+  "model": "gemini-3.6-flash",
+  "candidateDepth": 40,
+  "summary": {
+    "total": 20,
+    "passed": 18,
+    "passRate": 0.9,
+    "meanPrecisionAtK": 0.9285714285714286,
+    "meanRecall": 0.9285714285714286,
+    "failedCaseIds": [
+      "FB2-004",
+      "FB2-017"
+    ]
+  },
+  "byCategory": {
+    "garment_identity": {
+      "total": 20,
+      "passed": 18,
+      "passRate": 0.9,
+      "meanPrecisionAtK": 0.9285714285714286,
+      "meanRecall": 0.9285714285714286,
+      "failedCaseIds": [
+        "FB2-004",
+        "FB2-017"
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "FB2-001",
+      "category": "garment_identity",
+      "difficulty": "easy",
+      "language": "en",
+      "query": "long coat for a woman",
+      "intent": "garment + department",
+      "expectedOutcome": "Accept MOCK-013 is a women's charcoal knee-length wool-melton coat with three buttons. This is the catalog evidence for garment + department.",
+      "relevant": [
+        "MOCK-013"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-013"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-013": 1
+      }
+    },
+    {
+      "id": "FB2-002",
+      "category": "garment_identity",
+      "difficulty": "easy",
+      "language": "en",
+      "query": "men's tapered utility pants",
+      "intent": "garment + silhouette",
+      "expectedOutcome": "Accept MOCK-035 is men's sand twill cargo joggers with flap pockets and elastic cuffs. This is the catalog evidence for garment + silhouette.",
+      "relevant": [
+        "MOCK-035"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-035"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-035": 1
+      }
+    },
+    {
+      "id": "FB2-003",
+      "category": "garment_identity",
+      "difficulty": "easy",
+      "language": "en",
+      "query": "a baguette-shaped bag with a short shoulder strap",
+      "intent": "garment identity + shape + strap length",
+      "expectedOutcome": "Accept MOCK-016 is a women's black mini baguette shoulder bag priced €16.99. This is the catalog evidence for garment identity + shape + strap length.",
+      "relevant": [
+        "MOCK-016"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-016"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-016": 1
+      }
+    },
+    {
+      "id": "FB2-004",
+      "category": "garment_identity",
+      "difficulty": "easy",
+      "language": "en",
+      "query": "sporty pleated mini for women",
+      "intent": "garment + style",
+      "expectedOutcome": "Accept MOCK-028 is a women's navy high-waist pleated tennis mini skirt. This is the catalog evidence for garment + style.",
+      "relevant": [
+        "MOCK-028"
+      ],
+      "maxResults": 4,
+      "passed": false,
+      "precisionAtK": 0,
+      "recall": 0,
+      "actual": [],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-028": null
+      }
+    },
+    {
+      "id": "FB2-005",
+      "category": "garment_identity",
+      "difficulty": "easy",
+      "language": "en",
+      "query": "men's crew neck wool jumper",
+      "intent": "garment + department",
+      "expectedOutcome": "Accept MOCK-048 is a men's navy fine-gauge merino-blend crew-neck sweater. This is the catalog evidence for garment + department.",
+      "relevant": [
+        "MOCK-048"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-048"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-048": 1
+      }
+    },
+    {
+      "id": "FB2-006",
+      "category": "garment_identity",
+      "difficulty": "easy",
+      "language": "en",
+      "query": "women's short velvet party dress",
+      "intent": "garment + surface",
+      "expectedOutcome": "Accept MOCK-053 is a women's burgundy plush velvet strappy mini party dress priced €69.99. This is the catalog evidence for garment + surface.",
+      "relevant": [
+        "MOCK-053"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-053"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-053": 1
+      }
+    },
+    {
+      "id": "FB2-007",
+      "category": "garment_identity",
+      "difficulty": "medium",
+      "language": "en",
+      "query": "top layer with no sleeves and a funnel collar",
+      "intent": "garment paraphrase + construction",
+      "expectedOutcome": "Accept MOCK-019 is a women's beige padded sleeveless puffer vest with funnel collar. This is the catalog evidence for garment paraphrase + construction.",
+      "relevant": [
+        "MOCK-019"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-019"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-019": 1
+      }
+    },
+    {
+      "id": "FB2-008",
+      "category": "garment_identity",
+      "difficulty": "medium",
+      "language": "en",
+      "query": "denim bottoms with a tapered mom shape",
+      "intent": "garment + silhouette",
+      "expectedOutcome": "Accept MOCK-017 is women's light-blue high-waist tapered mom jeans priced €27.99. This is the catalog evidence for garment + silhouette.",
+      "relevant": [
+        "MOCK-017"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-017"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-017": 1
+      }
+    },
+    {
+      "id": "FB2-009",
+      "category": "garment_identity",
+      "difficulty": "medium",
+      "language": "en",
+      "query": "small crescent carrier worn at the waist",
+      "intent": "garment paraphrase",
+      "expectedOutcome": "Accept MOCK-040 is a silver reflective hands-free waist bag with adjustable strap. This is the catalog evidence for garment paraphrase.",
+      "relevant": [
+        "MOCK-040"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-040"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-040": 1
+      }
+    },
+    {
+      "id": "FB2-010",
+      "category": "garment_identity",
+      "difficulty": "medium",
+      "language": "en",
+      "query": "lace-up footwear covering the ankle",
+      "intent": "garment + construction",
+      "expectedOutcome": "Accept MOCK-037 is cream unisex lace-up high-top leather sneakers without a platform. This is the catalog evidence for garment + construction.",
+      "relevant": [
+        "MOCK-037"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-037"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-037": 1
+      }
+    },
+    {
+      "id": "FB2-011",
+      "category": "garment_identity",
+      "difficulty": "medium",
+      "language": "en",
+      "query": "collared one-piece with buttons and a tie belt",
+      "intent": "garment paraphrase + details",
+      "expectedOutcome": "Accept MOCK-061 is a women's cream breathable linen-blend shirt dress with tie belt. This is the catalog evidence for garment paraphrase + details.",
+      "relevant": [
+        "MOCK-061"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-061"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-061": 1
+      }
+    },
+    {
+      "id": "FB2-012",
+      "category": "garment_identity",
+      "difficulty": "medium",
+      "language": "en",
+      "query": "a fitted tee cut shorter than standard",
+      "intent": "garment + silhouette",
+      "expectedOutcome": "Accept MOCK-059 is a women's pink fitted cropped ribbed baby tee priced €12.99. This is the catalog evidence for garment + silhouette.",
+      "relevant": [
+        "MOCK-059"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-059"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-059": 1
+      }
+    },
+    {
+      "id": "FB2-013",
+      "category": "garment_identity",
+      "difficulty": "medium",
+      "language": "en",
+      "query": "jacket shaped like a shirt with workwear pockets",
+      "intent": "garment concept + details",
+      "expectedOutcome": "Accept MOCK-003 is a unisex olive heavy-twill overshirt with button front and two flap chest pockets. This is the catalog evidence for garment concept + details.",
+      "relevant": [
+        "MOCK-003"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-003"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-003": 1
+      }
+    },
+    {
+      "id": "FB2-014",
+      "category": "garment_identity",
+      "difficulty": "medium",
+      "language": "en",
+      "query": "smart men's footwear with elastic side panels",
+      "intent": "garment concept + construction",
+      "expectedOutcome": "Accept MOCK-050 is men's dark-brown polished Chelsea boots with low heels and elastic gussets. This is the catalog evidence for garment concept + construction.",
+      "relevant": [
+        "MOCK-050"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-050"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-050": 1
+      }
+    },
+    {
+      "id": "FB2-015",
+      "category": "garment_identity",
+      "difficulty": "adversarial",
+      "language": "en",
+      "query": "a skirt-shaped pair of trousers",
+      "intent": "contradictory garment identity",
+      "expectedOutcome": "Return no result because no catalog item satisfies the full request. This is the catalog evidence for contradictory garment identity. Exclude these concrete near-misses: MOCK-002 is women's black high-waist twill trousers with pleats, pressed crease and wide legs; MOCK-010 is a cream high-shine bias-cut satin midi skirt with fluid drape; MOCK-049 is women's ivory pleated wide trousers with pressed crease, priced €79.99; MOCK-063 is women's navy tailored wide trousers with crease, priced €72.99.",
+      "relevant": [],
+      "maxResults": 0,
+      "forbiddenTop": [
+        "MOCK-002",
+        "MOCK-010",
+        "MOCK-049",
+        "MOCK-063"
+      ],
+      "forbiddenTopK": 3,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {}
+    },
+    {
+      "id": "FB2-016",
+      "category": "garment_identity",
+      "difficulty": "adversarial",
+      "language": "en",
+      "query": "a backpack without any shoulder straps",
+      "intent": "garment + impossible exclusion",
+      "expectedOutcome": "Return no result because no catalog item satisfies the full request. This is the catalog evidence for garment + impossible exclusion. Exclude these concrete near-misses: MOCK-060 is a black unisex nylon mini backpack with padded shoulder straps.",
+      "relevant": [],
+      "maxResults": 0,
+      "forbiddenTop": [
+        "MOCK-060"
+      ],
+      "forbiddenTopK": 3,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {}
+    },
+    {
+      "id": "FB2-017",
+      "category": "garment_identity",
+      "difficulty": "adversarial",
+      "language": "en",
+      "query": "women's jeans, but only tailored non-denim trousers",
+      "intent": "contradictory garment constraints",
+      "expectedOutcome": "Return no result because no catalog item satisfies the full request. This is the catalog evidence for contradictory garment constraints. Exclude these concrete near-misses: MOCK-017 is women's light-blue high-waist tapered mom jeans priced €27.99; MOCK-002 is women's black high-waist twill trousers with pleats, pressed crease and wide legs; MOCK-049 is women's ivory pleated wide trousers with pressed crease, priced €79.99; MOCK-063 is women's navy tailored wide trousers with crease, priced €72.99.",
+      "relevant": [],
+      "maxResults": 0,
+      "forbiddenTop": [
+        "MOCK-017",
+        "MOCK-002",
+        "MOCK-049",
+        "MOCK-063"
+      ],
+      "forbiddenTopK": 3,
+      "passed": false,
+      "precisionAtK": 0,
+      "recall": 0,
+      "actual": [
+        "MOCK-063",
+        "MOCK-002",
+        "MOCK-049"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [
+        "MOCK-002",
+        "MOCK-049",
+        "MOCK-063"
+      ],
+      "overCap": true,
+      "relevantPositions": {}
+    },
+    {
+      "id": "FB2-018",
+      "category": "garment_identity",
+      "difficulty": "adversarial",
+      "language": "en",
+      "query": "a hoodie that opens fully but has no zip",
+      "intent": "construction contradiction",
+      "expectedOutcome": "Return no result because no catalog item satisfies the full request. This is the catalog evidence for construction contradiction. Exclude these concrete near-misses: MOCK-032 is a men's forest-green plain fleece hoodie with full zip; MOCK-008 is a men's plain grey fleece pullover hoodie with front pouch; MOCK-057 is a black unisex oversized fleece hoodie with geometric chest print.",
+      "relevant": [],
+      "maxResults": 0,
+      "forbiddenTop": [
+        "MOCK-032",
+        "MOCK-008",
+        "MOCK-057"
+      ],
+      "forbiddenTopK": 3,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {}
+    },
+    {
+      "id": "FB2-019",
+      "category": "garment_identity",
+      "difficulty": "adversarial",
+      "language": "en",
+      "query": "formal blazer for women, excluding navy",
+      "intent": "garment + department + colour exclusion",
+      "expectedOutcome": "Return no result because no catalog item satisfies the full request. This is the catalog evidence for garment + department + colour exclusion. Exclude these concrete near-misses: MOCK-007 is a women's navy tailored single-button blazer with notch lapels; MOCK-052 is a men's charcoal marled-wool tailored two-button suit jacket.",
+      "relevant": [],
+      "maxResults": 0,
+      "forbiddenTop": [
+        "MOCK-007",
+        "MOCK-052"
+      ],
+      "forbiddenTopK": 3,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {}
+    },
+    {
+      "id": "FB2-020",
+      "category": "garment_identity",
+      "difficulty": "adversarial",
+      "language": "en",
+      "query": "ankle boots for men rather than Chelsea boots",
+      "intent": "garment + department + subtype exclusion",
+      "expectedOutcome": "Return no result because no catalog item satisfies the full request. This is the catalog evidence for garment + department + subtype exclusion. Exclude these concrete near-misses: MOCK-043 is women's black low block-heel ankle boots with pointed toes; MOCK-050 is men's dark-brown polished Chelsea boots with low heels and elastic gussets.",
+      "relevant": [],
+      "maxResults": 0,
+      "forbiddenTop": [
+        "MOCK-043",
+        "MOCK-050"
+      ],
+      "forbiddenTopK": 3,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {}
+    }
+  ]
+}

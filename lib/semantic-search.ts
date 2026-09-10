@@ -51,19 +51,43 @@ export type QueryInterpretation = {
   text: string;
   /** Canonical terms recognised from what the shopper typed. */
   terms: string[];
+  /** Canonical attributes the shopper explicitly ruled out. Hard filters. */
+  excludedTerms: string[];
   /** Tokens no part of the vocabulary could explain. */
   unknownTerms: string[];
-  /** Hard ceiling parsed from "under 50" / "iki 50". */
+  /** Hard floor parsed from "100-150" / "from 100 to 150". */
+  minPrice?: number;
+  /** Hard ceiling parsed from "under 50" / "iki 50" / "100-150". */
   maxPrice?: number;
   /** Soft price direction from "cheap" / "premium". Ranking signal only. */
   pricePreference?: "low" | "high";
   /** True when the shopper asked for discounts. */
   wantsSale: boolean;
+  /** True when the shopper explicitly requires an immediately purchasable item. */
+  requiresInStock: boolean;
+  /** Reviewable structured plan used by hard filtering and diagnostics. */
+  constraints: QueryConstraints;
+};
+
+export type QueryConstraints = {
+  garmentTypes: string[];
+  colors: string[];
+  directAttributes: string[];
+  departments: string[];
+  excludedTerms: string[];
+  minPrice?: number;
+  maxPrice?: number;
+  availability?: "in_stock";
 };
 
 export type ProductScore = {
   score: number;
   matchedTerms: string[];
+};
+
+type ScoreOptions = {
+  /** Alternatives may soften explicit visual/material attributes, never subject, colour, price or availability. */
+  enforceDirectAttributes?: boolean;
 };
 
 /**
@@ -74,13 +98,16 @@ export type ProductScore = {
  */
 const LEXICON: Record<string, string[]> = {
   // Garment types
-  shirt: ["shirt", "shirts", "marskiniai", "marskinius", "marskiniu"],
+  shirt: ["shirt", "shirts", "buttonup", "button-ups", "marskiniai", "marskinius", "marskiniu"],
   tee: ["tee", "tees", "tshirt", "t-shirt", "tshirts", "marskineliai", "marskinelis", "marskineliu"],
   top: ["top", "tops", "virsus", "palaidine", "palaidines"],
   tank: ["tank", "tanks", "camisole", "petnesos"],
-  hoodie: ["hoodie", "hoodies", "hood", "gobtuvas", "dzemperis", "dzemperiai", "dzemperiu"],
+  hoodie: ["hoodie", "hoodies", "hood", "gobtuvas", "dzemperis", "dzemperiai", "dzemperiu", "худи", "толстовка"],
   sweatshirt: ["sweatshirt", "sweatshirts", "sweat", "sweats", "crewneck"],
-  sweater: ["sweater", "sweaters", "jumper", "pullover", "megztinis", "megztiniai", "megztini"],
+  sweater: ["sweater", "sweaters", "jumper", "megztinis", "megztiniai", "megztini"],
+  // Kept distinct from `sweater`: a pullover can be a hooded top, and making
+  // it a garment identity incorrectly hard-filtered hoodies out of the result.
+  pullover: ["pullover", "pullovers"],
   cardigan: ["cardigan", "cardigans", "kardiganas", "megztukas"],
   knitwear: ["knit", "knits", "knitwear", "knitted", "megzta", "megztas"],
   blazer: ["blazer", "blazers", "svarkas", "svarkai"],
@@ -104,7 +131,7 @@ const LEXICON: Record<string, string[]> = {
   bag: ["bag", "bags", "purse", "handbag", "rankine", "rankines", "krepsys", "krepsi"],
   tote: ["tote", "totes", "pirkiniu"],
   backpack: ["backpack", "backpacks", "rucksack", "kuprine", "kuprines"],
-  crossbody: ["crossbody", "shoulder", "petes"],
+  crossbody: ["crossbody", "petes"],
   belt: ["belt", "belts", "dirzas", "dirzai"],
   cap: ["cap", "caps", "hat", "kepure", "kepures", "kepuraite"],
   scarf: ["scarf", "scarves", "salikas", "salika", "salikai"],
@@ -122,7 +149,17 @@ const LEXICON: Record<string, string[]> = {
   midi: ["midi", "vidutinio"],
   long: ["long", "longline", "ilgas", "ilga", "ilgi"],
   high: ["high", "highrise", "aukstas", "aukstu"],
-  chunky: ["chunky", "platform", "storapadis", "storapadziai"],
+  chunky: ["chunky", "platform", "platforma", "platformos", "storapadis", "storapadziai"],
+  small: ["small", "tiny", "miniature", "maza", "mazas"],
+  low: ["low", "low-profile", "zemas", "zemu"],
+  faded: ["faded", "washed", "worn", "worn-in", "nuskalbtas"],
+  bottoms: ["bottoms", "bottom", "legwear", "apatine"],
+  breathable: ["breathable", "airy", "orui"],
+  reflective: ["reflective", "reflective-looking", "atspindintis"],
+  baselayer: ["baselayer"],
+  quietluxury: ["quietluxury"],
+  fluid: ["fluid"],
+  architectural: ["architectural"],
 
   // Materials and finishes
   cotton: ["cotton", "medvilne", "medvilnes"],
@@ -145,7 +182,8 @@ const LEXICON: Record<string, string[]> = {
   trail: ["trail"],
   utility: ["utility", "cargo", "tactical", "darbinis"],
   tracksuit: ["tracksuit", "tracksuits", "sportkostiumas"],
-  graphic: ["graphic", "print", "printed", "logo", "piesinys", "printas", "spauda"],
+  graphic: ["graphic", "print", "printed", "logo", "logos", "piesinys", "printas", "spauda"],
+  grotesque: ["grotesque", "гротеск", "гротескный", "гротескном"],
 
   // Motifs and construction read off the product photos. Only vocabulary the
   // catalog actually contains is listed — there are no stars, stripes, checks
@@ -154,12 +192,15 @@ const LEXICON: Record<string, string[]> = {
   geometric: ["geometric", "geometry", "bauhaus", "geometrinis", "geometrija"],
   abstract: ["abstract", "abstraktus", "abstrakcija"],
   floral: ["floral", "flower", "flowers", "blossom", "gelete", "geles", "geliu", "geletas"],
+  stripe: ["stripe", "stripes", "striped", "dryzuotas", "dryzuota"],
+  star: ["star", "stars", "starred", "звезда", "звезды", "звездочки", "звездочками", "звёзды", "звёздочки", "звёздочками"],
   circle: ["circle", "circles", "round", "dot", "dots", "apskritimas", "apskritimai", "taskai"],
   square: ["square", "squares", "rectangle", "rectangles", "kvadratas", "kvadratai", "staciakampis"],
   triangle: ["triangle", "triangles", "trikampis", "trikampiai"],
   hood: ["hood", "hooded", "gobtuvu"],
   drawstring: ["drawstring", "drawcord", "raiscia", "virvute"],
   zip: ["zip", "zipper", "zipped", "uztrauktukas", "uztrauktuku"],
+  closure: ["closure", "fastening", "fastener", "застежка", "застежкой", "застёжка", "застёжкой"],
   pocket: ["pocket", "pockets", "kisene", "kisenes", "kiseniu"],
   pleated: ["pleat", "pleats", "pleated", "klostes", "klostuotas"],
   laceup: ["lace", "laces", "laced", "lacing", "raisteliai", "sunerti"],
@@ -170,8 +211,29 @@ const LEXICON: Record<string, string[]> = {
   fleece: ["fleece", "flisas", "flisinis"],
   jersey: ["jersey", "trikotazas"],
 
+  // Photo-derived construction vocabulary. These are properties, not garment
+  // identities, so they can safely be matched from the attribute table.
+  button: ["button", "buttons", "buttoned", "buttoning", "saga", "sagos"],
+  collar: ["collar", "collared", "lapel", "lapels", "apykakle", "apykakles"],
+  sleeve: ["sleeve", "sleeves", "sleeved", "rankove", "rankoves", "rankoviu"],
+  strap: ["strap", "straps", "shoulder", "petnele", "petneles"],
+  waist: ["waist", "waistband", "liemuo", "liemens"],
+  handsfree: ["handsfree", "hands-free"],
+  tapered: ["tapered", "taper", "tapering", "siaurejantis"],
+  straight: ["straight", "tiesus", "tiesios"],
+  pointed: ["pointed", "pointy", "smailus", "smailia"],
+  almond: ["almond", "migdolinis"],
+  open: ["open", "open-top", "open top", "atviras", "atvira"],
+  flap: ["flap", "flaps", "atvartas", "atvartu"],
+  structured: ["structured", "structure", "boxy", "formuota"],
+  cargopocket: ["cargo-pocket", "cargo pockets"],
+  nobeltloops: ["no-belt-loops"],
+  glossy: ["glossy", "shiny", "high-shine", "high shine", "liquid-looking", "liquid"],
+  matte: ["matte", "matte", "matt", "matinis"],
+  soft: ["soft", "soft-looking", "brushed", "plush", "minkstas", "minksta"],
+
   // Colours and colour families
-  black: ["black", "juoda", "juodas", "juodi", "juodos", "juoduma"],
+  black: ["black", "juoda", "juodas", "juodi", "juodos", "juoduma", "черный", "черная", "черное", "черные", "чёрный", "чёрная", "чёрное", "чёрные"],
   white: ["white", "ivory", "cream", "balta", "baltas", "balti", "baltos"],
   grey: ["grey", "gray", "charcoal", "pilka", "pilkas", "pilki"],
   blue: ["blue", "navy", "melyna", "melynas", "melyni", "melynos"],
@@ -184,6 +246,9 @@ const LEXICON: Record<string, string[]> = {
   orange: ["orange", "oranzine", "oranzinis"],
   yellow: ["yellow", "mustard", "gold", "golden", "geltona", "geltonas", "geltoni"],
   silver: ["silver", "metallic", "sidabrine", "sidabrinis"],
+  // Kept as a separate shade rather than folded into green: there is no lime
+  // item in this catalog, and returning an emerald item would be deceptive.
+  lime: ["lime", "lime-green", "laimu"],
   neutral: ["neutral", "neutralus", "neutrali", "ramus"],
   bright: ["bright", "bold", "colourful", "colorful", "ryskus", "ryski", "spalvingas"],
   dark: ["dark", "tamsus", "tamsi", "tamsios"],
@@ -202,7 +267,7 @@ const LEXICON: Record<string, string[]> = {
   retro: ["retro", "vintage", "nineties", "y2k", "senovinis"],
   sport: ["sport", "sporty", "athletic", "active", "sportas", "sportinis", "sportiniai"],
   gym: ["gym", "training", "workout", "run", "running", "sportsale", "treniruote", "treniruotei", "begimas"],
-  outdoor: ["outdoor", "hiking", "hike", "lauko", "zygis", "zygiui", "zygiams", "zygio", "gamta"],
+  outdoor: ["outdoor", "hiking", "hike", "walking", "walk", "lauko", "zygis", "zygiui", "zygiams", "zygio", "pasivaiksciojimui", "gamta"],
   travel: ["travel", "trip", "commute", "kelione", "kelionei", "keliauti"],
   campus: ["campus", "school", "university", "student", "mokykla", "universitetas", "studentas"],
   festival: ["festival", "festivalis", "festivaliui"],
@@ -212,7 +277,7 @@ const LEXICON: Record<string, string[]> = {
   winter: ["winter", "ziema", "ziemai", "zieminis", "zieminiai"],
   autumn: ["autumn", "fall", "ruduo", "rudeniui", "rudeninis"],
   spring: ["spring", "pavasaris", "pavasariui", "pavasarinis"],
-  summer: ["summer", "vasara", "vasarai", "vasarinis", "vasariniai"],
+  summer: ["summer", "vasara", "vasarai", "vasarinis", "vasariniai", "vasarine", "vasarini"],
   rain: ["rain", "rainy", "wet", "lietus", "lietui", "lietinga", "slapias"],
   beach: ["beach", "holiday", "vacation", "paplūdimys", "pajuris", "atostogos", "atostogoms"],
   layering: ["layering", "layer", "sluoksniavimas", "sluoksniuoti"],
@@ -238,7 +303,7 @@ const LEXICON: Record<string, string[]> = {
  * product row can ever satisfy — every result in a "cheap accessories" search
  * would be penalised for the word "cheap".
  */
-const RANKING_ONLY_TERMS = new Set(["cheap", "premium"]);
+const RANKING_ONLY_TERMS = new Set(["cheap", "premium", "available"]);
 
 /** Multi-word phrases collapsed to a canonical term before tokenising. */
 const PHRASES: Array<[RegExp, string]> = [
@@ -252,6 +317,40 @@ const PHRASES: Array<[RegExp, string]> = [
   [/\bwide leg\b/g, "wide"],
   [/\bhigh top\b/g, "high"],
   [/\bt shirt\b/g, "tshirt"],
+  [/\bbutton[- ]up\b/g, "buttonup"],
+  [/\bhands[- ]free\b/g, "handsfree"],
+  [/\bacross the body\b/g, "crossbody"],
+  [/\bshort sleeves?\b/g, "sleeve"],
+  [/\bno visible closure\b/g, "open"],
+  [/\bankle[- ]height\b/g, "ankle"],
+  [/\bbelow the knee\b/g, "midi"],
+  [/\bouter layer\b/g, "outerwear"],
+  [/\bfront pouch\b/g, "pocket"],
+  [/\bfull outfit\b/g, "dress"],
+  [/\bbase layer\b/g, "baselayer"],
+  [/\bpressed (?:centre|center) crease\b/g, "crease"],
+  [/\bwide leg\b/g, "wide"],
+  [/\bcargo pockets?\b/g, "cargopocket"],
+  [/\bno belt loops?\b/g, "nobeltloops"],
+  [/\binstead of\b/g, "not"],
+  [/\bsuitable for movement\b/g, "gym"],
+  [/\bfor stretching\b/g, "gym"],
+  [/\bone[- ]piece\b/g, "dress"],
+  [/\bworn[- ]in\b/g, "faded"],
+  [/\blong sleeves?\b/g, "sleeve"],
+  [/\bflared silhouette\b/g, "wide"],
+  [/\bhands[- ]free for carrying essentials\b/g, "handsfree"],
+  [/\bgo with everything\b/g, "minimal"],
+  [/\bpolished dark\b/g, "formal dark"],
+  [/\bcosy for my upper body\b/g, "cozy"],
+  [/\boutfit[- ]finishing small gift\b/g, "gift"],
+  [/\bquiet luxury\b/g, "quietluxury"],
+  [/\bkeeps its shape\b/g, "structured"],
+  [/\bfeel dressed up\b/g, "evening"],
+  [/\btemperature keeps changing\b/g, "layering"],
+  [/\bcommuting and meetings\b/g, "office travel"],
+  [/\bsoft shape fluid movement\b/g, "fluid"],
+  [/\barchitectural but wearable\b/g, "architectural"],
   [/\bpuffer jacket\b/g, "quilted jacket"],
   [/\bi vakareli\b/g, "party"],
   [/\bi biura\b/g, "office"],
@@ -282,7 +381,7 @@ const ASSOCIATIONS: Record<string, Array<[string, number]>> = {
   // in a waterproof search. The garment word already supplies the category.
   waterproof: [["nylon", 0.9], ["parka", 0.9], ["windbreaker", 0.9], ["trail", 0.85], ["outdoor", 0.7]],
 
-  office: [["blazer", 0.95], ["formal", 0.9], ["trousers", 0.85], ["shirt", 0.85], ["minimal", 0.6], ["coat", 0.6], ["belt", 0.6], ["boots", 0.5]],
+  office: [["blazer", 0.95], ["formal", 0.9], ["trousers", 0.85], ["shirt", 0.85], ["tote", 0.8], ["crossbody", 0.55], ["minimal", 0.6], ["coat", 0.6], ["belt", 0.6], ["boots", 0.5]],
   formal: [["blazer", 0.95], ["trousers", 0.85], ["dress", 0.7], ["shirt", 0.75], ["boots", 0.55], ["office", 0.7]],
   smart: [["formal", 0.9], ["blazer", 0.85], ["trousers", 0.8], ["minimal", 0.6]],
   // Occasion → garment edges stay deliberately weaker than occasion → mood
@@ -298,6 +397,8 @@ const ASSOCIATIONS: Record<string, Array<[string, number]>> = {
   date: [["evening", 0.8], ["satin", 0.7], ["dress", 0.6], ["skirt", 0.5], ["jewelry", 0.6]],
 
   gym: [["sport", 0.95], ["leggings", 0.9], ["shorts", 0.85], ["joggers", 0.8], ["sweatpants", 0.75], ["tank", 0.7], ["sneakers", 0.7]],
+  breathable: [["linen", 0.95], ["cotton", 0.8], ["nylon", 0.55]],
+  reflective: [["silver", 0.9], ["metallic", 0.85]],
   sport: [["leggings", 0.85], ["shorts", 0.8], ["joggers", 0.8], ["sneakers", 0.75], ["sweatpants", 0.7], ["cap", 0.5]],
   // Hiking is answered by trail/weatherproof construction, NOT by footwear in
   // general. An earlier version pointed outdoor → sneakers at 0.75, which told
@@ -308,6 +409,8 @@ const ASSOCIATIONS: Record<string, Array<[string, number]>> = {
   travel: [["backpack", 0.9], ["crossbody", 0.8], ["tote", 0.75], ["nylon", 0.7], ["sneakers", 0.6], ["cozy", 0.5]],
   campus: [["backpack", 0.85], ["hoodie", 0.8], ["sneakers", 0.75], ["jeans", 0.7], ["tee", 0.65], ["casual", 0.7]],
   festival: [["streetwear", 0.8], ["shorts", 0.6], ["cap", 0.6], ["graphic", 0.6]],
+  grotesque: [["graphic", 0.9], ["abstract", 0.8], ["geometric", 0.7], ["dark", 0.55]],
+  closure: [["zip", 0.9], ["button", 0.8], ["flap", 0.55]],
 
   streetwear: [["hoodie", 0.85], ["sneakers", 0.8], ["graphic", 0.8], ["oversized", 0.75], ["cap", 0.7], ["joggers", 0.7], ["sweatshirt", 0.7]],
   casual: [["jeans", 0.8], ["tee", 0.8], ["hoodie", 0.75], ["sneakers", 0.7], ["shirt", 0.6], ["sweatshirt", 0.65]],
@@ -324,10 +427,17 @@ const ASSOCIATIONS: Record<string, Array<[string, number]>> = {
   // black sneakers alongside actual boots.
   shoes: [["sneakers", 0.9], ["boots", 0.9]],
   bag: [["tote", 0.85], ["backpack", 0.8], ["crossbody", 0.6]],
+  handsfree: [["crossbody", 0.9], ["backpack", 0.85], ["waist", 0.85]],
+  baselayer: [["tank", 0.95], ["tee", 0.9], ["top", 0.85]],
+  quietluxury: [["minimal", 0.9], ["formal", 0.85], ["satin", 0.75], ["leather", 0.7], ["wool", 0.7]],
+  fluid: [["satin", 0.95], ["cowl", 0.85]],
+  architectural: [["structured", 0.9], ["geometric", 0.8], ["formal", 0.65]],
+  bottoms: [["trousers", 0.9], ["jeans", 0.9], ["leggings", 0.85], ["shorts", 0.85], ["skirt", 0.8], ["joggers", 0.75], ["sweatpants", 0.75]],
   // Likewise no generic `bag` edge — a waist bag does not hold a laptop. Any
   // bag still reaches the results through the shopper's own word "bag".
   laptop: [["tote", 1], ["backpack", 1]],
   hoodie: [["sweatshirt", 0.75]],
+  pullover: [["hoodie", 0.95], ["sweater", 0.8]],
   hood: [["hoodie", 0.85], ["sweatshirt", 0.5]],
   sweatshirt: [["hoodie", 0.75]],
   sweater: [["knitwear", 0.9], ["cardigan", 0.6]],
@@ -366,14 +476,21 @@ const STOPWORDS = new Set([
   "something", "anything", "that", "this", "is", "are", "am", "be", "i", "want", "need", "needs",
   "looking", "look", "find", "show", "please", "nice", "good", "really", "very", "any", "kind",
   "sort", "thing", "things", "wear", "wearing", "it", "its", "im", "ive", "can", "you", "do",
-  "clothes", "clothing", "outfit", "outfits", "piece", "pieces", "item", "items", "should",
+  "clothes", "clothing", "outfit", "outfits", "piece", "pieces", "item", "items", "should", "finish",
+  "carry", "carrying", "essentials", "upper", "body", "alone", "built", "around",
   "drabuziai", "drabuziu", "apranga", "aprangos", "rubai", "rubu", "preke", "prekes",
   "ir", "su", "be", "del", "kazkas", "kazka", "kazko", "kazkoki", "kazkokia", "man", "as", "noriu",
   "reikia", "ieskau", "rodyk", "labai", "kad", "kuris", "kuri", "apie", "yra", "buti", "tai",
   "koks", "kokia", "kokie", "gerai", "geras", "gera", "prie", "per", "pas", "nes", "bet", "ar",
+  "not", "without", "no", "rather", "than", "actually", "quite", "over", "now", "ne",
+  "со", "в", "на", "для", "стиле", "стиль", "евро", "найди", "покажи", "нужно", "хочу",
 ]);
 
-const PRICE_PATTERN = /\b(?:under|below|less than|iki|pigiau nei|maziau nei)\s*€?\s*(\d+(?:[.,]\d+)?)\b/;
+const PRICE_RANGE_PATTERNS = [
+  /\b(?:between|from|nuo|от)\s*(\d+(?:[.,]\d+)?)\s*(?:to|and|iki|до|-)\s*(\d+(?:[.,]\d+)?)(?:\s*(?:euros?|eur|euro|евро))?/,
+  /\b(\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)(?:\s*(?:euros?|eur|euro|евро))?/,
+] as const;
+const PRICE_PATTERN = /\b(?:under|below|less than|up to|no more than|at|iki|pigiau nei|maziau nei|до)\s*(\d+(?:[.,]\d+)?)(?:\s*(?:euros?|eur|euro|евро))?(?:\s+or\s+less)?/;
 
 /** Field weights when building a product's own term vector. */
 const FIELD_WEIGHTS = {
@@ -432,7 +549,26 @@ const GARMENT_TARGET_FLOOR = 0.5;
  */
 const COLOR_TERMS = new Set([
   "black", "white", "grey", "blue", "green", "red", "pink",
-  "purple", "brown", "beige", "orange", "yellow", "silver",
+  "purple", "brown", "beige", "orange", "yellow", "silver", "lime",
+]);
+
+/** Explicit departments are catalog facts, not ranking preferences. */
+const DEPARTMENT_TERMS = new Set(["women", "men", "unisex"]);
+
+/**
+ * Concrete properties are conjunctions when a shopper names them. Intent
+ * words such as `winter` and `office` intentionally stay soft/expandable;
+ * materials and observed construction do not. This prevents a partial match
+ * (for example a nylon backpack) from impersonating a "leather backpack".
+ */
+const DIRECT_ATTRIBUTE_TERMS = new Set([
+  "cotton", "leather", "wool", "linen", "satin", "velvet", "nylon",
+  "ribbed", "quilted", "denim", "canvas", "fleece", "jersey", "utility", "graphic",
+  "button", "collar", "sleeve", "strap", "waist", "tapered", "straight", "pointed",
+  "almond", "open", "flap", "structured", "glossy", "matte", "soft", "cargopocket",
+  "nobeltloops", "zip", "pocket", "pleated", "laceup", "fringe", "cowl", "wrap",
+  "wide", "cropped", "slim", "mini", "midi", "long", "high", "low", "chunky",
+  "floral", "geometric", "abstract", "stripe", "star",
 ]);
 
 /**
@@ -456,12 +592,12 @@ const SECOND_HOP_DECAY = 0.7;
 /** Absolute relevance a product must clear to be shown at all. */
 export const RELEVANCE_FLOOR = 0.25;
 /** …and it must also be within this fraction of the best result. */
-export const RELEVANCE_RATIO = 0.55;
+export const RELEVANCE_RATIO = 0.65;
 
 const surfaceToCanonical = new Map<string, string>();
 for (const [canonical, surfaces] of Object.entries(LEXICON)) {
-  surfaceToCanonical.set(canonical, canonical);
-  for (const surface of surfaces) surfaceToCanonical.set(surface, canonical);
+  surfaceToCanonical.set(normalizeText(canonical), canonical);
+  for (const surface of surfaces) surfaceToCanonical.set(normalizeText(surface), canonical);
 }
 const vocabulary = [...surfaceToCanonical.keys()];
 
@@ -470,6 +606,7 @@ export function normalizeText(value: string): string {
     .toLowerCase()
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
+    .replace(/[–—]/g, "-")
     .replace(/[_/]+/g, " ")
     .replace(/[^\p{L}\p{N}\s-]/gu, " ");
 }
@@ -543,38 +680,129 @@ function canonicalize(token: string, allowFuzzy = true): string | undefined {
 
 function tokenize(text: string): string[] {
   return text
+    // Hyphens are editorial punctuation in product prose ("forest-coloured",
+    // "ankle-height"), not a semantic atom. Phrase normalization above keeps
+    // the small set of true compounds (for example "t-shirt") intact first.
+    .replace(/-/g, " ")
     .split(/[\s,]+/)
     .map((token) => token.trim().replace(/^-+|-+$/g, ""))
     .filter((token) => token.length > 1 && !STOPWORDS.has(token));
 }
 
+const NEGATION_STARTERS = new Set(["not", "without", "no", "ne", "be"]);
+const NEGATION_FILLER = new Set(["a", "an", "the", "actually", "quite", "over", "looking", "paying"]);
+const NEGATION_BREAKERS = new Set(["but", "rather", "than", "for", "that", "at", "under", "below", "with"]);
+
+/**
+ * Pull direct exclusions out of ordinary shopper phrasing before concept
+ * expansion. An exclusion deliberately never walks the association graph:
+ * "without a zipper" must reject a zip, not every item associated with one.
+ */
+function extractExcludedTerms(text: string): string[] {
+  const rawTokens = text.split(/\s+/).filter(Boolean);
+  const excluded = new Set<string>();
+
+  for (let index = 0; index < rawTokens.length; index += 1) {
+    const token = rawTokens[index];
+    const isRatherThan = token === "rather" && rawTokens[index + 1] === "than";
+    if (!NEGATION_STARTERS.has(token) && !isRatherThan) continue;
+
+    let cursor = index + (isRatherThan ? 2 : 1);
+    while (NEGATION_FILLER.has(rawTokens[cursor])) cursor += 1;
+    const candidates: string[] = [];
+    while (cursor < rawTokens.length && candidates.length < 3) {
+      const candidate = rawTokens[cursor];
+      if (NEGATION_BREAKERS.has(candidate) || NEGATION_STARTERS.has(candidate)) break;
+      if (candidate === "and" || candidate === "or") {
+        cursor += 1;
+        continue;
+      }
+      const canonical = canonicalize(candidate);
+      if (canonical) candidates.push(canonical);
+      cursor += 1;
+    }
+
+    // "not black shoes" means shoes are the positive subject and black is the
+    // excluded attribute. In all other cases the short exclusion phrase is a
+    // list ("not a coat or parka"), so retain every recognised term.
+    if (
+      candidates.length >= 2 &&
+      (COLOR_TERMS.has(candidates[0]) && GARMENT_TERMS.has(candidates[1]) ||
+        GARMENT_TERMS.has(candidates[candidates.length - 1]))
+    ) {
+      excluded.add(candidates[0]);
+    } else {
+      for (const candidate of candidates) excluded.add(candidate);
+    }
+  }
+
+  return [...excluded];
+}
+
 export function interpretQuery(rawQuery: string): QueryInterpretation {
   let text = normalizeText(rawQuery).replace(/\s+/g, " ").trim();
 
-  const priceMatch = text.match(PRICE_PATTERN);
-  const maxPrice = priceMatch ? Number(priceMatch[1].replace(",", ".")) : undefined;
-  if (priceMatch) text = text.replace(PRICE_PATTERN, " ").replace(/\s+/g, " ").trim();
+  let minPrice: number | undefined;
+  let maxPrice: number | undefined;
+  for (const pattern of PRICE_RANGE_PATTERNS) {
+    const rangeMatch = text.match(pattern);
+    if (!rangeMatch) continue;
+
+    const first = Number(rangeMatch[1].replace(",", "."));
+    const second = Number(rangeMatch[2].replace(",", "."));
+    if (Number.isFinite(first) && Number.isFinite(second)) {
+      minPrice = Math.min(first, second);
+      maxPrice = Math.max(first, second);
+      text = text.replace(pattern, " ").replace(/\s+/g, " ").trim();
+    }
+    break;
+  }
+
+  if (maxPrice === undefined) {
+    const priceMatch = text.match(PRICE_PATTERN);
+    maxPrice = priceMatch ? Number(priceMatch[1].replace(",", ".")) : undefined;
+    if (priceMatch) text = text.replace(PRICE_PATTERN, " ").replace(/\s+/g, " ").trim();
+  }
 
   for (const [pattern, replacement] of PHRASES) text = text.replace(pattern, replacement);
+
+  const excludedTerms = extractExcludedTerms(text);
 
   const terms: string[] = [];
   const unknownTerms: string[] = [];
   for (const token of tokenize(text)) {
     const canonical = canonicalize(token);
     if (canonical) {
+      if (excludedTerms.includes(canonical)) continue;
       if (!terms.includes(canonical)) terms.push(canonical);
     } else if (!unknownTerms.includes(token)) {
       unknownTerms.push(token);
     }
   }
 
+  const scoredTerms = terms.filter((term) => !RANKING_ONLY_TERMS.has(term));
+  const requiresInStock = terms.includes("available");
+
   return {
     text,
-    terms: terms.filter((term) => !RANKING_ONLY_TERMS.has(term)),
+    terms: scoredTerms,
+    excludedTerms,
     unknownTerms,
+    minPrice,
     maxPrice,
     pricePreference: terms.includes("cheap") ? "low" : terms.includes("premium") ? "high" : undefined,
     wantsSale: terms.includes("sale"),
+    requiresInStock,
+    constraints: {
+      garmentTypes: scoredTerms.filter((term) => GARMENT_TERMS.has(term)),
+      colors: scoredTerms.filter((term) => COLOR_TERMS.has(term)),
+      directAttributes: scoredTerms.filter((term) => DIRECT_ATTRIBUTE_TERMS.has(term)),
+      departments: scoredTerms.filter((term) => DEPARTMENT_TERMS.has(term)),
+      excludedTerms,
+      minPrice,
+      maxPrice,
+      availability: requiresInStock ? "in_stock" : undefined,
+    },
   };
 }
 
@@ -659,6 +887,18 @@ export function buildProductTerms(product: SearchableProduct): Map<string, numbe
   addQualitiesOnly(terms, product.visual_details, FIELD_WEIGHTS.visualDetail);
   addQualitiesOnly(terms, product.visual_description, FIELD_WEIGHTS.visualDescription);
 
+  const details = normalizeText([product.visual_details, product.visual_description].filter(Boolean).join(" "));
+  // These attributes are encoded compositionally in the source table. Preserve
+  // their meaningful compound/absence semantics instead of making a query for
+  // "no belt loops" look like a request to remove every belt from the result.
+  if (/\bcargo\b/.test(details) && /\bpocket/.test(details)) terms.set("cargopocket", FIELD_WEIGHTS.visualDetail);
+  if (/\bbelt loops none\b/.test(details)) terms.set("nobeltloops", FIELD_WEIGHTS.visualDetail);
+  if (product.subcategory === "hoodie" && !terms.has("zip")) terms.set("pullover", FIELD_WEIGHTS.visualDetail);
+  // A shoulder-bag silhouette is a valid cross-body alternative, but `shoulder`
+  // alone is also used for garment construction; derive this only from the
+  // product identity rather than treating every shoulder mention as a bag type.
+  if (/\bshoulder bag\b/.test(normalizeText(product.title))) terms.set("crossbody", FIELD_WEIGHTS.visualDetail);
+
   return terms;
 }
 
@@ -718,11 +958,39 @@ export function scoreProduct(
   product: SearchableProduct,
   garmentTargets: Set<string> | null,
   colorTargets: Set<string> | null = null,
+  options: ScoreOptions = {},
 ): ProductScore {
   let matched = 0;
   let total = 0;
   let answered = 0;
   const matchedTerms: string[] = [];
+  const price = Number(product.price_eur);
+  const enforceDirectAttributes = options.enforceDirectAttributes ?? true;
+
+  if (
+    (interpretation.minPrice !== undefined && (!Number.isFinite(price) || price < interpretation.minPrice)) ||
+    (interpretation.maxPrice !== undefined && (!Number.isFinite(price) || price > interpretation.maxPrice))
+  ) {
+    return { score: 0, matchedTerms };
+  }
+
+  if (interpretation.requiresInStock && product.availability !== "in_stock") {
+    return { score: 0, matchedTerms };
+  }
+
+  // Negative constraints are direct catalog attributes. Do not apply semantic
+  // expansion here: a request "not a coat" should reject coats, not sweaters
+  // merely because winter is related to both.
+  if (interpretation.excludedTerms.some((term) => productTerms.has(term))) {
+    return { score: 0, matchedTerms };
+  }
+
+  for (const concept of concepts) {
+    const isDepartment = DEPARTMENT_TERMS.has(concept.term);
+    const isEnforcedAttribute = enforceDirectAttributes && DIRECT_ATTRIBUTE_TERMS.has(concept.term);
+    if (!isDepartment && !isEnforcedAttribute) continue;
+    if (!productTerms.has(concept.term)) return { score: 0, matchedTerms };
+  }
 
   // Each concept contributes its single best answer. Listing "parka" and "coat"
   // both is not twice as good as listing one of them — the shopper asked once.
@@ -751,7 +1019,7 @@ export function scoreProduct(
     );
     for (const token of interpretation.unknownTerms) {
       total += 1;
-      if (haystack.includes(token)) {
+      if (productTerms.has(token) || haystack.includes(token)) {
         matched += 1;
         matchedTerms.push(token);
       }
@@ -780,7 +1048,6 @@ export function scoreProduct(
 
   if (interpretation.wantsSale && product.old_price_eur) score += 0.08;
   if (interpretation.pricePreference) {
-    const price = Number(product.price_eur);
     if (Number.isFinite(price)) {
       const normalized = Math.min(price, 200) / 200;
       score += (interpretation.pricePreference === "low" ? 1 - normalized : normalized) * 0.18;
@@ -816,30 +1083,24 @@ export type SemanticMatch<T extends SearchableProduct> = {
   matchedTerms: string[];
 };
 
-/**
- * Rank a catalog against a free-text query. Returns only products that clear
- * both the absolute floor and the relative cut, best first.
- */
-export function semanticSearch<T extends SearchableProduct>(
+export type SemanticSearchResult<T extends SearchableProduct> = {
+  /** Products satisfying every hard constraint. Evaluation and public metrics use only this list. */
+  matches: SemanticMatch<T>[];
+  /** Near-misses produced only when exact matching is empty; never counted as exact passes. */
+  alternatives: SemanticMatch<T>[];
+  /** Explicit attributes softened to create `alternatives`. Subject, colour, price and availability are never softened. */
+  relaxedConstraints: string[];
+  interpretation: QueryInterpretation;
+};
+
+function rankProducts<T extends SearchableProduct>(
   products: T[],
-  rawQuery: string,
-): { matches: SemanticMatch<T>[]; interpretation: QueryInterpretation } {
-  const interpretation = interpretQuery(rawQuery);
-
-  if (
-    interpretation.terms.length === 0 &&
-    interpretation.unknownTerms.length === 0 &&
-    !interpretation.pricePreference
-  ) {
-    return {
-      matches: products.map((product) => ({ product, score: 0, matchedTerms: [] })),
-      interpretation,
-    };
-  }
-
-  const concepts = buildQueryConcepts(interpretation.terms);
-  const garmentTargets = resolveGarmentTargets(concepts);
-  const colorTargets = resolveColorTargets(concepts);
+  concepts: QueryConcept[],
+  interpretation: QueryInterpretation,
+  garmentTargets: Set<string> | null,
+  colorTargets: Set<string> | null,
+  options: ScoreOptions = {},
+): SemanticMatch<T>[] {
   const scored = products
     .map((product) => {
       const { score, matchedTerms } = scoreProduct(
@@ -849,23 +1110,90 @@ export function semanticSearch<T extends SearchableProduct>(
         product,
         garmentTargets,
         colorTargets,
+        options,
       );
       return { product, score, matchedTerms };
     })
     .filter((entry) => entry.score >= RELEVANCE_FLOOR);
 
-  if (scored.length === 0) return { matches: [], interpretation };
+  if (scored.length === 0) return [];
 
   const best = Math.max(...scored.map((entry) => entry.score));
   const cut = Math.max(RELEVANCE_FLOOR, best * RELEVANCE_RATIO);
 
+  return scored
+    .filter((entry) => entry.score >= cut)
+    .sort((first, second) =>
+      second.score - first.score ||
+      first.product.mock_product_id.localeCompare(second.product.mock_product_id),
+    );
+}
+
+/**
+ * Rank a catalog against a free-text query. Returns only products that clear
+ * both the absolute floor and the relative cut, best first.
+ */
+export function semanticSearch<T extends SearchableProduct>(
+  products: T[],
+  rawQuery: string,
+): SemanticSearchResult<T> {
+  const interpretation = interpretQuery(rawQuery);
+
+  if (
+    interpretation.terms.length === 0 &&
+    interpretation.unknownTerms.length === 0 &&
+    !interpretation.pricePreference &&
+    interpretation.excludedTerms.length === 0 &&
+    !interpretation.requiresInStock
+  ) {
+    const matches = products
+      .filter((product) => {
+        const price = Number(product.price_eur);
+        if (interpretation.minPrice !== undefined && price < interpretation.minPrice) return false;
+        if (interpretation.maxPrice !== undefined && price > interpretation.maxPrice) return false;
+        return true;
+      })
+      .map((product) => ({ product, score: 0, matchedTerms: [] }));
+    return {
+      matches,
+      alternatives: [],
+      relaxedConstraints: [],
+      interpretation,
+    };
+  }
+
+  const concepts = buildQueryConcepts(interpretation.terms);
+  const garmentTargets = resolveGarmentTargets(concepts);
+  const colorTargets = resolveColorTargets(concepts);
+  const matches = rankProducts(
+    products,
+    concepts,
+    interpretation,
+    garmentTargets,
+    colorTargets,
+  );
+  if (matches.length > 0) {
+    return { matches, alternatives: [], relaxedConstraints: [], interpretation };
+  }
+
+  const relaxedConstraints = interpretation.constraints.directAttributes;
+  if (relaxedConstraints.length === 0) {
+    return { matches: [], alternatives: [], relaxedConstraints: [], interpretation };
+  }
+
+  const alternatives = rankProducts(
+    products,
+    concepts,
+    interpretation,
+    garmentTargets,
+    colorTargets,
+    { enforceDirectAttributes: false },
+  );
+
   return {
-    matches: scored
-      .filter((entry) => entry.score >= cut)
-      .sort((first, second) =>
-        second.score - first.score ||
-        first.product.mock_product_id.localeCompare(second.product.mock_product_id),
-      ),
+    matches: [],
+    alternatives,
+    relaxedConstraints: alternatives.length > 0 ? relaxedConstraints : [],
     interpretation,
   };
 }

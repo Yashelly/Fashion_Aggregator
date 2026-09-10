@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Three hand-written, numbered PostgreSQL/Supabase migration files defining the pre-affiliate schema: stores, affiliate program rules, feed import tracking, products/variants/embeddings, and the two analytics tables (`search_events`, `outbound_clicks`) the live app actually writes to today. **There is no migration runner wired into this repo** — no `supabase/migrations` CLI setup, no ORM migration tool, and no script that applies these automatically. They must be applied manually, in numeric order, against the target Supabase project (e.g. via the Supabase SQL editor, `psql`, or the `mcp__supabase__apply_migration` tool).
+Four hand-written, numbered PostgreSQL/Supabase migration files define the pre-affiliate schema, analytics tables, and the public vector-search index. **There is no migration runner wired into this repo** — no `supabase/migrations` CLI setup or ORM migration tool. Apply them manually in numeric order against the target Supabase project.
 
 ## Key Files
 
@@ -14,6 +14,7 @@ Three hand-written, numbered PostgreSQL/Supabase migration files defining the pr
 | `001_pre_affiliate_schema.sql` | Baseline schema. Creates every table in the system. |
 | `002_pre_affiliate_hardening.sql` | Small hardening pass: pins `search_path` on the shared trigger function, adds 4 missing indexes. |
 | `003_synthetic_click_boundary.sql` | Loosens one constraint to support the current "blocked synthetic-preview click" analytics behavior. |
+| `004_search_vector_index.sql` | Adds the Gemini 1024-dimensional public retrieval index, HNSW/GIN indexes, RLS, and the read-only vector-match RPC. |
 
 ## Migration Details
 
@@ -47,9 +48,9 @@ One change: `alter table public.outbound_clicks alter column store_id drop not n
 
 ### Working In This Directory
 
-- **Apply migrations manually and in numeric order** (001 → 002 → 003) against Supabase — there is no automated runner or schema-version table in this repo to do it for you. Use the Supabase MCP tool (`mcp__supabase__apply_migration`) or the SQL editor/CLI directly.
+- **Apply migrations manually and in numeric order** (001 → 002 → 003 → 004) against Supabase — there is no automated runner or schema-version table in this repo to do it for you. Use the SQL editor, CLI, or a direct Postgres connection after confirming the exact target project.
 - **Treat applied migrations as immutable and apply each once.** The files use `create ... if not exists` / idempotent-trigger-check patterns, so a rerun is *usually* harmless — but do not rely on rerunning as a workflow. (`001` now pins `set_updated_at`'s `search_path`, so a stray rerun no longer reverts `002`'s hardening; before that fix it did.) Always confirm against the target project's current schema (`mcp__supabase__list_tables`) before applying blind. There is no feed importer yet, so the `feed_import_runs` status machine, cross-store integrity, and hash-based idempotency described in `docs/data-model.md` are **planned, not DB-enforced** guarantees.
-- If you add a `004_*.sql` migration, follow the existing conventions: wrap in `begin;`/`commit;`, keep RLS enabled with `service_role`-only grants (this app writes exclusively through the server-side Supabase client — see `lib/supabase-server.ts` — never client-side), and add a short top-of-file or column comment explaining *why*, matching the style of `003`'s comment on `store_id`.
+- Keep private domain/analytics tables service-role-only. Public search data is the explicit exception: 004 grants read/execute only to `anon`/`authenticated`, keeps RLS enabled, restricts rows to `is_public`, and uses a `security invoker` function. Never expose write privileges or a service-role key to the search client.
 - `lib/analytics-storage.ts` treats all Supabase writes as best-effort with a 1-second timeout and silent (console-warned) failure — schema changes here should stay backward-compatible with that fire-and-forget write pattern, or that code needs to be updated in tandem.
 
 ## Dependencies

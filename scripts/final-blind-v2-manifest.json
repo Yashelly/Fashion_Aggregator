@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "name": "WEFT_FINAL_BLIND_V2_2026_09_08",
+  "status": "evaluated-once-immutable",
+  "sealedOn": "2026-09-08",
+  "caseCount": 200,
+  "categoryCount": 10,
+  "caseSetSha256": "b1d127b10ab3cd0b7eca741647b3c8f3a63116f8021637643af375de7a3b6bb8",
+  "catalogSha256": "4fedbf1813b206db8d3f2171a857aed867b532fa2b31efd1c171970c09bd9323",
+  "engineSha256": "f1e8dc8f3475543629b387bbc1793a1255461982731bf0d968a160439d18529b",
+  "evaluationHarnessSha256": "d0ded13b6f4bf8b00ba40e4271899882f8108662a1e84164b326c787edef960a",
+  "structuralValidatorSha256": "8ef816acac788bc634ec5759a05b47045a5c349232104dc0a4aadda063562c3e",
+  "loaderSha256": "96f675f73e9d88a4f16ee9eb742c96ff6e2c461c45b2a33920c0bde745660632",
+  "csvParserSha256": "77f1083075a9eeda31729b2091bf43d653740191438b023ee9622ff7fb71d5d6",
+  "authorship": {
+    "method": "A clean-room agent authored cases from catalog and product-attribute files without inspecting search implementation or output; a separate clean-room verifier reviewed labels against catalog facts before sealing.",
+    "limitations": "Labels are AI-assisted catalog judgements, not independent human relevance annotations or live-user interaction data."
+  },
+  "protocol": {
+    "version": 2,
+    "positiveK": "min(5, relevant.length)",
+    "minimumPrecisionAtK": 0.6,
+    "mustRankWindow": "top max(k, mustRank.length)",
+    "resultCap": "returned <= maxResults when maxResults is present",
+    "forbiddenRule": "no forbiddenTop ID may appear in top forbiddenTopK",
+    "negativeRule": "relevant is empty, maxResults is 0, and any exact match fails",
+    "alternativesRule": "shopper-facing alternatives are excluded; only semanticSearch().matches is evaluated",
+    "hashCanonicalization": "Text hashes normalize CRLF/CR to LF; catalog files are separated by a NUL byte before hashing."
+  },
+  "policy": "Freeze set, catalog, engine, evaluator, validator and loaders before the first run. Any failure-driven ranking change consumes the entire set and requires a new untouched blind generation.",
+  "firstRun": {
+    "evaluatedOn": "2026-09-09",
+    "passed": 105,
+    "total": 200,
+    "passRate": 0.525,
+    "meanPrecisionAtK": 0.55825,
+    "meanRecall": 0.72575,
+    "reportSha256": "36474c1642a331c336e319b6a92573eb6207faded6df5dfebfce1cb34b875026"
+  }
+}

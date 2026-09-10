@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "setName": "WEFT final blind v3",
+  "status": "evaluated-once-immutable",
+  "createdOn": "2026-09-10",
+  "sealedOn": "2026-09-10T20:36:14.674Z",
+  "caseCount": 200,
+  "categoryCounts": {
+    "ambiguous_conceptual": 20,
+    "color_constraints": 20,
+    "construction_details": 20,
+    "garment_identity": 20,
+    "lithuanian_language": 20,
+    "materials_textures": 20,
+    "negatives_exclusions": 20,
+    "occasion_style": 20,
+    "price_value": 20,
+    "weather_activity": 20
+  },
+  "difficultyCounts": {
+    "easy": 60,
+    "medium": 80,
+    "adversarial": 60
+  },
+  "languageCounts": {
+    "en": 180,
+    "lt": 20
+  },
+  "productionContract": {
+    "embeddingModel": "gemini-embedding-2",
+    "embeddingDimensions": 1024,
+    "judgeModel": "gemini-3.6-flash",
+    "judgeConfigVersion": "json-input-fashion-functions-temp0-seed20260910-low-v5",
+    "passRuleVersion": "positive-hit@5-plus-explicit-constraints-v2",
+    "candidateDepth": 40,
+    "rrfK": 60
+  },
+  "antiLeakage": {
+    "searchResultsInspectedBeforeSeal": false,
+    "modelResultsInspectedBeforeSeal": false,
+    "nearDuplicateComparisonSets": [
+      "DEV_SET",
+      "REGRESSION_SET",
+      "HISTORICAL_BLIND_SET_2026_08_27",
+      "CONSUMED_FINAL_BLIND_SET_2026_09_07",
+      "FINAL_BLIND_V2_SET"
+    ],
+    "postRunRule": "No production or evaluation changes may be based on v3 failures. Reclassify v3 as regression and create a new untouched blind set before any such tuning."
+  },
+  "caseSetSha256": "0fe46c2b508210c3e41a51731cede3001817ee9746ca1b69645df7a0cfc16de2",
+  "catalogSha256": "4fedbf1813b206db8d3f2171a857aed867b532fa2b31efd1c171970c09bd9323",
+  "productionHybridSha256": "19a06ea189e2720847f14c0f837b3ef2ef159fa334a6f37f182e624ceb52ac8e",
+  "productionEmbeddingSha256": "ac11a8a3c4ec380c6d1ee7f4d37a82b0ada2b1d903de4793f5a2e7fba4f98925",
+  "productionJudgeSha256": "59035ae017cd19d650031887c400dde00a5a72414bf85393ad080f38821ef041",
+  "conceptEngineSha256": "f1e8dc8f3475543629b387bbc1793a1255461982731bf0d968a160439d18529b",
+  "evaluationHarnessSha256": "d4133bf492293800f89e1685e6b5ebdcd5515e4b7dbd4c01c1871823a4ce310f",
+  "providerHarnessSha256": "47a3e5be11cea6f950c15d8a712cab680e04c27541dec170e4b1daf852f3e616",
+  "catalogLoaderSha256": "0585323b8ebfb4d5b31b7cdccf772c849c86e443438fd3593ad8e7b95cab385b",
+  "firstRun": {
+    "evaluatedOn": "2026-09-10T20:50:41.222Z",
+    "passed": 195,
+    "total": 200,
+    "passRate": 0.975,
+    "failedCaseIds": [
+      "FB3-045",
+      "FB3-149",
+      "FB3-158",
+      "FB3-179",
+      "FB3-194"
+    ],
+    "reportSha256": "06bd9b1e29d5975f7920848d8d18194f2997a8468e4c7c8e018003b066cdce48"
+  }
+}

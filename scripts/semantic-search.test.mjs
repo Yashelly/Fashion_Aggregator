@@ -166,3 +166,96 @@ test("a colour quality does not hard-filter: 'dark coat' keeps a brown coat", ()
 
   assert.ok(idsFor([brown], "dark coat").includes("brown-coat"), "'dark' is a range, not a literal colour filter");
 });
+
+// 12. Exclusions are hard constraints over direct catalog properties. They
+// must not be treated as ordinary positive words or expanded through the graph.
+test("negative constraints remove excluded attributes while preserving the subject", () => {
+  const black = product({ mock_product_id: "black-shoe", subcategory: "sneakers", category: "shoes", color: "black", title: "Black Sneaker" });
+  const white = product({ mock_product_id: "white-shoe", subcategory: "sneakers", category: "shoes", color: "white", title: "White Sneaker" });
+  const query = interpretQuery("not black shoes");
+
+  assert.deepEqual(query.excludedTerms, ["black"]);
+  assert.ok(query.terms.includes("shoes"), "the noun after a negated colour remains the positive subject");
+  assert.deepEqual(idsFor([black, white], "not black shoes"), ["white-shoe"]);
+});
+
+// 13. Availability is a real filter, not an unscored word that lets a sold-out
+// result through because all of its other concepts matched.
+test("in-stock queries exclude limited and out-of-stock products", () => {
+  const stocked = product({ mock_product_id: "stocked", subcategory: "skirt", category: "bottoms", availability: "in_stock" });
+  const soldOut = product({ mock_product_id: "sold-out", subcategory: "skirt", category: "bottoms", availability: "out_of_stock" });
+  const limited = product({ mock_product_id: "limited", subcategory: "skirt", category: "bottoms", availability: "limited" });
+
+  assert.equal(interpretQuery("in-stock skirt").requiresInStock, true);
+  assert.deepEqual(idsFor([stocked, soldOut, limited], "in-stock skirt"), ["stocked"]);
+});
+
+// 14. Compounds and encoded absences retain their meaning from the visual
+// attribute table; they are not approximated as unrelated individual words.
+test("construction compounds distinguish cargo pockets and explicit absent belt loops", () => {
+  const plain = product({ mock_product_id: "plain", subcategory: "trousers", category: "bottoms", visual_details: "wide_leg|belt_loops_none" });
+  const cargo = product({ mock_product_id: "cargo", subcategory: "jeans", category: "bottoms", visual_details: "two_cargo_flap_pockets|belt_loops" });
+  const fivePocket = product({ mock_product_id: "five-pocket", subcategory: "jeans", category: "bottoms", visual_details: "five_pocket|belt_loops" });
+
+  assert.deepEqual(idsFor([plain, cargo, fivePocket], "wide-leg bottoms with no belt loops"), ["plain"]);
+  assert.deepEqual(idsFor([plain, cargo, fivePocket], "jeans not cargo pockets"), ["five-pocket"]);
+});
+
+// 15. A production query plan must preserve an actual range, not collapse it
+// to a max-price hint, and must expose the parsed hard constraints for review.
+test("multi-language query parsing produces a reviewable structured plan", () => {
+  const query = interpretQuery("черное худи в стиле гротеск со звездочками застежкой 100-150 евро");
+
+  assert.equal(query.minPrice, 100);
+  assert.equal(query.maxPrice, 150);
+  assert.deepEqual(query.unknownTerms, []);
+  assert.deepEqual(query.constraints.garmentTypes, ["hoodie"]);
+  assert.deepEqual(query.constraints.colors, ["black"]);
+  assert.deepEqual(query.constraints.directAttributes, ["star"]);
+  assert.ok(query.terms.includes("grotesque"));
+  assert.ok(query.terms.includes("closure"));
+  assert.ok(!query.text.includes("евро"), "the whole price expression is removed before scoring");
+
+  const verboseRange = interpretQuery("hoodie from €100 to €150");
+  assert.equal(verboseRange.minPrice, 100);
+  assert.equal(verboseRange.maxPrice, 150);
+  assert.ok(!verboseRange.text.includes("100"));
+
+  const typographicRange = interpretQuery("hoodie 100–150 EUR");
+  assert.equal(typographicRange.minPrice, 100);
+  assert.equal(typographicRange.maxPrice, 150);
+});
+
+// 16. Price ranges are part of the search-engine contract itself. Callers must
+// not be able to accidentally bypass the floor by forgetting a UI pre-filter.
+test("semanticSearch enforces both sides of a price range", () => {
+  const cheap = product({ mock_product_id: "cheap", subcategory: "hoodie", color: "black", price_eur: "99" });
+  const inRange = product({ mock_product_id: "in-range", subcategory: "hoodie", color: "black", price_eur: "125" });
+  const expensive = product({ mock_product_id: "expensive", subcategory: "hoodie", color: "black", price_eur: "151" });
+
+  assert.deepEqual(idsFor([cheap, inRange, expensive], "black hoodie 100-150 euro"), ["in-range"]);
+});
+
+// 17. Honest fallback is a separate channel. A missing visual detail never
+// becomes an exact match, while category, colour and price stay hard.
+test("missing direct attributes yield labelled alternatives, not exact matches", () => {
+  const close = product({ mock_product_id: "close", subcategory: "hoodie", color: "black", price_eur: "125", style_tags: "graphic" });
+  const wrongPrice = product({ mock_product_id: "wrong-price", subcategory: "hoodie", color: "black", price_eur: "90", style_tags: "graphic" });
+  const wrongColor = product({ mock_product_id: "wrong-color", subcategory: "hoodie", color: "grey", price_eur: "125", style_tags: "graphic" });
+  const result = semanticSearch([close, wrongPrice, wrongColor], "black hoodie with stars 100-150 euro");
+
+  assert.deepEqual(result.matches, [], "a product without stars is never called exact");
+  assert.deepEqual(result.alternatives.map((entry) => entry.product.mock_product_id), ["close"]);
+  assert.deepEqual(result.relaxedConstraints, ["star"]);
+});
+
+// 18. When the requested detail exists, the fallback channel remains empty.
+test("a product satisfying every direct attribute remains an exact match", () => {
+  const starred = product({ mock_product_id: "starred", subcategory: "hoodie", color: "black", price_eur: "125", motif: "stars" });
+  const plain = product({ mock_product_id: "plain", subcategory: "hoodie", color: "black", price_eur: "125" });
+  const result = semanticSearch([plain, starred], "black hoodie with stars 100-150 euro");
+
+  assert.deepEqual(result.matches.map((entry) => entry.product.mock_product_id), ["starred"]);
+  assert.deepEqual(result.alternatives, []);
+  assert.deepEqual(result.relaxedConstraints, []);
+});
