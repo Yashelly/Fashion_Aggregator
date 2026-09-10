@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-10T12:34:59.868Z",
+  "purpose": "LLM judge experiment on consumed final-blind v2; not a blind metric",
+  "model": "gemini-3.6-flash",
+  "candidateDepth": 40,
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "passRate": 1,
+    "meanPrecisionAtK": 1,
+    "meanRecall": 1,
+    "failedCaseIds": []
+  },
+  "byCategory": {
+    "garment_identity": {
+      "total": 5,
+      "passed": 5,
+      "passRate": 1,
+      "meanPrecisionAtK": 1,
+      "meanRecall": 1,
+      "failedCaseIds": []
+    }
+  },
+  "cases": [
+    {
+      "id": "FB2-001",
+      "category": "garment_identity",
+      "difficulty": "easy",
+      "language": "en",
+      "query": "long coat for a woman",
+      "intent": "garment + department",
+      "expectedOutcome": "Accept MOCK-013 is a women's charcoal knee-length wool-melton coat with three buttons. This is the catalog evidence for garment + department.",
+      "relevant": [
+        "MOCK-013"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-013"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-013": 1
+      }
+    },
+    {
+      "id": "FB2-002",
+      "category": "garment_identity",
+      "difficulty": "easy",
+      "language": "en",
+      "query": "men's tapered utility pants",
+      "intent": "garment + silhouette",
+      "expectedOutcome": "Accept MOCK-035 is men's sand twill cargo joggers with flap pockets and elastic cuffs. This is the catalog evidence for garment + silhouette.",
+      "relevant": [
+        "MOCK-035"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-035"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-035": 1
+      }
+    },
+    {
+      "id": "FB2-003",
+      "category": "garment_identity",
+      "difficulty": "easy",
+      "language": "en",
+      "query": "a baguette-shaped bag with a short shoulder strap",
+      "intent": "garment identity + shape + strap length",
+      "expectedOutcome": "Accept MOCK-016 is a women's black mini baguette shoulder bag priced €16.99. This is the catalog evidence for garment identity + shape + strap length.",
+      "relevant": [
+        "MOCK-016"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-016"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-016": 1
+      }
+    },
+    {
+      "id": "FB2-004",
+      "category": "garment_identity",
+      "difficulty": "easy",
+      "language": "en",
+      "query": "sporty pleated mini for women",
+      "intent": "garment + style",
+      "expectedOutcome": "Accept MOCK-028 is a women's navy high-waist pleated tennis mini skirt. This is the catalog evidence for garment + style.",
+      "relevant": [
+        "MOCK-028"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-028"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-028": 1
+      }
+    },
+    {
+      "id": "FB2-005",
+      "category": "garment_identity",
+      "difficulty": "easy",
+      "language": "en",
+      "query": "men's crew neck wool jumper",
+      "intent": "garment + department",
+      "expectedOutcome": "Accept MOCK-048 is a men's navy fine-gauge merino-blend crew-neck sweater. This is the catalog evidence for garment + department.",
+      "relevant": [
+        "MOCK-048"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "recall": 1,
+      "actual": [
+        "MOCK-048"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-048": 1
+      }
+    }
+  ]
+}

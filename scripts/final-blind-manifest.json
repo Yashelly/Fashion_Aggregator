@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "name": "WEFT_FINAL_BLIND_2026_09_07",
+  "status": "evaluated-once-immutable",
+  "sealedOn": "2026-09-07",
+  "caseCount": 200,
+  "categoryCount": 10,
+  "caseSetSha256": "ae5b8a7b25f33d6dca88e7c054e5e7b0a8911f9c72594b3a2763abc9c7359c37",
+  "catalogSha256": "4fedbf1813b206db8d3f2171a857aed867b532fa2b31efd1c171970c09bd9323",
+  "engineSha256": "ae3ff20bc7a715486054deb67a2a70448788f5f30ef81db10eefacf7164d0259",
+  "firstRunRawCatalogSha256": "fbe53ed693b8078504db1960f3cf1cfe7d92ef6e6c70a521c5c117a5651bb2fa",
+  "firstRunRawEngineSha256": "54c73525c569fd7d0144e837f1d0b83a0ede1c4312e3cb0db4d803c141195e17",
+  "firstRunEvaluatorSha256": "eb95ba104d0cf4e9d12c217ff74f49421a03bfeaf1b428d0f7c9865ad245626f",
+  "evaluationHarnessSha256": "36b86feb436f378c2ca95a0c167e2321c7e01d2b67c6767a2823b1766e39b01f",
+  "loaderSha256": "96f675f73e9d88a4f16ee9eb742c96ff6e2c461c45b2a33920c0bde745660632",
+  "csvParserSha256": "77f1083075a9eeda31729b2091bf43d653740191438b023ee9622ff7fb71d5d6",
+  "protocol": {
+    "version": 1,
+    "positiveK": "min(5, relevant.length)",
+    "minimumPrecisionAtK": 0.6,
+    "mustRankWindow": "top max(k, mustRank.length)",
+    "resultCap": "returned <= maxResults when maxResults is present",
+    "forbiddenRule": "no forbiddenTop ID may appear in top forbiddenTopK",
+    "negativeRule": "relevant is empty, maxResults is 0, and any returned result fails",
+    "hashCanonicalization": "Text hashes normalize CRLF/CR to LF; catalog files are separated by a NUL byte before hashing.",
+    "note": "The first-run evaluator and docs define this executed protocol; an earlier file-header shorthand saying mustRank used maxResults was corrected after review without changing any case data."
+  },
+  "firstRun": {
+    "evaluatedOn": "2026-09-07",
+    "passed": 60,
+    "total": 200,
+    "passRate": 0.3,
+    "meanPrecisionAtK": 0.366,
+    "meanRecall": 0.498917,
+    "reportSha256": "ede6c3c29a2ae4975fec42c6e7163189c11badb7c3830d38ca44858e39f351a5"
+  },
+  "policy": "Authored and structurally validated without inspecting ranking output. Any tuning from first-run failures consumes this set."
+}

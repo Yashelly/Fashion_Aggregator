@@ -38,6 +38,7 @@ jobs:
       - name: Search evaluation
         run: npm run test:search
 
+
       - name: Production build
         run: npm run build
 

@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-10T20:13:00.572Z",
+  "purpose": "LLM judge experiment on consumed final-blind v2; not a blind metric",
+  "model": "gemini-3.6-flash",
+  "configVersion": "json-input-top40-stock-neutral-temp0-seed20260910-low-v4",
+  "candidateDepth": 40,
+  "summary": {
+    "total": 7,
+    "passed": 3,
+    "passRate": 0.42857142857142855,
+    "meanPrecisionAtK": 0.75,
+    "meanRecall": 0.5833333333333334,
+    "failedCaseIds": [
+      "FB2-017",
+      "FB2-113",
+      "FB2-130",
+      "FB2-195"
+    ]
+  },
+  "byCategory": {
+    "ambiguous_conceptual": {
+      "total": 2,
+      "passed": 1,
+      "passRate": 0.5,
+      "meanPrecisionAtK": 0.5,
+      "meanRecall": 0.25,
+      "failedCaseIds": [
+        "FB2-195"
+      ]
+    },
+    "garment_identity": {
+      "total": 1,
+      "passed": 0,
+      "passRate": 0,
+      "meanPrecisionAtK": null,
+      "meanRecall": null,
+      "failedCaseIds": [
+        "FB2-017"
+      ]
+    },
+    "negatives_exclusions": {
+      "total": 1,
+      "passed": 1,
+      "passRate": 1,
+      "meanPrecisionAtK": 1,
+      "meanRecall": 0.5,
+      "failedCaseIds": []
+    },
+    "occasion_style": {
+      "total": 1,
+      "passed": 1,
+      "passRate": 1,
+      "meanPrecisionAtK": 1,
+      "meanRecall": 1,
+      "failedCaseIds": []
+    },
+    "price_value": {
+      "total": 1,
+      "passed": 0,
+      "passRate": 0,
+      "meanPrecisionAtK": 1,
+      "meanRecall": 0.5,
+      "failedCaseIds": [
+        "FB2-130"
+      ]
+    },
+    "weather_activity": {
+      "total": 1,
+      "passed": 0,
+      "passRate": 0,
+      "meanPrecisionAtK": 0.5,
+      "meanRecall": 1,
+      "failedCaseIds": [
+        "FB2-113"
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "FB2-017",
+      "category": "garment_identity",
+      "difficulty": "adversarial",
+      "language": "en",
+      "query": "women's jeans, but only tailored non-denim trousers",
+      "intent": "contradictory garment constraints",
+      "expectedOutcome": "Return no result because no catalog item satisfies the full request. This is the catalog evidence for contradictory garment constraints. Exclude these concrete near-misses: MOCK-017 is women's light-blue high-waist tapered mom jeans priced €27.99; MOCK-002 is women's black high-waist twill trousers with pleats, pressed crease and wide legs; MOCK-049 is women's ivory pleated wide trousers with pressed crease, priced €79.99; MOCK-063 is women's navy tailored wide trousers with crease, priced €72.99.",
+      "relevant": [],
+      "maxResults": 0,
+      "forbiddenTop": [
+        "MOCK-017",
+        "MOCK-002",
+        "MOCK-049",
+        "MOCK-063"
+      ],
+      "forbiddenTopK": 3,
+      "passed": false,
+      "precisionAtK": 0,
+      "hitAt5": false,
+      "recall": 0,
+      "actual": [
+        "MOCK-063",
+        "MOCK-049",
+        "MOCK-002"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [
+        "MOCK-002",
+        "MOCK-049",
+        "MOCK-063"
+      ],
+      "overCap": true,
+      "relevantPositions": {}
+    },
+    {
+      "id": "FB2-093",
+      "category": "occasion_style",
+      "difficulty": "medium",
+      "language": "en",
+      "query": "smart winter accessory suitable as a present",
+      "intent": "style + season + gift",
+      "expectedOutcome": "Accept MOCK-056 is a women's powder-blue brushed soft-wool scarf with fringe. This is the catalog evidence for style + season + gift.",
+      "relevant": [
+        "MOCK-056"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "hitAt5": true,
+      "recall": 1,
+      "actual": [
+        "MOCK-056"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-056": 1
+      }
+    },
+    {
+      "id": "FB2-113",
+      "category": "weather_activity",
+      "difficulty": "medium",
+      "language": "en",
+      "query": "sunny-day skirt that allows movement",
+      "intent": "weather + activity + garment",
+      "expectedOutcome": "Accept MOCK-028 is a women's navy high-waist pleated tennis mini skirt. This is the catalog evidence for weather + activity + garment.",
+      "relevant": [
+        "MOCK-028"
+      ],
+      "maxResults": 4,
+      "passed": false,
+      "precisionAtK": 0.5,
+      "hitAt5": true,
+      "recall": 1,
+      "actual": [
+        "MOCK-028",
+        "MOCK-010"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-028": 1
+      }
+    },
+    {
+      "id": "FB2-130",
+      "category": "price_value",
+      "difficulty": "medium",
+      "language": "en",
+      "query": "best-priced black hands-free bag under twenty-five",
+      "intent": "value + colour + carrying",
+      "expectedOutcome": "Accept MOCK-016 is a women's black mini baguette shoulder bag priced €16.99; MOCK-060 is a black unisex nylon mini backpack with padded shoulder straps. This is the catalog evidence for value + colour + carrying.",
+      "relevant": [
+        "MOCK-016",
+        "MOCK-060"
+      ],
+      "mustRank": [
+        "MOCK-016"
+      ],
+      "maxResults": 4,
+      "passed": false,
+      "precisionAtK": 1,
+      "hitAt5": true,
+      "recall": 0.5,
+      "actual": [
+        "MOCK-060"
+      ],
+      "missingRequired": [
+        "MOCK-016"
+      ],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-016": null,
+        "MOCK-060": 1
+      }
+    },
+    {
+      "id": "FB2-151",
+      "category": "negatives_exclusions",
+      "difficulty": "medium",
+      "language": "en",
+      "query": "soft winter piece excluding coats and knitwear",
+      "intent": "weather + feel + category exclusions",
+      "expectedOutcome": "Accept MOCK-056 is a women's powder-blue brushed soft-wool scarf with fringe; MOCK-019 is a women's beige padded sleeveless puffer vest with funnel collar. This is the catalog evidence for weather + feel + category exclusions. Exclude these concrete near-misses: MOCK-006 is a women's camel brushed-knit oversized V-neck cardigan; MOCK-013 is a women's charcoal knee-length wool-melton coat with three buttons; MOCK-044 is a men's tan knee-length brushed-wool coat with three buttons; MOCK-048 is a men's navy fine-gauge merino-blend crew-neck sweater.",
+      "relevant": [
+        "MOCK-056",
+        "MOCK-019"
+      ],
+      "maxResults": 4,
+      "forbiddenTop": [
+        "MOCK-006",
+        "MOCK-013",
+        "MOCK-044",
+        "MOCK-048"
+      ],
+      "forbiddenTopK": 3,
+      "passed": true,
+      "precisionAtK": 1,
+      "hitAt5": true,
+      "recall": 0.5,
+      "actual": [
+        "MOCK-056"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-056": 1,
+        "MOCK-019": null
+      }
+    },
+    {
+      "id": "FB2-185",
+      "category": "ambiguous_conceptual",
+      "difficulty": "easy",
+      "language": "en",
+      "query": "a practical layer with lots of storage",
+      "intent": "utility concept + layering",
+      "expectedOutcome": "Accept MOCK-054 is a grey unisex winter technical parka with hood and four-plus utility pockets; MOCK-003 is a unisex olive heavy-twill overshirt with button front and two flap chest pockets. This is the catalog evidence for utility concept + layering.",
+      "relevant": [
+        "MOCK-054",
+        "MOCK-003"
+      ],
+      "maxResults": 4,
+      "passed": true,
+      "precisionAtK": 1,
+      "hitAt5": true,
+      "recall": 0.5,
+      "actual": [
+        "MOCK-054"
+      ],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-054": 1,
+        "MOCK-003": null
+      }
+    },
+    {
+      "id": "FB2-195",
+      "category": "ambiguous_conceptual",
+      "difficulty": "adversarial",
+      "language": "en",
+      "query": "weightless warmth without knit, fleece or padding",
+      "intent": "abstract need + material exclusions",
+      "expectedOutcome": "Accept MOCK-056 is a women's powder-blue brushed soft-wool scarf with fringe. This is the catalog evidence for abstract need + material exclusions. Exclude these concrete near-misses: MOCK-006 is a women's camel brushed-knit oversized V-neck cardigan; MOCK-008 is a men's plain grey fleece pullover hoodie with front pouch; MOCK-015 is a women's pink cropped fleece sweatshirt with balloon sleeves; MOCK-019 is a women's beige padded sleeveless puffer vest with funnel collar; MOCK-048 is a men's navy fine-gauge merino-blend crew-neck sweater; MOCK-057 is a black unisex oversized fleece hoodie with geometric chest print.",
+      "relevant": [
+        "MOCK-056"
+      ],
+      "maxResults": 4,
+      "forbiddenTop": [
+        "MOCK-006",
+        "MOCK-008",
+        "MOCK-015",
+        "MOCK-019",
+        "MOCK-048",
+        "MOCK-057"
+      ],
+      "forbiddenTopK": 3,
+      "passed": false,
+      "precisionAtK": 0,
+      "hitAt5": false,
+      "recall": 0,
+      "actual": [],
+      "missingRequired": [],
+      "forbiddenFound": [],
+      "overCap": false,
+      "relevantPositions": {
+        "MOCK-056": null
+      }
+    }
+  ]
+}

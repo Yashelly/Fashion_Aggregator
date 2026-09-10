@@ -5,13 +5,24 @@
 
 ## Purpose
 
-Holds `locale_e2e.py`, a Playwright-driven browser regression suite that verifies Weft's EN/LT locale contract end-to-end against a running server. It is invoked via `npm run test:locale` (defined in `package.json` as `python scripts/locale_e2e.py`) and requires `BASE_URL` to point at a live dev/production server — it does not start the server itself.
+Holds the search evaluation data/harness and the Playwright-driven locale regression suite. Routine search development uses DEV/REGRESSION only; v2 is an immutable report-only first-run record and must never become a tuning gate.
 
 ## Key Files
 
 | File | Description |
 |------|--------------|
 | `locale_e2e.py` | Full Playwright browser suite covering locale cookie/query precedence, all public routes, internal link locale-preservation, search filters, mobile/desktop viewports, browser history, and `/out` success/404 boundaries. |
+| `search-queries.mjs` | DEV, REGRESSION, and immutable historical-blind cases. |
+| `final-blind-queries.mjs` | Immutable consumed 200-case first-run record with stable IDs, categories, difficulties, expected outcomes, and ranking/exclusion judgements. |
+| `final-blind-manifest.json` | Sealed case/catalog/engine hashes and the immutable first-run result. |
+| `final-blind-v2-queries.mjs` | Immutable consumed 200-case v2 set (`FB2-001`…`FB2-200`), clean-room authored and catalog-reviewed before its first run. |
+| `final-blind-v2-manifest.json` | V2 hashes, anti-leakage policy, and immutable 105/200 first-run summary/report hash. |
+| `validate-blind-set.mjs` | Generic structural/duplicate/catalog validator that never imports the search engine. |
+| `validate-final-blind.mjs` | Structural, catalog-reference, duplicate, balance, and hash validation. Does not invoke the ranker. |
+| `semantic-eval.mjs` | Development gates plus historical/consumed diagnostics; emits deterministic per-case ranking evidence. It reads exact `matches`, never shopper-facing relaxed alternatives. |
+| `apply-search-migration.mjs` | Applies only `sql/004_search_vector_index.sql` through the direct Session-pooler connection; never logs the connection string. |
+| `index-search-products.mjs` | Hash-incremental Gemini document embedding and upsert for the public search index. |
+| `search-doctor.mjs` | Checks env presence and public REST index readiness without printing secrets. |
 | `__pycache__/locale_e2e.cpython-312.pyc` | Compiled bytecode cache from a prior run; not source, safe to ignore/regenerate. |
 
 ## Structure (as read from source)
@@ -45,6 +56,9 @@ Test matrix functions, each returning an assertion count (summed into the final 
 
 ### Working In This Directory
 
+- `npm run test:search` evaluates DEV and REGRESSION only. Do not add the final blind set to routine CI.
+- `npm run eval:consumed` prints diagnostics for the reclassified 200-case set. Never present it as final validation; create and seal a new untouched blind set after tuning ends.
+- `npm run eval:historical:v2` reproduces and verifies v2's frozen 105/200 first run. V2 is now consumed because its failures informed the cloud architecture. `npm run eval:blind` is an intentional guard until an untouched v3 is frozen.
 - This suite talks to a **real running server** — it does not mock Next.js. Start `npm run dev` (or a production build) and set `BASE_URL` before running `npm run test:locale`; running it without a live server will just fail every `page.goto`.
 - Requires `playwright` (Python) with Chromium installed (`pip install playwright && playwright install chromium` if not already present) — there is no `requirements.txt` in this directory, check the repo root or `.omx/` for how the Python environment is otherwise managed.
 - If you change locale-switching markup (`.language-switcher`, `.header-search`, `#catalog-query`, `.active-filters`, `.desktop-nav`, `.product-link`), this suite's CSS-selector-based assertions will likely break silently until re-run — grep this file for the selector before renaming any of those classes/ids elsewhere in the app.
