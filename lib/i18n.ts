@@ -268,6 +268,9 @@ export const copy = {
       interpretation: {
         aria: "How your search was read",
         ranked: "Ranked by how closely each piece matches your description.",
+        approximate: "No exact match. Showing the closest alternatives without weakening category, colour, price or availability.",
+        relaxed: (words: string) => `Missing requested detail: ${words}`,
+        priceRange: (minimum: number, maximum: number) => `Price range read from your search: €${minimum}–€${maximum}`,
         priceCeiling: (limit: number) => `Price limit read from your search: up to €${limit}`,
         unknown: (words: string) => `Not recognised: ${words}`,
       },
@@ -494,6 +497,9 @@ export const copy = {
       interpretation: {
         aria: "Kaip suprasta jūsų paieška",
         ranked: "Rikiuota pagal tai, kiek prekė atitinka jūsų aprašymą.",
+        approximate: "Tikslaus atitikmens nėra. Rodomos artimiausios alternatyvos nekeičiant kategorijos, spalvos, kainos ar prieinamumo.",
+        relaxed: (words: string) => `Trūkstama pageidauta detalė: ${words}`,
+        priceRange: (minimum: number, maximum: number) => `Kainos intervalas iš jūsų paieškos: ${minimum}–${maximum} €`,
         priceCeiling: (limit: number) => `Kainos riba iš jūsų paieškos: iki ${limit} €`,
         unknown: (words: string) => `Neatpažinta: ${words}`,
       },

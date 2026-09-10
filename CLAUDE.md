@@ -38,28 +38,35 @@ BASE_URL=http://127.0.0.1:3000 npm run test:locale
 
 This runs `scripts/locale_e2e.py`, covering EN/LT switching, cookie/query precedence, every public route, internal links, search filters, mobile/desktop layouts, browser history, and `/out` success/404 behavior. It writes a JSON report to `.omx/artifacts/qa/locale-summary.json`.
 
-Search relevance suite (no server needed):
+Search relevance suites (no server needed):
 
 ```bash
-npm run test:search    # node scripts/semantic-eval.mjs
+npm run test:search        # DEV + REGRESSION only; routine CI gate
+npm run eval:cloud         # cloud embedding bake-off; DEV + REGRESSION only
+npm run eval:consumed      # verbose inspected 200-case historical regression
+npm run eval:historical:v2 # hash-verified old v2 first-run report
+npm run eval:blind         # verify/display immutable final blind v3 first run
+npm run eval:blind:validate # validate v3 structure and sealed hashes
+npm run search:doctor      # env + remote public-index readiness, no secrets printed
+npm run search:migrate     # apply sql/004 using SUPABASE_DB_URL
+npm run search:index       # refresh the Supabase pgvector index
 ```
 
-110 labelled queries against `lib/semantic-search.ts`, split three ways in
-`scripts/search-queries.mjs`: a **dev set** (44, tuning allowed — a fit ceiling,
-not generalization), a **regression set** (48, formerly held-out; the original 30
-scored blind once at 24/30 then fixed to 26/30, plus the consumed 2026-08-15 blind
-set of 18 folded in 2026-08-27 — a benchmark, **not** an unbiased unseen-query
-signal), and a **blind set** (18, sealed 2026-08-27 after the colour-constraint
-fix consumed its predecessor, scored exactly once — the honest generalization
-estimate). Only dev and regression gate the build; the blind set is reported,
-never gated, and must never be tuned against (doing so burns it into a second
-regression set). A query
-passes at precision@k ≥ 0.6 (k = min(5, relevant)) with every required item
-ranked, and each gated set passes at ≥ 80% of queries. Exits non-zero below the
-threshold. Labels are relevance judgements — on the dev set, if one looks wrong,
-argue with the label rather than tuning the graph around it; on the regression
-and blind sets, editing a label to force a pass is the dishonesty the split
-exists to prevent. Full methodology: `docs/search-engine.md`.
+`scripts/search-queries.mjs` contains DEV (44, tuning allowed), REGRESSION (48,
+already inspected), and an immutable 18-case historical blind set. The former
+200-case final set in `scripts/final-blind-queries.mjs` was consumed after its
+first run and is now inspected regression data. The replacement 200-case v2 set
+in `scripts/final-blind-v2-queries.mjs` was clean-room authored, separately
+catalog-reviewed, sealed on 2026-09-08, and first scored on 2026-09-09 at
+105/200 (52.5%). Its inputs and report are hash-pinned. A positive
+case passes at precision@k ≥ 0.6 (`k = min(5, relevant)`), with every `mustRank`
+item placed, no result-cap breach, and no declared forbidden product in the top
+window; final-blind negatives require zero results. V2 was later consumed when
+its inspected failures informed the cloud architecture. Final blind v3 was then
+authored independently, structurally validated, and SHA-256 sealed before any
+retrieval or judge output. Its one authorised first run on 2026-09-10 scored
+195/200 (97.5%); the report and production/evaluator fingerprints are immutable.
+Only DEV and REGRESSION gate CI. Full methodology: `docs/search-evaluation.md`.
 
 Regenerating the synthetic multi-store listings (only when the base catalog
 changes — the output is committed):
@@ -89,7 +96,7 @@ When in doubt about whether something counts as "real retailer data," treat it a
 - **App Router pages** (`app/**/page.tsx`) are server components. Locale-aware pages take `searchParams` as a `Promise` (Next 16 convention) and pass it through `lib/i18n.ts` helpers.
 - **i18n**: two locales (`en` default, `lt`), selected via a `lang` query param and persisted through a `weft-locale` cookie (not shown in `lib/i18n.ts` itself — cookie handling lives in the layout/middleware). `lib/i18n.ts` centralizes all UI copy in one large `copy` object plus label formatters (`formatCategoryLabel`, `formatColorLabel`, etc.) and a `withLocale(href, locale)` helper for building locale-preserving links. Add new UI strings there under both `en` and `lt`, not inline in components.
 - **Product data** (`lib/mock-products.ts`): reads and hand-parses `data/mock_products.csv` at request time (no DB dependency for the base catalog), joins each product to a public demo store via `lib/demo-stores.ts`, and resolves local image paths under `public/demo-products/` (falling back gracefully — `image_available`/`detail_image_available` flags — when a demo image file is missing). `filterProducts` applies the explicit facets, `searchProducts` layers free-text relevance on top, and `sortProducts` falls back to relevance order when the shopper typed a query and picked no explicit sort; all are pure functions over the in-memory product array, called from `app/search/page.tsx`.
-- **Search relevance** (`lib/semantic-search.ts`): a weighted concept graph, not a token match and not an embedding model — the app must run with no API keys or model downloads. A query is canonicalised against a bilingual lexicon, expanded two hops into the catalog's own vocabulary, and each concept is satisfied by its single best match on the product (never summed, or wide concepts would punish themselves). Terms naming a *kind of thing* additionally constrain the result set, so "shoes for hiking in the rain" cannot answer with a parka. Add vocabulary to `LEXICON`/`ASSOCIATIONS` there, then re-run `npm run test:search`.
+- **Search relevance** (`lib/hybrid-search.ts`, `lib/search-embedding.ts`, `lib/search-judge.ts`, `lib/semantic-search.ts`): production search uses Gemini Embedding 2 vector retrieval from Supabase/pgvector plus the explainable concept graph, fused by RRF after deterministic price/availability/department/colour prefilters. Gemini 3.6 Flash then returns a schema-validated list from the top 40 candidates; invalid, missing, quota-limited, or timed-out cloud responses fall back to the local graph. The frozen architecture's sealed 200-case final blind v3 first run scored 195/200 (97.5%); see `docs/search-evaluation.md`.
 - **Cross-store comparison** (`lib/product-listings.ts`, `data/mock_listings.csv`): the base catalog has one store per product and no repeated items, so the multi-store listings are generated rather than observed — see the header of `scripts/generate-listings.mjs`. Listings carry a public `demo-store-NN` id directly (no internal retailer slug is invented, because no retailer is involved), and any listing naming an unpublished store id is dropped at load. The synthetic nature is stated in shopper-facing copy.
 - **Supabase** (`lib/supabase.ts` browser client, `lib/supabase-server.ts` admin client): both are optional — analytics/persistence degrade gracefully when env vars are absent. `lib/supabase-server.ts` uses the service-role key and is guarded by `import "server-only"`; never import it from client components, and never give the service-role key a `NEXT_PUBLIC_` prefix.
 - **Analytics** (`lib/analytics.ts`, `lib/analytics-storage.ts`, `app/api/analytics/{search,click}/route.ts`): server-side HTTPS capture to PostHog via `captureAnalyticsEvent`, keyed by an anonymous ID (`createAnonymousId`/`normalizeAnonymousId`). `POST /api/analytics/search` records search events; `POST /api/analytics/click` is called by the `/out/:productId` guard after render, validates same-origin (`lib/request-security.ts`) and the product ID, reads correlation only from HttpOnly cookies, and returns `202` without blocking navigation. Both endpoints are no-ops (return a "disabled" status) when `POSTHOG_PROJECT_API_KEY` is unset.
@@ -102,13 +109,18 @@ Copy `.env.example` to `.env.local`. All listed services are optional — the ap
 ```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_DB_URL=
+GEMINI_API_KEY=
+SEARCH_JUDGE_MODEL=
+COHERE_API_KEY=
+VOYAGE_API_KEY=
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 POSTHOG_PROJECT_API_KEY=
 POSTHOG_HOST=https://eu.i.posthog.com
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` is server-only. `SUPABASE_URL` is preferred server-side; `lib/supabase-server.ts` falls back to `NEXT_PUBLIC_SUPABASE_URL` if unset. `POSTHOG_PROJECT_API_KEY` is a project key for server-side HTTPS capture, not a personal API key.
+`GEMINI_API_KEY`, `SEARCH_JUDGE_MODEL`, `SUPABASE_DB_URL`, and `SUPABASE_SERVICE_ROLE_KEY` are server-only. `SEARCH_JUDGE_MODEL` is optional and defaults to `gemini-3.6-flash`. `SUPABASE_DB_URL` is needed only by `npm run search:index`; use the Session pooler connection on IPv4 networks. `SUPABASE_SERVICE_ROLE_KEY` is optional analytics access and is not required for search. `SUPABASE_URL` is an optional server-side alias; `lib/supabase-server.ts` falls back to `NEXT_PUBLIC_SUPABASE_URL`. Cohere and Voyage keys are optional bake-off inputs. `POSTHOG_PROJECT_API_KEY` is a project key for server-side HTTPS capture, not a personal API key.
 
 ## Design contract
 
@@ -120,8 +132,10 @@ There is no authentication or authorization in this codebase. No `middleware.ts`
 no session/JWT handling, no Supabase Auth usage. `/account` is a client-only UI
 mock persisted to `localStorage` — it does not represent a real user account.
 Supabase's service-role key is used exclusively for anonymous analytics writes
-(`search_events`, `outbound_clicks`); RLS on every table grants access only to
-`service_role`, blocking `anon`/`authenticated` entirely.
+(`search_events`, `outbound_clicks`), whose RLS blocks public roles. Search is the
+deliberate exception: migration 004 grants public roles read/execute only over
+`is_public` retrieval documents and a `security invoker` RPC. No authentication
+or user-owned data is involved.
 
 ## CI/CD and deployment
 

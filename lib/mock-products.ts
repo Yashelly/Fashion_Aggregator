@@ -154,8 +154,9 @@ export type SearchFilterParams = {
  */
 export function filterProducts(
   products: MockProduct[],
-  params: SearchFilterParams & { maxPrice?: number },
+  params: SearchFilterParams & { minPrice?: number; maxPrice?: number },
 ) {
+  const minPrice = params.minPrice;
   const maxPrice = params.maxPrice;
   const status = params.status ?? "";
   const availability = params.availability || (status !== "sale" ? status : "");
@@ -169,7 +170,8 @@ export function filterProducts(
     if (params.gender && product.gender.toLowerCase() !== params.gender.toLowerCase()) {
       return false;
     }
-    if (maxPrice && Number(product.price_eur) > maxPrice) return false;
+    if (minPrice !== undefined && Number(product.price_eur) < minPrice) return false;
+    if (maxPrice !== undefined && Number(product.price_eur) > maxPrice) return false;
 
     return true;
   });
@@ -180,6 +182,10 @@ export type ProductSearchResult = {
   /** Relevance by product id — empty when no free-text query was given. */
   relevance: Map<string, number>;
   interpretation: QueryInterpretation | null;
+  /** True only when exact matching was empty and explicitly-labelled near-misses are shown. */
+  approximate: boolean;
+  /** Constraints softened for the approximate result set. */
+  relaxedConstraints: string[];
 };
 
 /**
@@ -195,17 +201,30 @@ export function searchProducts(
   const rawQuery = params.query?.trim();
 
   if (!rawQuery) {
-    return { results: filterProducts(products, params), relevance: new Map(), interpretation: null };
+    return {
+      results: filterProducts(products, params),
+      relevance: new Map(),
+      interpretation: null,
+      approximate: false,
+      relaxedConstraints: [],
+    };
   }
 
   const interpretation = interpretQuery(rawQuery);
-  const faceted = filterProducts(products, { ...params, maxPrice: interpretation.maxPrice });
-  const { matches } = semanticSearch(faceted, rawQuery);
+  const faceted = filterProducts(products, {
+    ...params,
+    minPrice: interpretation.minPrice,
+    maxPrice: interpretation.maxPrice,
+  });
+  const { matches, alternatives, relaxedConstraints } = semanticSearch(faceted, rawQuery);
+  const selected = matches.length > 0 ? matches : alternatives;
 
   return {
-    results: matches.map((match) => match.product),
-    relevance: new Map(matches.map((match) => [match.product.mock_product_id, match.score])),
+    results: selected.map((match) => match.product),
+    relevance: new Map(selected.map((match) => [match.product.mock_product_id, match.score])),
     interpretation,
+    approximate: matches.length === 0 && alternatives.length > 0,
+    relaxedConstraints,
   };
 }
 

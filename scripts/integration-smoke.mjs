@@ -99,6 +99,31 @@ async function run() {
     "expected a known coat title in the HTML",
   );
 
+  const alternativeSearch = await fetch(
+    `${ORIGIN}/search?query=${encodeURIComponent("black hoodie with stars 30-50 euro")}&lang=en`,
+  );
+  const alternativeHtml = await alternativeSearch.text();
+  check(
+    "missing detail renders a labelled alternative",
+    alternativeHtml.includes("Black Oversized Graphic Hoodie") && alternativeHtml.includes("No exact match."),
+    "expected the close hoodie plus the approximate-result disclosure",
+  );
+  check(
+    "alternative disclosure names the relaxed detail",
+    alternativeHtml.includes("Missing requested detail: star"),
+    "expected the softened star constraint to be visible",
+  );
+
+  const outOfBudgetSearch = await fetch(
+    `${ORIGIN}/search?query=${encodeURIComponent("black hoodie with stars 100-150 euro")}&lang=en`,
+  );
+  const outOfBudgetHtml = await outOfBudgetSearch.text();
+  check(
+    "fallback never weakens the requested price range",
+    !outOfBudgetHtml.includes("Black Oversized Graphic Hoodie"),
+    "the only black hoodie costs less than the requested minimum",
+  );
+
   // 3. Product on-site preview guard resolves for a valid id and 404s otherwise.
   const validOut = await fetch(`${ORIGIN}/out/MOCK-045`, { redirect: "manual" });
   check("GET /out/MOCK-045 resolves (200, no external redirect)", validOut.status === 200, `status ${validOut.status}`);

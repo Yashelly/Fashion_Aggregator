@@ -44,8 +44,9 @@ Ownership across the whole stack, not one slice of it:
   same-origin validation and non-blocking capture.
 - **Data** — an incremental PostgreSQL schema with row-level security, plus a
   hand-parsed CSV catalog layer that needs no database to run.
-- **Search** — a deterministic, explainable concept-graph ranker with its own
-  evaluation harness (dev vs. sealed held-out sets).
+- **Search** — Gemini Embedding 2 retrieval in Supabase/pgvector, concept-graph
+  fusion, and a schema-constrained Gemini 3.6 Flash relevance judge, with a
+  deterministic local fallback and leakage-resistant evaluation harness.
 - **Internationalization** — EN/LT with query + cookie precedence, middleware,
   and a browser regression suite that proves it stays consistent.
 - **Deployment** — Vercel, with locale middleware and graceful degradation when
@@ -67,51 +68,58 @@ flowchart TD
     Browser["Browser (React 19)"]
     MW["proxy.ts middleware<br/>locale: ?lang + weft-locale cookie"]
     RSC["Next.js App Router<br/>Server Components"]
+    Search["Hybrid search<br/>constraints · vector · graph · judge"]
     Domain["Domain logic (pure, in-memory)<br/>mock-products · semantic-search<br/>product-listings · demo-stores · i18n"]
     CSV[("Synthetic catalog<br/>data/*.csv")]
     API["Server routes<br/>/api/analytics/search · /out → /api/analytics/click"]
-    PG[("PostgreSQL / Supabase<br/>RLS: service_role only")]
+    PG[("PostgreSQL / Supabase<br/>pgvector + RLS")]
+    Gemini["Gemini API<br/>embedding + relevance judge"]
     PH["PostHog capture"]
 
     Browser --> MW --> RSC
-    RSC --> Domain --> CSV
+    RSC --> Search --> Domain --> CSV
+    Search -.optional, graceful.-> PG
+    Search -.optional, graceful.-> Gemini
     Browser -.click intent.-> API
     API -->|optional, graceful| PG
     API -->|optional, graceful| PH
 
     classDef opt stroke-dasharray: 4 3;
-    class PG,PH opt;
+    class PG,Gemini,PH opt;
 ```
 
 The base catalog is read and joined **in memory from CSV at request time** — the
-app has no hard database dependency. Supabase/PostgreSQL and PostHog are
-**optional**: every analytics path no-ops cleanly when their environment
-variables are unset, so the whole product runs from a clean clone with zero
-credentials.
+app has no hard database dependency. Supabase/PostgreSQL, Gemini, and PostHog are
+**optional**: search falls back locally and analytics paths no-op cleanly when
+their environment variables are unset, so the whole product runs from a clean
+clone with zero credentials.
 
 ## Key engineering work
 
-**1. Explainable concept-graph search — no embeddings, no model, no API keys.**
-`lib/semantic-search.ts` ranks by meaning using a weighted bilingual concept
-graph, not token matching and not an embedding model. A query is canonicalized
-against an EN/LT lexicon, expanded two hops into the catalog's own vocabulary,
-and each concept is satisfied by its single best match on a product (never
-summed — otherwise broad concepts would penalize themselves). Terms that name a
-*kind of thing* additionally constrain the result set, so *"shoes for hiking in
-the rain"* can't answer with a parka. Every ranking decision is inspectable,
-which is the reason it can be evaluated rather than eyeballed.
+**1. Explainable hybrid search — cloud retrieval with a deterministic fallback.**
+`lib/semantic-search.ts` converts noisy free text into a reviewable query plan:
+garment, colour, direct attributes, department, exclusions, price range, and
+availability remain hard constraints while style/occasion intent is expanded
+through a weighted concept graph. Exact matches and explicitly labelled
+alternatives are separate, so a near-miss cannot silently violate colour or
+budget or inflate evaluation. When configured, `lib/hybrid-search.ts` combines
+Gemini Embedding 2 retrieval from Supabase/pgvector with that concept-graph lane
+using reciprocal-rank fusion, then asks a schema-constrained Gemini 3.6 Flash
+judge to return only strong matches from the top 40 candidates. When a cloud
+dependency is absent, invalid, quota-limited, or times out, the demo falls back
+to the local engine instead of failing the request. The
+provider bake-off is documented in
+[`docs/cloud-search-bakeoff.md`](docs/cloud-search-bakeoff.md)
+under this same constraint/explanation layer.
 
-**2. A search-evaluation harness with an honest three-way split.**
-`scripts/semantic-eval.mjs` scores 92 hand-labelled queries across three sets
-with three different levels of trust: a **dev set** tuning may touch (a fit
-ceiling, not a generalization estimate), a **regression set** that was once
-held-out but has since been inspected and so is now a benchmark rather than an
-unbiased signal, and a **blind set** sealed and scored exactly once. It reports
-precision@k (`k = min(5, |relevant|)`, so narrow queries aren't unfairly capped),
-recall, and a per-query pass/fail, and includes *negative* queries (the catalog
-doesn't stock the thing, so the win is resisting a made-up answer) and `mustRank`
-constraints. Why this split, and why 26/30 is *not* "unseen", is spelled out in
-[Search relevance and evaluation](#search-relevance-and-evaluation).
+**2. A leakage-resistant search-evaluation harness.**
+Routine CI scores a 44-case DEV set and a 48-case inspected REGRESSION set. The
+current production candidate was frozen before a new 200-case final blind v3
+was structurally reviewed and SHA-256 sealed. Its one authorised first run scored
+**195/200 (97.5%)**; the report and all production/evaluator fingerprints are now
+immutable. The harness reports hit@5, precision@5, recall, reciprocal rank,
+stable failed IDs, expected versus actual rankings, candidate positions,
+required/forbidden windows, and category/difficulty/language breakdowns.
 
 **3. A demo-data boundary enforced in code.**
 Public store identity is decoupled from internal retailer identity: internal
@@ -148,53 +156,70 @@ route, internal links, search filters, mobile/desktop layouts, browser history,
 and `/out` success/404 across both locales.
 
 **6. Feed-oriented PostgreSQL schema with RLS.**
-Three incremental migrations (`sql/00N_*.sql`) model the pre-affiliate schema and
+Four incremental migrations (`sql/00N_*.sql`) model the pre-affiliate schema and
 the synthetic-click analytics boundary: a feed-import lifecycle
 (`feed_import_runs` + `raw_feed_items` with jsonb payloads and validation state),
 content-hash columns, variants, per-relationship `on delete` rules, and FK/GIN
 indexes chosen for real query patterns. **The lifecycle's auditability and
 hash-based idempotency are schema *intent*, not enforced guarantees** — there is
 no feed importer yet, and `status`/counters/hashes are unconstrained metadata (see
-`docs/data-model.md` and `sql/AGENTS.md`). Row-level security grants access only
-to `service_role`, blocking `anon`/`authenticated` entirely. Migrations are
-applied manually in numeric order (no runner). The full ER diagram and rationale
-are in [`docs/data-model.md`](docs/data-model.md).
+`docs/data-model.md` and `sql/AGENTS.md`). Private domain and analytics tables
+remain `service_role`-only. Migration 004 exposes only public search documents
+and a read-only `security invoker` RPC to `anon`/`authenticated`; RLS restricts
+those rows to `is_public`. Migrations are applied manually in numeric order (no
+runner). The full ER diagram and rationale are in
+[`docs/data-model.md`](docs/data-model.md).
 
 ## Search relevance and evaluation
 
-Run `npm run test:search`. Current measured results against the 64-item synthetic
-catalog (`k = min(5, |relevant|)`; passing bar ≥ 80% of queries per set at
-precision@k ≥ 0.6):
+Run `npm run test:search` for development gates, `npm run eval:consumed` for the
+inspected regression extension, `npm run eval:historical:v2` for the old-engine
+record, or `npm run eval:blind` to verify and display the immutable v3 first run.
+Current results against the 64-item synthetic catalog:
 
-| Set | Queries | Passing | Mean p@k | Recall | What the number is worth |
-|-----|--------:|--------:|---------:|-------:|--------------------------|
-| **Dev** — tuning allowed | 44 | 44/44 (100%) | 0.941 | 0.981 | A **fit ceiling**, not generalization: the graph was shaped to answer these. High here only proves the graph *can express* the answers. |
-| **Regression** — previously inspected | 30 | 26/30 (86.7%) | 0.926 | 1.000 | A **benchmark, not an unseen signal** (see below). Its job is to be a tripwire that must not drop when an edge is retuned. |
-| **Blind** — sealed 2026-08-15, scored once | 18 | 17/18 (94.4%) | 0.944 | 1.000 | The **current best generalization estimate**. Reported, deliberately *not* a CI gate. |
+| Set | Queries | Passing | Diagnostic precision | Recall | What the number is worth |
+|-----|--------:|--------:|---------------------:|-------:|--------------------------|
+| **Final blind v3** — sealed before first run | 200 | **195/200 (97.5%)** | **0.958 p@5** | **0.934** | The public first-run validation metric for the frozen hybrid architecture; immutable report and fingerprints. |
+| **Dev** — tuning allowed | 44 | 44/44 (100%) | 0.941 | 0.973 | A **fit ceiling**, not generalization: the graph was shaped to answer these. High here only proves the graph *can express* the answers. |
+| **Regression** — previously inspected | 48 | 47/48 (97.9%) | 0.985 | 1.000 | A **benchmark, not an unseen signal**. Its job is to be a tripwire when the graph changes. |
+| **Consumed final blind v2** — frozen 2026-09-08 | 200 | **105/200 (52.5%)** | **0.558** | **0.726** | Immutable old-engine first run. Its inspected failures later informed the cloud architecture, so it is no longer a public unseen metric. |
+| **Historical blind** — already published | 18 | Historical only | — | — | Preserved as an immutable audit trail; its result is known and is not the final metric. |
+| **Consumed former final blind** — 2026-09-07 | 200 | Historical first run: 60/200 (30.0%) | 0.366 | 0.499 | Its output is now used for regression tuning; not an independent metric. |
 
-**Why the regression set is not "unseen", and why that's stated plainly.** It was
-written before tuning and scored blind exactly once — **24/30**. Its four failures
-were then inspected, and two exposed two real defects: the word *tracksuit* was
-missing from the lexicon entirely, and a `jewelry → accessories` edge let every
-belt and sock answer *"earrings"*. Fixing those took the same set to **26/30**.
-That second number is a useful regression benchmark, but it is **no longer an
-unbiased estimate of unseen-query performance** — the set has been looked at.
-Calling it "sealed / unseen" today would be false, so the repo doesn't.
+The retrieval candidate (`gemini-embedding-2` + structured prefilters + concept
+graph + RRF) passed **91/92 known DEV/REGRESSION cases (98.9%)** during model
+selection. The frozen Gemini 3.6 Flash judge then reached **196/200 (98.0%)** on
+consumed v2 under the final pass contract. Both are inspected development
+evidence, not the public blind metric.
 
-**The blind set is the replacement, and it is only scored once.** Neither the
-engine nor a single label may be changed in response to how the blind set scores;
-the first time a weight is nudged to lift it, it is burned and becomes a second
-regression set. On its one sealed run it passed **17/18** and — usefully —
-immediately caught a real limitation the tuned sets did not: `"yellow dress"`
-should answer *"not stocked"* (there is nothing yellow in the catalog) but returns
-four non-yellow dresses, because an **unknown** colour token doesn't constrain the
-result the way a *known* one does (`"beige coat"`, with *beige* in the lexicon,
-correctly returns nothing). That failure is reported, not patched — patching it
-would defeat the purpose of a blind set. It's logged in
-[`docs/search-engine.md`](docs/search-engine.md#known-limitations).
+Final blind v2 was authored from catalog evidence in a clean-room agent context,
+then rejected twice and corrected during a separate catalog-only review. The
+case set, catalog, engine, evaluator, validator, loader, and CSV parser were
+sealed before the first run. This is AI-assisted labelling over a synthetic
+catalog—not an independent human study—and the result is deliberately reported
+despite missing the desired 97–99% target. Its weakest categories are
+ambiguous/conceptual (15%) and price/value (25%); colour constraints are strongest
+at 85%. Full per-case diagnostics are committed in
+[`reports/search/final-blind-v2-report.json`](reports/search/final-blind-v2-report.json).
 
-The full methodology, and the split's rationale, lives in
-[`docs/search-engine.md`](docs/search-engine.md).
+The original held-out set and both earlier 18-case blind generations have already
+been inspected or published. They remain useful regression/history artifacts,
+but calling them sealed today would be false. The 200 former-final cases were
+authored from catalog evidence without running the ranker, passed structural
+duplicate and schema checks, and were frozen by SHA-256 before scoring. Their
+first-run report remains immutable, but they are now consciously used for tuning.
+
+V2 is explicitly reclassified as consumed. Final blind v3 contains 200 new cases
+(20 per category; 60 easy, 80 medium, 60 adversarial; 180 EN and 20 LT), was
+checked against every earlier set for duplicates and near-duplicates, and was
+sealed before any retrieval or judge output was inspected. Its first run on
+2026-09-10 passed **195/200 (97.5%)**. Five failures remain in the immutable raw
+result (`FB3-045`, `FB3-149`, `FB3-158`, `FB3-179`, `FB3-194`); the report also
+records two clear annotation defects and one debatable ontology label rather
+than silently rescoring them. This is AI-assisted evaluation over a synthetic
+64-product catalog, not human-labelled live-search evidence.
+The full protocol, anti-leakage rules, category table, and immutable report live in
+[`docs/search-evaluation.md`](docs/search-evaluation.md).
 
 ## Technology
 
@@ -202,7 +227,7 @@ The full methodology, and the split's rationale, lives in
 |-------|--------|
 | Framework | Next.js 16 (App Router, React Server Components) |
 | Language | TypeScript (strict), React 19 |
-| Search | Custom concept-graph ranker (`lib/semantic-search.ts`), no external model |
+| Search | Gemini Embedding 2 + Supabase pgvector + structured prefilters + concept graph/RRF + Gemini 3.6 Flash relevance judge; local fallback |
 | Data (base catalog) | Hand-parsed CSV, read in memory at request time |
 | Persistence / analytics | Supabase + PostgreSQL, PostHog — both optional |
 | 3D prototype | Three.js (fitting-room mannequin) |
@@ -230,9 +255,11 @@ npm install
 npm run build && npm run start   # production preview at http://localhost:3000
 ```
 
-No environment variables are required — the app runs fully on the synthetic
-catalog. To enable analytics/persistence, copy `.env.example` to `.env.local`
-and fill in the optional Supabase/PostHog values.
+No environment variables are required — the app falls back to the deterministic
+engine over the synthetic catalog. To enable hybrid search, copy `.env.example`
+to `.env.local`, fill the Gemini and Supabase values, run
+`npm run search:migrate`, then `npm run search:index`, and verify with
+`npm run search:doctor`. The doctor prints presence/readiness only, never keys.
 
 ## Validation
 
@@ -285,8 +312,9 @@ Tracked in [`ROADMAP.md`](ROADMAP.md). Near-term technical direction:
 1. Connect a first real affiliate feed behind the existing `/out` validation gate.
 2. Move the base catalog from CSV to PostgreSQL once a feed exists.
 3. Wire the fitting-room prototype to an image-generation backend.
-4. Broaden the search lexicon and grow the blind evaluation set — ideally
-   labelled by someone other than the engine's author, or from real click data.
+4. Improve the ranker using DEV/REGRESSION only; when ready, retire the current
+   final set and commission a new independently labelled blind set or use real
+   click judgements.
 
 ---
 
