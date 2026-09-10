@@ -8,7 +8,8 @@ import {
   formatAvailabilityLabel, formatCategoryLabel, formatColorLabel, formatGenderLabel,
   getCopy, getLocale, normalizeParams, type SearchParamsInput, withLocale,
 } from "@/lib/i18n";
-import { getMockProducts, getStoreOptions, searchProducts, sortProducts } from "@/lib/mock-products";
+import { searchProductsHybrid } from "@/lib/hybrid-search";
+import { getMockProducts, getStoreOptions, sortProducts } from "@/lib/mock-products";
 
 type SearchPageProps = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 const unique = (values: string[]) => Array.from(new Set(values)).filter(Boolean).sort();
@@ -43,7 +44,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const locale = getLocale(params);
   const t = getCopy(locale).search;
   const products = getMockProducts();
-  const { results: matched, relevance, interpretation } = searchProducts(products, params);
+  const {
+    results: matched,
+    relevance,
+    interpretation,
+    approximate,
+    relaxedConstraints,
+  } = await searchProductsHybrid(products, params);
   const results = sortProducts(matched, params.sort, relevance);
   const parsedPageSize = Number(params.perPage);
   const perPage = pageSizes.includes(parsedPageSize as (typeof pageSizes)[number])
@@ -139,9 +146,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       </div>
       {interpretation && results.length > 0 ? (
         <p aria-label={t.interpretation.aria} className="search-interpretation">
-          <span>{t.interpretation.ranked}</span>
-          {interpretation.maxPrice ? (
+          <span>{approximate ? t.interpretation.approximate : t.interpretation.ranked}</span>
+          {interpretation.minPrice !== undefined && interpretation.maxPrice !== undefined ? (
+            <span>{t.interpretation.priceRange(interpretation.minPrice, interpretation.maxPrice)}</span>
+          ) : interpretation.maxPrice !== undefined ? (
             <span>{t.interpretation.priceCeiling(interpretation.maxPrice)}</span>
+          ) : null}
+          {approximate && relaxedConstraints.length > 0 ? (
+            <span>{t.interpretation.relaxed(relaxedConstraints.join(", "))}</span>
           ) : null}
           {interpretation.unknownTerms.length > 0 ? (
             <span>{t.interpretation.unknown(interpretation.unknownTerms.join(", "))}</span>

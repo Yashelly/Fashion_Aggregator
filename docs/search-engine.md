@@ -2,13 +2,13 @@
 
 # Search engine: how Weft ranks by meaning
 
-Weft's search is a **weighted concept graph**, not token matching and not an
-embedding model. That choice is a hard constraint, not a preference: the app must
-run from a clean clone with no API keys, no database, and no model download (see
-[`CLAUDE.md`](../CLAUDE.md)). The whole engine is one file,
-[`lib/semantic-search.ts`](../lib/semantic-search.ts), and every ranking decision
-it makes is inspectable — which is what lets it be *evaluated* instead of
-eyeballed.
+Weft's no-key fallback is a **structured query interpreter plus weighted concept
+graph**, not token matching. The configured production path adds Gemini Embedding
+2 retrieval from Supabase/pgvector, fuses it with that graph, then asks Gemini
+3.6 Flash to return a schema-validated list from the top 40 candidates. The demo
+still runs from a clean clone with no API keys, database, or model download (see
+[`CLAUDE.md`](../CLAUDE.md)); a cloud failure returns the deterministic result
+instead of breaking search.
 
 The problem it solves: the old query path was a boolean AND over raw tokens, so
 *"something warm for winter"* returned **zero** results because no product row
@@ -25,7 +25,7 @@ raw query
 normalize (lowercase, strip diacritics, drop punctuation)
    │
    ▼
-extract price ceiling  ── "under 40" / "iki 45" → maxPrice, removed from text
+extract price bounds   ── "under 40" → maxPrice; "100-150" → minPrice + maxPrice
    │
    ▼
 collapse phrases       ── "night out" → party, "wide leg" → wide
@@ -34,26 +34,44 @@ collapse phrases       ── "night out" → party, "wide leg" → wide
 tokenize + canonicalize ── EN/LT surface form → canonical term
    │                        (fuzzy typo rescue ON for the query only)
    ▼
-QueryInterpretation { terms, unknownTerms, maxPrice, pricePreference, wantsSale }
+QueryInterpretation { terms, unknownTerms, constraints, pricePreference, wantsSale }
    │  buildQueryConcepts()
    ▼
 expand each term two hops across the association graph (decayed, one-way)
    │  resolveGarmentTargets()
    ▼
-hard constraint: which garment categories may answer at all
+hard envelope: garment, colour, department, exclusions, price, availability
    │  scoreProduct()  ── against buildProductTerms(product)
    ▼
 per-product relevance in [0,1] + matchedTerms (the explanation)
    │  semanticSearch()
    ▼
-absolute floor + relative cut → ranked, explained results
+absolute floor + relative cut → exact ranked, explained results
+   │  only when exact is empty
+   ▼
+soften explicit detail/material constraints → separately labelled alternatives
 ```
 
 The split between **interpretation** (`interpretQuery`) and **ranking**
 (`buildQueryConcepts` → `resolveGarmentTargets` → `scoreProduct`) is deliberate:
 interpretation is a pure function of the query string alone, so it is trivially
 unit-testable (`interpretQuery("dress under 50")` → `{ terms: ["dress"], maxPrice:
-50 }`) without touching the catalog.
+50 }`) without touching the catalog. The nested `constraints` object is the
+reviewable query plan consumed by hard filtering and diagnostics.
+
+## Exact results and alternatives are different products
+
+`semanticSearch()` returns two lists. `matches` satisfies every hard constraint
+and is the **only** list used by the evaluation harness. If it is empty and the
+query contains a concrete material/visual detail, `alternatives` may soften
+those details while continuing to enforce garment type, colour, department,
+price range, availability, and exclusions. `relaxedConstraints` names exactly
+what was softened, and the search page labels the result as approximate.
+
+This avoids two equally bad behaviours: returning nothing useful when one rare
+detail is missing, or silently calling a wrong-colour/out-of-budget item an exact
+match. A product without stars can be an explicitly labelled alternative to a
+black starred hoodie; it can never pass an exact case for that query.
 
 ## The five decisions worth discussing
 
@@ -94,7 +112,7 @@ terms. This asymmetry is covered by a regression test
 
 **5. Two cutoffs, absolute and relative.**
 A result must clear an absolute `RELEVANCE_FLOOR = 0.25` (is it good enough to show
-at all?) *and* sit within `RELEVANCE_RATIO = 0.55` of the best result (is it in the
+at all?) *and* sit within `RELEVANCE_RATIO = 0.65` of the best result (is it in the
 same league as the winner?). The relative cut is what keeps a broad query from
 dragging a long tail of weak matches onto the page. A coverage penalty
 (`COVERAGE_FLOOR`) additionally makes *ignoring* one of the shopper's concepts
@@ -128,31 +146,34 @@ comfortable into the low thousands of products; past that, the graph becomes the
 rerank layer under an embedding recall stage (see below), which is the point at
 which the O(*N*) scan stops being free.
 
-## Evaluation methodology (the honest version)
+## Evaluation methodology
 
-Search quality is a *measurement*, not an opinion — but only if the measurement is
-kept honest. The labelled queries in
-[`scripts/search-queries.mjs`](../scripts/search-queries.mjs) are split three ways,
-each with a different job and a different level of trust:
+Routine development evaluates two inspected sets from
+[`scripts/search-queries.mjs`](../scripts/search-queries.mjs): DEV (44, tuning
+allowed) and REGRESSION (48, a tripwire assembled from formerly held-out and
+consumed blind cases). The already-published 18-case 2026-08-27 blind set is
+preserved there under an explicitly historical name.
 
-| Set | Size | Trust |
-|-----|-----:|-------|
-| **Dev** | 44 | Tuning is allowed. Its score (44/44, p@k 0.941) is a **fit ceiling** — the graph was shaped to answer these, so it only proves the answers are expressible. |
-| **Regression** | 30 | Was held-out; scored blind **once at 24/30**, then its failures were inspected and two real defects fixed, taking it to **26/30**. Because it has been looked at, 26/30 is a **benchmark, not an unbiased generalization estimate**. Its job now is to be a tripwire that must not drop. |
-| **Blind** | 18 | Written 2026-08-15 against the catalog, sealed, scored **exactly once (17/18, p@k 0.944)**. The **current best generalization signal**. Neither the engine nor any label may change in response to it; the first tuning burns it into a second regression set. |
+The first 200-case expansion came from a separate, frozen set in
+[`scripts/final-blind-queries.mjs`](../scripts/final-blind-queries.mjs). It is
+balanced across ten intent categories and includes easy, medium, adversarial,
+positive, negative, ambiguous, Lithuanian, multi-constraint, and top-ranking
+exclusion cases. Stable case IDs and prose expected outcomes make every judgement
+reviewable.
 
-The two defects the regression set exposed on its blind run were genuine: the word
-*tracksuit* was missing from the lexicon entirely, and a `jewelry → accessories`
-edge let every belt and sock answer *"earrings"*. That is the value of a held-out
-set — and the reason its post-fix number can no longer be reported as "unseen".
+`npm run test:search` touches DEV plus the inspected regression extension.
+`npm run eval:consumed` prints per-case positions, scores, matched concepts,
+failures, and category/difficulty aggregates for the consumed 200-case record.
+It is not an unseen final metric. V2 was also consumed after its failures informed
+the cloud architecture. After the production model and configuration were frozen,
+a new 200-case v3 was authored, checked against all earlier sets, SHA-256 sealed,
+and run once. The immutable end-to-end result is **195/200 (97.5%)**; see the
+evaluation protocol for category results and all five failures.
 
-Only **dev and regression gate the build**. The blind set is reported but never
-gated, because a gate is a target and tuning to a target is exactly what would
-destroy the one honest reading it gives.
-
-All labels share a single author (the engine's), which is a real ceiling: two
-people disagree about whether a shirt dress answers "office". The next honest step
-is a set labelled by someone else, or drawn from real click data.
+The complete construction, pass criteria, history, and anti-leakage rules are in
+[`docs/search-evaluation.md`](search-evaluation.md). Labels remain single-author
+judgements over a synthetic catalog; independently labelled cases or real click
+data would be a stronger future validation source.
 
 ## A named colour is a hard constraint (resolved 2026-08-27)
 
@@ -188,9 +209,28 @@ behaviour is guarded by synthetic invariants in `scripts/semantic-search.test.mj
 
 ## When a real feed arrives
 
-The graph is not throwaway scaffolding. When a retailer feed replaces the
-synthetic catalog, embedding similarity becomes the *recall* stage (find the
-candidate hundreds out of many thousands) and this concept graph becomes the
-**explainable rerank + hard-constraint layer** on top — the part that still knows a
-parka is not a shoe, and can still tell the shopper *why* a product matched. See
+The production shape is hybrid retrieval, not “send the catalog to an LLM” and
+not pure vector search:
+
+1. Normalize every feed into typed fields plus searchable text; enrich missing
+   visual attributes offline from product text/images.
+2. Parse the shopper query into the same structured constraint schema used by
+   this demo. Deterministic parsing covers price, colour, category, availability,
+   and exclusions; an LLM parser may propose uncertain style/intent fields, but
+   its output must be schema-validated.
+3. Retrieve candidates in parallel with lexical search (exact names/brands),
+   vector similarity (messy intent/paraphrases), and hard database facets.
+4. Fuse the candidate lists, then run a cross-encoder or learning-to-rank model
+   over the top candidate hundreds.
+5. Reapply hard constraints after reranking, deduplicate product variants, and
+   return exact results separately from explicitly relaxed alternatives.
+6. Log anonymous query/result/click signals for later judgement collection; do
+   not train directly on raw clicks without position-bias correction.
+
+For a larger catalog, PostgreSQL/pgvector or a dedicated vector engine owns
+candidate recall; a small model service owns query parsing and reranking. PyTorch
+is a training/inference implementation detail, not the search architecture. The
+concept graph remains the deterministic **constraint, explanation, and fallback
+layer** — the part that still knows a parka is not a shoe and can explain why a
+candidate matched. See
 [`docs/feed-format-research-2026-07-31.md`](feed-format-research-2026-07-31.md).
