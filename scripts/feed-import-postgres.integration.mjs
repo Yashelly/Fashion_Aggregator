@@ -74,9 +74,9 @@ try {
   await sql.unsafe("alter role weft_feed_importer password 'weft-ci-importer-password'");
   await sql`
     insert into public.stores (
-      slug, display_name, affiliate_status, feed_status, public_listing_status
+      slug, display_name, affiliate_status, feed_status, public_listing_status, public_id
     ) values (
-      'weft_import_ci', 'Synthetic CI Store', 'target', 'not_available', 'demo'
+      'weft_import_ci', 'Synthetic CI Store', 'target', 'not_available', 'demo', 'demo-store-ci'
     )
   `;
 
