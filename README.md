@@ -267,8 +267,8 @@ changes reach `main` and can also be started manually. Configure the repository
 secret `GEMINI_API_KEY` plus either `SUPABASE_URL` and a dedicated Supabase
 `SUPABASE_SECRET_KEY` (preferred), or `SUPABASE_DB_URL`. Privileged credentials
 are server-only and must never be added to Vercel client variables or source
-control. Direct Postgres remains an indexing fallback, not a production runtime
-dependency.
+control. Direct Postgres is an operator-only indexing/import connection, not a
+production request-time dependency.
 
 Production search health is checked every six hours by
 `.github/workflows/search-production-monitor.yml` using one strict synthetic
@@ -283,6 +283,34 @@ five-minute, 200-entry process-local TTL/LRU cache with concurrent request
 coalescing. Ambiguous/fallback-equivalent results are not retained, so an
 upstream outage cannot pin fallback output in cache.
 
+## Feed importer
+
+The first product-level feed importer is ready before any retailer credentials
+are connected. It accepts strict CSV, TSV, JSON, or flat item-based XML through
+a versioned mapping profile, normalizes canonical product fields, validates
+HTTPS destinations and public-card requirements, and computes stable raw/feed/
+content hashes. Dry-run is the default and performs no database writes:
+
+```bash
+npm run feed:dry-run
+
+# Inspect a provider-specific feed without exposing its URL in shell history.
+npm run feed:import -- \
+  --source-env RETAILER_FEED_URL \
+  --authorization-env RETAILER_FEED_AUTH \
+  --config data/feed-configs/provider.json
+```
+
+`--apply --store <internal-slug>` writes through one transaction to the existing
+`feed_import_runs`, `raw_feed_items`, and `products` tables. Apply mode requires
+`SUPABASE_DB_URL`, serializes imports per store, verifies the store approval/feed
+state and affiliate rules, and only then performs product insert/update/
+unchanged reconciliation. Full snapshots mark previously active missing products
+out of stock; `--partial` disables that behavior. Feed URLs and authorization
+values are never printed, and only a non-secret/redacted source label is stored.
+The committed fixture and mapping profile are synthetic and are not loaded by
+the public storefront.
+
 ## Validation
 
 ```bash
@@ -291,6 +319,7 @@ npm run test:unit        # search-engine invariants (node:test)
 npm run test:search      # semantic-search relevance eval (no server needed)
 npm run build            # next build
 npm run search:probe:production # confirm the live AI path with synthetic probes
+npm run feed:dry-run     # validate the committed synthetic feed; no DB writes
 
 # full-stack HTTP smoke: search render + /out guard + click-endpoint security
 npm run build && npm run test:integration
@@ -312,8 +341,9 @@ These are intentional for a pre-affiliate MVP and are called out honestly:
 
 - **Synthetic catalog only.** All products are fictional; there is no live
   retailer data and no checkout.
-- **No live feeds connected.** Real products/links require an approved affiliate
-  feed plus destination validation — `/out` is a guard, not a redirect.
+- **No live feeds connected.** The importer and audit/idempotency path exist,
+  but real products/links still require an approved affiliate feed plus
+  destination validation — `/out` is a guard, not a redirect.
 - **The fitting room is a client-side 3D prototype, not image-based AI try-on.**
   Body measurements shape a Three.js mannequin, an optional photo is used only to
   approximate skin tone and **never leaves the device**, and the result is a
@@ -332,7 +362,7 @@ These are intentional for a pre-affiliate MVP and are called out honestly:
 
 Tracked in [`ROADMAP.md`](ROADMAP.md). Near-term technical direction:
 
-1. Connect a first real affiliate feed behind the existing `/out` validation gate.
+1. Add the first approved provider mapping and connect its feed to the importer.
 2. Move the base catalog from CSV to PostgreSQL once a feed exists.
 3. Wire the fitting-room prototype to an image-generation backend.
 4. Improve the ranker using DEV/REGRESSION only; when ready, retire the current
