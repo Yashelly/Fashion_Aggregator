@@ -21,7 +21,12 @@ overlooked.
       from production, and sync `DESIGN.md` / audit docs with the new
       direction
 - [ ] Brand-name candidates researched and presented for a decision
-- [ ] Affiliate feed-format research → flexible DB schema proposal
+- [x] Affiliate feed-format research → flexible DB schema proposal. The
+      pre-affiliate schema lives in `sql/001_pre_affiliate_schema.sql` and the
+      provider-agnostic product-level importer landed on 2026-09-11 with strict
+      CSV/TSV/JSON/flat-XML parsing, dry-run validation, raw-row audit storage,
+      stable hashes, approval/rules gates, and transactional idempotent product
+      reconciliation. No live feed or credentials are connected yet.
 - [x] Legal/GDPR baseline (2026-07-31). Live privacy page now covers cookie
       use and EU/EEA data rights in both languages. Cookie consent banner
       built and exercised, rendered only when

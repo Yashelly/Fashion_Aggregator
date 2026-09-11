@@ -23,6 +23,10 @@ Holds the search evaluation data/harness and the Playwright-driven locale regres
 | `apply-search-migration.mjs` | Applies only `sql/004_search_vector_index.sql` through the direct Session-pooler connection; never logs the connection string. |
 | `index-search-products.mjs` | Hash-incremental Gemini document embedding and upsert for the public search index. |
 | `search-doctor.mjs` | Checks env presence and public REST index readiness without printing secrets. |
+| `import-feed.mjs` | Generic provider-profile feed CLI; dry-run by default, explicit guarded PostgreSQL apply. |
+| `feed-import-core.mjs` | Pure CSV/TSV/JSON/flat-XML parsing, normalization, validation, and stable hashing. |
+| `feed-import-postgres.mjs` | Transactional store/rules-gated writes to import runs, raw items, and products. |
+| `feed-import.test.mjs` | Parser, mapping, validation, safety, and idempotency regression tests. |
 | `__pycache__/locale_e2e.cpython-312.pyc` | Compiled bytecode cache from a prior run; not source, safe to ignore/regenerate. |
 
 ## Structure (as read from source)
