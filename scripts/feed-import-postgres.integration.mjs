@@ -168,6 +168,10 @@ try {
   const searchableProducts = await loadSearchProductsFromPostgres(importerDatabaseUrl.toString());
   assert.equal(searchableProducts.length, 4);
   assert.equal(searchableProducts.every((product) => product.source_status === "mock_not_live"), true);
+  await sql`
+    update public.stores set public_listing_status = 'paused'
+    where slug = 'weft_import_ci'
+  `;
 
   console.log("Feed importer PostgreSQL integration: PASS");
   console.log(JSON.stringify({ productCount, rawCount, runCount, searchableProducts: 4, scenarios: 7 }));
