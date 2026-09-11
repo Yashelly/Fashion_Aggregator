@@ -110,6 +110,7 @@ Copy `.env.example` to `.env.local`. All listed services are optional — the ap
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_DB_URL=
+SUPABASE_SECRET_KEY=
 GEMINI_API_KEY=
 SEARCH_JUDGE_MODEL=
 COHERE_API_KEY=
@@ -120,7 +121,7 @@ POSTHOG_PROJECT_API_KEY=
 POSTHOG_HOST=https://eu.i.posthog.com
 ```
 
-`GEMINI_API_KEY`, `SEARCH_JUDGE_MODEL`, `SUPABASE_DB_URL`, and `SUPABASE_SERVICE_ROLE_KEY` are server-only. `SEARCH_JUDGE_MODEL` is optional and defaults to `gemini-3.6-flash`. `SUPABASE_DB_URL` is needed only by `npm run search:index`; use the Session pooler connection on IPv4 networks. `SUPABASE_SERVICE_ROLE_KEY` is optional analytics access and is not required for search. `SUPABASE_URL` is an optional server-side alias; `lib/supabase-server.ts` falls back to `NEXT_PUBLIC_SUPABASE_URL`. Cohere and Voyage keys are optional bake-off inputs. `POSTHOG_PROJECT_API_KEY` is a project key for server-side HTTPS capture, not a personal API key.
+`GEMINI_API_KEY`, `SEARCH_JUDGE_MODEL`, `SUPABASE_SECRET_KEY`, `SUPABASE_DB_URL`, and `SUPABASE_SERVICE_ROLE_KEY` are server-only. `SEARCH_JUDGE_MODEL` is optional and defaults to `gemini-3.6-flash`. `npm run search:index` prefers a dedicated modern `SUPABASE_SECRET_KEY` plus `SUPABASE_URL` and falls back to the Session-pooler `SUPABASE_DB_URL` for local administration. The GitHub Actions index workflow uses the secret-key path; neither privileged credential belongs in the browser or Vercel public variables. `SUPABASE_SERVICE_ROLE_KEY` remains an optional legacy analytics credential. `SUPABASE_URL` is also the server-side project URL; `lib/supabase-server.ts` falls back to `NEXT_PUBLIC_SUPABASE_URL`. Cohere and Voyage keys are optional bake-off inputs. `POSTHOG_PROJECT_API_KEY` is a project key for server-side HTTPS capture, not a personal API key.
 
 ## Design contract
 
