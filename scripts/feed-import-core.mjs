@@ -7,9 +7,11 @@ const CANONICAL_FIELDS = [
   "brand",
   "description",
   "merchant_category",
+  "subcategory",
   "gender",
   "color_label",
   "material",
+  "style_tags",
   "product_url",
   "affiliate_url",
   "image_url",
@@ -237,11 +239,19 @@ function validHttpsUrl(value) {
   }
 }
 
+function validDemoPath(value, kind) {
+  if (!value) return false;
+  const pattern = kind === "image"
+    ? /^\/demo-products\/product-\d+(?:-tryon)?\.(?:png|webp)$/
+    : /^\/mock\/products\/[A-Za-z0-9_-]+$/;
+  return pattern.test(value);
+}
+
 function contentHashPayload(product) {
   return Object.fromEntries([
     "external_product_id", "source_sku", "title", "brand", "description",
-    "merchant_category", "normalized_category", "gender", "color_label",
-    "normalized_color", "material", "product_url", "affiliate_url", "image_url",
+    "merchant_category", "normalized_category", "subcategory", "gender", "color_label",
+    "normalized_color", "material", "style_tags", "product_url", "affiliate_url", "image_url",
     "currency", "price", "sale_price", "old_price", "availability", "in_stock",
     "size_summary", "status",
   ].map((key) => [key, product[key] ?? null]));
@@ -268,7 +278,7 @@ function validateConfig(config) {
   }
 }
 
-export function buildImportPlan(text, config) {
+export function buildImportPlan(text, config, { allowRelativeDemoUrls = false } = {}) {
   validateConfig(config);
   const parsedRows = parseFeedText(text, config);
   const seenProductIds = new Set();
@@ -304,13 +314,18 @@ export function buildImportPlan(text, config) {
     if (mapped.old_price && Number.isNaN(oldPrice)) errors.push("invalid_old_price");
     if (!/^[A-Z]{3}$/.test(currency)) errors.push("invalid_currency");
     if (!mapped.availability) errors.push("missing_availability");
-    if (!validHttpsUrl(mapped.product_url) && !validHttpsUrl(mapped.affiliate_url)) {
+    const validProductUrl = validHttpsUrl(mapped.product_url)
+      || (allowRelativeDemoUrls && validDemoPath(mapped.product_url, "product"));
+    const validAffiliateUrl = validHttpsUrl(mapped.affiliate_url);
+    const validImageUrl = validHttpsUrl(mapped.image_url)
+      || (allowRelativeDemoUrls && validDemoPath(mapped.image_url, "image"));
+    if (!validProductUrl && !validAffiliateUrl) {
       errors.push("missing_or_invalid_https_destination");
     }
-    if (mapped.product_url && !validHttpsUrl(mapped.product_url)) errors.push("invalid_product_url");
-    if (mapped.affiliate_url && !validHttpsUrl(mapped.affiliate_url)) errors.push("invalid_affiliate_url");
+    if (mapped.product_url && !validProductUrl) errors.push("invalid_product_url");
+    if (mapped.affiliate_url && !validAffiliateUrl) errors.push("invalid_affiliate_url");
     if (!mapped.image_url) warnings.push("missing_image_url");
-    else if (!validHttpsUrl(mapped.image_url)) errors.push("invalid_image_url");
+    else if (!validImageUrl) errors.push("invalid_image_url");
     if (mapped.external_product_id && seenProductIds.has(mapped.external_product_id)) {
       errors.push("duplicate_external_product_id");
     }

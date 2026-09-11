@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Four hand-written, numbered PostgreSQL/Supabase migration files define the pre-affiliate schema, analytics tables, and the public vector-search index. **There is no migration runner wired into this repo** — no `supabase/migrations` CLI setup or ORM migration tool. Apply them manually in numeric order against the target Supabase project.
+Five hand-written, numbered PostgreSQL/Supabase migration files define the pre-affiliate schema, analytics tables, public vector-search index, and storefront catalog read model. **There is no production migration runner wired into this repo** — apply them manually in numeric order against the exact target project. CI applies the non-pgvector subset to a disposable PostgreSQL service.
 
 ## Key Files
 
@@ -15,6 +15,7 @@ Four hand-written, numbered PostgreSQL/Supabase migration files define the pre-a
 | `002_pre_affiliate_hardening.sql` | Small hardening pass: pins `search_path` on the shared trigger function, adds 4 missing indexes. |
 | `003_synthetic_click_boundary.sql` | Loosens one constraint to support the current "blocked synthetic-preview click" analytics behavior. |
 | `004_search_vector_index.sql` | Adds the Gemini 1024-dimensional public retrieval index, HNSW/GIN indexes, RLS, and the read-only vector-match RPC. |
+| `005_public_catalog_read_model.sql` | Adds safe public store IDs, importer enrichment columns, a trigger-maintained private catalog projection, and an RLS-protected `security_invoker` storefront view. |
 
 ## Migration Details
 
@@ -48,9 +49,10 @@ One change: `alter table public.outbound_clicks alter column store_id drop not n
 
 ### Working In This Directory
 
-- **Apply migrations manually and in numeric order** (001 → 002 → 003 → 004) against Supabase — there is no automated runner or schema-version table in this repo to do it for you. Use the SQL editor, CLI, or a direct Postgres connection after confirming the exact target project.
-- **Treat applied migrations as immutable and apply each once.** The files use `create ... if not exists` / idempotent-trigger-check patterns, so a rerun is *usually* harmless — but do not rely on rerunning as a workflow. (`001` now pins `set_updated_at`'s `search_path`, so a stray rerun no longer reverts `002`'s hardening; before that fix it did.) Always confirm against the target project's current schema (`mcp__supabase__list_tables`) before applying blind. There is no feed importer yet, so the `feed_import_runs` status machine, cross-store integrity, and hash-based idempotency described in `docs/data-model.md` are **planned, not DB-enforced** guarantees.
+- **Apply migrations manually and in numeric order** (001 → 002 → 003 → 004 → 005) against Supabase — there is no automated production runner or schema-version table in this repo to do it for you. Use the SQL editor, CLI, or a direct Postgres connection after confirming the exact target project.
+- **Treat applied migrations as immutable and apply each once.** The files use `create ... if not exists` / idempotent-trigger-check patterns, so a rerun is *usually* harmless — but do not rely on rerunning as a workflow. Always confirm the exact target schema before applying blind. The generic importer owns the application-level run state and hash idempotency; CI verifies those contracts against disposable PostgreSQL.
 - Keep private domain/analytics tables service-role-only. Public search data is the explicit exception: 004 grants read/execute only to `anon`/`authenticated`, keeps RLS enabled, restricts rows to `is_public`, and uses a `security invoker` function. Never expose write privileges or a service-role key to the search client.
+- Migration 005 follows the same least-privilege boundary: trigger-maintained source rows live in `private`, source UUIDs are not selectable by public roles, and `public.catalog_products` contains only shopper-safe fields. Preserve explicit grants because Supabase no longer auto-exposes new Data API relations.
 - `lib/analytics-storage.ts` treats all Supabase writes as best-effort with a 1-second timeout and silent (console-warned) failure — schema changes here should stay backward-compatible with that fire-and-forget write pattern, or that code needs to be updated in tandem.
 
 ## Dependencies

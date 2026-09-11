@@ -14,7 +14,7 @@ public storefront. No live retailer catalog exists in the repo.
 
 | File | Description |
 |------|--------------|
-| `mock_products.csv` | 64 synthetic demo products (header + 64 rows). Public catalog source. |
+| `mock_products.csv` | 64 synthetic demo products (header + 64 rows). Supabase seed input and runtime bootstrap/outage fallback. |
 | `store_tracker.csv` | 7 internal retailer/affiliate-program tracking rows (header + 7 rows). Never rendered publicly as-is. |
 | `feed-configs/weft-test-feed.json` | Versioned alias/category/availability mapping profile for the synthetic importer fixture. |
 | `feed-fixtures/weft-test-feed.csv` | Synthetic five-row feed used only by dry-run and importer tests. |
@@ -63,7 +63,7 @@ This is an **internal affiliate-application tracking sheet** (real retailer name
 
 ### Internal
 
-- `lib/mock-products.ts` — reads `data/mock_products.csv` (`getMockProducts`), filters to `mock_not_live`, resolves image paths, and delegates store-id resolution to `lib/demo-stores.ts`.
+- `lib/mock-products.ts` — parses fallback data and supplies pure catalog/search utilities; `lib/catalog.ts` prefers Supabase and calls `getMockProducts()` only for bootstrap/outage fallback.
 - `lib/demo-stores.ts` — reads `data/store_tracker.csv` (`getInternalStoreRecords`), excludes `market_suspended` rows, and builds the internal-slug → public-`demo-store-NN` map used everywhere products or store filters are rendered (search page, stores page, filter dropdowns).
 - Both files resolve the CSV path via `path.join(process.cwd(), "data", ...)`, so they must be run from the project root (standard for Next.js server-side code).
 

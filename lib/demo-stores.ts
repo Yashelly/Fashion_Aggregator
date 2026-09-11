@@ -19,6 +19,7 @@ type InternalStoreRecord = {
 type ProductStoreReference = {
   mock_product_id: string;
   store_slug: string;
+  public_store_id?: string;
 };
 
 const storeTrackerPath = path.join(process.cwd(), "data", "store_tracker.csv");
@@ -112,6 +113,10 @@ export function getPublicDemoStoreById(
 export function getPublicDemoStoreForProduct(
   product: ProductStoreReference,
 ): PublicDemoStore {
+  const explicitPublicStore = product.public_store_id
+    ? getPublicDemoStoreById(product.public_store_id)
+    : undefined;
+  if (explicitPublicStore) return explicitPublicStore;
   const directlyMappedStore = publicStoreByInternalSlug.get(product.store_slug);
   if (directlyMappedStore) return directlyMappedStore;
 

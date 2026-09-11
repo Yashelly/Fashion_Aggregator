@@ -74,7 +74,7 @@ export function readCsvFile<T extends Record<string, string>>(filePath: string):
  * are 1-based over the data rows plus the header line, so they line up with what
  * an editor shows.
  */
-export function assertUniqueBy<T extends Record<string, string>>(
+export function assertUniqueBy<T extends object>(
   records: T[],
   key: keyof T,
   label: string,
