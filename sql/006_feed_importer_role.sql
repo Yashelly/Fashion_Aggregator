@@ -5,24 +5,36 @@ begin
   if not exists (select 1 from pg_roles where rolname = 'weft_feed_importer') then
     create role weft_feed_importer
       login
-      noinherit
-      nosuperuser
-      nocreatedb
-      nocreaterole
-      noreplication
-      nobypassrls;
+      noinherit;
   end if;
 end;
 $$;
 
-alter role weft_feed_importer
-  login
-  noinherit
-  nosuperuser
-  nocreatedb
-  nocreaterole
-  noreplication
-  nobypassrls;
+-- Supabase's supautils hook does not allow the project postgres role to alter
+-- SUPERUSER/REPLICATION/BYPASSRLS attributes, even when setting them to false.
+-- New roles already default to the safe values; fail closed if an existing
+-- role has drifted instead of trying to normalize restricted attributes.
+do $$
+begin
+  if exists (
+    select 1
+    from pg_roles
+    where rolname = 'weft_feed_importer'
+      and (
+        not rolcanlogin
+        or rolinherit
+        or rolsuper
+        or rolcreatedb
+        or rolcreaterole
+        or rolreplication
+        or rolbypassrls
+      )
+  ) then
+    raise exception 'weft_feed_importer has unsafe role attributes';
+  end if;
+end;
+$$;
+
 alter role weft_feed_importer connection limit 2;
 alter role weft_feed_importer set statement_timeout = '2min';
 alter role weft_feed_importer set lock_timeout = '15s';

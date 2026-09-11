@@ -16,7 +16,7 @@ Six hand-written, numbered PostgreSQL/Supabase migration files define the pre-af
 | `003_synthetic_click_boundary.sql` | Loosens one constraint to support the current "blocked synthetic-preview click" analytics behavior. |
 | `004_search_vector_index.sql` | Adds the Gemini 1024-dimensional public retrieval index, HNSW/GIN indexes, RLS, and the read-only vector-match RPC. |
 | `005_public_catalog_read_model.sql` | Adds safe public store IDs, importer enrichment columns, a trigger-maintained private catalog projection, and an RLS-protected `security_invoker` storefront view. |
-| `006_feed_importer_role.sql` | Adds a passwordless, connection-limited `weft_feed_importer` login plus explicit grants/RLS policies for guarded production imports. |
+| `006_feed_importer_role.sql` | Adds a credential-unconfigured, connection-limited `weft_feed_importer` login plus explicit grants/RLS policies for guarded production imports. |
 
 ## Migration Details
 
@@ -54,7 +54,7 @@ One change: `alter table public.outbound_clicks alter column store_id drop not n
 - **Treat applied migrations as immutable and apply each once.** The files use `create ... if not exists` / idempotent-trigger-check patterns, so a rerun is *usually* harmless — but do not rely on rerunning as a workflow. Always confirm the exact target schema before applying blind. The generic importer owns the application-level run state and hash idempotency; CI verifies those contracts against disposable PostgreSQL.
 - Keep private domain/analytics tables service-role-only. Public search data is the explicit exception: 004 grants read/execute only to `anon`/`authenticated`, keeps RLS enabled, restricts rows to `is_public`, and uses a `security invoker` function. Never expose write privileges or a service-role key to the search client.
 - Migration 005 follows the same least-privilege boundary: trigger-maintained source rows live in `private`, source UUIDs are not selectable by public roles, and `public.catalog_products` contains only shopper-safe fields. Preserve explicit grants because Supabase no longer auto-exposes new Data API relations.
-- Migration 006 deliberately creates the importer login without a password. Set/rotate it outside Git, store only its pooler URL in the protected GitHub Environment, and never replace it with a `postgres` URL. Its private-projection DML exists only because migration 005's trigger functions are `SECURITY INVOKER`; public roles remain unchanged.
+- Migration 006 deliberately creates the importer login without setting a usable credential. Supabase may retain an internal password marker; explicitly set/rotate the operational password outside Git, store only its pooler URL in the protected GitHub Environment, and never replace it with a `postgres` URL. Its private-projection DML exists only because migration 005's trigger functions are `SECURITY INVOKER`; public roles remain unchanged.
 - `lib/analytics-storage.ts` treats all Supabase writes as best-effort with a 1-second timeout and silent (console-warned) failure — schema changes here should stay backward-compatible with that fire-and-forget write pattern, or that code needs to be updated in tandem.
 
 ## Dependencies
