@@ -9,6 +9,7 @@ const checks = {
   NEXT_PUBLIC_SUPABASE_URL: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()),
   SUPABASE_DB_URL: Boolean(process.env.SUPABASE_DB_URL?.trim()),
+  SUPABASE_SECRET_KEY: Boolean(process.env.SUPABASE_SECRET_KEY?.trim()),
   GEMINI_API_KEY: Boolean(process.env.GEMINI_API_KEY?.trim()),
 };
 
@@ -49,7 +50,9 @@ if (!checks.NEXT_PUBLIC_SUPABASE_URL || !checks.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
   }
 }
 
-if (!checks.SUPABASE_DB_URL) {
-  console.log("Indexer connection: MISSING (copy the Session pooler URL from Supabase Connect)");
+if (!checks.SUPABASE_SECRET_KEY && !checks.SUPABASE_DB_URL) {
+  console.log("Indexer connection: MISSING (set SUPABASE_SECRET_KEY, or fallback SUPABASE_DB_URL)");
   process.exitCode = 1;
+} else {
+  console.log(`Indexer connection: READY (${checks.SUPABASE_SECRET_KEY ? "Data API secret key" : "direct Postgres fallback"})`);
 }
