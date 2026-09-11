@@ -358,6 +358,6 @@ export function buildImportPlan(text, config) {
 }
 
 export function classifyProductChange(existingContentHash, nextContentHash) {
-  if (!existingContentHash) return "inserted";
+  if (existingContentHash === undefined) return "inserted";
   return existingContentHash === nextContentHash ? "unchanged" : "updated";
 }
