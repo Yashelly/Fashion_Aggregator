@@ -1,0 +1,88 @@
+name: Import approved production feed
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: Versioned mapping profile name from data/feed-configs (without .json)
+        required: true
+        type: string
+      source_type:
+        description: Approved source contract
+        required: true
+        default: affiliate_feed
+        type: choice
+        options:
+          - affiliate_feed
+          - direct_partner_feed
+      full_snapshot:
+        description: Mark missing products out of stock
+        required: true
+        default: true
+        type: boolean
+      apply:
+        description: Apply after validation (false is dry-run only)
+        required: true
+        default: false
+        type: boolean
+      apply_confirmation:
+        description: For apply=true, type IMPORT_APPROVED_FEED
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-feed-import
+  cancel-in-progress: false
+
+jobs:
+  import:
+    name: Validate and optionally import approved feed
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production-feed-import
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install (clean, from lockfile)
+        run: npm ci
+
+      - name: Validate and run feed operation
+        run: npm run feed:operate
+        env:
+          FEED_APPLY: ${{ inputs.apply }}
+          FEED_APPLY_CONFIRMATION: ${{ inputs.apply_confirmation }}
+          FEED_AUTHORIZATION: ${{ secrets.FEED_AUTHORIZATION }}
+          FEED_FULL_SNAPSHOT: ${{ inputs.full_snapshot }}
+          FEED_PROFILE: ${{ inputs.profile }}
+          FEED_SOURCE_LABEL: ${{ secrets.FEED_SOURCE_LABEL }}
+          FEED_SOURCE_TYPE: ${{ inputs.source_type }}
+          FEED_SOURCE_URL: ${{ secrets.FEED_SOURCE_URL }}
+          FEED_STORE_SLUG: ${{ secrets.FEED_STORE_SLUG }}
+          SUPABASE_IMPORT_DB_URL: ${{ secrets.SUPABASE_IMPORT_DB_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+
+      - name: Refresh search index from the imported catalog
+        if: inputs.apply
+        run: npm run search:index
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SEARCH_CATALOG_DB_URL: ${{ secrets.SUPABASE_IMPORT_DB_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+
+      - name: Verify public catalog and search index
+        if: inputs.apply
+        run: npm run search:doctor
+        env:
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
