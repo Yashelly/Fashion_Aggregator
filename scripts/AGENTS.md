@@ -28,7 +28,9 @@ Holds the search evaluation data/harness and the Playwright-driven locale regres
 | `feed-import-core.mjs` | Pure CSV/TSV/JSON/flat-XML parsing, normalization, validation, and stable hashing. |
 | `feed-import-postgres.mjs` | Transactional store/rules-gated writes to import runs, raw items, and products. |
 | `feed-import.test.mjs` | Parser, mapping, validation, safety, and idempotency regression tests. |
-| `feed-import-postgres.integration.mjs` | Localhost-only `weft_test` integration suite that applies migrations 001–003 and verifies seven transactional apply/idempotency scenarios. |
+| `feed-import-postgres.integration.mjs` | Localhost-only `weft_test` integration suite that applies migrations 001–003/005 and verifies seven transactional apply/idempotency scenarios. |
+| `seed-demo-catalog.mjs` | Dry-run-by-default 64-product synthetic catalog seed; groups rows into six neutral stores and writes through the generic importer only with `--apply`. |
+| `catalog-postgres.integration.mjs` | Runs after the feed DB test and verifies seed idempotency, trigger refresh, store pause behavior, safe view columns, grants, and RLS as `anon`. |
 | `__pycache__/locale_e2e.cpython-312.pyc` | Compiled bytecode cache from a prior run; not source, safe to ignore/regenerate. |
 
 ## Structure (as read from source)
@@ -64,6 +66,7 @@ Test matrix functions, each returning an assertion count (summed into the final 
 
 - `npm run test:search` evaluates DEV and REGRESSION only. Do not add the final blind set to routine CI.
 - `npm run test:feed:postgres` is destructive only inside a dedicated local database named `weft_test`; CI supplies a disposable PostgreSQL 17 service. The script refuses non-local hosts and any other database name.
+- `npm run test:catalog:postgres` expects the same database immediately after `test:feed:postgres`; it never accepts a non-local host or a database name other than `weft_test`.
 - `npm run eval:consumed` prints diagnostics for the reclassified 200-case set. Never present it as final validation; create and seal a new untouched blind set after tuning ends.
 - `npm run eval:historical:v2` reproduces and verifies v2's frozen 105/200 first run. V2 is now consumed because its failures informed the cloud architecture. `npm run eval:blind` is an intentional guard until an untouched v3 is frozen.
 - This suite talks to a **real running server** — it does not mock Next.js. Start `npm run dev` (or a production build) and set `BASE_URL` before running `npm run test:locale`; running it without a live server will just fail every `page.goto`.

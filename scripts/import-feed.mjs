@@ -133,7 +133,9 @@ if (!options.config) throw new Error("--config is required");
 const configPath = path.resolve(rootDir, options.config);
 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
 const text = await readSource(source, options.authorizationEnv);
-const plan = buildImportPlan(text, config);
+const plan = buildImportPlan(text, config, {
+  allowRelativeDemoUrls: options.sourceType === "manual_mock",
+});
 const report = {
   config: config.name ?? path.basename(configPath),
   feedHash: plan.feedHash,

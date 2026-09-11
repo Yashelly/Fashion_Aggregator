@@ -4,6 +4,7 @@ import { loadLocalEnv } from "./cloud-search-providers.mjs";
 import {
   checkDataApiConnection,
   checkPostgresConnection,
+  checkPublicCatalogConnection,
 } from "./search-doctor-lib.mjs";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -25,8 +26,10 @@ for (const [name, present] of Object.entries(checks)) {
 
 if (indexerOnly) {
   console.log("Remote search index: SKIPPED (--indexer-only)");
+  console.log("Remote catalog: SKIPPED (--indexer-only)");
 } else if (!checks.NEXT_PUBLIC_SUPABASE_URL || !checks.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
   console.log("Remote search index: SKIPPED (public Supabase env is incomplete)");
+  console.log("Remote catalog: SKIPPED (public Supabase env is incomplete)");
   process.exitCode = 1;
 } else {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL.trim().replace(/\/$/, "");
@@ -54,6 +57,14 @@ if (indexerOnly) {
     }
   } catch (error) {
     console.log(`Remote search index: UNREACHABLE (${error instanceof Error ? error.name : "unknown error"})`);
+    process.exitCode = 1;
+  }
+
+  const catalog = await checkPublicCatalogConnection(url, key);
+  if (catalog.ready) {
+    console.log("Remote catalog: READY (public read verified)");
+  } else {
+    console.log(`Remote catalog: NOT READY (${catalog.detail})`);
     process.exitCode = 1;
   }
 }

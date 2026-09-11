@@ -240,7 +240,7 @@ A pre-affiliate Next.js (App Router) fashion discovery/search MVP for Lithuanian
 
 This is the single most important cross-cutting constraint in the codebase:
 
-- All products come from `data/mock_products.csv`, filtered by `lib/mock-products.ts` to rows where `source_status === "mock_not_live"`.
+- Runtime pages prefer the RLS-protected Supabase `catalog_products` read model and filter to `source_status === "mock_not_live"`; `data/mock_products.csv` is the deterministic seed input and outage/bootstrap fallback.
 - Internal retailer identity (`data/store_tracker.csv`, `store_slug`) is never exposed publicly. `lib/demo-stores.ts` maps each internal slug to one of 6 neutral public IDs (`demo-store-01`…`06`) via a stable hash; only those public IDs/labels may reach URLs, search filters, or rendered copy.
 - `app/out/[productId]/page.tsx` renders a synthetic click-out preview and 404s on unknown IDs, but **never redirects to a merchant**. A real redirect requires an approved affiliate feed plus destination/host validation that does not exist yet.
 - Stores with `source_status: market_suspended` (e.g. Factcool LT, per `data/store_tracker.csv`/`README.md`) are excluded from the public store list entirely.
@@ -261,8 +261,8 @@ This is the single most important cross-cutting constraint in the codebase:
 |-----------|---------|
 | `app/` | Next.js App Router — pages, layout, and the analytics API routes (see `app/AGENTS.md`). |
 | `components/` | Shared React components: page chrome, product grid, search/account/AI-fitting-room UI, loading mascot, analytics beacons (see `components/AGENTS.md`). |
-| `lib/` | Server/browser utilities: mock catalog + demo-store mapping, i18n, optional Supabase clients, optional PostHog analytics (see `lib/AGENTS.md`). |
-| `data/` | Source CSVs for the mock product catalog and internal store tracker (see `data/AGENTS.md`). |
+| `lib/` | Server/browser utilities: Supabase-first catalog + CSV fallback, demo-store mapping, i18n, optional Supabase clients, optional PostHog analytics (see `lib/AGENTS.md`). |
+| `data/` | Synthetic catalog seed/fallback and internal store tracker CSVs (see `data/AGENTS.md`). |
 | `docs/` | Planning/reference documentation (PRD, feed-import spec, affiliate research, legal drafts) — non-normative; `CLAUDE.md`/`DESIGN.md`/`README.md` are the current-state source of truth (see `docs/AGENTS.md`, `docs/legal/AGENTS.md`). |
 | `public/` | Static assets — demo product photography and hero imagery (see `public/AGENTS.md`). |
 | `scripts/` | Python Playwright locale/E2E regression suite (see `scripts/AGENTS.md`). |
