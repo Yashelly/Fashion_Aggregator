@@ -316,7 +316,7 @@ migrations 001–003/005/006, and runs importer/catalog scenarios; it never conn
 to Supabase or any production database.
 
 Production feed runs use `.github/workflows/feed-import.yml`, never the admin
-`postgres` credential. Migration 006 creates a passwordless
+`postgres` credential. Migration 006 creates a credential-unconfigured
 `weft_feed_importer` login with RLS-constrained select/insert/update privileges,
 no delete permission on source tables, a two-connection limit, and bounded
 statement/lock timeouts. Set its password outside Git, then store a Session
