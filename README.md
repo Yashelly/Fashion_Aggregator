@@ -261,6 +261,15 @@ to `.env.local`, fill the Gemini and Supabase values, run
 `npm run search:migrate`, then `npm run search:index`, and verify with
 `npm run search:doctor`. The doctor prints presence/readiness only, never keys.
 
+Production index refreshes are automated by
+`.github/workflows/search-index.yml`. It runs after catalog/search-document
+changes reach `main` and can also be started manually. Configure the repository
+secret `GEMINI_API_KEY` plus either `SUPABASE_URL` and a dedicated Supabase
+`SUPABASE_SECRET_KEY` (preferred), or `SUPABASE_DB_URL`. Privileged credentials
+are server-only and must never be added to Vercel client variables or source
+control. Direct Postgres remains an indexing fallback, not a production runtime
+dependency.
+
 ## Validation
 
 ```bash

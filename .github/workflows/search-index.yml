@@ -1,0 +1,45 @@
+name: Refresh production search index
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - data/mock_products.csv
+      - data/product_attributes.csv
+      - scripts/cloud-search-providers.mjs
+      - scripts/index-search-products.mjs
+      - scripts/load-search.mjs
+      - scripts/search-catalog.mjs
+      - lib/semantic-search.ts
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-search-index
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    name: Embed catalog and upsert pgvector index
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install (clean, from lockfile)
+        run: npm ci
+
+      - name: Refresh search index
+        run: npm run search:index
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
