@@ -312,8 +312,26 @@ out of stock; `--partial` disables that behavior. Feed URLs and authorization
 values are never printed, and only a non-secret/redacted source label is stored.
 The committed fixture and mapping profile are synthetic and are not loaded by
 the public storefront. CI creates a disposable PostgreSQL 17 service, applies
-migrations 001–003/005, and runs importer/catalog scenarios; it never connects
+migrations 001–003/005/006, and runs importer/catalog scenarios; it never connects
 to Supabase or any production database.
+
+Production feed runs use `.github/workflows/feed-import.yml`, never the admin
+`postgres` credential. Migration 006 creates a passwordless
+`weft_feed_importer` login with RLS-constrained select/insert/update privileges,
+no delete permission on source tables, a two-connection limit, and bounded
+statement/lock timeouts. Set its password outside Git, then store a Session
+pooler URL using `weft_feed_importer.<project-ref>` in the protected
+`production-feed-import` GitHub Environment as `SUPABASE_IMPORT_DB_URL`.
+
+That environment also owns `FEED_SOURCE_URL`, optional `FEED_AUTHORIZATION`,
+`FEED_SOURCE_LABEL`, `FEED_STORE_SLUG`, and `SUPABASE_ANON_KEY`. Configure a
+required reviewer before adding secrets. Every workflow run is manually
+dispatched and environment-gated; `apply=false` performs validation only.
+`apply=true` additionally requires the exact `IMPORT_APPROVED_FEED`
+confirmation, imports the already-validated plan, rebuilds the search index from
+the safe Supabase catalog read model, and runs the public catalog/search doctor.
+The workflow serializes runs and never prints the feed URL or authorization.
+Do not schedule it until a real feed and its update contract are approved.
 
 The storefront catalog is seeded through that importer as six neutral demo
 stores. Dry-run is the default:
@@ -340,6 +358,7 @@ npm run test:search      # semantic-search relevance eval (no server needed)
 npm run build            # next build
 npm run search:probe:production # confirm the live AI path with synthetic probes
 npm run feed:dry-run     # validate the committed synthetic feed; no DB writes
+npm run feed:operate     # guarded CI/operator entry point; env-configured
 npm run test:feed:postgres # apply/idempotency suite; requires local weft_test PostgreSQL
 npm run test:catalog:postgres # run after test:feed:postgres in the same weft_test DB
 

@@ -27,10 +27,14 @@ Holds the search evaluation data/harness and the Playwright-driven locale regres
 | `import-feed.mjs` | Generic provider-profile feed CLI; dry-run by default, explicit guarded PostgreSQL apply. |
 | `feed-import-core.mjs` | Pure CSV/TSV/JSON/flat-XML parsing, normalization, validation, and stable hashing. |
 | `feed-import-postgres.mjs` | Transactional store/rules-gated writes to import runs, raw items, and products. |
+| `feed-operation.mjs` | Environment-driven production wrapper that validates dynamic inputs, refuses admin DB URLs, and invokes the generic importer without a shell. |
+| `feed-operation.test.mjs` | Regression tests for secret isolation, role enforcement, and untrusted workflow inputs. |
 | `feed-import.test.mjs` | Parser, mapping, validation, safety, and idempotency regression tests. |
-| `feed-import-postgres.integration.mjs` | Localhost-only `weft_test` integration suite that applies migrations 001–003/005 and verifies seven transactional apply/idempotency scenarios. |
+| `feed-import-postgres.integration.mjs` | Localhost-only `weft_test` integration suite that applies migrations 001–003/005/006 and verifies the dedicated importer role plus seven transactional apply/idempotency scenarios. |
 | `seed-demo-catalog.mjs` | Dry-run-by-default 64-product synthetic catalog seed; groups rows into six neutral stores and writes through the generic importer only with `--apply`. |
 | `catalog-postgres.integration.mjs` | Runs after the feed DB test and verifies seed idempotency, trigger refresh, store pause behavior, safe view columns, grants, and RLS as `anon`. |
+| `search-catalog-postgres.mjs` | Loads only shopper-safe catalog view columns for a post-import pgvector refresh. |
+| `search-catalog-postgres.test.mjs` | Locks the private-to-search shape boundary and excludes source UUIDs. |
 | `__pycache__/locale_e2e.cpython-312.pyc` | Compiled bytecode cache from a prior run; not source, safe to ignore/regenerate. |
 
 ## Structure (as read from source)

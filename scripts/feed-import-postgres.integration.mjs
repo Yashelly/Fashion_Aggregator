@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import postgres from "postgres";
 import { buildImportPlan } from "./feed-import-core.mjs";
 import { applyImportPlan } from "./feed-import-postgres.mjs";
+import { loadSearchProductsFromPostgres } from "./search-catalog-postgres.mjs";
 import { checkPostgresConnection } from "./search-doctor-lib.mjs";
 
 const rootDir = process.cwd();
@@ -26,6 +27,9 @@ const fixture = fs.readFileSync(
   "utf8",
 );
 const sql = postgres(databaseUrl, { max: 1, prepare: false, ssl: false });
+const importerDatabaseUrl = new URL(databaseUrl);
+importerDatabaseUrl.username = "weft_feed_importer";
+importerDatabaseUrl.password = "weft-ci-importer-password";
 
 function withoutRow(text, externalProductId) {
   return text
@@ -37,7 +41,7 @@ function withoutRow(text, externalProductId) {
 async function apply(text, { fullSnapshot = true } = {}) {
   const plan = buildImportPlan(text, config);
   return applyImportPlan({
-    databaseUrl,
+    databaseUrl: importerDatabaseUrl.toString(),
     fullSnapshot,
     plan,
     sourceFormat: config.format,
@@ -63,9 +67,11 @@ try {
     "002_pre_affiliate_hardening.sql",
     "003_synthetic_click_boundary.sql",
     "005_public_catalog_read_model.sql",
+    "006_feed_importer_role.sql",
   ]) {
     await sql.unsafe(fs.readFileSync(path.join(rootDir, "sql", migration), "utf8"));
   }
+  await sql.unsafe("alter role weft_feed_importer password 'weft-ci-importer-password'");
   await sql`
     insert into public.stores (
       slug, display_name, affiliate_status, feed_status, public_listing_status
@@ -76,6 +82,28 @@ try {
 
   const doctor = await checkPostgresConnection(databaseUrl);
   assert.deepEqual(doctor, { backend: "direct Postgres", ready: true });
+  const importerDoctor = await checkPostgresConnection(importerDatabaseUrl.toString());
+  assert.deepEqual(importerDoctor, { backend: "direct Postgres", ready: true });
+
+  const importerSql = postgres(importerDatabaseUrl.toString(), {
+    max: 1,
+    prepare: false,
+    ssl: false,
+  });
+  try {
+    const [{ current_user: currentUser }] = await importerSql`select current_user`;
+    assert.equal(currentUser, "weft_feed_importer");
+    await assert.rejects(
+      importerSql`update public.stores set display_name = display_name`,
+      (error) => error?.code === "42501",
+    );
+    await assert.rejects(
+      importerSql`delete from public.products`,
+      (error) => error?.code === "42501",
+    );
+  } finally {
+    await importerSql.end();
+  }
 
   const first = await apply(fixture);
   assert.deepEqual(
@@ -137,9 +165,12 @@ try {
   assert.equal(productCount, 4);
   assert.equal(runCount, 7);
   assert.equal(rawCount, 34);
+  const searchableProducts = await loadSearchProductsFromPostgres(importerDatabaseUrl.toString());
+  assert.equal(searchableProducts.length, 4);
+  assert.equal(searchableProducts.every((product) => product.source_status === "mock_not_live"), true);
 
   console.log("Feed importer PostgreSQL integration: PASS");
-  console.log(JSON.stringify({ productCount, rawCount, runCount, scenarios: 7 }));
+  console.log(JSON.stringify({ productCount, rawCount, runCount, searchableProducts: 4, scenarios: 7 }));
 } finally {
   await sql.end();
 }
