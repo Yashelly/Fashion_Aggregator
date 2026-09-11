@@ -124,6 +124,26 @@ async function run() {
     "the only black hoodie costs less than the requested minimum",
   );
 
+  const searchAnalytics = await fetch(`${ORIGIN}/api/analytics/search`, {
+    method: "POST",
+    headers: sameOrigin,
+    body: JSON.stringify({
+      query: "wool coat",
+      resultCount: 2,
+      searchDiagnostics: {
+        cacheStatus: "miss",
+        durationMs: 125,
+        mode: "hybrid-confirmed",
+      },
+      sourcePage: "/search",
+    }),
+  });
+  check(
+    "POST /api/analytics/search accepts bounded runtime diagnostics",
+    searchAnalytics.status === 202,
+    `status ${searchAnalytics.status}`,
+  );
+
   // 3. Product on-site preview guard resolves for a valid id and 404s otherwise.
   const validOut = await fetch(`${ORIGIN}/out/MOCK-045`, { redirect: "manual" });
   check("GET /out/MOCK-045 resolves (200, no external redirect)", validOut.status === 200, `status ${validOut.status}`);

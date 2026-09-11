@@ -270,6 +270,19 @@ are server-only and must never be added to Vercel client variables or source
 control. Direct Postgres remains an indexing fallback, not a production runtime
 dependency.
 
+Production search health is checked every six hours by
+`.github/workflows/search-production-monitor.yml` using one strict synthetic
+probe to keep Gemini usage bounded; a manual run executes all three probes.
+They are deliberately chosen so the deterministic fallback produces different
+answers, so a green run confirms the live hybrid AI path rather than merely
+confirming that `/search` returned HTTP 200. Runtime logs and the
+`search_performed` PostHog event record `hybrid-confirmed`,
+`hybrid-or-fallback`, or `browse`, plus bounded latency and cache status, without
+putting the query text into server logs. Confirmed hybrid results use a
+five-minute, 200-entry process-local TTL/LRU cache with concurrent request
+coalescing. Ambiguous/fallback-equivalent results are not retained, so an
+upstream outage cannot pin fallback output in cache.
+
 ## Validation
 
 ```bash
@@ -277,6 +290,7 @@ npm run typecheck        # tsc --noEmit
 npm run test:unit        # search-engine invariants (node:test)
 npm run test:search      # semantic-search relevance eval (no server needed)
 npm run build            # next build
+npm run search:probe:production # confirm the live AI path with synthetic probes
 
 # full-stack HTTP smoke: search render + /out guard + click-endpoint security
 npm run build && npm run test:integration

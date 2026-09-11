@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { recordRecentSearch } from "@/lib/recent-searches";
+import type { SearchRuntimeDiagnostics } from "@/lib/search-runtime-cache";
 
 const FILTER_KEYS = ["availability", "category", "color", "gender", "sale", "status", "store"] as const;
 
@@ -23,7 +24,13 @@ function getAnonymousId() {
   return created;
 }
 
-export function SearchAnalyticsTracker({ resultCount }: { resultCount: number }) {
+export function SearchAnalyticsTracker({
+  diagnostics,
+  resultCount,
+}: {
+  diagnostics: SearchRuntimeDiagnostics;
+  resultCount: number;
+}) {
   const params = useSearchParams();
   const signature = params.toString();
 
@@ -48,6 +55,7 @@ export function SearchAnalyticsTracker({ resultCount }: { resultCount: number })
           filters,
           sort: params.get("sort"),
           resultCount,
+          searchDiagnostics: diagnostics,
           sourcePage: "/search",
         }),
         keepalive: true,
@@ -57,7 +65,7 @@ export function SearchAnalyticsTracker({ resultCount }: { resultCount: number })
     }, 250);
 
     return () => window.clearTimeout(timer);
-  }, [params, resultCount, signature]);
+  }, [diagnostics, params, resultCount, signature]);
 
   return null;
 }
