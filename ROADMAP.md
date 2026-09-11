@@ -26,7 +26,9 @@ overlooked.
       provider-agnostic product-level importer landed on 2026-09-11 with strict
       CSV/TSV/JSON/flat-XML parsing, dry-run validation, raw-row audit storage,
       stable hashes, approval/rules gates, and transactional idempotent product
-      reconciliation. No live feed or credentials are connected yet.
+      reconciliation. A disposable PostgreSQL 17 CI job now applies migrations
+      001–003 and verifies seven apply/idempotency scenarios. No live feed or
+      production credentials are connected yet.
 - [x] Legal/GDPR baseline (2026-07-31). Live privacy page now covers cookie
       use and EU/EEA data rights in both languages. Cookie consent banner
       built and exercised, rendered only when

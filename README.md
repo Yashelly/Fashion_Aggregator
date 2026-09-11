@@ -160,9 +160,10 @@ Four incremental migrations (`sql/00N_*.sql`) model the pre-affiliate schema and
 the synthetic-click analytics boundary: a feed-import lifecycle
 (`feed_import_runs` + `raw_feed_items` with jsonb payloads and validation state),
 content-hash columns, variants, per-relationship `on delete` rules, and FK/GIN
-indexes chosen for real query patterns. **The lifecycle's auditability and
-hash-based idempotency are schema *intent*, not enforced guarantees** — there is
-no feed importer yet, and `status`/counters/hashes are unconstrained metadata (see
+indexes chosen for real query patterns. The generic importer now exercises that
+lifecycle transactionally, and CI proves its insert/re-import/update/full-snapshot
+behavior against a disposable PostgreSQL 17 database. `status`/counters/hashes
+remain application-maintained metadata rather than database-generated values (see
 `docs/data-model.md` and `sql/AGENTS.md`). Private domain and analytics tables
 remain `service_role`-only. Migration 004 exposes only public search documents
 and a read-only `security invoker` RPC to `anon`/`authenticated`; RLS restricts
@@ -309,7 +310,9 @@ unchanged reconciliation. Full snapshots mark previously active missing products
 out of stock; `--partial` disables that behavior. Feed URLs and authorization
 values are never printed, and only a non-secret/redacted source label is stored.
 The committed fixture and mapping profile are synthetic and are not loaded by
-the public storefront.
+the public storefront. CI creates a disposable PostgreSQL 17 service, applies
+migrations 001–003, and runs seven apply/idempotency scenarios; it never connects
+to Supabase or any production database.
 
 ## Validation
 
@@ -320,6 +323,7 @@ npm run test:search      # semantic-search relevance eval (no server needed)
 npm run build            # next build
 npm run search:probe:production # confirm the live AI path with synthetic probes
 npm run feed:dry-run     # validate the committed synthetic feed; no DB writes
+npm run test:feed:postgres # apply/idempotency suite; requires local weft_test PostgreSQL
 
 # full-stack HTTP smoke: search render + /out guard + click-endpoint security
 npm run build && npm run test:integration
