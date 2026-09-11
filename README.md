@@ -157,7 +157,7 @@ route, internal links, search filters, mobile/desktop layouts, browser history,
 and `/out` success/404 across both locales.
 
 **6. Feed-oriented PostgreSQL schema with RLS.**
-Four incremental migrations (`sql/00N_*.sql`) model the pre-affiliate schema and
+Five incremental migrations (`sql/00N_*.sql`) model the pre-affiliate schema and
 the synthetic-click analytics boundary: a feed-import lifecycle
 (`feed_import_runs` + `raw_feed_items` with jsonb payloads and validation state),
 content-hash columns, variants, per-relationship `on delete` rules, and FK/GIN
@@ -241,9 +241,9 @@ The full protocol, anti-leakage rules, category table, and immutable report live
 ```
 app/            App Router pages (server components) + analytics API routes
 components/     React UI: search, product grid/detail, account, fitting room
-lib/            Domain logic — semantic-search, mock-products, i18n,
-                demo-stores, product-listings, analytics, supabase clients
-data/           Synthetic catalog + store tracker (CSV)
+lib/            Domain logic — Supabase-first catalog, semantic search, i18n,
+                demo stores, product listings, analytics, Supabase clients
+data/           Synthetic catalog seed/fallback + store tracker (CSV)
 sql/            Incremental PostgreSQL migrations (RLS-hardened)
 scripts/        Search eval harness + Playwright locale suite + data gen
 docs/           Product/UX audits, data-workflow and feed-format research
@@ -312,7 +312,7 @@ out of stock; `--partial` disables that behavior. Feed URLs and authorization
 values are never printed, and only a non-secret/redacted source label is stored.
 The committed fixture and mapping profile are synthetic and are not loaded by
 the public storefront. CI creates a disposable PostgreSQL 17 service, applies
-migrations 001–003, and runs seven apply/idempotency scenarios; it never connects
+migrations 001–003/005, and runs importer/catalog scenarios; it never connects
 to Supabase or any production database.
 
 The storefront catalog is seeded through that importer as six neutral demo
