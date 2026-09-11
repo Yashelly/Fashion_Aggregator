@@ -1,0 +1,37 @@
+name: Monitor production hybrid search
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-search-monitor
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    name: Confirm live AI search path
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Run scheduled low-cost probe
+        if: github.event_name == 'schedule'
+        run: node scripts/check-production-search.mjs --scheduled
+        env:
+          SEARCH_PROBE_BASE_URL: https://fashion-aggregator-flame.vercel.app
+
+      - name: Run full manual probe
+        if: github.event_name == 'workflow_dispatch'
+        run: node scripts/check-production-search.mjs
+        env:
+          SEARCH_PROBE_BASE_URL: https://fashion-aggregator-flame.vercel.app

@@ -29,9 +29,35 @@ type SearchEventBody = {
   filters?: unknown;
   query?: unknown;
   resultCount?: unknown;
+  searchDiagnostics?: unknown;
   sort?: unknown;
   sourcePage?: unknown;
 };
+
+const SEARCH_MODES = new Set([
+  "browse",
+  "hybrid-confirmed",
+  "hybrid-or-fallback",
+]);
+const CACHE_STATUSES = new Set(["bypass", "hit", "miss", "shared"]);
+
+function cleanSearchDiagnostics(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const input = value as Record<string, unknown>;
+  if (typeof input.mode !== "string" || !SEARCH_MODES.has(input.mode)) return null;
+  if (typeof input.cacheStatus !== "string" || !CACHE_STATUSES.has(input.cacheStatus)) return null;
+  if (
+    typeof input.durationMs !== "number"
+    || !Number.isInteger(input.durationMs)
+    || input.durationMs < 0
+    || input.durationMs > 60_000
+  ) return null;
+  return {
+    cacheStatus: input.cacheStatus,
+    durationMs: input.durationMs,
+    mode: input.mode,
+  };
+}
 
 function cleanText(value: unknown, maxLength: number) {
   if (typeof value !== "string") return null;
@@ -109,6 +135,7 @@ export async function POST(request: Request) {
   const filters = cleanFilters(body.filters);
   const sort = cleanText(body.sort, 50);
   const sourcePage = cleanText(body.sourcePage, 120) || "/search";
+  const searchDiagnostics = cleanSearchDiagnostics(body.searchDiagnostics);
   const referrerUrl = cleanText(request.headers.get("referer"), 500);
   const userAgent = cleanText(request.headers.get("user-agent"), 500);
 
@@ -128,6 +155,9 @@ export async function POST(request: Request) {
       filter_count: Object.keys(filters).length,
       has_query: Boolean(query),
       result_count: resultCount,
+      search_cache_status: searchDiagnostics?.cacheStatus,
+      search_duration_ms: searchDiagnostics?.durationMs,
+      search_mode: searchDiagnostics?.mode,
       sort_key: sort,
       source_page: sourcePage,
     }),
