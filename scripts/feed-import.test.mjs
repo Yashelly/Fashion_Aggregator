@@ -71,7 +71,8 @@ test("content hashes make insert, update, and unchanged decisions deterministic"
   const hash = first.rows[0].contentHash;
 
   assert.equal(first.feedHash, second.feedHash);
-  assert.equal(classifyProductChange(null, hash), "inserted");
+  assert.equal(classifyProductChange(undefined, hash), "inserted");
+  assert.equal(classifyProductChange(null, hash), "updated");
   assert.equal(classifyProductChange(hash, hash), "unchanged");
   assert.equal(classifyProductChange("different", hash), "updated");
 });
