@@ -5,7 +5,10 @@
 
 ## Purpose
 
-Two hand-maintained CSV files that back the entire synthetic demo catalog and the internal retailer-tracking sheet for Weft. There is no database, ORM, or seed script here — these files are read directly from disk at request time by `lib/mock-products.ts` and `lib/demo-stores.ts`. This is a pre-affiliate MVP: no live retailer catalog exists anywhere in the repo, and every row in `mock_products.csv` is explicitly synthetic ("Synthetic demo item; not a real merchant product." in the `notes` column).
+Two hand-maintained CSV files back the synthetic storefront and internal retailer
+tracker. Additional `feed-configs/` and `feed-fixtures/` directories exercise the
+pre-affiliate importer; they are test/operator inputs and are never read by the
+public storefront. No live retailer catalog exists in the repo.
 
 ## Key Files
 
@@ -13,6 +16,8 @@ Two hand-maintained CSV files that back the entire synthetic demo catalog and th
 |------|--------------|
 | `mock_products.csv` | 64 synthetic demo products (header + 64 rows). Public catalog source. |
 | `store_tracker.csv` | 7 internal retailer/affiliate-program tracking rows (header + 7 rows). Never rendered publicly as-is. |
+| `feed-configs/weft-test-feed.json` | Versioned alias/category/availability mapping profile for the synthetic importer fixture. |
+| `feed-fixtures/weft-test-feed.csv` | Synthetic five-row feed used only by dry-run and importer tests. |
 
 ## Data Model
 

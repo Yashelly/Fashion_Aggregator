@@ -4,6 +4,12 @@
 
 The MVP must import products only from approved affiliate/product feeds or explicitly permitted partner feeds. The importer is not a scraper and must not use retailer web pages as the data source unless written permission exists.
 
+Implementation status: the product-level CSV/TSV/JSON/flat-XML parser,
+normalizer, validator, dry-run report, and transactional PostgreSQL writer are
+implemented in `scripts/import-feed*.mjs`. The committed test feed is synthetic.
+No live provider mapping or credentials are connected, product variants are not
+yet written, and the public storefront still reads `data/mock_products.csv`.
+
 First-wave feed targets:
 
 | Store | Network path | MVP feed assumption |
