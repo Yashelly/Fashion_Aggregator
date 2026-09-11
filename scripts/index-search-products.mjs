@@ -6,6 +6,7 @@ import postgres from "postgres";
 import { EMBEDDING_PROVIDERS, loadLocalEnv } from "./cloud-search-providers.mjs";
 import { loadSemanticSearch } from "./load-search.mjs";
 import { loadSearchProducts, productDocument } from "./search-catalog.mjs";
+import { loadSearchProductsFromPostgres } from "./search-catalog-postgres.mjs";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const BATCH_SIZE = 32;
@@ -190,6 +191,7 @@ async function indexWithPostgres(documents, provider, databaseUrl) {
 
 async function main() {
   const databaseUrl = process.env.SUPABASE_DB_URL?.trim();
+  const catalogDatabaseUrl = process.env.SEARCH_CATALOG_DB_URL?.trim();
   const secretKey = process.env.SUPABASE_SECRET_KEY?.trim();
   const supabaseUrl = (process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL)?.trim();
   if ((!secretKey || !supabaseUrl) && !databaseUrl) {
@@ -198,7 +200,10 @@ async function main() {
 
   const provider = EMBEDDING_PROVIDERS.gemini;
   const engine = loadSemanticSearch();
-  const products = loadSearchProducts(rootDir);
+  const products = catalogDatabaseUrl
+    ? await loadSearchProductsFromPostgres(catalogDatabaseUrl)
+    : loadSearchProducts(rootDir);
+  console.log(`Catalog source: ${catalogDatabaseUrl ? "Supabase read model" : "bundled CSV"}`);
   const documents = products.map((product) => {
     const content = productDocument(product);
     return {
