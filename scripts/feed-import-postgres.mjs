@@ -1,6 +1,11 @@
 import postgres from "postgres";
 import { classifyProductChange } from "./feed-import-core.mjs";
 
+function postgresSsl(databaseUrl) {
+  const host = new URL(databaseUrl).hostname;
+  return new Set(["127.0.0.1", "::1", "localhost"]).has(host) ? false : "require";
+}
+
 export function assertStoreCanImport(store, sourceType) {
   if (store.feed_status === "paused" || store.affiliate_status === "blocked") {
     throw new Error(`Store ${store.slug} is paused or blocked`);
@@ -60,7 +65,11 @@ export async function applyImportPlan({
   if (!plan.summary.canApply) {
     throw new Error("Import plan is not safe to apply; fix dry-run validation errors first");
   }
-  const sql = postgres(databaseUrl, { max: 1, prepare: false, ssl: "require" });
+  const sql = postgres(databaseUrl, {
+    max: 1,
+    prepare: false,
+    ssl: postgresSsl(databaseUrl),
+  });
   let runId;
 
   try {
