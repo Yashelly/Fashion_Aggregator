@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "name": "weft-test-feed-v1",
+  "format": "csv",
+  "fields": {
+    "external_product_id": ["id", "product_id"],
+    "source_sku": ["sku"],
+    "title": ["name", "title"],
+    "brand": ["brand"],
+    "description": ["description"],
+    "merchant_category": ["category"],
+    "gender": ["department", "gender"],
+    "color_label": ["colour", "color"],
+    "material": ["material"],
+    "product_url": ["product_link", "url"],
+    "affiliate_url": ["tracking_link"],
+    "image_url": ["image_link", "image"],
+    "currency": ["currency"],
+    "price": ["current_price", "price"],
+    "sale_price": ["sale_price"],
+    "old_price": ["was_price"],
+    "availability": ["stock_status", "availability"],
+    "size_summary": ["sizes"]
+  },
+  "defaults": {
+    "currency": "EUR"
+  },
+  "categoryMap": {
+    "coats & jackets": "jackets",
+    "footwear > trainers": "sneakers",
+    "accessories > bags": "bags",
+    "tops > shirts": "tops"
+  },
+  "availabilityMap": {
+    "ready to ship": {
+      "in_stock": true,
+      "status": "active"
+    }
+  }
+}
