@@ -4,11 +4,12 @@ import { ProductGrid } from "@/components/product-grid";
 import { FilterDisclosure } from "@/components/filter-disclosure";
 import { SearchForm } from "@/components/search-form";
 import { SearchAnalyticsTracker } from "@/components/search-analytics-tracker";
+import { getCatalogProducts } from "@/lib/catalog";
 import {
   formatAvailabilityLabel, formatCategoryLabel, formatColorLabel, formatGenderLabel,
   getCopy, getLocale, normalizeParams, type SearchParamsInput, withLocale,
 } from "@/lib/i18n";
-import { getMockProducts, getStoreOptions, sortProducts } from "@/lib/mock-products";
+import { getStoreOptions, sortProducts } from "@/lib/mock-products";
 import { searchProductsWithRuntime } from "@/lib/search-runtime";
 
 type SearchPageProps = { searchParams: Promise<Record<string, string | string[] | undefined>> };
@@ -43,7 +44,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = normalizeParams((await searchParams) as SearchParamsInput);
   const locale = getLocale(params);
   const t = getCopy(locale).search;
-  const products = getMockProducts();
+  const products = await getCatalogProducts();
   const {
     results: matched,
     relevance,

@@ -47,7 +47,7 @@ Every `page.tsx` in this table is a thin, self-contained composition of `lib/i18
 
 - Every new page must resolve `Locale` via `lib/i18n.ts` (`getLocale`), not by inventing ad hoc locale detection — `error.tsx` and `not-found.tsx` show the two supported fallback patterns (client: query param/`document.lang`; server: cookie).
 - Respect the demo-data boundary (see root `AGENTS.md` project-documentation section and `README.md`): no page here may render real retailer names, logos, or a live purchase/checkout action. `out/[productId]/` is the canonical example of the guard pattern.
-- `dynamicParams` / `generateStaticParams` (see `out/[productId]/page.tsx`) statically prebuild one route per mock product — if the product set changes shape, rebuild is required for new IDs to resolve.
+- `generateStaticParams` (see `out/[productId]/page.tsx`) prebuilds the current catalog, while `dynamicParams = true` lets newly imported IDs resolve without waiting for a rebuild.
 
 ### Testing Requirements
 
@@ -56,7 +56,7 @@ There is no component/unit test suite for `app/`. Verification is `npm run build
 ## Dependencies
 
 ### Internal
-- `lib/i18n.ts` (locale + copy), `lib/mock-products.ts` (catalog), `lib/demo-stores.ts` (public store identity), `components/*` (all page-level composition).
+- `lib/i18n.ts` (locale + copy), `lib/catalog.ts` (Supabase-first catalog with CSV fallback), `lib/mock-products.ts` (types/pure search utilities), `lib/demo-stores.ts` (public store identity), `components/*` (all page-level composition).
 
 ### External
 - `next/font/google` (Syne, IBM Plex Sans), `lucide-react` (icons throughout).

@@ -5,7 +5,7 @@ import {
   normalizeAnonymousId,
 } from "@/lib/analytics";
 import { saveBlockedPreviewClick } from "@/lib/analytics-storage";
-import { getMockProducts } from "@/lib/mock-products";
+import { getCatalogProducts } from "@/lib/catalog";
 import { isSameOrigin } from "@/lib/request-security";
 
 export const runtime = "nodejs";
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
   }
 
   const productId = cleanText(body.productId, 64);
-  const product = getMockProducts().find(
+  const product = (await getCatalogProducts()).find(
     (candidate) => candidate.mock_product_id === productId,
   );
   if (!product) {

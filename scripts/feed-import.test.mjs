@@ -100,6 +100,21 @@ test("a row without an image is audited but excluded from public product writes"
   assert.equal(plan.summary.publicRows, 3);
 });
 
+test("relative demo paths require the explicit manual-mock boundary", () => {
+  const relative = fixture
+    .replace("https://merchant.invalid/products/test-001", "/mock/products/TEST-001")
+    .replace("https://merchant.invalid/images/test-001.webp", "/demo-products/product-01.webp");
+  const strict = buildImportPlan(relative, config);
+  assert.equal(strict.rows[0].validationStatus, "invalid");
+
+  const manualMock = buildImportPlan(relative, config, { allowRelativeDemoUrls: true });
+  assert.equal(manualMock.rows[0].validationStatus, "valid");
+
+  const traversal = relative.replace("/mock/products/TEST-001", "/mock/products/../TEST-001");
+  const rejected = buildImportPlan(traversal, config, { allowRelativeDemoUrls: true });
+  assert.equal(rejected.rows[0].validationErrors.includes("invalid_product_url"), true);
+});
+
 test("apply policy requires an approved store and compatible program rules", () => {
   const approved = {
     affiliate_status: "approved_feed",

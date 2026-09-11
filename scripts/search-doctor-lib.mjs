@@ -69,3 +69,32 @@ export async function checkDataApiConnection(supabaseUrl, secretKey) {
     clearTimeout(timeout);
   }
 }
+
+export async function checkPublicCatalogConnection(supabaseUrl, publicKey) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5_000);
+  try {
+    const response = await fetch(
+      `${supabaseUrl.replace(/\/$/, "")}/rest/v1/catalog_products?select=public_product_id&limit=1`,
+      {
+        headers: {
+          apikey: publicKey,
+          Authorization: `Bearer ${publicKey}`,
+        },
+        signal: controller.signal,
+      },
+    );
+    if (!response.ok) {
+      return { detail: `HTTP ${response.status}`, ready: false };
+    }
+    const rows = await response.json();
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return { detail: "no public products", ready: false };
+    }
+    return { ready: true };
+  } catch (error) {
+    return { detail: safeConnectionError(error), ready: false };
+  } finally {
+    clearTimeout(timeout);
+  }
+}

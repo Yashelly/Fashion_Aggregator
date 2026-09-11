@@ -52,6 +52,11 @@ jobs:
         env:
           TEST_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/weft_test
 
+      - name: Supabase catalog PostgreSQL integration
+        run: npm run test:catalog:postgres
+        env:
+          TEST_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/weft_test
+
       # Deterministic search-relevance gate. Fails the build if the concept-graph
       # ranker drops below the labelled precision@k / pass-rate thresholds.
       - name: Search evaluation

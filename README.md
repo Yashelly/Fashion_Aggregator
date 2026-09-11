@@ -42,8 +42,9 @@ Ownership across the whole stack, not one slice of it:
   product/search/detail/account experience, light/dark theming, and WCAG-oriented markup.
 - **Backend / API** — server routes for click-intent and search analytics with
   same-origin validation and non-blocking capture.
-- **Data** — an incremental PostgreSQL schema with row-level security, plus a
-  hand-parsed CSV catalog layer that needs no database to run.
+- **Data** — an incremental PostgreSQL schema with row-level security and a
+  least-privilege public catalog read model, with the bundled CSV retained as
+  an outage/bootstrap fallback.
 - **Search** — Gemini Embedding 2 retrieval in Supabase/pgvector, concept-graph
   fusion, and a schema-constrained Gemini 3.6 Flash relevance judge, with a
   deterministic local fallback and leakage-resistant evaluation harness.
@@ -88,11 +89,11 @@ flowchart TD
     class PG,Gemini,PH opt;
 ```
 
-The base catalog is read and joined **in memory from CSV at request time** — the
-app has no hard database dependency. Supabase/PostgreSQL, Gemini, and PostHog are
-**optional**: search falls back locally and analytics paths no-op cleanly when
-their environment variables are unset, so the whole product runs from a clean
-clone with zero credentials.
+The storefront prefers the RLS-protected `catalog_products` Supabase read model.
+Until migration 005 and the synthetic seed are present—or during a short remote
+outage—it falls back to the bundled CSV, so the app still has no hard database
+dependency. Gemini and PostHog remain optional too: search falls back locally and
+analytics paths no-op cleanly when their environment variables are unset.
 
 ## Key engineering work
 
@@ -314,6 +315,22 @@ the public storefront. CI creates a disposable PostgreSQL 17 service, applies
 migrations 001–003, and runs seven apply/idempotency scenarios; it never connects
 to Supabase or any production database.
 
+The storefront catalog is seeded through that importer as six neutral demo
+stores. Dry-run is the default:
+
+```bash
+npm run catalog:seed:demo
+
+# After applying migration 005 and verifying the exact target database:
+npm run catalog:seed:demo -- --apply
+```
+
+Migration 005 keeps `products`, internal store slugs, source UUIDs, feed URLs,
+and raw rows private. A trigger-maintained read model exposes only shopper-safe
+fields through a `security_invoker` view with explicit `anon`/`authenticated`
+grants and RLS. The runtime uses that view first and falls back to the committed
+CSV if it is unavailable.
+
 ## Validation
 
 ```bash
@@ -324,6 +341,7 @@ npm run build            # next build
 npm run search:probe:production # confirm the live AI path with synthetic probes
 npm run feed:dry-run     # validate the committed synthetic feed; no DB writes
 npm run test:feed:postgres # apply/idempotency suite; requires local weft_test PostgreSQL
+npm run test:catalog:postgres # run after test:feed:postgres in the same weft_test DB
 
 # full-stack HTTP smoke: search render + /out guard + click-endpoint security
 npm run build && npm run test:integration
