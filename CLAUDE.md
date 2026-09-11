@@ -89,7 +89,7 @@ that never hydrates in this repo.
 
 This is the single most important constraint in the codebase and shows up in code, copy, and data:
 
-- **No live retailer catalog.** All products come from `data/mock_products.csv`, filtered to rows where `source_status === "mock_not_live"`. Only synthetic/demo products may ever render publicly.
+- **No live retailer catalog.** Runtime prefers the safe Supabase catalog projection and filters it to `source_status === "mock_not_live"`; `data/mock_products.csv` is the seed input and fallback. Only synthetic/demo products may render publicly before an approved live-feed change.
 - **Public store identity is decoupled from internal retailer identity.** `data/store_tracker.csv` holds real retailer slugs (`store_slug`, `source_status`); `lib/demo-stores.ts` maps each internal slug to one of 6 neutral public IDs (`demo-store-01`…`demo-store-06`) via a stable hash (`stableStoreIndex`). Public UI, URLs, and search filters must only ever use the public `demo-store-NN` IDs/labels — never internal retailer slugs or names.
 - **`/out/:productId` never redirects to a merchant.** It renders an onsite synthetic-preview guard for a valid mock product (404 for unknown IDs) and posts a click-intent analytics event; it does not perform an external redirect. Real redirects require an approved affiliate feed plus destination HTTPS/host/affiliate-rule validation — do not add one without that context.
 - Stores with `source_status: market_suspended` in `store_tracker.csv` are excluded from the public store list entirely (see `data/store_tracker.csv`, e.g. Factcool LT).
