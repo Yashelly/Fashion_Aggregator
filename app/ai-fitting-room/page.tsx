@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AiFittingRoom } from "@/components/ai-fitting-room";
+import { getCatalogProducts } from "@/lib/catalog";
 import { getLocale, type SearchParamsInput } from "@/lib/i18n";
-import { getMockProducts } from "@/lib/mock-products";
 
 type AiFittingRoomPageProps = {
   searchParams: Promise<SearchParamsInput>;
@@ -16,7 +16,7 @@ export default async function AiFittingRoomPage({ searchParams }: AiFittingRoomP
   const query = await searchParams;
   const locale = getLocale(query);
   const requestedProduct = Array.isArray(query.product) ? query.product[0] : query.product;
-  const products = getMockProducts()
+  const products = (await getCatalogProducts())
     .filter((product) => product.image_available && product.availability !== "out_of_stock")
     .sort((left, right) => {
       if (left.mock_product_id === requestedProduct) return -1;

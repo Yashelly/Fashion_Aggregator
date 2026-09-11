@@ -1,12 +1,12 @@
 import { ArrowRight, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { getCatalogProducts } from "@/lib/catalog";
 import {
   getPublicDemoStoreLabel,
   getPublicDemoStores,
 } from "@/lib/demo-stores";
 import { getCopy, getLocale, type SearchParamsInput, withLocale } from "@/lib/i18n";
-import { getMockProducts } from "@/lib/mock-products";
 
 type StoresPageProps = {
   searchParams: Promise<SearchParamsInput>;
@@ -15,7 +15,7 @@ type StoresPageProps = {
 export default async function StoresPage({ searchParams }: StoresPageProps) {
   const locale = getLocale(await searchParams);
   const copy = getCopy(locale).pages.stores;
-  const products = getMockProducts();
+  const products = await getCatalogProducts();
   const stores = getPublicDemoStores();
 
   return (

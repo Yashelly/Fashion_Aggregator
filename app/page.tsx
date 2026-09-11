@@ -3,8 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { CinematicHero } from "@/components/cinematic-hero";
 import { ProductGrid } from "@/components/product-grid";
+import { getCatalogProducts } from "@/lib/catalog";
 import { formatCategoryLabel, getLocale, type SearchParamsInput, withLocale } from "@/lib/i18n";
-import { getMockProducts } from "@/lib/mock-products";
 
 type HomePageProps = { searchParams: Promise<SearchParamsInput> };
 
@@ -14,7 +14,7 @@ const FEATURED_CATEGORIES = ["outerwear", "shoes", "dresses", "bags", "knitwear"
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const locale = getLocale(await searchParams);
-  const products = getMockProducts();
+  const products = await getCatalogProducts();
 
   const categoryTiles = FEATURED_CATEGORIES.map((category) => {
     const rep = products.find((p) => p.category === category && p.image_available);

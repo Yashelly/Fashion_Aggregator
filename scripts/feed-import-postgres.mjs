@@ -152,16 +152,18 @@ export async function applyImportPlan({
           const [created] = await transaction`
             insert into public.products (
               store_id, external_product_id, source_sku, title, brand, description,
-              merchant_category, normalized_category, gender, color_label, normalized_color,
-              material, product_url, affiliate_url, image_url, currency, price, sale_price,
+              merchant_category, normalized_category, subcategory, gender, color_label, normalized_color,
+              material, style_tags, product_url, affiliate_url, image_url, currency, price, sale_price,
               old_price, availability, in_stock, size_summary, status, raw_hash, content_hash,
               last_import_run_id
             ) values (
               ${store.id}, ${product.external_product_id}, ${product.source_sku || null},
               ${product.title}, ${product.brand || null}, ${product.description || null},
               ${product.merchant_category || null}, ${product.normalized_category || null},
+              ${product.subcategory || null},
               ${product.gender || null}, ${product.color_label || null},
               ${product.normalized_color || null}, ${product.material || null},
+              ${product.style_tags || null},
               ${product.product_url || null}, ${product.affiliate_url || null},
               ${product.image_url || null}, ${product.currency}, ${product.price},
               ${product.sale_price}, ${product.old_price}, ${product.availability || null},
@@ -178,8 +180,10 @@ export async function applyImportPlan({
               brand = ${product.brand || null}, description = ${product.description || null},
               merchant_category = ${product.merchant_category || null},
               normalized_category = ${product.normalized_category || null},
+              subcategory = ${product.subcategory || null},
               gender = ${product.gender || null}, color_label = ${product.color_label || null},
               normalized_color = ${product.normalized_color || null}, material = ${product.material || null},
+              style_tags = ${product.style_tags || null},
               product_url = ${product.product_url || null}, affiliate_url = ${product.affiliate_url || null},
               image_url = ${product.image_url || null}, currency = ${product.currency},
               price = ${product.price}, sale_price = ${product.sale_price}, old_price = ${product.old_price},
