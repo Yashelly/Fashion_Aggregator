@@ -102,39 +102,12 @@ class HeroQA:
             )
             page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
 
-    def shot(self, page: Page, name: str, *, full_page: bool = True) -> str:
+    def shot(self, page: Page, name: str) -> str:
         path = self.screenshots / f"{name}.png"
         page.evaluate("scrollTo(0, 0)")
-        campaign = page.locator("main .campaign")
-        if campaign.count() and campaign.is_visible():
-            campaign_box = campaign.bounding_box()
-            if campaign_box is None:
-                raise AssertionError("campaign is visible but has no rendered box")
-            original_viewport = page.viewport_size
-            if original_viewport is None:
-                raise AssertionError("hero screenshot requires a fixed viewport")
-            campaign_bottom = int(campaign_box["y"] + campaign_box["height"] + 0.999)
-            expanded = campaign_bottom > original_viewport["height"]
-            try:
-                if expanded:
-                    page.set_viewport_size({"width": original_viewport["width"], "height": campaign_bottom})
-                    page.evaluate("scrollTo(0, 0)")
-                    campaign_box = campaign.bounding_box()
-                    if campaign_box is None:
-                        raise AssertionError("campaign disappeared after expanding screenshot viewport")
-                    campaign_bottom = int(campaign_box["y"] + campaign_box["height"] + 0.999)
-                    if campaign_bottom > page.viewport_size["height"]:
-                        page.set_viewport_size({"width": original_viewport["width"], "height": campaign_bottom})
-                page.screenshot(
-                    path=str(path),
-                    clip={"x": 0, "y": 0, "width": original_viewport["width"], "height": campaign_bottom},
-                    animations="disabled",
-                )
-            finally:
-                if expanded:
-                    page.set_viewport_size(original_viewport)
-        else:
-            page.screenshot(path=str(path), full_page=full_page, animations="disabled")
+        # Never enlarge the viewport to hide an over-tall campaign. A viewport
+        # capture is the evidence for fitting beneath real browser chrome.
+        page.screenshot(path=str(path), full_page=False, animations="disabled")
         return str(path.relative_to(ROOT)).replace("\\", "/")
 
     def run(self, test_id: str, name: str, function: Callable[[], None]) -> None:
@@ -241,8 +214,7 @@ def main() -> int:
                 metrics = hero_geometry(page, width)
                 if width == 1440:
                     image_bottom = metrics["image"]["y"] + metrics["image"]["height"]
-                    assert image_bottom > height, (image_bottom, height)
-                    assert page.evaluate("document.documentElement.scrollHeight") >= image_bottom - 1
+                    assert image_bottom <= height + 1, (image_bottom, height)
                 evidence.append({"viewport": [width, height], **metrics})
                 context.close()
             qa.current_details["matrix"] = evidence

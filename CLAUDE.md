@@ -142,6 +142,10 @@ Responsive display addendum: the current UI uses rem-based dimensions, matched C
 
 Homepage addendum, 13 September 2026: the owner-approved Gemini-refined street photograph replaces the old jacket close-up and product inset. Native `picture` art direction serves full landscape desktop WebPs or a separately exported4:5 phone crop at43.75em; phone copy/CTA follows the photo. Header/search is in normal flow above the image at all widths. Image aspect ratio is preserved even on short viewports, which scroll instead of cutting off heads or shoes. See `docs/design/street-hero-verification.md` and `scripts/home_hero_e2e.py` for evidence and checks. This does not change catalog products, search behavior or deployment authority.
 
+## Viewport and spacing
+
+Viewport/spacing correction, 13 September 2026: `--collection-width:92%` in the existing CSS gives home merchandise and search four-percent side fields; phones use0.75rem. Search's enclosing focus outline is replaced by an inset underline, with a forced-colors border fallback and unchanged button keyboard outlines. Home photo now sits in `.campaign-frame`, constrained by the smaller of full width and `(100svh - --home-header-h) × 2508/1412`; the header consumes the same height token. Full image and no-JS behavior are preserved; unused side space uses the theme canvas. Below512px desktop viewport height, copy flows below the complete image. This supersedes the earlier height-only-by-width/scrolling behavior. Hero screenshot tests now keep the real viewport instead of enlarging it. Evidence and limitations: `docs/design/viewport-spacing-verification.md`.
+
 ## Authentication
 
 There is no authentication or authorization in this codebase. No `middleware.ts`,
