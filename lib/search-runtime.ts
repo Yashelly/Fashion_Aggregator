@@ -1,7 +1,8 @@
 import "server-only";
 
 import { createSearchCacheKey } from "@/lib/search-cache-key";
-import { searchProductsHybrid } from "@/lib/hybrid-search";
+import { searchProductsHybridDetailed } from "@/lib/hybrid-search";
+import { matchesObjectiveQuery, planSearchRoute, searchObjectiveProducts } from "@/lib/search-router";
 import {
   searchProducts,
   type MockProduct,
@@ -25,15 +26,6 @@ const searchCache = new SearchRuntimeCache<ProductSearchResult>({
   ttlMs: CACHE_TTL_MS,
 });
 
-function resultSignature(result: ProductSearchResult) {
-  return JSON.stringify({
-    approximate: result.approximate,
-    ids: result.results.map((product) => product.mock_product_id),
-    relevance: [...result.relevance.entries()],
-    relaxedConstraints: result.relaxedConstraints,
-  });
-}
-
 function reportSearchRuntime(diagnostics: SearchRuntimeDiagnostics, resultCount: number) {
   console.info(
     `[search-runtime] mode=${diagnostics.mode} cache=${diagnostics.cacheStatus} duration_ms=${diagnostics.durationMs} result_count=${resultCount}`,
@@ -41,10 +33,9 @@ function reportSearchRuntime(diagnostics: SearchRuntimeDiagnostics, resultCount:
 }
 
 /**
- * Operational wrapper around the frozen/evaluated ranking implementation.
- * A result is cached only when it differs from the deterministic fallback,
- * which proves that the cloud hybrid path completed. Ambiguous results remain
- * uncached so a transient cloud failure cannot pin fallback output for minutes.
+ * Fully supported objective requests never enter the cloud pipeline. Unknown
+ * grammar preserves semantic search. Cache admission uses an explicit successful
+ * judge outcome, including empty or fallback-equivalent successful responses.
  */
 export async function searchProductsWithRuntime(
   products: MockProduct[],
@@ -62,12 +53,34 @@ export async function searchProductsWithRuntime(
     return { ...result, diagnostics };
   }
 
-  const loaded = await searchCache.getOrLoad(createSearchCacheKey(products, params), async () => {
-    const fallback = searchProducts(products, params);
-    const hybrid = await searchProductsHybrid(products, params);
+  const route = planSearchRoute(params.query!);
+  const routingEnabled = process.env.SEARCH_OBJECTIVE_ROUTING !== "off";
+  const constraints = routingEnabled ? route.constraints : null;
+  const parserMs = Math.round(performance.now() - startedAt);
+  if (routingEnabled && route.route === "objective" && constraints) {
+    const result = searchObjectiveProducts(products, params, constraints);
+    const diagnostics: SearchRuntimeDiagnostics = {
+      cacheStatus: "bypass",
+      durationMs: Math.round(performance.now() - startedAt),
+      mode: "objective",
+    };
+    console.info(`[search-route] reason=${route.reason} parser_ms=${parserMs}`);
+    reportSearchRuntime(diagnostics, result.results.length);
+    return { ...result, diagnostics };
+  }
+
+  const eligible = products.filter((product) => matchesObjectiveQuery(product, constraints));
+  const loaded = await searchCache.getOrLoad(createSearchCacheKey(eligible, params), async () => {
+    const hybrid = await searchProductsHybridDetailed(eligible, params);
+    const { totalMs, embeddingMs = 0, vectorMs = 0, judgeMs = 0 } = hybrid.timings;
+    console.info(`[search-stages] outcome=${hybrid.outcome} reason=${hybrid.reason} total_ms=${totalMs} embedding_ms=${embeddingMs} vector_ms=${vectorMs} judge_ms=${judgeMs}`);
+    // A final guard keeps supported objective clauses hard even across service
+    // responses or fallback ranking changes. Other facets are enforced upstream.
+    const results = hybrid.result.results.filter((product) => matchesObjectiveQuery(product, constraints));
+    const ids = new Set(results.map((product) => product.mock_product_id));
     return {
-      cacheable: resultSignature(hybrid) !== resultSignature(fallback),
-      value: hybrid,
+      cacheable: hybrid.outcome === "success",
+      value: { ...hybrid.result, results, relevance: new Map([...hybrid.result.relevance].filter(([id]) => ids.has(id))) },
     };
   });
   const diagnostics: SearchRuntimeDiagnostics = {
@@ -75,6 +88,7 @@ export async function searchProductsWithRuntime(
     durationMs: Math.round(performance.now() - startedAt),
     mode: loaded.cacheable ? "hybrid-confirmed" : "hybrid-or-fallback",
   };
+  console.info(`[search-route] reason=${routingEnabled ? route.reason : "disabled"} parser_ms=${parserMs}`);
   reportSearchRuntime(diagnostics, loaded.value.results.length);
   return { ...loaded.value, diagnostics };
 }
