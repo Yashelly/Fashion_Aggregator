@@ -1,6 +1,6 @@
 import "server-only";
 
-import crypto from "node:crypto";
+import { createSearchCacheKey } from "@/lib/search-cache-key";
 import { searchProductsHybrid } from "@/lib/hybrid-search";
 import {
   searchProducts,
@@ -34,20 +34,6 @@ function resultSignature(result: ProductSearchResult) {
   });
 }
 
-function cacheKey(params: SearchFilterParams) {
-  const normalized = {
-    availability: params.availability ?? "",
-    category: params.category ?? "",
-    color: params.color ?? "",
-    gender: params.gender ?? "",
-    query: params.query?.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase("lt") ?? "",
-    sale: params.sale ?? "",
-    status: params.status ?? "",
-    store: params.store ?? "",
-  };
-  return crypto.createHash("sha256").update(JSON.stringify(normalized)).digest("hex");
-}
-
 function reportSearchRuntime(diagnostics: SearchRuntimeDiagnostics, resultCount: number) {
   console.info(
     `[search-runtime] mode=${diagnostics.mode} cache=${diagnostics.cacheStatus} duration_ms=${diagnostics.durationMs} result_count=${resultCount}`,
@@ -76,7 +62,7 @@ export async function searchProductsWithRuntime(
     return { ...result, diagnostics };
   }
 
-  const loaded = await searchCache.getOrLoad(cacheKey(params), async () => {
+  const loaded = await searchCache.getOrLoad(createSearchCacheKey(products, params), async () => {
     const fallback = searchProducts(products, params);
     const hybrid = await searchProductsHybrid(products, params);
     return {
