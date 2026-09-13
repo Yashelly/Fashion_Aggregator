@@ -20,7 +20,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               sizes="100vw" />
             <img src="/hero-assets/weft-street-desktop-1920.webp"
               srcSet="/hero-assets/weft-street-desktop-1280.webp 1280w, /hero-assets/weft-street-desktop-1920.webp 1920w, /hero-assets/weft-street-desktop-2508.webp 2508w"
-              sizes="(min-width: 2560px) 2560px, 100vw"
+              sizes="100vw"
               width={2508} height={1412} alt="" fetchPriority="high" decoding="async" />
           </picture>
         </div>
