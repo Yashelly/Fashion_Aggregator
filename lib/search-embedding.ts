@@ -1,5 +1,7 @@
 import "server-only";
 
+import { createAbortScope } from "@/lib/search-deadline";
+
 const EMBEDDING_MODEL = "gemini-embedding-2";
 const EMBEDDING_DIMENSIONS = 1024;
 const REQUEST_TIMEOUT_MS = 4_000;
@@ -23,7 +25,15 @@ function remember(query: string, vector: number[]) {
   queryCache.set(query, vector);
 }
 
-export async function embedSearchQuery(query: string): Promise<number[] | null> {
+export type SearchEmbeddingOptions = {
+  signal?: AbortSignal;
+  timeoutMs?: number;
+};
+
+export async function embedSearchQuery(
+  query: string,
+  options: SearchEmbeddingOptions = {},
+): Promise<number[] | null> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) return null;
 
@@ -32,8 +42,14 @@ export async function embedSearchQuery(query: string): Promise<number[] | null> 
   const cached = queryCache.get(normalizedQuery);
   if (cached) return cached;
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const scope = createAbortScope(
+    options.signal,
+    Math.min(options.timeoutMs ?? REQUEST_TIMEOUT_MS, REQUEST_TIMEOUT_MS),
+  );
+  if (scope.signal.aborted) {
+    scope.dispose();
+    return null;
+  }
 
   try {
     const response = await fetch(
@@ -53,7 +69,7 @@ export async function embedSearchQuery(query: string): Promise<number[] | null> 
           outputDimensionality: EMBEDDING_DIMENSIONS,
         }),
         cache: "no-store",
-        signal: controller.signal,
+        signal: scope.signal,
       },
     );
 
@@ -68,7 +84,7 @@ export async function embedSearchQuery(query: string): Promise<number[] | null> 
   } catch {
     return null;
   } finally {
-    clearTimeout(timeout);
+    scope.dispose();
   }
 }
 
