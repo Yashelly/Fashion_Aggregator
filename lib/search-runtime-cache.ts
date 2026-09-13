@@ -2,6 +2,7 @@ export type SearchCacheStatus = "hit" | "miss" | "shared";
 
 export type SearchRuntimeMode =
   | "browse"
+  | "objective"
   | "hybrid-confirmed"
   | "hybrid-or-fallback";
 

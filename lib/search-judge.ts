@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { MockProduct } from "@/lib/mock-products";
+import { createAbortScope } from "@/lib/search-deadline";
 
 const DEFAULT_MODEL = "gemini-3.6-flash";
 const REQUEST_TIMEOUT_MS = 12_000;
@@ -80,6 +81,7 @@ function remember(key: string, matches: string[]) {
 export async function judgeSearchCandidates(
   query: string,
   candidates: MockProduct[],
+  options: SearchJudgeOptions = {},
 ): Promise<string[] | null> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey || candidates.length === 0) return null;
@@ -89,8 +91,14 @@ export async function judgeSearchCandidates(
   const cached = resultCache.get(cacheKey);
   if (cached) return cached;
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const scope = createAbortScope(
+    options.signal,
+    Math.min(options.timeoutMs ?? REQUEST_TIMEOUT_MS, REQUEST_TIMEOUT_MS),
+  );
+  if (scope.signal.aborted) {
+    scope.dispose();
+    return null;
+  }
   try {
     const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
       method: "POST",
@@ -121,7 +129,7 @@ export async function judgeSearchCandidates(
         },
       }),
       cache: "no-store",
-      signal: controller.signal,
+      signal: scope.signal,
     });
     if (!response.ok) return null;
     const text = outputText(await response.json());
@@ -140,9 +148,14 @@ export async function judgeSearchCandidates(
   } catch {
     return null;
   } finally {
-    clearTimeout(timeout);
+    scope.dispose();
   }
 }
+
+export type SearchJudgeOptions = {
+  signal?: AbortSignal;
+  timeoutMs?: number;
+};
 
 export const SEARCH_JUDGE_CONFIG = {
   configVersion: CONFIG_VERSION,
