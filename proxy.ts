@@ -3,8 +3,31 @@ import { getMockProducts } from "@/lib/mock-products";
 
 const LOCALE_COOKIE = "weft-locale";
 
-function syncLocaleCookie(response: NextResponse, lang: string | null) {
-  if (lang !== "en" && lang !== "lt") return response;
+function isSpeculativePrefetch(request: NextRequest) {
+  const purpose = request.headers.get("purpose")?.toLowerCase() ?? "";
+  const secPurpose = request.headers.get("sec-purpose")?.toLowerCase() ?? "";
+  return request.headers.get("next-router-prefetch") === "1"
+    || purpose.includes("prefetch")
+    || secPurpose.includes("prefetch");
+}
+
+function isHtmlDocumentNavigation(request: NextRequest) {
+  const accept = request.headers.get("accept")?.toLowerCase() ?? "";
+  const isFlight = request.headers.get("rsc") === "1"
+    || accept.includes("text/x-component")
+    || request.nextUrl.searchParams.has("_rsc");
+  if (isFlight) return false;
+
+  return request.headers.get("sec-fetch-dest") === "document"
+    || accept.includes("text/html");
+}
+
+function syncLocaleCookie(
+  response: NextResponse,
+  lang: string | null,
+  persistPreference: boolean,
+) {
+  if (!persistPreference || (lang !== "en" && lang !== "lt")) return response;
 
   response.cookies.set(LOCALE_COOKIE, lang, {
     maxAge: 60 * 60 * 24 * 365,
@@ -16,6 +39,8 @@ function syncLocaleCookie(response: NextResponse, lang: string | null) {
 
 export function proxy(request: NextRequest) {
   const lang = request.nextUrl.searchParams.get("lang");
+  const persistPreference = isHtmlDocumentNavigation(request)
+    && !isSpeculativePrefetch(request);
 
   if (
     lang !== "en" &&
@@ -55,6 +80,7 @@ export function proxy(request: NextRequest) {
           request: { headers: requestHeaders },
         }),
         lang,
+        persistPreference,
       );
     }
   }
@@ -64,6 +90,7 @@ export function proxy(request: NextRequest) {
       request: { headers: requestHeaders },
     }),
     lang,
+    persistPreference,
   );
 }
 

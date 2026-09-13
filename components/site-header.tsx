@@ -4,7 +4,8 @@ import { Menu, Moon, Sun, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { copy, formatCategoryLabel, formatGenderLabel, getLocale, type Locale, withLocale } from "@/lib/i18n";
+import { copy, formatCategoryLabel, formatGenderLabel, type Locale, withLocale } from "@/lib/i18n";
+import { useLocaleContext } from "@/lib/use-client-locale";
 import { Wordmark } from "@/components/wordmark";
 
 function languageHref(pathname: string, params: URLSearchParams, locale: Locale) {
@@ -18,11 +19,6 @@ function publicPathname(pathname: string) {
   return pathname.startsWith(missingPreviewPrefix)
     ? `/out/${pathname.slice(missingPreviewPrefix.length)}`
     : pathname;
-}
-
-function persistLocale(locale: Locale) {
-  document.documentElement.lang = locale;
-  document.cookie = `weft-locale=${locale}; Path=/; Max-Age=31536000; SameSite=Lax`;
 }
 
 function ThemeToggle({ locale, variant = "icon" }: { locale: Locale; variant?: "icon" | "row" }) {
@@ -86,7 +82,7 @@ export function SiteHeader() {
   const pathname = usePathname();
   const visiblePathname = publicPathname(pathname);
   const params = useSearchParams();
-  const locale = getLocale({ lang: params.get("lang") ?? undefined });
+  const { locale, setLocale } = useLocaleContext();
   const t = copy[locale].header;
   /*
    * A shopping-first top bar, matching what every mainstream fashion site leads
@@ -109,10 +105,6 @@ export function SiteHeader() {
     { href: "/search?status=sale", label: locale === "lt" ? "Išpardavimas" : "Sale", active: onSearch && statusParam === "sale", highlight: true },
   ];
   const accountLabel = locale === "lt" ? "Mano paskyra" : "My account";
-
-  useEffect(() => {
-    persistLocale(locale);
-  }, [locale]);
 
   return (
     <>
@@ -145,21 +137,23 @@ export function SiteHeader() {
           </Link>
           <ThemeToggle locale={locale} />
           <nav className="language-switcher" aria-label={t.languageAria}>
-            <a
+            <Link
               aria-current={locale === "en" ? "true" : undefined}
               href={languageHref(visiblePathname, params, "en")}
-              onClick={() => persistLocale("en")}
+              prefetch={false}
+              onClick={() => setLocale("en")}
             >
               EN
-            </a>
+            </Link>
             <span aria-hidden="true">/</span>
-            <a
+            <Link
               aria-current={locale === "lt" ? "true" : undefined}
               href={languageHref(visiblePathname, params, "lt")}
-              onClick={() => persistLocale("lt")}
+              prefetch={false}
+              onClick={() => setLocale("lt")}
             >
               LT
-            </a>
+            </Link>
           </nav>
           <details className="mobile-menu">
             <summary aria-label={locale === "lt" ? "Atverti navigaciją" : "Open navigation"}><Menu aria-hidden="true" size={20} /></summary>
@@ -191,20 +185,22 @@ export function SiteHeader() {
               </Link>
               <ThemeToggle locale={locale} variant="row" />
               <div className="mobile-menu-locales" aria-label={t.languageAria}>
-                <a
+                <Link
                   aria-current={locale === "en" ? "true" : undefined}
                   href={languageHref(visiblePathname, params, "en")}
-                  onClick={() => persistLocale("en")}
+                  prefetch={false}
+                  onClick={() => setLocale("en")}
                 >
                   EN
-                </a>
-                <a
+                </Link>
+                <Link
                   aria-current={locale === "lt" ? "true" : undefined}
                   href={languageHref(visiblePathname, params, "lt")}
-                  onClick={() => persistLocale("lt")}
+                  prefetch={false}
+                  onClick={() => setLocale("lt")}
                 >
                   LT
-                </a>
+                </Link>
               </div>
             </nav>
           </details>
