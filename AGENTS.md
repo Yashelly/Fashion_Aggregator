@@ -285,3 +285,9 @@ This is the single most important cross-cutting constraint in the codebase:
 - Next.js 16 (App Router), React, TypeScript (strict), `@supabase/supabase-js` (optional), `lucide-react`.
 
 <!-- MANUAL: Any manually added notes below this line are preserved on regeneration -->
+
+## Owner's pull request workflow
+
+- After completing and verifying changes, commit and push the task's `codex/` branch and open a pull request targeting `main` without asking again.
+- If a pull request already exists for the task branch, update it instead of creating a duplicate. Report its URL and verification status.
+- Never commit directly to `main` or merge a pull request. Only the repository owner merges changes into `main`.

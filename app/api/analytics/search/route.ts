@@ -36,6 +36,7 @@ type SearchEventBody = {
 
 const SEARCH_MODES = new Set([
   "browse",
+  "objective",
   "hybrid-confirmed",
   "hybrid-or-fallback",
 ]);

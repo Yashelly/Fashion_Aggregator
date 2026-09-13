@@ -690,6 +690,13 @@ function tokenize(text: string): string[] {
 }
 
 const NEGATION_STARTERS = new Set(["not", "without", "no", "ne", "be"]);
+
+/** Shared color families for structured catalog data; never repair data typos. */
+export function catalogColorFamilies(color: string): string[] {
+  return [...new Set(tokenize(normalizeText(color))
+    .map((token) => canonicalize(token, false))
+    .filter((term): term is string => term !== undefined && COLOR_TERMS.has(term)))];
+}
 const NEGATION_FILLER = new Set(["a", "an", "the", "actually", "quite", "over", "looking", "paying"]);
 const NEGATION_BREAKERS = new Set(["but", "rather", "than", "for", "that", "at", "under", "below", "with"]);
 
