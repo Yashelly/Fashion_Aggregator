@@ -1,2892 +1,504 @@
+/* Selected A home/search + B catalog. DESIGN.md is the visual contract. */
 :root {
   color-scheme: light;
-  /*
-   * Light mode, Phase 3: crisp white canvas over near-black ink, replacing the
-   * warm paper/espresso it launched with (decided in
-   * .omc/specs/deep-interview-vibewear-strategic-vision.md §5).
-   *
-   * The neutrals are deliberately NEUTRAL. The Variant B block those values
-   * came from carried a lavender cast — its greys ran 13 to 24 points bluer
-   * than red — which was a side effect of that comparison rather than part of
-   * what was chosen, and a default blue-purple palette with no brand reason
-   * behind it is exactly what DESIGN.md tells us to question.
-   */
-  --color-canvas: #ffffff;
-  --color-surface: #ffffff;
-  --color-surface-soft: #f4f4f5;
-  --color-surface-elevated: #ffffff;
-  --color-ink: #0d0d0d;
-  --color-ink-muted: #5a5a60;
-  --color-line: #dcdcdf;
-  /*
-   * Two accent roles, not one. `accent` is drawn as text and borders, so it is
-   * held to 4.5:1 on white. `acid` is a FILL sitting under near-black text —
-   * inverse buttons, demo-store chips, category hovers — so it has to stay
-   * light enough for `--color-on-acid` to clear the same bar. The acid-lime
-   * this replaces was rejected; the fill is now a tint of the accent hue so
-   * the two cannot drift apart.
-   *
-   * Rust was chosen by the owner on 2026-08-01 over magenta, teal and cobalt,
-   * judged on rendered pages rather than swatches. It carries the textile
-   * reading of the name and is the closest in temperature to the coral the
-   * dark theme already uses, so switching themes does not lurch.
-   */
-  --color-accent: #b7410e;
-  --color-acid: #ffd9c2;
-  --color-on-acid: #0d0d0d;
-  --color-focus: #3150ff;
-  --color-success: #0a7a4f;
-  --color-warning: #8a5a00;
-  --color-error: #c81c10;
-  --color-on-dark: #fffaf2;
-  --color-dark-surface: #1a1816;
-  --color-dark-muted: #c9c1b7;
-  --color-dark-line: #514b45;
-  --color-placeholder-a: #e4e4e7;
-  --color-placeholder-b: #3150c1;
-  --color-placeholder-c: #d9a18b;
-  --color-placeholder-d: #ffd9c2;
-  --color-product-media: #f4f4f5;
-  --shadow: 0 18px 45px rgba(0, 0, 0, 0.10);
-  --gutter: clamp(16px, 3.35vw, 48px);
-  --max: 1376px;
-  /*
-   * The header height is load-bearing beyond the header: the title page sizes
-   * itself to the remaining viewport from it, the product gallery sticks below
-   * it, and the nav links fill it. It was repeated as a literal in five places
-   * and in a mobile override, so changing it meant changing all six in step.
-   */
-  --header-h: 64px;
-  --radius-sm: 3px;
-  --radius-md: 10px;
-  --transition: 180ms ease;
+  --color-canvas: #fff;
+  --color-surface: #fff;
+  --color-surface-soft: #f2f2ef;
+  --color-surface-elevated: #fff;
+  --color-ink: #161616;
+  --color-ink-muted: #575757;
+  --color-line: #d9d9d6;
+  --color-control: #888;
+  --color-accent: #161616;
+  --color-accent-hover: #383838;
+  --color-on-accent: #fff;
+  --color-acid: #f2f2ef;
+  --color-on-acid: #161616;
+  --color-focus: #161616;
+  --color-success: #286145;
+  --color-warning: #785414;
+  --color-error: #a22c26;
+  --color-disabled: #686868;
+  --color-product-media: #eeeae4;
+  --color-overlay: rgb(0 0 0 / 50%);
+  --shadow: 0 0.75rem 2.5rem rgb(0 0 0 / 14%);
+  --font-body: Arial, Helvetica, sans-serif;
+  --font-display: var(--font-body);
+  --gutter: 1.5625rem;
+  --max: 96rem;
+  --header-h: 4rem;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --transition: 160ms ease;
 }
-
 :root[data-theme="dark"] {
   color-scheme: dark;
-  /* Neutral charcoal, not warm espresso (owner decision 2026-08-24): the dark
-     surfaces read as a plain very-dark grey with no orange/brown cast, and stop
-     short of full black. Accent stays rust; only the neutrals were cooled. */
-  --color-canvas: #1c1c1e;
-  --color-surface: #252527;
-  --color-surface-soft: #2d2d2f;
-  --color-surface-elevated: #313133;
-  --color-ink: #f1f1f2;
-  --color-ink-muted: #b3b3b7;
-  --color-line: #3c3c40;
-  /* Accent is held identical to light mode by owner decision (2026-08-24): the
-     brand rust must not shift to coral between themes, keeping the wordmark's
-     `ft` the same colour everywhere. */
-  --color-accent: #b7410e;
-  --color-focus: #9eb0ff;
-  /* Warm peach, not acid-lime (owner decision 2026-08-28): the neon-lime fill
-     read as an out-of-place "кислотный" element in dark mode — on the account
-     avatar, the SOON badge, the inverse button and demo-store chips. The acid
-     role is now the same warm tint as light mode, in the rust accent family. */
-  --color-acid: #ffd9c2;
-  --color-success: #7bd5a2;
-  --color-warning: #efc66b;
-  --color-error: #ff8a7d;
-  --color-on-dark: #f3f3f4;
-  --color-dark-surface: #141416;
-  --color-dark-muted: #c4c4c8;
-  --color-dark-line: #48484c;
-  --color-placeholder-a: #2d2d2f;
-  --color-placeholder-b: #344a9e;
-  --color-placeholder-c: #704f44;
-  --color-placeholder-d: #63722d;
-  --color-product-media: #f2ede6;
-  --shadow: 0 20px 55px rgba(0, 0, 0, 0.34);
+  --color-canvas: #161616;
+  --color-surface: #1c1c1c;
+  --color-surface-soft: #2b2b29;
+  --color-surface-elevated: #333;
+  --color-ink: #f6f6f3;
+  --color-ink-muted: #bcbcb6;
+  --color-line: #474745;
+  --color-control: #8c8c87;
+  --color-accent: #f6f6f3;
+  --color-accent-hover: #d6d6d0;
+  --color-on-accent: #161616;
+  --color-acid: #30302d;
+  --color-on-acid: #f6f6f3;
+  --color-focus: #f6f6f3;
+  --color-success: #8fd4ac;
+  --color-warning: #edc87d;
+  --color-error: #ffafa2;
+  --color-disabled: #aeafa9;
+  --color-overlay: rgb(0 0 0 / 65%);
 }
+* { box-sizing: border-box; }
+/* The 1440px composition is the baseline, not a fixed size for every display.
+   Relative bounds preserve browser font preferences; CSS viewport width (not
+   hardware pixels) grows the whole UI coherently to 1.5x on a 2560px display. */
+html { font-size: clamp(100%, calc(0.357142857rem + 0.714285714vw), 150%); background: var(--color-canvas); scroll-padding-top: 1.5rem; }
+body { margin: 0; color: var(--color-ink); background: var(--color-canvas); font: 0.9375rem/1.4 var(--font-body); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button, a, summary { touch-action: manipulation; }
+button, summary { cursor: pointer; }
+button { border-radius: var(--radius-sm); }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+svg { flex-shrink: 0; }
+figure, fieldset { margin: 0; }
+fieldset { padding: 0; border: 0; min-width: 0; }
+legend { font-weight: 500; margin-bottom: 0.75rem; padding: 0; }
+input, select, textarea { min-width: 0; max-width: 100%; background: var(--color-surface); border: 1px solid var(--color-control); border-radius: 0; min-height: 2.75rem; padding: 0.625rem 0.75rem; }
+input[type="checkbox"], input[type="radio"] { min-height: 1.25rem; width: 1.25rem; height: 1.25rem; accent-color: var(--color-accent); }
+input::placeholder { color: var(--color-ink-muted); opacity: 1; }
+:where(a, button, input, select, summary, textarea, [tabindex]):focus-visible { outline: 2px solid var(--color-focus); outline-offset: 0.1875rem; }
+[aria-invalid="true"] { border-color: var(--color-error); }
+[aria-disabled="true"], button:disabled { color: var(--color-disabled); cursor: not-allowed; }
+h1, h2, h3, p { margin-top: 0; }
+h1, h2 { font-family: var(--font-body); font-weight: 400; letter-spacing: -.025em; line-height: 1.15; }
+h1 { font-size: clamp(1.875rem, 3vw, 2.625rem); margin-bottom: 1.5rem; }
+h2 { font-size: 1.6875rem; margin-bottom: 1rem; }
+h3 { font-size: 1.1875rem; font-weight: 500; }
+.shell { min-height: 100dvh; max-width: 2560px; margin-inline: auto; position: relative; }
+.main { min-height: 65vh; }
+.main:focus { outline: none; }
+.route-shell { max-width: var(--max); margin-inline: auto; padding: 2.5rem var(--gutter) 4rem; }
+.route-heading { margin-bottom: 2rem; }
+.route-heading h1 { margin: 0 0 1rem; }
+.lead { color: var(--color-ink-muted); font-size: 1.125rem; line-height: 1.65; max-width: 41.25rem; margin-bottom: 1.5rem; }
+.button { display: inline-flex; justify-content: center; align-items: center; gap: 0.625rem; min-height: 2.875rem; padding: 0.6875rem 1.25rem; font-weight: 400; border: 1px solid var(--color-accent); border-radius: 0; background: var(--color-accent); color: var(--color-on-accent); text-align: center; }
+.button:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
+.button.secondary { background: transparent; color: var(--color-ink); border-color: var(--color-control); }
+.button.secondary:hover { background: var(--color-surface-soft); }
+.text-link { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.625rem 0; min-height: 2.75rem; border: 0; background: none; text-decoration: underline; text-underline-offset: 0.25rem; font-size: 0.875rem; }
+.text-link:hover, .clear-link:hover { color: var(--color-accent); }
+.icon-button { display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem; background: transparent; border: 1px solid var(--color-control); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.skip-link { position: fixed; top: 0.75rem; left: 0.75rem; z-index: 100; padding: 0.75rem 1.125rem; background: var(--color-ink); color: var(--color-canvas); transform: translateY(-150%); }
+.skip-link:focus { transform: none; }
 
-/*
- * Variant B token values — INACTIVE. Nothing sets data-visual-variant="b"
- * anymore; the A/B comparison toggle these belonged to was a review tool and
- * was removed from production once the comparison was settled.
- *
- * Kept deliberately as input values for the Phase 3 visual work, not as live
- * configuration. See .omc/specs/deep-interview-vibewear-strategic-vision.md
- * §5 for the decided direction: the light-mode block below is the confirmed
- * source for the new light canvas (crisp white/near-black beat the warm
- * paper/espresso it replaces), while the dark-mode block below is REJECTED —
- * it skews blue-purple, and dark mode stays on Variant A's neutral/warm
- * surfaces. The acid-lime accent (--color-acid) is rejected in both blocks
- * and needs a replacement that hasn't been chosen yet.
- *
- * All pairs verified >= 4.5:1 (WCAG AA) when they were live.
- */
-:root[data-visual-variant="b"] {
-  --color-canvas: #ffffff;
-  --color-surface: #ffffff;
-  --color-surface-soft: #f2f0ff;
-  --color-surface-elevated: #ffffff;
-  --color-ink: #0d0d0d;
-  --color-ink-muted: #55536b;
-  --color-line: #d8d6f0;
-  --color-accent: #d81f10;
-  --color-focus: #3150ff;
-  --color-acid: #c6f22e;
-  --color-success: #0a7a4f;
-  --color-warning: #8a5a00;
-  --color-error: #c81c10;
-  --color-on-acid: #0d0d0d;
-}
+/* Navigation stays small; language never disappears behind the mobile menu. */
+.site-header { min-height: var(--header-h); padding: 0 1.5625rem; display: flex; align-items: center; gap: 2.25rem; border-bottom: 1px solid var(--color-line); background: var(--color-surface); position: relative; z-index: 10; }
+.brand { display: inline-flex; align-items: center; min-height: 2.75rem; font-size: 2.6875rem; flex-shrink: 0; padding-bottom: 0.3125rem; }
+.wordmark { display: inline-block; font: 700 1em/1 var(--font-wordmark), Arial, sans-serif; letter-spacing: -0.1875rem; white-space: nowrap; }
+.wm-fit { color: inherit; }
+.wm-lead { margin-right: -.025em; }
+.wm-islot { display: none; }
+.desktop-nav { display: flex; gap: 1.6875rem; align-items: center; }
+.desktop-nav a { display: inline-flex; align-items: center; min-height: 2.75rem; font-size: 0.9375rem; white-space: nowrap; }
+.desktop-nav a:hover, .desktop-nav a[aria-current="page"] { text-decoration: underline; text-underline-offset: 0.3125rem; }
+.header-tools { display: flex; align-items: center; gap: 1.0625rem; margin-left: auto; white-space: nowrap; }
+.account-link { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-width: 2.75rem; min-height: 2.75rem; font-size: 0.9375rem; }
+.account-link:hover { text-decoration: underline; text-underline-offset: 0.25rem; }
+.theme-toggle { display: inline-flex; align-items: center; gap: 0.5625rem; min-height: 2.75rem; padding: 0; border: 0; background: transparent; font-size: 0.8125rem; }
+.theme-toggle:hover { text-decoration: underline; text-underline-offset: 0.25rem; }
+.mobile-menu summary { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border: 0; background: transparent; color: var(--color-ink); }
+.language-switcher { display: flex; gap: 0.625rem; align-items: center; font-size: 0.8125rem; }
+.language-switcher a { display: grid; place-items: center; min-width: 1.125rem; min-height: 2.75rem; }
+.language-switcher a[aria-current="true"] { text-decoration: underline; text-underline-offset: 0.25rem; }
+.mobile-menu { display: none; }
+.site-header.is-home { min-height: 4.0625rem; padding: 0 var(--gutter); gap: 1.75rem; }
+.is-home .brand { font-size: 2.375rem; }
+.header-search { margin-left: auto; width: 21.25rem; min-width: 11.25rem; }
+.is-home .header-tools { margin-left: 0; }
+.account-link>svg, .search-icon, .search-idle>svg { width: 1.125rem; height: 1.125rem; }
+.query-clear>svg, .icon-button>svg { width: 1.25rem; height: 1.25rem; }
+.theme-toggle>svg { width: 1.0625rem; height: 1.0625rem; }
+.site-footer { max-width: var(--max); margin: 0 auto; padding: 2rem var(--gutter) 2.5rem; border-top: 1px solid var(--color-line); display: flex; gap: 3rem; align-items: flex-start; justify-content: space-between; }
+.footer-statement { max-width: 18.75rem; }
+.footer-statement p { color: var(--color-ink-muted); font-size: 0.875rem; margin: 0; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 0 1.5rem; justify-content: flex-end; max-width: 43.125rem; }
+.footer-links a { padding: 0.625rem 0; min-height: 2.75rem; font-size: 0.8125rem; text-decoration: underline; text-underline-offset: 0.25rem; }
 
-:root[data-theme="dark"][data-visual-variant="b"] {
-  --color-canvas: #0a0a0f;
-  --color-surface: #131320;
-  --color-surface-soft: #1c1c30;
-  --color-surface-elevated: #191928;
-  --color-ink: #f5f5ff;
-  --color-ink-muted: #b3b0d6;
-  --color-line: #35314f;
-  --color-accent: #ff6b5a;
-  --color-focus: #8fa0ff;
-  --color-acid: #d4f24a;
-  --color-success: #6fe0a8;
-  --color-warning: #f2c94c;
-  --color-error: #ff8577;
-}
+/* Approved street photograph: full landscape on desktop, a separate phone crop. */
+.home-storefront { padding-bottom: 4rem; }
+/* Readable text-led homepage while the separate street-media PR is reviewed. */
+.campaign.campaign--text { background: var(--color-canvas); }
+.campaign--text::after { display: none; }
+.campaign--text .campaign-copy { position: relative; left: auto; bottom: auto; width: 100%; max-width: 45rem; padding: 3rem var(--gutter); color: var(--color-ink); }
+.campaign--text .campaign-cta { background: var(--color-accent); color: var(--color-on-accent); }
+.campaign--text :focus-visible { outline-color: var(--color-focus); }
+.campaign { position: relative; background: #161616; }
+.campaign-image { aspect-ratio: 2508 / 1412; }
+.campaign-image picture, .campaign-image img { display: block; width: 100%; height: 100%; }
+.campaign-image img { object-fit: contain; }
+/* Contrast support ends before the people; it is not a filter on the photograph. */
+.campaign::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgb(0 0 0 / 64%) 0%, rgb(0 0 0 / 60%) 26%, transparent 39%); }
+.campaign-copy { position: absolute; z-index: 1; left: var(--gutter); bottom: 3rem; width: 33%; max-width: 34rem; color: white; }
+.campaign-copy h1 { font-size: clamp(2.25rem, 5vw, 4.5rem); letter-spacing: -.04em; line-height: 1.03; margin: 0; white-space: pre-line; }
+.campaign-copy p { font-size: 1rem; max-width: 26ch; margin: 1.25rem 0; }
+.campaign-cta { display: inline-flex; align-items: center; justify-content: center; background: white; color: #161616; min-height: 2.9375rem; padding: 0 1.4375rem; font-size: 0.875rem; }
+.campaign-cta:hover { text-decoration: underline; text-underline-offset: 0.25rem; }
+.campaign :focus-visible { outline-color: white; }
+.home-section-head { display: flex; justify-content: space-between; align-items: center; gap: 1.25rem; padding: 1.8125rem 1.5625rem 1.375rem; }
+.home-section-head h2 { margin: 0; font-size: 1.5rem; letter-spacing: -.65px; }
 
-* {
-  box-sizing: border-box;
-}
+/* The query, refinements and count fit into one compact workbench. */
+.search-input-row { display: flex; align-items: center; gap: 0.875rem; padding: 0; min-height: 3.5625rem; border-bottom: 1px solid var(--color-ink); background: var(--color-surface); }
+.search-input-row:focus-within { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.search-icon { color: var(--color-ink); }
+.search-input-row input { flex: 1; width: 100%; height: 3.5rem; padding: 0; border: 0; background: transparent; outline: none; min-width: 0; border-radius: 0; font-size: 1rem; }
+.search-input-row input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.search-submit { position: relative; align-self: stretch; flex-shrink: 0; border: 0; background: transparent; color: var(--color-ink); font-size: 0.9375rem; font-weight: 400; padding: 0; white-space: nowrap; min-height: 2.75rem; min-width: 4rem; }
+.search-submit:hover { text-decoration: underline; text-underline-offset: 0.25rem; }
+.search-idle { display: inline-flex; align-items: center; justify-content: center; }
+.header-search .search-input-row { border: 0; min-height: 3.375rem; }
+.header-search input { height: 3.375rem; font-size: 0.875rem; }
+.header-search .search-submit { min-width: 2.75rem; }
+.query-clear { display: grid; place-items: center; flex-shrink: 0; width: 2.5rem; min-height: 2.75rem; border: 0; background: transparent; color: var(--color-ink-muted); }
+.search-busy { display: none; }
+[data-pending] .search-idle { visibility: hidden; }
+[data-pending] .search-busy { display: block; position: absolute; inset: 0; font-size: 0; }
+[data-pending] .search-busy::before { content: ""; position: absolute; width: 1.125rem; height: 1.125rem; top: calc(50% - 0.5625rem); left: calc(50% - 0.5625rem); border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: pending-turn .7s linear infinite; }
+@keyframes pending-turn { to { transform: rotate(1turn); } }
+.search-route { max-width: none; padding: 0 0 4rem; }
+.catalog-search-row { max-width: 51.25rem; padding: 0.5625rem 1.5625rem 0.375rem; }
+.category-nav { display: flex; align-items: center; gap: 1.875rem; padding: 0 1.5625rem; min-height: 2.75rem; overflow-x: auto; scrollbar-width: thin; }
+.category-nav a { display: inline-flex; align-items: center; flex-shrink: 0; min-height: 2.75rem; white-space: nowrap; }
+.category-nav a:hover, .category-nav a[aria-current="page"] { text-decoration: underline; text-underline-offset: 0.3125rem; }
+.category-nav a:focus-visible { outline-offset: -2px; }
+.catalog-layout { display: grid; grid-template-columns: 13.5rem minmax(0,1fr); }
+.catalog-layout.filters-hidden { grid-template-columns: minmax(0,1fr); }
+.filter-panel { padding: 0.9375rem 1.5rem 2rem; min-width: 0; }
+.filter-panel-heading { display: flex; align-items: baseline; justify-content: space-between; min-height: 2.125rem; margin: 0 0 0.5625rem; }
+.filter-panel-heading h2 { font-size: 1.0625rem; letter-spacing: 0; margin: 0; }
+.filter-panel-heading>span { font-size: 0.8125rem; color: var(--color-ink-muted); }
+.filter-group { border-bottom: 1px solid var(--color-line); }
+.filter-group summary { display: flex; align-items: center; justify-content: space-between; min-height: 2.875rem; list-style: none; font-size: 0.875rem; }
+.filter-group summary::after { content: "+"; font-size: 1.0625rem; }
+.filter-group[open] summary::after { content: "−"; }
+.filter-group-body { padding-bottom: 1.0625rem; }
+.filter-choices { display: grid; max-height: 20rem; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--color-control) transparent; }
+.filter-choice { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 0.625rem; min-height: 2.75rem; padding: 0.375rem 0.25rem; font-size: 0.875rem; cursor: pointer; }
+.filter-choice>span { min-width: 0; overflow-wrap: anywhere; }
+.filter-choice>svg { width: 0.9375rem; height: 0.9375rem; visibility: hidden; }
+.filter-choice input:checked~svg { visibility: visible; }
+.filter-choice:hover { background: var(--color-surface-soft); }
+.filter-choice:has(input:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.filter-panel .field-hint { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+.price-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0.5625rem; margin-top: 0.1875rem; }
+.price-fields .filter-field { gap: 0.3125rem; color: var(--color-ink-muted); font-size: 0.75rem; }
+.price-fields input { padding: 0 0.5rem; font-size: 0.875rem; color: var(--color-ink); }
+.filter-panel-actions { display: flex; flex-direction: column; gap: 0.5625rem; padding-top: 0.75rem; }
+.filter-panel-actions .button { padding-inline: 0.5rem; font-size: 0.8125rem; }
+.catalog-body { min-width: 0; }
+.catalog-toolbar { min-height: 3.625rem; display: flex; align-items: center; justify-content: space-between; gap: 1.375rem; padding: 0 1.25rem 0 1rem; }
+.catalog-title { display: flex; gap: 1.3125rem; align-items: baseline; min-width: 0; }
+.catalog-title h1 { font-size: 1.375rem; letter-spacing: -.5px; margin: 0; }
+.catalog-title p { font-size: 0.8125rem; color: var(--color-ink-muted); white-space: nowrap; margin: 0; }
+.tool-actions { display: flex; align-items: center; gap: 1.5625rem; font-size: 0.875rem; flex-shrink: 0; }
+.filter-disclosure { position: relative; }
+.filter-toggle, .filter-fallback-toggle { display: inline-flex; align-items: center; gap: 0.5625rem; padding: 0; min-height: 2.75rem; border: 0; background: transparent; font: inherit; list-style: none; }
+.filter-toggle[hidden] { display: none; }
+.filter-toggle:hover, .filter-fallback-toggle:hover { text-decoration: underline; text-underline-offset: 0.25rem; }
+.filter-toggle>svg, .filter-fallback-toggle>svg { width: 0.9375rem; height: 0.9375rem; }
+.mobile-filter-label { display: none; }
+summary::-webkit-details-marker { display: none; }
+.filter-count { font-size: 0.75rem; color: var(--color-ink-muted); }
+.filter-fallback { padding: 1.25rem; width: min(21.875rem, calc(100vw - 1.875rem)); border: 1px solid var(--color-control); background: var(--color-surface); position: absolute; top: 2.75rem; left: 0; z-index: 5; box-shadow: var(--shadow); max-height: 70dvh; overflow-y: auto; }
+.filter-fallback>.button { margin-top: 1.25rem; }
+.option-picker { position: relative; min-width: 0; }
+.option-picker:not([open])>.picker-options { display: none; }
+.option-picker>summary { display: flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; padding: 0; border: 0; background: transparent; list-style: none; white-space: nowrap; }
+.option-picker>summary:hover .picker-value { text-decoration: underline; text-underline-offset: 0.25rem; }
+.option-picker>summary>svg { width: 0.875rem; height: 0.875rem; }
+.option-picker[open]>summary>svg { transform: rotate(180deg); }
+.picker-label { color: var(--color-ink-muted); }
+.picker-options { position: absolute; inset-inline-end: 0; top: calc(100% + 0.375rem); z-index: 30; display: grid; width: max-content; min-width: 12.5rem; max-width: calc(100vw - 2 * var(--gutter)); max-height: min(22rem, 60dvh); overflow-y: auto; padding: 0.375rem; border: 1px solid var(--color-line); background: var(--color-surface); box-shadow: 0 0.25rem 1.25rem rgb(0 0 0 / 8%); scrollbar-width: thin; scrollbar-color: var(--color-control) transparent; }
+.picker-options>button { display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; width: 100%; min-height: 2.75rem; padding: 0.625rem 0.75rem; border: 0; background: transparent; text-align: start; font: inherit; }
+.picker-options>button:hover:not(:disabled) { background: var(--color-surface-soft); }
+.picker-options>button:focus-visible { outline-offset: -2px; }
+.picker-options>button>svg { width: 0.9375rem; height: 0.9375rem; visibility: hidden; }
+.picker-options>button[aria-pressed="true"]>svg { visibility: visible; }
+.density-view { font-size: 0.8125rem; }
+.density-view .picker-options { min-width: 8.5rem; }
+.sort-form { font-size: 0.875rem; }
+.active-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0 1rem 0.75rem; font-size: 0.8125rem; }
+.active-filters a { display: inline-flex; gap: 0.5rem; align-items: center; min-height: 2.75rem; padding: 0.5rem 0.75rem; border: 1px solid var(--color-line); background: transparent; overflow-wrap: anywhere; }
+.active-filters .clear-link { background: none; border-color: transparent; text-decoration: underline; text-underline-offset: 0.25rem; }
+.active-filters svg { width: 0.875rem; height: 0.875rem; }
+.search-interpretation { display: flex; flex-wrap: wrap; gap: 0 0.875rem; font-size: 0.8125rem; color: var(--color-ink-muted); margin: 0 1rem 1rem; }
+.search-interpretation span+span::before { content: "·"; margin-right: 0.875rem; }
+.filter-dialog { border: 1px solid var(--color-line); padding: 0; color: var(--color-ink); background: var(--color-surface); width: min(36.25rem, calc(100vw - 2rem)); max-height: calc(100dvh - 3rem); box-shadow: var(--shadow); }
+.filter-dialog::backdrop, .lightbox::backdrop { background: var(--color-overlay); }
+.filter-dialog form { display: flex; flex-direction: column; max-height: calc(100dvh - 3.125rem); }
+.filter-dialog-head { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--color-line); flex-shrink: 0; }
+.filter-dialog-head h2 { margin: 0; font-size: 1.4375rem; }
+.filter-dialog-body { overflow-y: auto; padding: 0.75rem 1.5rem; overscroll-behavior: contain; }
+.filter-field-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; }
+.filter-field { display: grid; gap: 0.5rem; font-size: 0.875rem; min-width: 0; }
+.filter-field input { width: 100%; font-size: 1rem; }
+.field-hint { margin: 0.625rem 0 0; color: var(--color-ink-muted); font-size: 0.8125rem; }
+.field-error { color: var(--color-error); font-size: 0.875rem; margin: 0.625rem 0 0; }
+.store-options { display: grid; grid-template-columns: 1fr; }
+.store-options label { min-height: 2.75rem; display: flex; align-items: center; gap: 0.625rem; font-size: 0.875rem; }
+.store-options input { margin: 0; }
+.filter-dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; padding: 1rem 1.5rem; border-top: 1px solid var(--color-line); gap: 0.75rem; flex-shrink: 0; }
 
-html {
-  /* Paint the theme canvas on the root element, not just <body>. During a hard
-     navigation (language switch, first paint) the browser repaints before body
-     renders; without this it flashes the default white — harsh in dark mode.
-     The inline theme script in the layout sets data-theme synchronously in
-     <head>, so --color-canvas already resolves to the active theme here. */
-  background-color: var(--color-canvas);
-  scroll-behavior: smooth;
-}
+/* Cards retain their geometry if an image is missing or the network fails. */
+.product-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 0.75rem 2px; }
+.catalog-body .product-grid { grid-template-columns: repeat(var(--catalog-columns,4),minmax(0,1fr)); }
+.product-tile { min-width: 0; }
+.product-media-wrap { position: relative; }
+.product-media { display: block; position: relative; aspect-ratio: 4/5; background: var(--color-product-media); }
+.product-media img { object-fit: contain; }
+.image-fallback { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; padding: 1rem; color: #62635d; background: #eeeae4; font-size: 0.8125rem; text-align: center; }
+.wishlist-button { position: absolute; top: 0.5625rem; right: 0.5rem; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; background: transparent; color: var(--color-ink); border: 0; }
+.wishlist-button:hover svg { fill: currentColor; fill-opacity: .15; }
+.wishlist-button.is-saved { color: var(--color-accent); }
+.wishlist-button.is-saved svg { fill: currentColor; }
+.product-media-wrap>.wishlist-button { color: #161616; }
+.product-media-wrap>.wishlist-button:focus-visible { outline-color: #161616; background: white; }
+.product-media-wrap>.wishlist-button svg { width: 1.125rem; height: 1.125rem; stroke-width: 1.4; }
+.product-body { padding: 0.625rem 0.75rem 0; min-height: 4.0625rem; }
+.product-title { font: 400 0.875rem/1.35 var(--font-body); letter-spacing: 0; margin: 0 0 0.375rem; overflow-wrap: anywhere; }
+.product-title a { display: inline-block; }
+.product-title a:hover { text-decoration: underline; text-underline-offset: 0.1875rem; }
+.product-price-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.4375rem; font-size: 0.8125rem; }
+.price { font-weight: 400; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.old-price { color: var(--color-ink-muted); font-size: 0.8125rem; }
+.product-store { display: inline-flex; align-items: center; min-height: 1.5rem; color: var(--color-ink-muted); font-size: 0.8125rem; text-decoration: underline; text-underline-offset: 0.1875rem; }
+.product-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 0.75rem; }
+.product-meta .product-store { text-decoration: none; }
+.product-meta .product-store:hover { text-decoration: underline; }
+.availability { font-size: 0.8125rem; margin: 0.375rem 0 0; color: var(--color-ink-muted); }
+.availability-limited { color: var(--color-warning); }
+.availability-out_of_stock { color: var(--color-ink-muted); }
+.product-kicker { color: var(--color-ink-muted); font-size: 0.8125rem; margin-bottom: 0.5rem; }
+.catalog-view-controls { margin: 2rem 1rem 0; border-top: 1px solid var(--color-line); padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.8125rem; color: var(--color-ink-muted); }
+.catalog-view-controls p { margin: 0; }
+.catalog-view-controls nav { display: flex; align-items: center; gap: 0.25rem; }
+.catalog-view-controls a { display: grid; place-items: center; min-width: 2.75rem; min-height: 2.75rem; }
+.catalog-view-controls a[aria-current="page"] { color: var(--color-ink); font-weight: 600; text-decoration: underline; text-underline-offset: 0.25rem; }
+.pagination { display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin-top: 1rem; font-size: 0.875rem; }
+.pagination>div, .pagination-item { display: inline-flex; align-items: center; }
+.pagination a, .pagination>span { display: inline-flex; align-items: center; justify-content: center; min-width: 2.75rem; min-height: 2.75rem; padding: 0.5rem; }
+.pagination a[aria-current="page"] { color: var(--color-ink); text-decoration: underline; text-underline-offset: 0.25rem; }
 
-body {
-  background: var(--color-canvas);
-  color: var(--color-ink);
-  font-family: var(--font-body), Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.55;
-  margin: 0;
-  overflow-x: clip;
-  transition: background-color var(--transition), color var(--transition);
-}
+/* Details: two source images, factual attributes, safe return to results. */
+.product-breadcrumbs { display: flex; gap: 0.75rem; align-items: center; margin: 0 0 1.75rem; color: var(--color-ink-muted); font-size: 0.875rem; }
+.product-breadcrumbs a { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; }
+.product-detail-layout { display: grid; grid-template-columns: 1.3fr 1fr; gap: 3rem; align-items: start; }
+.product-gallery { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2px; }
+.product-gallery figure { min-width: 0; }
+.product-detail-media { position: relative; display: block; width: 100%; border: 0; aspect-ratio: 4/5.6; padding: 0; background: var(--color-product-media); }
+.product-detail-media img { object-fit: contain; }
+.product-gallery figcaption { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--color-ink-muted); }
+.product-zoom-badge { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; position: absolute; bottom: 0.5rem; right: 0.5rem; background: var(--color-surface); }
+.product-detail-category { font-size: 0.875rem; color: var(--color-accent); margin-bottom: 0.75rem; }
+.product-detail-title-row { display: flex; align-items: flex-start; gap: 1rem; }
+.product-detail-title-row h1 { font-size: 2rem; overflow-wrap: anywhere; margin-bottom: 1.125rem; }
+.product-detail-title-row .wishlist-button { position: static; flex-shrink: 0; }
+.product-detail-store { display: inline-flex; gap: 0.5rem; align-items: center; min-height: 2.75rem; color: var(--color-ink-muted); font-size: 0.875rem; text-decoration: underline; text-underline-offset: 0.25rem; }
+.product-detail-price { display: flex; gap: 0.75rem; align-items: baseline; margin: 1rem 0 0.25rem; }
+.product-detail-price strong { font-size: 1.5rem; font-weight: 400; }
+.product-detail-price del { font-size: 1rem; color: var(--color-ink-muted); }
+.product-size-section { border-top: 1px solid var(--color-line); margin-top: 1.5rem; padding-top: 1.5rem; }
+.product-size-section>div { display: flex; justify-content: space-between; align-items: center; }
+.product-size-section h2 { font: 500 0.9375rem var(--font-body),Arial,sans-serif; letter-spacing: 0; margin: 0; }
+.product-size-section ul { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; margin: 1rem 0 1.5rem; }
+.product-size-section li { display: grid; place-items: center; min-width: 2.75rem; min-height: 2.75rem; border: 1px solid var(--color-line); padding: 0.5rem 0.75rem; font-size: 0.875rem; }
+.product-detail-facts { margin: 0 0 1.5rem; font-size: 0.875rem; }
+.product-detail-facts>div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.75rem 0; border-top: 1px solid var(--color-line); }
+.product-detail-facts dt { display: flex; align-items: center; gap: 0.5rem; color: var(--color-ink-muted); }
+.product-detail-facts dd { margin: 0; }
+.product-detail-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.related-products { margin-top: 4rem; }
+.lightbox { padding: 3.5rem 1.5rem 1.5rem; border: 1px solid var(--color-line); width: min(68.75rem,95vw); height: min(56.25rem,94dvh); color: var(--color-ink); background: var(--color-surface); border-radius: 0.5rem; }
+.lightbox-close { position: absolute; top: 0.5rem; right: 0.5rem; z-index: 2; width: 2.75rem; height: 2.75rem; display: grid; place-items: center; background: var(--color-surface); border: 1px solid var(--color-control); }
+.lightbox-image-button { display: block; height: calc(100% - 2rem); width: 100%; padding: 0; border: 0; overflow: hidden; background: var(--color-product-media); cursor: zoom-in; }
+.lightbox-image { height: 100%; width: 100%; object-fit: contain; }
+.lightbox-image.is-zoomed { transform: scale(2); cursor: zoom-out; }
+.lightbox-hint { text-align: center; margin: 0.5rem 0 0; font-size: 0.8125rem; color: var(--color-ink-muted); }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+/* Supporting routes */
+.demo-store-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1.5rem; }
+.demo-store-card { display: flex; flex-direction: column; background: var(--color-surface); border-bottom: 1px solid var(--color-line); min-width: 0; }
+.demo-store-card:hover { border-color: var(--color-accent); }
+.demo-store-copy { position: relative; padding: 1.5rem; }
+.demo-store-copy h2 { margin-bottom: 0.75rem; }
+.demo-store-copy p { font-size: 0.875rem; color: var(--color-ink-muted); margin-bottom: 0.5rem; }
+.demo-store-copy span { font-size: 0.8125rem; }
+.demo-store-arrow { position: absolute; right: 1.5rem; top: 1.875rem; }
+.demo-store-collage { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 0.25rem; }
+.demo-store-thumb { position: relative; aspect-ratio: 4/5; background: var(--color-product-media); }
+.demo-store-thumb img { object-fit: contain; }
+.demo-store-icon { min-height: 11.25rem; display: grid; place-items: center; }
+.info-route { max-width: 65.625rem; }
+.info-route .route-heading { max-width: 48.75rem; }
+.info-content { max-width: 47.5rem; }
+.prose-section { margin: 0 0 2rem; padding-top: 1.5rem; border-top: 1px solid var(--color-line); }
+.prose-section h2 { font-size: 1.6875rem; margin-bottom: 1rem; }
+.prose-section p, .prose-section li { color: var(--color-ink-muted); line-height: 1.75; }
+.prose-section a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 0.25rem; }
+.prose-section ul, .prose-section ol { padding-left: 1.5rem; }
+.prose-section li { padding: 0.25rem 0; }
+.empty-state, .state-page { padding-block: 3.5rem; text-align: center; }
+.empty-state { border: 1px solid var(--color-line); margin-top: 1.5rem; padding-inline: 1.5rem; }
+.empty-state>svg, .state-page>svg { color: var(--color-ink-muted); margin-bottom: 1.25rem; }
+.empty-state h2 { font-size: 1.875rem; max-width: 39.375rem; margin: 0 auto 1rem; }
+.empty-state p, .state-page>p { color: var(--color-ink-muted); max-width: 36.25rem; margin: 0 auto 1.5rem; }
+.empty-state.is-error { border-color: var(--color-error); }
+.empty-state.is-error h2 { color: var(--color-error); }
+.state-actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 1rem; }
+.source-note, .privacy-note { color: var(--color-ink-muted); font-size: 0.875rem; }
+.source-note { padding: 1.5rem; border: 1px solid var(--color-line); }
+.source-note a { text-decoration: underline; }
+.cookie-consent { position: fixed; z-index: 20; bottom: 0; inset-inline: 0; max-width: 2560px; margin-inline: auto; background: var(--color-surface); border-top: 1px solid var(--color-control); padding: 1.5rem var(--gutter); display: flex; gap: 2rem; align-items: center; box-shadow: var(--shadow); }
+.cookie-consent-text { max-width: 45rem; }
+.cookie-consent-text p { font-size: 0.875rem; margin-bottom: 0.5rem; }
+.cookie-consent-title { font-weight: 600; }
+.cookie-consent-text a { text-decoration: underline; font-size: 0.875rem; }
+.cookie-consent-actions { display: flex; gap: 0.75rem; margin-left: auto; }
+.saved-product>.wishlist-button { position: static; }
 
-button,
-input,
-select {
-  color: inherit;
-  font: inherit;
+@media (max-width: 73.75em) {
+  .site-header, .site-header.is-home { gap: 1.25rem; }
+  .desktop-nav { gap: 1.25rem; }
+  .product-detail-layout { gap: 2rem; }
+  .catalog-toolbar { align-items: flex-start; flex-direction: column; gap: 0; padding-top: 0.75rem; padding-bottom: 0.3125rem; }
+  .catalog-toolbar .tool-actions { justify-content: space-between; width: 100%; gap: 0.8125rem; }
 }
-
-button,
-a,
-summary {
-  touch-action: manipulation;
+@media (max-width: 63.9375em) {
+  :root { --gutter: 1.5rem; }
+  .desktop-nav { gap: 1rem; }
+  .desktop-nav a { font-size: 0.875rem; }
+  .header-tools { gap: 0.625rem; }
+  .is-home .desktop-nav { display: none; }
+  .is-home .mobile-menu { display: block; }
+  .product-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .product-detail-layout { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .product-detail-title-row h1 { font-size: 2rem; }
 }
-
-:where(a, button, input, select, summary):focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 3px;
+@media (max-width: 56.25em) {
+  .catalog-layout { display: block; }
+  .filter-panel { display: none; }
+  .catalog-toolbar { min-height: 5.875rem; align-items: stretch; padding: 1rem 0.9375rem 0.25rem; gap: 0.25rem; }
+  .catalog-title { justify-content: space-between; }
+  .catalog-title p { font-size: 0.75rem; }
+  .catalog-toolbar .tool-actions { gap: 1rem; font-size: 0.8125rem; }
+  .desktop-filter-label { display: none; }
+  .mobile-filter-label { display: initial; }
+  .density-view { display: none; }
+  .catalog-body .product-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .filter-dialog { margin: auto 0 0; width: 100%; max-width: 100%; max-height: calc(100dvh - 1.5rem); border-radius: 0; }
+  .filter-dialog form { max-height: calc(100dvh - 1.625rem); }
+  .filter-dialog-head, .filter-dialog-body { padding: 1rem 1.25rem; }
+  .filter-dialog-actions { padding: 0.75rem 1.25rem calc(1rem + env(safe-area-inset-bottom)); }
+  .filter-dialog-actions>.text-link { flex-basis: 100%; padding: 0; }
+  .filter-dialog-actions .button { flex: 1; padding-inline: 0.5rem; }
 }
-
-.shell {
-  min-height: 100dvh;
+/* The native menu also serves tablet home, where the search keeps its space. */
+@media (max-width: 63.9375em) {
+  .mobile-menu summary { list-style: none; }
+  .mobile-menu nav { position: absolute; top: 100%; inset-inline: 0; z-index: 12; display: flex; flex-direction: column; background: var(--color-surface); padding: 0.75rem var(--gutter) 1.25rem; border-bottom: 1px solid var(--color-control); box-shadow: var(--shadow); max-height: calc(100dvh - 8.75rem); overflow-y: auto; }
+  .mobile-menu nav>a, .mobile-menu .theme-toggle { display: flex; align-items: center; gap: 0.75rem; min-height: 3rem; padding: 0.625rem 0.75rem; font-size: 1rem; }
+  .mobile-menu nav>a[aria-current="page"] { text-decoration: underline; text-underline-offset: 0.25rem; }
+  .mobile-menu-locales { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+  .mobile-menu-locales a { display: grid; place-items: center; width: 3rem; height: 2.75rem; border: 1px solid var(--color-control); }
+  .mobile-menu-locales a[aria-current="true"] { text-decoration: underline; }
+  .mobile-menu-scrim { position: fixed; inset: 0; background: var(--color-overlay); z-index: 11; }
 }
-
-.main {
-  min-height: 65vh;
+@media (max-width: 43.75em) {
+  :root { --gutter: 0.9375rem; }
+  body { font-size: 0.875rem; }
+  .route-shell { padding-top: 1.75rem; padding-bottom: 2.5rem; }
+  .site-header { gap: 0.75rem; padding: 0 0.9375rem; }
+  .brand { font-size: 2.3125rem; }
+  .desktop-nav { display: none; }
+  .header-tools { gap: 0.625rem; }
+  .account-link>span { display: none; }
+  .mobile-menu { display: block; }
+  .site-header.is-home { padding: 0 var(--gutter); min-height: 6.8125rem; align-items: flex-start; flex-wrap: wrap; gap: 0; }
+  .is-home .brand { font-size: 2.125rem; height: 3.3125rem; }
+  .is-home .header-tools { height: 3.3125rem; margin-left: auto; }
+  .header-search { order: 4; width: 100%; min-width: 0; border-top: 1px solid var(--color-line); margin: 0; height: 3.25rem; }
+  .header-search .search-input-row { min-height: 3.25rem; }
+  .header-search input { height: 3.0625rem; font-size: 1rem; }
+  .home-storefront { padding-bottom: 2.5rem; }
+  .campaign { background: var(--color-canvas); }
+  .campaign::after { display: none; }
+  .campaign-image { aspect-ratio: 4 / 5; background: var(--color-surface-soft); }
+  .campaign-copy { position: static; width: auto; max-width: none; padding: 1.25rem var(--gutter) 1.5rem; color: var(--color-ink); }
+  .campaign-copy h1 { font-size: clamp(2.25rem, 9vw, 3.25rem); max-width: 20ch; white-space: normal; }
+  .campaign-copy p { font-size: 1rem; max-width: 36ch; margin: 0.875rem 0 1rem; }
+  .campaign-cta { min-height: 2.75rem; padding: 0.625rem 1.25rem; font-size: 0.875rem; background: var(--color-accent); color: var(--color-on-accent); }
+  .campaign :focus-visible { outline-color: var(--color-focus); }
+  .home-section-head { padding: 1.4375rem 0.9375rem 1.125rem; gap: 0.9375rem; }
+  .home-section-head h2 { font-size: 1.25rem; letter-spacing: -.4px; }
+  .home-section-head .text-link { font-size: 0.75rem; flex-shrink: 0; white-space: nowrap; }
+  .site-footer { display: block; padding-top: 1.5rem; }
+  .footer-statement { max-width: 100%; margin-bottom: 1rem; }
+  .footer-links { justify-content: flex-start; gap: 0 1.5rem; }
+  h1 { font-size: 1.875rem; }
+  h2 { font-size: 1.5625rem; }
+  .lead { font-size: 1rem; }
+  .route-heading { margin-bottom: 1.5rem; }
+  .search-input-row { gap: 0.5625rem; min-height: 3.1875rem; }
+  .search-input-row input { height: 3.125rem; font-size: 1rem; }
+  .search-submit { min-width: 2.75rem; font-size: 0.8125rem; }
+  .query-clear { width: 2.75rem; }
+  .search-route { padding-top: 0; }
+  .catalog-search-row { padding: 0.5rem 0.9375rem 0.625rem; }
+  .category-nav { gap: 1.3125rem; padding: 0 0.9375rem; min-height: 3.125rem; font-size: 0.8125rem; }
+  .sort-form { font-size: 0.8125rem; }
+  .active-filters { gap: 0.375rem; margin-top: 0.75rem; }
+  .active-filters a { min-height: 2.5rem; padding: 0.4375rem 0.625rem; font-size: 0.75rem; }
+  .search-interpretation { font-size: 0.8125rem; gap: 0 0.5rem; margin-top: 0.75rem; }
+  .filter-field-grid { gap: 0.75rem; }
+  .product-grid, .catalog-body .product-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0.75rem 2px; }
+  .product-body { padding: 0.625rem 0.625rem 0; min-height: 5rem; }
+  .product-title { font-size: 0.875rem; line-height: 1.35; min-height: 2.1875rem; margin-bottom: 0.4375rem; }
+  .product-meta { gap: 0.25rem; }
+  .product-price-row { font-size: 0.8125rem; gap: 0.3125rem; }
+  .old-price, .product-store { font-size: 0.8125rem; }
+  .wishlist-button { top: 0; right: 0; }
+  .catalog-view-controls { align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; }
+  .pagination { gap: 0.5rem; font-size: 0.8125rem; }
+  .pagination a, .pagination>span { min-width: 2.25rem; padding-inline: 0.375rem; }
+  .product-breadcrumbs { margin-bottom: 1rem; }
+  .product-detail-layout { display: block; }
+  .product-gallery { margin-bottom: 1.75rem; }
+  .product-detail-media { aspect-ratio: 4/5; }
+  .product-detail-title-row h1 { font-size: 1.8125rem; }
+  .product-detail-actions .button { flex: 1; font-size: 0.875rem; padding-inline: 0.75rem; }
+  .related-products { margin-top: 2.5rem; }
+  .demo-store-grid { grid-template-columns: 1fr; gap: 1.25rem; }
+  .demo-store-copy { padding: 1.25rem; }
+  .prose-section h2 { font-size: 1.5625rem; }
+  .empty-state, .state-page { padding-block: 2.5rem; }
+  .empty-state h2 { font-size: 1.6875rem; }
+  .cookie-consent { display: block; max-height: 75dvh; overflow-y: auto; padding: 1.25rem; }
+  .cookie-consent-actions { margin-top: 1rem; }
 }
-
-.skip-link {
-  background: var(--color-ink);
-  color: var(--color-canvas);
-  left: 16px;
-  padding: 10px 14px;
-  position: fixed;
-  top: 12px;
-  transform: translateY(-160%);
-  z-index: 50;
-}
-
-.skip-link:focus-visible {
-  transform: none;
-}
-
-.header-skeleton {
-  border-bottom: 1px solid var(--color-line);
-  height: var(--header-h);
-}
-
-.site-header {
-  align-items: center;
-  backdrop-filter: blur(14px);
-  background: color-mix(in srgb, var(--color-canvas) 92%, transparent);
-  border-bottom: 1px solid var(--color-line);
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  height: var(--header-h);
-  padding: 0 var(--gutter);
-  position: sticky;
-  top: 0;
-  z-index: 20;
-}
-
-.brand,
-.footer-brand {
-  font-family: var(--font-display), Arial Black, sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-}
-
-.brand {
-  font-size: clamp(22px, 2.2vw, 31px);
-  line-height: 1;
-  width: fit-content;
-}
-
-/* ---- wordmark: lowercase `weft`, with an optional `i` reveal that reads
-   "we fit". Works in em so it inherits font-size from whatever surface holds it
-   (header .brand, footer .footer-brand, hero .title-page h1). Its own tracking
-   overrides the tight caps tracking those surfaces set for the old WEFT. ---- */
-.wordmark {
-  font-family: var(--font-display), Arial Black, sans-serif;
-  font-weight: 800;
-  letter-spacing: 0.03em;
-  text-transform: none;
-  white-space: nowrap;
-  line-height: 1;
-  display: inline-block;
-}
-.wordmark .wm-fit {
-  color: var(--color-accent);
-}
-/* On the title page the mark is a toy: click (or focus + Enter) to replay the
-   "we fit" reveal. Signal that it is pressable without changing its look. */
-.wm-clickable {
-  cursor: pointer;
-  border-radius: 0.08em;
-}
-.wm-clickable:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 0.12em;
-}
-/* `w` reads a hair loose against `e`; pull it back for an even w–e–f–t rhythm */
-.wm-lead {
-  display: inline-block;
-  vertical-align: baseline;
-  margin-right: -0.03em;
-}
-/* The gap holder. It stays zero-width in layout on purpose: the reveal must NOT
-   reflow the word, because the mark is centred and any width change would shift
-   the whole word sideways (the "flies in from the right" bug). Instead the gap
-   is made by sliding the trailing `t` with a transform (below), which never
-   touches layout — so the word stays put and the i drops straight down. The i
-   is pinned flush after f (text-align:left) and only ever moves vertically. */
-.wm-islot {
-  display: inline-block;
-  max-width: 0;
-  overflow: visible;
-  text-align: left;
-  vertical-align: baseline;
-  margin: 0 0.018em;
-}
-/* `t` slides right by one measured i-advance via transform — no layout change,
-   so the centred word never re-centres mid-reveal. On close it slides back. */
-.wm-tail {
-  display: inline-block;
-  vertical-align: baseline;
-  transition: transform 0.28s cubic-bezier(0.2, 0.72, 0.3, 1);
-}
-.wm-islot.is-open ~ .wm-tail {
-  transform: translateX(var(--wm-iw, 0.34em));
-}
-.wm-islot.is-shut ~ .wm-tail {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 1, 1);
-}
-.wm-ichar {
-  display: inline-block;
-  transform: translateY(-0.9em);
-  opacity: 0;
-  transition:
-    transform 0.28s cubic-bezier(0.2, 0.72, 0.3, 1),
-    opacity 0.2s ease;
-}
-.wm-ichar.is-in {
-  transform: translateY(0);
-  opacity: 1;
-}
-.wm-ichar.is-out {
-  transform: translateY(0.9em);
-  opacity: 0;
-  transition:
-    transform 0.3s cubic-bezier(0.4, 0, 1, 1),
-    opacity 0.24s ease;
+@media (max-width: 22.5em) {
+  .site-header { gap: 0.25rem; }
+  .header-tools { gap: 0; }
+  .query-clear { width: 2.75rem; }
+  .filter-field-grid { grid-template-columns: 1fr; }
+  .product-detail-actions { flex-direction: column; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .wm-islot,
-  .wm-ichar,
-  .wm-tail {
-    transition: none !important;
-  }
-}
-
-.desktop-nav {
-  display: flex;
-  gap: clamp(14px, 1.7vw, 28px);
-  grid-column: 2;
-  grid-row: 1;
-}
-
-.desktop-nav a,
-.language-switcher {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-}
-
-.desktop-nav a {
-  align-items: center;
-  border-bottom: 3px solid transparent;
-  display: flex;
-  height: var(--header-h);
-}
-
-.desktop-nav a:hover,
-.desktop-nav a[aria-current="page"] {
-  border-color: var(--color-accent);
-}
-
-.desktop-nav .nav-sale,
-.mobile-menu .nav-sale {
-  color: var(--color-accent);
-}
-
-.header-tools {
-  align-items: center;
-  display: flex;
-  gap: 10px;
-  grid-column: 3;
-  grid-row: 1;
-  justify-self: end;
-}
-
-.account-link,
-.theme-toggle {
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  min-height: 44px;
-}
-
-.account-link,
-.theme-toggle {
-  background: transparent;
-  border: 1px solid var(--color-line);
-  border-radius: 50%;
-  padding: 0;
-  transition: background-color var(--transition), border-color var(--transition);
-  width: 44px;
-}
-
-.theme-toggle {
-  cursor: pointer;
-}
-
-.account-link:hover,
-.theme-toggle:hover {
-  background: var(--color-surface-soft);
-  border-color: var(--color-ink);
-}
-
-.account-link[aria-current="page"] {
-  background: var(--color-ink);
-  border-color: var(--color-ink);
-  color: var(--color-canvas);
-}
-
-.language-switcher {
-  align-items: center;
-  display: flex;
-}
-
-.language-switcher a {
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  min-height: 44px;
-  min-width: 44px;
-}
-
-.language-switcher a[aria-current="true"] {
-  font-weight: 800;
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
-}
-
-.mobile-menu {
-  display: none;
-  position: relative;
-}
-
-.mobile-menu summary {
-  align-items: center;
-  cursor: pointer;
-  display: flex;
-  height: 44px;
-  justify-content: center;
-  list-style: none;
-  width: 44px;
-}
-
-.mobile-menu summary::-webkit-details-marker {
-  display: none;
-}
-
-.mobile-menu > nav {
-  background: var(--color-surface-elevated);
-  border: 1px solid var(--color-line);
-  box-shadow: var(--shadow);
-  display: grid;
-  min-width: 240px;
-  padding: 8px;
-  position: absolute;
-  right: 0;
-  top: 50px;
-}
-
-/* Tap-to-close scrim behind the open mobile menu. Hidden until the phone
-   breakpoint turns the menu into a full-width sheet (below). */
-.mobile-menu-scrim {
-  display: none;
-}
-
-.mobile-menu > nav > a {
-  align-items: center;
-  border-bottom: 1px solid var(--color-line);
-  display: flex;
-  font-weight: 600;
-  min-height: 48px;
-  padding: 0 12px;
-}
-
-.mobile-menu > nav > a[aria-current="page"] {
-  background: var(--color-surface-soft);
-}
-
-.mobile-menu > nav > .mobile-account-link {
-  gap: 10px;
-}
-
-/* Theme toggle rendered as a full-width menu row (its top-bar circular twin is
-   hidden on phones). Matches the nav-link rows around it. */
-.mobile-menu-theme {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid var(--color-line);
-  cursor: pointer;
-  display: flex;
-  font-weight: 600;
-  gap: 10px;
-  min-height: 48px;
-  padding: 0 12px;
-  text-align: left;
-  width: 100%;
-}
-
-.mobile-menu-locales {
-  display: none;
-  gap: 8px;
-  padding-top: 8px;
-}
-
-.mobile-menu-locales a {
-  align-items: center;
-  border: 1px solid var(--color-line);
-  display: flex;
-  font-size: 12px;
-  font-weight: 700;
-  justify-content: center;
-  min-height: 44px;
-  width: 100%;
-}
-
-.mobile-menu-locales a[aria-current="true"] {
-  background: var(--color-ink);
-  color: var(--color-canvas);
-}
-
-.home-stack,
-.route-shell,
-.site-footer {
-  margin-inline: auto;
-  max-width: var(--max);
-}
-
-/* ---- Home storefront (below the hero) --------------------------------- */
-
-.home-storefront {
-  display: grid;
-  gap: clamp(48px, 6vw, 96px);
-  padding-block: clamp(48px, 6vw, 88px);
-}
-
-.home-section-head {
-  align-items: baseline;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-
-.home-section-head h2 {
-  font-family: var(--font-display);
-  font-size: clamp(24px, 3.4vw, 40px);
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-
-.home-section-link {
-  align-items: center;
-  color: var(--color-accent);
-  display: inline-flex;
-  font-size: 13px;
-  font-weight: 600;
-  gap: 6px;
-  text-transform: uppercase;
-}
-
-.category-tiles {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.category-tile {
-  aspect-ratio: 4 / 5;
-  display: block;
-  overflow: hidden;
-  position: relative;
-}
-
-.category-tile-media {
-  background: var(--color-product-media);
-  inset: 0;
-  position: absolute;
-}
-
-.category-tile-media img {
-  object-fit: cover;
-  transition: transform 400ms ease;
-}
-
-.category-tile:hover .category-tile-media img {
-  transform: scale(1.04);
-}
-
-.category-tile-label {
-  align-items: center;
-  backdrop-filter: blur(6px);
-  background: color-mix(in srgb, var(--color-canvas) 88%, transparent);
-  bottom: 0;
-  color: var(--color-ink);
-  display: flex;
-  font-family: var(--font-display);
-  font-size: 18px;
-  gap: 8px;
-  justify-content: space-between;
-  left: 0;
-  padding: 14px 18px;
-  position: absolute;
-  right: 0;
-}
-
-.category-tile:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
-@media (max-width: 767px) {
-  .category-tiles {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* ---- Title page (/) --------------------------------------------------- */
-
-.title-page {
-  align-items: center;
-  border-inline: 1px solid var(--color-line);
-  display: grid;
-  isolation: isolate;
-  min-height: calc(100svh - var(--header-h));
-  padding: clamp(40px, 7vw, 96px) clamp(24px, 5vw, 72px);
-  position: relative;
-}
-
-.title-page-copy {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 640px;
-  margin-inline: auto;
-  text-align: center;
-}
-
-.title-page h1 {
-  font-family: var(--font-display);
-  /*
-   * Sized to stay inside the copy column rather than to be as large as
-   * possible. Syne's caps are wide — a four-letter wordmark runs roughly 1.2em
-   * per glyph — so 208px ran the "T" over the mannequins on desktop and pushed
-   * the whole word off-screen at 375px.
-   */
-  font-size: clamp(44px, 12vw, 132px);
-  max-width: 100%;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 0.86;
-  margin: 0;
-  text-transform: uppercase;
-}
-
-.title-page-slogan {
-  color: var(--color-accent);
-  font-family: var(--font-display);
-  font-size: clamp(24px, 4vw, 44px);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.05;
-  margin: 16px 0 0;
-}
-
-.title-page-lead {
-  color: var(--color-ink-muted);
-  font-size: clamp(16px, 1.5vw, 19px);
-  margin: 20px 0 0;
-  max-width: 46ch;
-}
-
-/*
- * The one action on the page, so it is the one saturated thing on it — the
- * hero loop is greyscale and the rest of the copy is ink or muted grey, so
- * rust is found before anything else without needing to be large.
- *
- * The text colour has to flip with the theme. Light mode paints near-white on
- * rust (#fffaf2 on #b7410e = 5.4:1); dark mode's accent is the lighter coral,
- * where the same near-white would fall to 2.3:1 and fail, so it takes the
- * near-black instead (#0d0d0d on #ff7867 = 7.5:1). Both clear the 4.5:1 AA
- * floor; neither ratio survives if the two are swapped.
- */
-/*
- * Written as `.button.title-page-cta`, like `.button.secondary` — `.button`
- * itself is defined ~390 lines further down, so a single-class selector here
- * carries equal specificity and loses on source order alone.
- */
-.button.title-page-cta {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: var(--color-on-dark);
-  font-size: 17px;
-  margin-top: 40px;
-  min-height: 60px;
-  padding: 16px 30px;
-}
-
-:root[data-theme="dark"] .button.title-page-cta {
-  color: var(--color-on-acid);
-}
-
-.button.title-page-cta:hover {
-  background: var(--color-ink);
-  border-color: var(--color-ink);
-  color: var(--color-canvas);
-}
-
-/* The dark rule above outranks the hover rule, so the hover colour has to be
-   restated at that weight or the hover state keeps the near-black text. */
-:root[data-theme="dark"] .button.title-page-cta:hover {
-  color: var(--color-canvas);
-}
-
-/*
- * The atmospheric wash behind the title page. No photo: a set of brand-tinted
- * radial blobs bled together and blurred, so it reads as coloured light rather
- * than an image. `overflow: hidden` clips the over-scanned, drifting inner
- * layer back to the section.
- */
-.hero-media {
-  inset: 0;
-  overflow: hidden;
-  position: absolute;
-  z-index: -1;
-}
-
-/*
- * The colour lives on its own layer so the ::after halo stays sharp on top of
- * it. It is over-scanned well past the box (inset: -35%) because it both blurs
- * — which samples past the edge — and slowly rotates/scales; the extra margin
- * keeps the section corners from ever showing bare canvas mid-drift. The blobs
- * are pushed toward the corners so the centre stays lightest for the copy.
- */
-.hero-media::before {
-  background:
-    radial-gradient(38% 46% at 22% 26%, color-mix(in srgb, var(--color-accent) 56%, transparent), transparent 70%),
-    radial-gradient(42% 52% at 80% 24%, color-mix(in srgb, var(--color-accent) 30%, transparent), transparent 72%),
-    radial-gradient(46% 56% at 74% 82%, color-mix(in srgb, var(--color-accent) 48%, transparent), transparent 70%),
-    radial-gradient(40% 48% at 18% 82%, color-mix(in srgb, var(--color-accent) 26%, transparent), transparent 72%);
-  content: "";
-  filter: blur(64px) saturate(1.08);
-  inset: -35%;
-  position: absolute;
-  transform-origin: center;
-  will-change: transform;
-  animation: hero-drift 9s ease-in-out infinite alternate;
-}
-
-/*
- * A soft canvas halo behind the centred copy. The blobs are semi-transparent
- * over canvas so the middle is already the lightest region; this just guarantees
- * the headline's contrast without flattening the colour around it.
- */
-.hero-media::after {
-  background: radial-gradient(
-    58% 54% at 50% 46%,
-    color-mix(in srgb, var(--color-canvas) 55%, transparent) 0%,
-    color-mix(in srgb, var(--color-canvas) 22%, transparent) 45%,
-    transparent 72%
-  );
-  content: "";
-  inset: 0;
-  position: absolute;
-}
-
-/*
- * The drift: a slow, continuous glide + breath + turn on the colour layer.
- * `alternate` between the two extremes so there is no seam on repeat. The
- * global prefers-reduced-motion guard collapses the duration to ~0, holding it
- * on the first frame for anyone who asked for reduced motion.
- */
-@keyframes hero-drift {
-  from {
-    transform: translate3d(-9%, -6%, 0) scale(1.05) rotate(-12deg);
-  }
-  to {
-    transform: translate3d(9%, 6%, 0) scale(1.26) rotate(12deg);
-  }
-}
-
-/* Same drift, smaller travel — see the narrow-screen note below. */
-@keyframes hero-drift-narrow {
-  from {
-    transform: translate3d(-5%, -3%, 0) scale(1.06) rotate(-7deg);
-  }
-  to {
-    transform: translate3d(5%, 3%, 0) scale(1.18) rotate(7deg);
-  }
-}
-
-.preview-kicker,
-.eyebrow,
-.route-eyebrow,
-.store-eyebrow {
-  align-items: center;
-  display: flex;
-  font-size: 12px;
-  font-weight: 600;
-  gap: 8px;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.preview-kicker,
-.eyebrow {
-  margin: 0 0 20px;
-}
-
-/*
- * The eyebrow is a brand moment, so it follows the accent. It used to be
- * painted with --color-focus, which is the keyboard focus-ring colour: a
- * functional token borrowed for decoration. That is why the label read blue
- * next to every accent we tried.
- */
-.preview-kicker,
-.route-eyebrow {
-  color: var(--color-accent);
-}
-
-.hero-copy h1,
-.route-heading h1,
-.state-page h1 {
-  font-family: var(--font-display), Arial Black, sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.055em;
-  margin: 0;
-}
-
-.hero-lead,
-.lead {
-  color: var(--color-ink-muted);
-  font-size: clamp(16px, 1.4vw, 20px);
-  max-width: 650px;
-}
-
-.hero-search > label,
-.query-field > span,
-.primary-filters label > span {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  margin-bottom: 7px;
-  text-transform: uppercase;
-}
-
-.hero-search-row,
-.query-field > div {
-  align-items: center;
-  background: var(--color-surface);
-  border: 2px solid var(--color-ink);
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  min-height: 60px;
-  padding-left: 16px;
-  transition: box-shadow var(--transition), border-color var(--transition);
-}
-
-.hero-search-row:focus-within,
-.query-field > div:focus-within {
-  border-color: var(--color-focus);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus) 28%, transparent);
-}
-
-.hero-search-row input,
-.query-field input {
-  background: transparent;
-  border: 0;
-  min-width: 0;
-  padding: 12px;
-  width: 100%;
-}
-
-.hero-search-row input:focus,
-.query-field input:focus {
-  outline: 0;
-}
-
-.hero-search-row button,
-.query-field button {
-  align-items: center;
-  align-self: stretch;
-  background: var(--color-ink);
-  border: 0;
-  color: var(--color-canvas);
-  cursor: pointer;
-  display: flex;
-  font-weight: 600;
-  gap: 12px;
-  padding: 0 22px;
-  transition: background-color var(--transition);
-}
-
-.hero-search-row button:hover,
-.query-field button:hover {
-  background: var(--color-focus);
-  color: var(--color-on-dark);
-}
-
-.section-heading h2,
-.trust-band h2,
-.empty-state h2 {
-  font-family: var(--font-display);
-  font-size: clamp(30px, 4vw, 56px);
-  letter-spacing: -0.035em;
-  line-height: 0.95;
-  margin: 0;
-}
-
-.text-link,
-.product-link {
-  align-items: center;
-  display: inline-flex;
-  font-size: 12px;
-  font-weight: 600;
-  gap: 8px;
-  letter-spacing: 0.06em;
-  min-height: 44px;
-  margin-top: auto;
-  text-decoration: underline;
-  text-transform: uppercase;
-  text-underline-offset: 4px;
-}
-
-.text-link:hover,
-.product-link:hover,
-.product-store:hover {
-  color: var(--color-focus);
-}
-
-.text-link.disabled,
-.product-link.disabled {
-  color: var(--color-ink-muted);
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.product-grid {
-  display: grid;
-  gap: 36px 20px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.product-tile {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-/* Results animate in on each search/filter/page change. The grid is remounted
-   with a new key on the server (see app/search/page.tsx), so this replays every
-   time the result set changes, giving the soft navigation a visible response.
-   The global prefers-reduced-motion guard collapses the duration to ~0, so the
-   tiles appear instantly for users who ask for reduced motion. */
-@keyframes tile-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.product-grid .product-tile {
-  animation: tile-in 0.42s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-
-.product-grid .product-tile:nth-child(2) { animation-delay: 40ms; }
-.product-grid .product-tile:nth-child(3) { animation-delay: 80ms; }
-.product-grid .product-tile:nth-child(4) { animation-delay: 120ms; }
-.product-grid .product-tile:nth-child(5) { animation-delay: 160ms; }
-.product-grid .product-tile:nth-child(6) { animation-delay: 200ms; }
-.product-grid .product-tile:nth-child(7) { animation-delay: 240ms; }
-.product-grid .product-tile:nth-child(n + 8) { animation-delay: 280ms; }
-
-/* While a search is running the form carries data-pending, so the submit
-   button shows a spinner — feedback the old native full-page reload never gave.
-   Paired with the .search-progress sweep below. */
-.catalog-form[data-pending] {
-  cursor: progress;
-}
-
-.catalog-form[data-pending] .query-field button {
-  position: relative;
-}
-
-.catalog-form[data-pending] .query-field button::after {
-  animation: search-spin 0.7s linear infinite;
-  border: 2px solid color-mix(in srgb, var(--color-canvas) 40%, transparent);
-  border-radius: 50%;
-  border-top-color: var(--color-canvas);
-  content: "";
-  height: 15px;
-  width: 15px;
-}
-
-@keyframes search-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* The pre-navigation "searching" animation. On submit the form carries
-   data-pending for a deliberate ~620ms (see components/search-form.tsx), and
-   this bar sweeps across the top of the form before the results load — the
-   visible cue that a search was triggered. Kept in sync with REVEAL_MS. */
-.search-progress {
-  background: var(--color-accent);
-  height: 3px;
-  left: 0;
-  opacity: 0;
-  position: absolute;
-  top: -2px;
-  transform: scaleX(0);
-  transform-origin: left center;
-  width: 100%;
-}
-
-.catalog-form[data-pending] .search-progress {
-  animation: search-progress-sweep 0.62s cubic-bezier(0.3, 0.1, 0.2, 1) forwards;
-  opacity: 1;
-}
-
-@keyframes search-progress-sweep {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-/* Product-preview loading skeleton (app/out/[productId]/loading.tsx). Shown only
-   on a cold/slow navigation; the static pages are usually prefetched. */
-.detail-skeleton {
-  padding-block: 24px;
-}
-
-.skeleton {
-  background: color-mix(in srgb, var(--color-ink) 9%, var(--color-surface));
-  border-radius: 2px;
-  display: block;
-  overflow: hidden;
-  position: relative;
-}
-
-.skeleton::after {
-  animation: skeleton-shimmer 1.3s ease-in-out infinite;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--color-ink) 7%, transparent),
-    transparent
-  );
-  content: "";
-  inset: 0;
-  position: absolute;
-  transform: translateX(-100%);
-}
-
-.skeleton-media {
-  aspect-ratio: 4 / 5;
-  width: 100%;
-}
-
-.skeleton-media-secondary {
-  aspect-ratio: 16 / 9;
-  margin-top: 16px;
-}
-
-.skeleton-line {
-  height: 18px;
-  margin-bottom: 16px;
-  width: 100%;
-}
-
-.skeleton-back { height: 14px; margin-bottom: 28px; width: 120px; }
-.skeleton-line-sm { height: 12px; width: 35%; }
-.skeleton-line-lg { height: 34px; width: 80%; }
-.skeleton-line-md { width: 60%; }
-.skeleton-cta { height: 52px; margin-top: 8px; width: 100%; }
-
-@keyframes skeleton-shimmer {
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.product-media {
-  align-items: center;
-  aspect-ratio: 4 / 5;
-  background: var(--color-placeholder-a);
-  display: flex;
-  justify-content: center;
-  overflow: hidden;
-  position: relative;
-}
-
-.product-media img {
-  object-fit: contain;
-}
-
-.product-glyph {
-  display: contents;
-}
-
-.product-media svg {
-  height: 31%;
-  stroke-width: 0.75;
-  transition: transform 220ms ease;
-  width: 31%;
-}
-
-.product-media:hover svg {
-  transform: scale(1.025);
-}
-
-/* The media + its overlaid save button. The button is a sibling of the media
-   link (never nested inside it — interactive-in-interactive is invalid). */
-.product-media-wrap {
-  position: relative;
-}
-
-/* Second product image (the styled shot), faded in on hover — the "hover to see
-   it worn" interaction shoppers expect. Skipped when there is no detail image. */
-.product-media-hover {
-  opacity: 0;
-  transition: opacity 260ms ease;
-}
-
-.product-media-wrap:hover .product-media-hover {
-  opacity: 1;
-}
-
-.wishlist-button {
-  align-items: center;
-  backdrop-filter: blur(6px);
-  background: color-mix(in srgb, var(--color-canvas) 82%, transparent);
-  border: 0;
-  border-radius: 999px;
-  color: var(--color-ink);
-  cursor: pointer;
-  display: flex;
-  height: 38px;
-  justify-content: center;
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  transition: background-color var(--transition), color var(--transition);
-  width: 38px;
-  z-index: 2;
-}
-
-.wishlist-button:hover {
-  background: var(--color-canvas);
-}
-
-.wishlist-button.is-saved {
-  color: var(--color-accent);
-}
-
-.wishlist-button.is-saved svg {
-  fill: currentColor;
-}
-
-.wishlist-button:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .product-media-hover {
-    transition: none;
-  }
-}
-
-.tone-1 .product-media {
-  background: var(--color-placeholder-b);
-  color: var(--color-on-dark);
-}
-
-.tone-2 .product-media {
-  background: var(--color-placeholder-c);
-}
-
-.tone-3 .product-media {
-  background: var(--color-placeholder-d);
-  color: var(--color-on-acid);
-}
-
-.product-tile .product-media.has-image {
-  background: var(--color-product-media);
-}
-
-.is-sold-out .product-media {
-  filter: grayscale(0.85);
-  opacity: 0.72;
-}
-
-.demo-media-label,
-.media-category {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  position: absolute;
-  text-transform: uppercase;
-}
-
-.demo-media-label {
-  left: 12px;
-  top: 12px;
-}
-
-.media-category {
-  bottom: 12px;
-  left: 12px;
-}
-
-.product-body {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  padding-top: 14px;
-}
-
-.product-kicker {
-  color: var(--color-ink-muted);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  margin: 10px 0 4px;
-  text-transform: uppercase;
-}
-
-.product-title {
-  font-family: var(--font-display);
-  font-size: 18px;
-  line-height: 1.15;
-  margin: 0 0 8px;
-  /* Reserve two lines so a one-line title next to a two-line title doesn't
-     push its store/price row up — keeping the numbers level across the grid
-     columns instead of "one higher, one lower". */
-  min-height: 2.3em;
-}
-
-.product-store {
-  color: var(--color-ink-muted);
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 600;
-  margin-bottom: 10px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.product-price-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.price {
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-}
-
-.old-price {
-  color: var(--color-ink-muted);
-}
-
-.old-price del {
-  text-decoration: line-through;
-}
-
-.availability {
-  font-size: 11px;
-  margin: 3px 0;
-}
-
-.availability-in_stock {
-  color: var(--color-success);
-}
-
-.availability-limited {
-  color: var(--color-warning);
-}
-
-.availability-out_of_stock {
-  color: var(--color-error);
-}
-
-.button {
-  align-items: center;
-  background: var(--color-ink);
-  border: 1px solid var(--color-ink);
-  color: var(--color-canvas);
-  cursor: pointer;
-  display: inline-flex;
-  font-weight: 600;
-  gap: 8px;
-  justify-content: center;
-  min-height: 48px;
-  padding: 10px 18px;
-  transition: background-color var(--transition), border-color var(--transition), color var(--transition);
-}
-
-.button.secondary {
-  background: transparent;
-  color: var(--color-ink);
-}
-
-.button.inverse {
-  background: var(--color-acid);
-  border-color: var(--color-acid);
-  color: var(--color-on-acid);
-}
-
-.button:hover {
-  background: var(--color-focus);
-  border-color: var(--color-focus);
-  color: var(--color-on-dark);
-}
-
-.route-shell {
-  padding: 56px var(--gutter) 88px;
-}
-
-.route-heading {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  margin-bottom: 28px;
-}
-
-.route-eyebrow {
-  align-self: start;
-  border-top: 2px solid currentColor;
-  margin: 10px 0 0;
-  padding-top: 14px;
-}
-
-.route-heading h1 {
-  font-size: clamp(2rem, 4vw, 3.25rem);
-  line-height: 0.95;
-}
-
-.route-heading .lead {
-  margin-bottom: 0;
-}
-
-.catalog-form {
-  border-block: 1px solid var(--color-line);
-  padding: 24px 0;
-  position: relative;
-}
-
-.primary-filters {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  margin-top: 18px;
-}
-
-.primary-filters select {
-  appearance: none;
-  background-color: var(--color-surface);
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--color-ink) 50%),
-    linear-gradient(135deg, var(--color-ink) 50%, transparent 50%);
-  background-position: calc(100% - 16px) 21px, calc(100% - 11px) 21px;
-  background-repeat: no-repeat;
-  background-size: 5px 5px;
-  border: 1px solid var(--color-line);
-  border-radius: 0;
-  min-height: 48px;
-  padding: 10px 32px 10px 12px;
-  width: 100%;
-}
-
-/* Focus (including click) in the brand accent, not the global blue box. The
-   selected value itself stays neutral — only the focus ring is accented. */
-.primary-filters select:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 1px;
-}
-
-.advanced-filters {
-  border-top: 1px solid var(--color-line);
-  margin-top: 18px;
-  padding-top: 14px;
-}
-
-.advanced-filters summary {
-  align-items: center;
-  border: 2px solid transparent;
-  cursor: pointer;
-  display: flex;
-  font-size: 12px;
-  font-weight: 600;
-  gap: 8px;
-  letter-spacing: 0.06em;
-  min-height: 44px;
-  padding: 0 4px;
-  text-transform: uppercase;
-}
-
-.advanced-filters summary:focus-visible {
-  border-color: var(--color-focus);
-  outline: 0;
-}
-
-.results-toolbar {
-  align-items: flex-start;
-  display: flex;
-  justify-content: space-between;
-  padding: 24px 0;
-}
-
-.results-toolbar p {
-  margin: 0;
-}
-
-.results-toolbar p strong {
-  color: var(--color-accent);
-  font-family: var(--font-display);
-  font-size: 28px;
-}
-
-.active-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.active-filters a {
-  align-items: center;
-  border: 1px solid var(--color-line);
-  display: flex;
-  font-size: 10px;
-  font-weight: 600;
-  gap: 8px;
-  min-height: 44px;
-  padding: 6px 10px;
-  text-transform: uppercase;
-}
-
-.active-filters a:hover {
-  border-color: var(--color-ink);
-}
-
-.active-filters .clear-link {
-  border: 0;
-}
-
-/*
- * Quick-browse category pills: a familiar click-to-browse row so shoppers can
- * page the catalog by category without typing a query. Mirrors the department
- * bar every mainstream fashion site leads with.
- */
-.browse-categories {
-  -webkit-overflow-scrolling: touch;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 20px;
-  overflow-x: auto;
-}
-
-.browse-categories a {
-  border: 1px solid var(--color-line);
-  border-radius: 999px;
-  color: var(--color-ink);
-  flex: 0 0 auto;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  min-height: 40px;
-  padding: 9px 16px;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.browse-categories a:hover {
-  border-color: var(--color-ink);
-}
-
-.browse-categories a[aria-current="page"] {
-  background-color: var(--color-ink);
-  border-color: var(--color-ink);
-  color: var(--color-canvas);
-}
-
-.catalog-view-controls {
-  align-items: center;
-  border-top: 1px solid var(--color-line);
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 24px;
-  padding-top: 16px;
-}
-
-.catalog-view-controls > p {
-  color: var(--color-ink-muted);
-  font-size: 14px;
-  margin: 0;
-}
-
-.catalog-view-controls nav {
-  align-items: center;
-  display: flex;
-  gap: 6px;
-}
-
-.catalog-view-controls nav > span {
-  color: var(--color-ink-muted);
-  font-size: 12px;
-  font-weight: 600;
-  margin-right: 4px;
-  text-transform: uppercase;
-}
-
-.catalog-view-controls a,
-.pagination a {
-  align-items: center;
-  border: 1px solid var(--color-line);
-  display: inline-flex;
-  font-size: 13px;
-  font-weight: 600;
-  justify-content: center;
-  min-height: 44px;
-  min-width: 44px;
-  padding: 8px 12px;
-  transition: background-color var(--transition), border-color var(--transition), color var(--transition);
-}
-
-.catalog-view-controls a:hover,
-.pagination a:hover {
-  border-color: var(--color-ink);
-}
-
-.catalog-view-controls a[aria-current="page"],
-.pagination a[aria-current="page"] {
-  background: var(--color-ink);
-  border-color: var(--color-ink);
-  color: var(--color-canvas);
-}
-
-.pagination {
-  align-items: center;
-  border-top: 1px solid var(--color-line);
-  display: grid;
-  gap: 16px;
-  grid-template-columns: auto 1fr auto;
-  margin-top: 32px;
-  padding-top: 24px;
-}
-
-.pagination > div {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-}
-
-.pagination-item {
-  align-items: center;
-  display: inline-flex;
-  gap: 6px;
-}
-
-.pagination .is-disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.pagination-control {
-  align-items: center;
-  border: 1px solid var(--color-line);
-  display: inline-flex;
-  font-size: 13px;
-  font-weight: 600;
-  justify-content: center;
-  min-height: 44px;
-  min-width: 44px;
-  padding: 8px 12px;
-}
-
-.source-note {
-  align-items: center;
-  border-block: 1px solid var(--color-line);
-  display: grid;
-  gap: 24px;
-  grid-template-columns: 1fr auto;
-  margin-top: 64px;
-  padding: 24px 0;
-}
-
-.source-note p {
-  color: var(--color-ink-muted);
-  margin: 4px 0;
-}
-
-.source-note > a {
-  font-size: 12px;
-  font-weight: 600;
-  min-height: 44px;
-  padding-block: 12px;
-  text-decoration: underline;
-}
-
-.empty-state {
-  border-block: 1px solid var(--color-line);
-  padding: 48px 0;
-}
-
-.empty-state p,
-.result-state-note {
-  color: var(--color-ink-muted);
-}
-
-.result-state-note {
-  border-left: 4px solid var(--color-accent);
-  margin: 0 0 24px;
-  padding: 12px 16px;
-}
-
-.result-state-note.is-error {
-  border-color: var(--color-error);
-  color: var(--color-error);
-}
-
-.demo-store-grid {
-  display: grid;
-  gap: 18px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.demo-store-card {
-  align-items: stretch;
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  display: grid;
-  gap: clamp(18px, 2.4vw, 28px);
-  grid-template-columns: 1fr minmax(0, 44%);
-  min-height: 250px;
-  padding: clamp(22px, 3vw, 34px);
-  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
-}
-
-/* A small collage of this store's product photos fills what used to be an empty
-   right half of the card, so the store list reads as imagery, not text tiles.
-   The first photo runs the full height beside two stacked ones. */
-.demo-store-collage {
-  display: grid;
-  gap: 6px;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  min-height: 190px;
-}
-
-.demo-store-collage .demo-store-thumb:first-child {
-  grid-column: 1;
-  grid-row: 1 / 3;
-}
-
-.demo-store-thumb {
-  background: var(--color-product-media);
-  overflow: hidden;
-  position: relative;
-}
-
-.demo-store-thumb img {
-  object-fit: cover;
-}
-
-.demo-store-card:hover {
-  border-color: var(--color-ink);
-  box-shadow: var(--shadow);
-  transform: translateY(-2px);
-}
-
-.demo-store-icon {
-  align-items: center;
-  background: var(--color-acid);
-  color: var(--color-on-acid);
-  display: flex;
-  height: 48px;
-  justify-content: center;
-  width: 48px;
-}
-
-.store-eyebrow {
-  color: var(--color-ink-muted);
-  font-size: 10px;
-  margin: 2px 0 12px;
-}
-
-.demo-store-copy h2 {
-  font-family: var(--font-display);
-  font-size: clamp(25px, 3vw, 38px);
-  line-height: 1;
-  margin: 0 0 12px;
-}
-
-.demo-store-copy {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.demo-store-copy > p:last-of-type {
-  color: var(--color-ink-muted);
-  margin: 0 0 24px;
-  max-width: 500px;
-}
-
-.demo-store-copy span {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.demo-store-arrow {
-  margin-top: auto;
-  padding-top: 16px;
-}
-
-.info-content {
-  border-top: 2px solid var(--color-ink);
-  margin-left: 0;
-  max-width: 860px;
-}
-
-.prose-section {
-  border-bottom: 1px solid var(--color-line);
-  max-width: 790px;
-  padding: 38px 0;
-}
-
-.prose-section h2 {
-  font-family: var(--font-display);
-  font-size: clamp(24px, 3vw, 36px);
-  line-height: 1;
-  margin: 0 0 18px;
-}
-
-.prose-section p,
-.prose-section li {
-  color: var(--color-ink-muted);
-}
-
-.prose-section p {
-  max-width: 72ch;
-}
-
-.prose-section ul,
-.prose-section ol {
-  margin: 18px 0 0;
-  max-width: 72ch;
-  padding-left: 1.25rem;
-}
-
-.prose-section p:first-child {
-  margin-top: 0;
-}
-
-.prose-section a {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.prose-section li + li {
-  margin-top: 10px;
-}
-
-.product-detail-page {
-  padding-top: clamp(28px, 4vw, 52px);
-}
-
-/* "You may also like" — a full-width product row below the detail, filling what
-   was empty space beneath the (shorter) buy-box with more imagery. */
-.related-products {
-  margin-top: clamp(48px, 6vw, 88px);
-}
-
-.related-products > h2 {
-  font-family: var(--font-display);
-  font-size: clamp(22px, 3vw, 32px);
-  letter-spacing: -0.02em;
-  margin: 0 0 24px;
-}
-
-.product-breadcrumbs {
-  align-items: center;
-  color: var(--color-ink-muted);
-  display: flex;
-  flex-wrap: wrap;
-  font-size: 12px;
-  font-weight: 600;
-  gap: 10px;
-  margin-bottom: 26px;
-}
-
-.product-breadcrumbs a {
-  align-items: center;
-  display: inline-flex;
-  gap: 7px;
-  min-height: 44px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.product-breadcrumbs a:hover {
-  color: var(--color-focus);
-}
-
-.product-detail-layout {
-  align-items: start;
-  display: grid;
-  gap: clamp(28px, 4vw, 56px);
-  grid-template-columns: minmax(0, 1.45fr) minmax(340px, 0.75fr);
-}
-
-/* One large image per row, stacked — filling the left column beside the sticky
-   buy-box, the standard PDP gallery. (It used to be two side-by-side images,
-   which left half the column empty below them.) */
-.product-gallery {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: 1fr;
-  min-width: 0;
-}
-
-.product-gallery figure {
-  margin: 0;
-  min-width: 0;
-}
-
-.product-detail-media {
-  aspect-ratio: 4 / 5;
-  background: var(--color-product-media);
-  overflow: hidden;
-  position: relative;
-}
-
-.product-detail-media img {
-  object-fit: contain;
-}
-
-/* Each gallery image is a button that opens the lightbox. Strip the button
-   chrome so it reads as the image, and hint the zoom with the cursor + a badge
-   that fades in on hover/focus. */
-.product-zoom-trigger {
-  display: block;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: var(--color-product-media);
-  color: inherit;
-  font: inherit;
-  cursor: zoom-in;
-}
-.product-zoom-badge {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  background: color-mix(in srgb, var(--color-ink) 76%, transparent);
-  color: var(--color-canvas);
-  opacity: 0;
-  transition: opacity var(--transition);
-  pointer-events: none;
-}
-.product-zoom-trigger:hover .product-zoom-badge,
-.product-zoom-trigger:focus-visible .product-zoom-badge {
-  opacity: 1;
-}
-.product-zoom-trigger:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-/* The enlarged-image overlay. Deliberately a single dark look in both themes —
-   a photo viewer reads best on a neutral dark scrim. overflow:hidden clips the
-   second-level zoom so it never spawns scrollbars. */
-.lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  padding: clamp(8px, 2vw, 24px);
-  background: rgba(0, 0, 0, 0.86);
-  backdrop-filter: blur(6px);
-  cursor: zoom-out;
-  animation: lightbox-fade 0.18s ease both;
-}
-/* Fits the whole photo to the viewport — never cropped. Clicking it toggles the
-   second-level zoom; while zoomed, transform-origin (set inline from the mouse)
-   makes the picture pan to follow the cursor. */
-.lightbox-image {
-  /* Sized in viewport units, not %, so it reliably fits the screen — a grid
-     item's max-height:100% resolves against an auto track and fails to clamp. */
-  max-width: 96vw;
-  max-height: 92vh;
-  object-fit: contain;
-  cursor: zoom-in;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
-  transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
-  will-change: transform;
-  /* Entrance fade only — must NOT animate transform, or its fill state would
-     override the .is-zoomed scale below. */
-  animation: lightbox-pop 0.2s ease both;
-}
-.lightbox-image.is-zoomed {
-  cursor: zoom-out;
-  transform: scale(2.4);
-}
-.lightbox-hint {
-  position: absolute;
-  left: 50%;
-  bottom: clamp(12px, 3vw, 28px);
-  transform: translateX(-50%);
-  margin: 0;
-  padding: 7px 14px;
-  background: rgba(0, 0, 0, 0.5);
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  pointer-events: none;
-}
-.lightbox-close {
-  position: absolute;
-  top: clamp(12px, 2.5vw, 24px);
-  right: clamp(12px, 2.5vw, 24px);
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border: 0;
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  cursor: pointer;
-}
-.lightbox-close:hover {
-  background: rgba(255, 255, 255, 0.22);
-}
-.lightbox-close:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
-}
-@keyframes lightbox-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes lightbox-pop {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.product-gallery figcaption {
-  color: var(--color-ink-muted);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  padding-top: 9px;
-  text-transform: uppercase;
-}
-
-.product-detail-card {
-  align-self: start;
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  padding: clamp(24px, 3vw, 36px);
-  position: sticky;
-  top: calc(var(--header-h) + 24px);
-}
-
-.product-mobile-summary {
-  display: none;
-}
-
-.product-detail-category {
-  color: var(--color-accent);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  margin: 0 0 10px;
-  text-transform: uppercase;
-}
-
-.product-detail-card h1,
-.product-mobile-summary h1 {
-  font-family: var(--font-display);
-  font-size: clamp(34px, 4vw, 56px);
-  letter-spacing: -0.045em;
-  line-height: 0.98;
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.product-detail-store {
-  align-items: center;
-  color: var(--color-ink-muted);
-  display: inline-flex;
-  font-size: 13px;
-  font-weight: 600;
-  gap: 8px;
-  margin-top: 18px;
-  min-height: 44px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.product-detail-store:hover {
-  color: var(--color-focus);
-}
-
-.product-detail-price {
-  align-items: baseline;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.product-detail-price strong {
-  font-family: var(--font-display);
-  font-size: 30px;
-  font-variant-numeric: tabular-nums;
-}
-
-.product-detail-price del {
-  color: var(--color-ink-muted);
-}
-
-.product-detail-intro > .availability,
-.product-mobile-summary > .availability {
-  font-size: 13px;
-  font-weight: 600;
-  margin: 4px 0 24px;
-}
-
-.product-description,
-.product-size-section {
-  border-top: 1px solid var(--color-line);
-  padding: 24px 0;
-}
-
-.product-description h2,
-.product-size-section h2 {
-  font-family: var(--font-display);
-  font-size: 20px;
-  margin: 0 0 12px;
-}
-
-.product-description p {
-  color: var(--color-ink-muted);
-  font-size: 14px;
-  margin: 0;
-}
-
-.product-description p + p {
-  margin-top: 12px;
-}
-
-.product-size-section > div {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-}
-
-.product-size-section ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.product-size-section li {
-  align-items: center;
-  border: 1px solid var(--color-line);
-  display: flex;
-  font-size: 13px;
-  font-weight: 600;
-  justify-content: center;
-  min-height: 42px;
-  min-width: 48px;
-  padding: 6px 10px;
-}
-
-.product-detail-facts {
-  border-block: 1px solid var(--color-line);
-  margin: 0;
-}
-
-.product-detail-facts > div {
-  align-items: center;
-  display: flex;
-  font-size: 13px;
-  gap: 16px;
-  justify-content: space-between;
-  min-height: 50px;
-}
-
-.product-detail-facts > div + div {
-  border-top: 1px solid var(--color-line);
-}
-
-.product-detail-facts dt {
-  align-items: center;
-  color: var(--color-ink-muted);
-  display: flex;
-  gap: 8px;
-}
-
-.product-detail-facts dd {
-  font-weight: 600;
-  margin: 0;
-  text-align: right;
-}
-
-.product-detail-actions {
-  display: grid;
-  gap: 10px;
-  margin-top: 24px;
-}
-
-.product-purchase-note {
-  color: var(--color-ink-muted);
-  font-size: 12px;
-  margin: 14px 0 0;
-  text-align: center;
-}
-
-.info-columns {
-  display: grid;
-  gap: 40px;
-  grid-template-columns: 1fr 1fr;
-}
-
-.info-columns .prose-section {
-  width: 100%;
-}
-
-.state-page {
-  align-items: flex-start;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 65vh;
-  max-width: 900px;
-}
-
-.state-page h1 {
-  font-size: clamp(3rem, 8vw, 7rem);
-  line-height: 0.85;
-  margin: 12px 0 24px;
-  max-width: 100%;
-  overflow-wrap: break-word;
-}
-
-.state-page > p:not(.preview-kicker) {
-  color: var(--color-ink-muted);
-  font-size: 18px;
-  max-width: 620px;
-}
-
-.state-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 20px;
-}
-
-.route-loading-space {
-  min-height: 65vh;
-}
-
-.site-footer {
-  border-top: 2px solid var(--color-ink);
-  display: grid;
-  gap: 64px;
-  grid-template-columns: minmax(260px, 0.85fr) minmax(400px, 1.15fr);
-  padding: 56px var(--gutter);
-}
-
-.footer-statement {
-  align-content: start;
-  display: grid;
-}
-
-.footer-brand {
-  font-size: 34px;
-  width: fit-content;
-}
-
-.site-footer p {
-  color: var(--color-ink-muted);
-  max-width: 560px;
-}
-
-.preview-line {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.footer-links {
-  display: grid;
-  gap: 32px;
-  grid-template-columns: 1fr 1fr;
-}
-
-.footer-links nav {
-  display: grid;
-}
-
-.footer-links nav > p {
-  color: var(--color-ink);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  margin: 0 0 8px;
-  text-transform: uppercase;
-}
-
-.footer-links a {
-  align-items: center;
-  border-bottom: 1px solid var(--color-line);
-  display: flex;
-  font-size: 12px;
-  font-weight: 600;
-  justify-content: space-between;
-  min-height: 48px;
-}
-
-.sr-only {
-  border: 0;
-  clip: rect(0, 0, 0, 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  white-space: nowrap;
-  width: 1px;
-}
-
-/*
- * Desktop header, two-row: the wordmark sits centred on the top row (tools
- * pinned right), and the shopping nav is centred on a second row beneath it —
- * the centred-logo layout luxury/fashion sites use. Only above the nav's
- * breakpoint (>1180px); narrower widths keep the single-row brand-left header
- * with the burger. The title page header (utilities only) is excluded so its
- * single-row layout is untouched.
- */
-@media (min-width: 1181px) {
-  .site-header:not(.site-header-title) {
-    grid-template-rows: var(--header-h) auto;
-    height: auto;
-  }
-
-  .site-header:not(.site-header-title) .brand {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: center;
-  }
-
-  .site-header:not(.site-header-title) .header-tools {
-    grid-column: 3;
-    grid-row: 1;
-  }
-
-  .site-header:not(.site-header-title) .desktop-nav {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    justify-content: center;
-    padding-bottom: 12px;
-  }
-
-  .site-header:not(.site-header-title) .desktop-nav a {
-    height: auto;
-    min-height: 40px;
-  }
-
-  /* The buy-box sticks below the taller two-row header while the gallery scrolls. */
-  .product-detail-card {
-    top: calc(var(--header-h) + 66px);
-  }
-}
-
-@media (max-width: 1180px) {
-  .site-header {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .desktop-nav {
-    display: none;
-  }
-
-  .header-tools {
-    grid-column: 2;
-  }
-
-  .mobile-menu {
-    display: block;
-  }
-}
-
-@media (max-width: 1023px) {
-  /*
-   * The title page is centred at every width now, so the colour wash and its
-   * halo need no narrow-screen recomposition — the base rules carry over. Only
-   * the drift is toned down: a smaller viewport magnifies the same percentage
-   * translate, so a gentler sweep keeps the blobs from swinging offscreen.
-   */
-  .hero-media::before {
-    animation-name: hero-drift-narrow;
-  }
-
-  .product-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .product-detail-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .product-detail-card,
-  .product-gallery {
-    position: static;
-  }
-
-  .product-mobile-summary {
-    background: var(--color-surface);
-    border: 1px solid var(--color-line);
-    display: block;
-    padding: clamp(22px, 4vw, 32px);
-  }
-
-  .product-detail-card .product-detail-intro {
-    display: none;
-  }
-
-}
-
-@media (max-width: 900px) {
-
-  .site-footer {
-    gap: 40px;
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 767px) {
-  :root {
-    --header-h: 56px;
-  }
-
-  /* Solid, not frosted, on phones. `backdrop-filter` also makes it the
-     containing block for `position: fixed` descendants, which would anchor the
-     full-width menu sheet to the 56px header box instead of the viewport —
-     dropping the blur lets the sheet and its scrim resolve against the screen. */
-  .site-header {
-    backdrop-filter: none;
-    background: var(--color-canvas);
-    /* Centred wordmark, burger on the right, empty balancing column on the
-       left — the classic phone header. Account + theme move into the menu. */
-    grid-template-columns: 1fr auto 1fr;
-  }
-
-  .brand {
-    font-size: 23px;
-    grid-column: 2;
-    justify-self: center;
-  }
-
-  .header-tools {
-    gap: 6px;
-    grid-column: 3;
-    justify-self: end;
-  }
-
-  /* Account and theme are reachable inside the burger menu on phones, so the
-     top bar carries only the wordmark and the burger. */
-  .header-tools > .account-link,
-  .header-tools > .theme-toggle {
-    display: none;
-  }
-
-  /*
-   * Mobile navigation as a full-width sheet, not the narrow desktop dropdown
-   * that floated in the top-right corner and overlapped the page. It drops the
-   * full width of the screen from under the sticky header, over a tap-to-close
-   * scrim, with comfortable full-row targets — the layout a phone expects.
-   */
-  .mobile-menu-scrim {
-    display: block;
-    position: fixed;
-    inset: var(--header-h) 0 0;
-    z-index: 1;
-    background: color-mix(in srgb, var(--color-ink) 34%, transparent);
-    animation: mobile-scrim-in 0.2s ease both;
-  }
-
-  .mobile-menu > nav {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: var(--header-h);
-    z-index: 2;
-    min-width: 0;
-    max-height: calc(100dvh - var(--header-h));
-    overflow-y: auto;
-    padding: 8px var(--gutter) calc(16px + env(safe-area-inset-bottom));
-    border-inline: 0;
-    border-top: 0;
-    box-shadow: var(--shadow);
-    animation: mobile-menu-in 0.24s cubic-bezier(0.2, 0.72, 0.3, 1) both;
-  }
-
-  .mobile-menu > nav > a,
-  .mobile-menu > nav > .mobile-menu-theme {
-    font-size: 16px;
-    min-height: 56px;
-  }
-
-  .mobile-menu > nav > a[aria-current="page"] {
-    box-shadow: inset 3px 0 0 var(--color-accent);
-  }
-
-  .mobile-menu > nav > .mobile-account-link {
-    margin-top: 4px;
-  }
-
-  @keyframes mobile-menu-in {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-
-  @keyframes mobile-scrim-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  .query-field > div {
-    grid-template-columns: auto 1fr;
-  }
-
-  /* Full-bleed the submit button to both inner edges of the field. The field
-     box carries a left-only 16px pad (for the search icon), which otherwise
-     left-inset the button while it stayed flush right — the "сьехавший" look.
-     Pulling it back by that pad makes it symmetric across the field. */
-  .query-field button {
-    grid-column: 1 / -1;
-    justify-content: center;
-    min-height: 52px;
-    margin-left: -16px;
-  }
-
-  .product-grid {
-    gap: 30px 14px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .product-title {
-    font-size: 15px;
-  }
-
-  .product-facts div {
-    display: block;
-  }
-
-  .product-facts dd {
-    text-align: left;
-  }
-
-  .trust-band .button {
-    justify-self: start;
-  }
-
-  .route-shell {
-    padding: 40px 16px 68px;
-  }
-
-  .route-heading {
-    display: block;
-  }
-
-  .route-eyebrow {
-    margin: 0 0 24px;
-    width: fit-content;
-  }
-
-  .route-heading h1 {
-    font-size: clamp(2rem, 9vw, 4.4rem);
-    overflow-wrap: break-word;
-  }
-
-  /* Two filters per row instead of one full-width stack, so the four dropdowns
-     read as a compact 2×2 block rather than a tall wall the shopper has to
-     scroll past before any product appears. */
-  .primary-filters {
-    gap: 12px;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .results-toolbar {
-    display: grid;
-    gap: 16px;
-  }
-
-  .active-filters {
-    justify-content: flex-start;
-  }
-
-  .catalog-view-controls {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .pagination {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .pagination > div {
-    grid-column: 1 / -1;
-    grid-row: 1;
-  }
-
-  .pagination > :first-child {
-    grid-column: 1;
-    grid-row: 2;
-  }
-
-  .pagination > :last-child {
-    grid-column: 2;
-    grid-row: 2;
-  }
-
-  .source-note {
-    align-items: start;
-    grid-template-columns: 1fr;
-  }
-
-  .product-gallery {
-    grid-template-columns: 1fr;
-  }
-
-  .product-detail-card {
-    padding: 22px;
-  }
-
-  .product-detail-card h1,
-  .product-mobile-summary h1 {
-    font-size: clamp(32px, 11vw, 48px);
-  }
-
-  .demo-store-grid,
-  .info-columns {
-    grid-template-columns: 1fr;
-  }
-
-  .demo-store-card {
-    min-height: 0;
-  }
-
-  .info-content {
-    margin: 0;
-  }
-
-  .prose-section {
-    padding: 30px 0;
-  }
-
-  .state-page {
-    min-height: 70vh;
-  }
-
-  .site-footer {
-    padding: 44px 16px;
-  }
-
-  .footer-links {
-    gap: 24px;
-  }
-}
-
-@media (max-width: 560px) {
-  .demo-store-card {
-    grid-template-columns: 1fr;
-    padding: 20px;
-  }
-
-  .demo-store-arrow {
-    margin-top: 16px;
-    padding-top: 0;
-  }
-
-  .footer-links {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 767px) {
-  .language-switcher {
-    display: none;
-  }
-
-  /*
-   * Except on the title page. Elsewhere the switcher collapses into the burger
-   * menu on phones; `/` has no burger — it carries the utilities alone, so
-   * the wordmark is stated once — and a Lithuanian shopper landing there on a
-   * phone has to be able to reach LT without first entering the app.
-   */
-  .site-header-title .language-switcher {
-    display: flex;
-  }
-
-  .mobile-menu-locales {
-    display: flex;
-  }
-}
-
-@media (max-width: 390px) {
-  .demo-media-label,
-  .media-category {
-    font-size: 9px;
-  }
-
-  .product-price-row {
-    flex-wrap: wrap;
-  }
-
-  .footer-links {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 350px) {
-  .product-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-  }
-
-  .product-media:hover svg,
-  .demo-store-card:hover {
-    transform: none;
-  }
-}
-
-/*
- * Cookie consent banner. Rendered only when
- * NEXT_PUBLIC_COOKIE_BANNER_ENABLED is "true" — see
- * components/cookie-consent.tsx for why it ships staged rather than live.
- * Both actions share the same button treatment on purpose: refusing must not
- * be visually harder than accepting.
- */
-.cookie-consent {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 40;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 20px 24px;
-  background: var(--color-surface-elevated);
-  border-top: 1px solid var(--color-line);
-  box-shadow: var(--shadow);
-}
-
-.cookie-consent-text {
-  flex: 1 1 320px;
-  max-width: 70ch;
-}
-
-.cookie-consent-text p {
-  margin: 0 0 6px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--color-ink-muted);
-}
-
-.cookie-consent-title {
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-.cookie-consent-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-@media (max-width: 640px) {
-  .cookie-consent {
-    padding: 16px;
-  }
-
-  .cookie-consent-actions .button {
-    flex: 1 1 auto;
-  }
-}
-
-/* Search: how the free-text query was interpreted (lib/semantic-search.ts). */
-.search-interpretation {
-  color: var(--color-ink-muted);
-  display: flex;
-  flex-wrap: wrap;
-  font-size: 12px;
-  gap: 6px 16px;
-  margin: 0 0 12px;
-}
-
-.search-interpretation span:not(:first-child)::before {
-  content: "·";
-  margin-right: 16px;
-}
-
-/* Product card: this item is carried by more than one demo store. */
-.product-multi-store {
-  align-items: baseline;
-  border-top: 1px solid var(--color-line);
-  color: var(--color-ink-muted);
-  display: flex;
-  flex-wrap: wrap;
-  font-size: 11px;
-  gap: 2px;
-  margin: 0;
-  padding-top: 8px;
-}
-
-.product-multi-store data {
-  color: var(--color-ink);
-  font-weight: 600;
-}
-
-/* Product detail: the same item across demo stores. */
-.store-comparison {
-  border-top: 1px solid var(--color-line);
-  display: grid;
-  gap: 10px;
-  padding-top: 18px;
-}
-
-.store-comparison-head {
-  align-items: baseline;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  justify-content: space-between;
-}
-
-.store-comparison-head h2 {
-  margin: 0;
-}
-
-.store-comparison-saving {
-  color: var(--color-ink-muted);
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0;
-}
-
-.store-comparison-table {
-  border-collapse: collapse;
-  font-size: 13px;
-  width: 100%;
-}
-
-.store-comparison-table th,
-.store-comparison-table td {
-  border-bottom: 1px solid var(--color-line);
-  padding: 11px 0;
-  vertical-align: baseline;
-}
-
-.store-comparison-table tr:last-child th,
-.store-comparison-table tr:last-child td {
-  border-bottom: 0;
-}
-
-.store-comparison-table tbody th {
-  display: grid;
-  gap: 3px;
-  justify-items: start;
-  text-align: left;
-}
-
-.store-comparison-store {
-  align-items: baseline;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.store-comparison-table tbody th .availability {
-  font-size: 11px;
-}
-
-.store-comparison-table tbody th a {
-  color: var(--color-ink);
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.store-comparison-table tbody th a:hover {
-  color: var(--color-focus);
-}
-
-.store-comparison-table td {
-  text-align: right;
-  white-space: nowrap;
-}
-
-.store-comparison-table tr.is-lowest td strong {
-  color: var(--color-success);
-}
-
-/* Plain inline labels rather than boxed chips, to keep the block calm. */
-.store-comparison-tag,
-.store-comparison-best {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.store-comparison-tag {
-  color: var(--color-ink-muted);
-}
-
-.store-comparison-best {
-  color: var(--color-success);
-  margin-left: 8px;
-}
-
-.store-comparison-note {
-  color: var(--color-ink-muted);
-  font-size: 11px;
-  margin: 0;
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

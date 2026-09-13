@@ -1,14 +1,17 @@
 "use client";
 
-import { Menu, Moon, Sun, UserRound } from "lucide-react";
+import { Heart, Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { copy, formatCategoryLabel, formatGenderLabel, type Locale, withLocale } from "@/lib/i18n";
-import { useLocaleContext } from "@/lib/use-client-locale";
+import { useEffect, useRef } from "react";
 import { Wordmark } from "@/components/wordmark";
+import { SearchForm } from "@/components/search-form";
+import { SearchInput } from "@/components/search-input";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { copy, formatGenderLabel, type Locale, withLocale } from "@/lib/i18n";
+import { useLocaleContext } from "@/lib/use-client-locale";
 
-function languageHref(pathname: string, params: URLSearchParams, locale: Locale) {
+function languageHref(pathname: string, params: { toString(): string }, locale: Locale) {
   const next = new URLSearchParams(params.toString());
   next.set("lang", locale);
   return `${pathname}${next.size ? `?${next}` : ""}`;
@@ -21,183 +24,135 @@ function publicPathname(pathname: string) {
     : pathname;
 }
 
-function ThemeToggle({ locale, variant = "icon" }: { locale: Locale; variant?: "icon" | "row" }) {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-
-  useEffect(() => {
-    const current =
-      document.documentElement.dataset.theme === "dark" ? "dark" : "light";
-    setTheme(current);
-  }, []);
-
-  const toggleTheme = () => {
-    const nextTheme = theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = nextTheme;
-    document.documentElement.style.colorScheme = nextTheme;
-    setTheme(nextTheme);
-    try {
-      localStorage.setItem("weft-theme", nextTheme);
-    } catch {
-      // The visible toggle still works for the current page session.
-    }
-  };
-
-  const label =
-    locale === "lt"
-      ? theme === "dark"
-        ? "Įjungti šviesų režimą"
-        : "Įjungti naktinį režimą"
-      : theme === "dark"
-        ? "Use light mode"
-        : "Use night mode";
-
-  const icon =
-    theme === "dark" ? <Sun aria-hidden="true" size={variant === "row" ? 20 : 18} /> : <Moon aria-hidden="true" size={variant === "row" ? 20 : 18} />;
-
-  // Row variant: a full-width labelled control used inside the mobile menu sheet,
-  // where the top-bar's circular icon toggle is hidden on phones.
-  if (variant === "row") {
-    return (
-      <button className="mobile-menu-theme" onClick={toggleTheme} type="button">
-        {icon}
-        <span>{label}</span>
-      </button>
-    );
-  }
-
-  return (
-    <button
-      aria-label={label}
-      className="theme-toggle"
-      onClick={toggleTheme}
-      title={label}
-      type="button"
-    >
-      {icon}
-    </button>
-  );
-}
-
 export function SiteHeader() {
   const pathname = usePathname();
   const visiblePathname = publicPathname(pathname);
   const params = useSearchParams();
   const { locale, setLocale } = useLocaleContext();
-  const t = copy[locale].header;
-  /*
-   * A shopping-first top bar, matching what every mainstream fashion site leads
-   * with: audience departments (Women/Men/Unisex) first, a category entry, the
-   * store list (our "brands" analog), the AI feature, and a highlighted Sale.
-   * Discovery lives here now; the "about the product" pages (How it works,
-   * About) moved to the footer, which already carries them.
-   */
-  const onSearch = visiblePathname === "/search";
-  const genderParam = params.get("gender");
-  const categoryParam = params.get("category");
-  const statusParam = params.get("status");
+  const header = copy[locale].header;
+  const frontend = copy[locale].frontend;
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const locationKey = `${visiblePathname}?${params}`;
+  const isHome = visiblePathname === "/";
   const nav = [
-    { href: "/search?gender=women", label: formatGenderLabel("women", locale), active: onSearch && genderParam === "women" },
-    { href: "/search?gender=men", label: formatGenderLabel("men", locale), active: onSearch && genderParam === "men" },
-    { href: "/search?gender=unisex", label: formatGenderLabel("unisex", locale), active: onSearch && genderParam === "unisex" },
-    { href: "/search?category=shoes", label: formatCategoryLabel("shoes", locale), active: onSearch && categoryParam === "shoes" },
-    { href: "/stores", label: t.nav.stores, active: visiblePathname === "/stores" },
-    { href: "/ai-fitting-room", label: locale === "lt" ? "AI matavimasis" : "AI fitting room", active: visiblePathname === "/ai-fitting-room" },
-    { href: "/search?status=sale", label: locale === "lt" ? "Išpardavimas" : "Sale", active: onSearch && statusParam === "sale", highlight: true },
+    { href: "/search", label: frontend.catalog, active: visiblePathname === "/search" && !params.get("gender") },
+    ...["women", "men"].map((gender) => ({ href: `/search?gender=${gender}`, label: formatGenderLabel(gender, locale), active: visiblePathname === "/search" && params.get("gender") === gender })),
+    { href: "/stores", label: header.nav.stores, active: visiblePathname === "/stores" },
   ];
-  const accountLabel = locale === "lt" ? "Mano paskyra" : "My account";
+
+  useEffect(() => {
+    detailsRef.current?.removeAttribute("open");
+  }, [locationKey]);
+
+  useEffect(() => {
+    function closeOnEscape(event: KeyboardEvent) {
+      const details = detailsRef.current;
+      if (event.key !== "Escape" || !details?.open) return;
+      details.removeAttribute("open");
+      details.querySelector("summary")?.focus();
+    }
+
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, []);
+
+  function closeMobileMenu() {
+    detailsRef.current?.removeAttribute("open");
+  }
 
   return (
     <>
       <a className="skip-link" href="#main-content">{copy[locale].common.skipToContent}</a>
-      <header className="site-header">
-        <Link className="brand" href={withLocale("/", locale)} aria-label={locale === "lt" ? "Weft pradinis puslapis" : "Weft home"}>
+      <header className={`site-header${isHome ? " is-home" : ""}`}>
+        <Link className="brand" href={withLocale("/", locale)} aria-label={frontend.home}>
           <Wordmark />
         </Link>
-        <nav className="desktop-nav" aria-label={t.mainNavAria}>
-          {nav.map(({ href, label, active, highlight }) => (
-            <Link
-              aria-current={active ? "page" : undefined}
-              className={highlight ? "nav-sale" : undefined}
-              href={withLocale(href, locale)}
-              key={href}
-            >
+
+        <nav className="desktop-nav" aria-label={header.mainNavAria}>
+          {nav.map(({ href, label, active }) => (
+            <Link aria-current={active ? "page" : undefined} href={withLocale(href, locale)} key={href}>
               {label}
             </Link>
           ))}
         </nav>
+
+        {isHome && <SearchForm action="/search" className="header-search" role="search">
+          {locale === "lt" && <input name="lang" type="hidden" value="lt" />}
+          <SearchInput locale={locale} compact />
+        </SearchForm>}
+
         <div className="header-tools">
-          <Link
-            aria-current={visiblePathname === "/account" ? "page" : undefined}
-            aria-label={accountLabel}
-            className="account-link"
-            href={withLocale("/account", locale)}
-            title={accountLabel}
-          >
-            <UserRound aria-hidden="true" size={19} />
-          </Link>
-          <ThemeToggle locale={locale} />
-          <nav className="language-switcher" aria-label={t.languageAria}>
+          <nav className="language-switcher" aria-label={header.languageAria}>
             <Link
               aria-current={locale === "en" ? "true" : undefined}
               href={languageHref(visiblePathname, params, "en")}
-              prefetch={false}
               onClick={() => setLocale("en")}
+              prefetch={false}
             >
               EN
             </Link>
-            <span aria-hidden="true">/</span>
             <Link
               aria-current={locale === "lt" ? "true" : undefined}
               href={languageHref(visiblePathname, params, "lt")}
-              prefetch={false}
               onClick={() => setLocale("lt")}
+              prefetch={false}
             >
               LT
             </Link>
           </nav>
-          <details className="mobile-menu">
-            <summary aria-label={locale === "lt" ? "Atverti navigaciją" : "Open navigation"}><Menu aria-hidden="true" size={20} /></summary>
-            <span
-              aria-hidden="true"
-              className="mobile-menu-scrim"
-              onClick={(event) => event.currentTarget.closest("details")?.removeAttribute("open")}
-            />
-            <nav aria-label={t.mainNavAria}>
-              {nav.map(({ href, label, active, highlight }) => (
+
+          <Link aria-current={visiblePathname === "/account" ? "page" : undefined} aria-label={frontend.saved}
+            className="account-link" href={withLocale("/account", locale)} title={frontend.saved}>
+            <Heart aria-hidden="true" size={18} strokeWidth={1.4} /><span>{frontend.savedShort}</span>
+          </Link>
+
+          <details className="mobile-menu" ref={detailsRef}>
+            <summary aria-label={frontend.menu}><Menu aria-hidden="true" size={20} /></summary>
+            <span aria-hidden="true" className="mobile-menu-scrim" onClick={closeMobileMenu} />
+            <nav aria-label={header.mainNavAria}>
+              {nav.map(({ href, label, active }) => (
                 <Link
                   aria-current={active ? "page" : undefined}
-                  className={highlight ? "nav-sale" : undefined}
                   href={withLocale(href, locale)}
                   key={href}
-                  onClick={(event) => event.currentTarget.closest("details")?.removeAttribute("open")}
+                  onClick={closeMobileMenu}
                 >
                   {label}
                 </Link>
               ))}
               <Link
+                aria-current={visiblePathname === "/ai-fitting-room" ? "page" : undefined}
+                className="mobile-menu-secondary"
+                href={withLocale("/ai-fitting-room", locale)}
+                onClick={closeMobileMenu}
+              >
+                {frontend.preview3d}
+              </Link>
+              <Link
                 aria-current={visiblePathname === "/account" ? "page" : undefined}
                 className="mobile-account-link"
                 href={withLocale("/account", locale)}
-                onClick={(event) => event.currentTarget.closest("details")?.removeAttribute("open")}
+                onClick={closeMobileMenu}
               >
-                <UserRound aria-hidden="true" size={18} />
-                {accountLabel}
+                <Heart aria-hidden="true" size={18} />
+                {frontend.saved}
               </Link>
-              <ThemeToggle locale={locale} variant="row" />
-              <div className="mobile-menu-locales" aria-label={t.languageAria}>
+              <Link href={withLocale("/how-it-works", locale)} onClick={closeMobileMenu}>{copy[locale].footer.links.howItWorks}</Link>
+              <ThemeToggle locale={locale} />
+              <div className="mobile-menu-locales" aria-label={header.languageAria}>
                 <Link
                   aria-current={locale === "en" ? "true" : undefined}
                   href={languageHref(visiblePathname, params, "en")}
-                  prefetch={false}
                   onClick={() => setLocale("en")}
+                  prefetch={false}
                 >
                   EN
                 </Link>
                 <Link
                   aria-current={locale === "lt" ? "true" : undefined}
                   href={languageHref(visiblePathname, params, "lt")}
-                  prefetch={false}
                   onClick={() => setLocale("lt")}
+                  prefetch={false}
                 >
                   LT
                 </Link>
