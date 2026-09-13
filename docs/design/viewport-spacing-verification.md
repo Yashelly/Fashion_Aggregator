@@ -1,5 +1,13 @@
 # Viewport fit and catalog breathing room
 
+## Follow-up: full-width desktop crop
+
+Follow-up verification: final production build/typecheck passed; layout 30/30 plus keyboard/forced-colors, hero 8/8 and responsive 7/7 passed after the short-height title fix. Unit tests 84/84, integration 15/15 and full EN/LT 3,112 assertions passed on the full-width build before that final title-only CSS adjustment. Independent review approved with no remaining findings. Inspected 2560×1294, 3440×1440, 390×744 and LT 2560×513 screenshots. At extreme short-wide ratios, the intentional vertical crop can remove parts of people; no complete-figure guarantee is made. No browser errors in the final layout run.
+
+Ultrawide refinement: the home hero spans the viewport even beyond 2560px. The home shell is uncapped, while navigation/footer and merchandise retain their earlier maxima; catalog and other routes are unchanged. Tests compare the image to the actual viewport and include 3440/3840px. Desktop `sizes` is `100vw`. This is the only exception to the historical storefront cap below.
+
+The owner rejected the centered photo with side fields after PR #39 and explicitly requested cropping above/below instead. The follow-up keeps the frame at 100% viewport width and caps image height at `100svh - --home-header-h`. Cover fitting preserves proportions; `object-position: 50% 20%` favors faces while cropping both vertical edges on a normal short desktop viewport. The 2560px cap remains for navigation/footer and other routes, not the hero. Mobile crop, catalog gutters, search focus and short-height flowing-copy fallback remain unchanged. The title scales with both frame width and viewport height so it does not overlap the header in short/wide windows. The three geometry suites now assert viewport width and the height cap instead of requiring the image box to retain its source aspect ratio. The original complete-photo tradeoff and results below describe PR #39, not this updated crop.
+
 Owner correction, 13 September 2026. Reference: the owner's browser100%/90% product screenshots and focus/over-tall hero screenshots. The90% reference informs side spacing, not a request to scale typography or zoom the page. No palette, photography, search or catalog-data changes.
 
 ## Changes

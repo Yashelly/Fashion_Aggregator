@@ -18,7 +18,7 @@ def main():
     records, errors = [], []
     matrix = [(2560, 1294), (2506, 1294), (1920, 940), (1440, 760), (1024, 650), (390, 744), (320, 640)]
     if not args.baseline:
-        matrix += [(2560, 500), (1440, 400)]
+        matrix += [(2560, 500), (1440, 400), (3440, 1440), (3840, 1600)]
     with sync_playwright() as p:
         browser = p.chromium.launch()
         variants = [(width, height, 'en') for width, height in matrix]
@@ -61,7 +61,12 @@ def main():
                         assert focus['outline'] == 'none' and focus['shadow'] != 'none', focus
                         if width > 700:
                             assert metrics['image']['bottom'] <= height + 1, metrics
-                            assert abs(metrics['image']['width']/metrics['image']['height'] - 2508/1412) < .01, metrics
+                            assert abs(metrics['image']['width'] - metrics['hero']['width']) < 1, metrics
+                            assert abs(metrics['image']['width'] - width) < 1 and abs(metrics['image']['x']) < 1, metrics
+                            assert abs(metrics['image']['x'] - metrics['hero']['x']) < 1, metrics
+                            expected_height = min(metrics['image']['width'] * 1412/2508, height - metrics['header']['height'])
+                            assert abs(metrics['image']['height'] - expected_height) < 1, metrics
+                            assert page.locator('.campaign-image img').evaluate('e => getComputedStyle(e).objectFit') == 'cover'
                             assert metrics['copy']['y'] >= metrics['image']['y'], metrics
                             if height > 512:
                                 assert metrics['hero']['bottom'] <= height + 1, metrics
