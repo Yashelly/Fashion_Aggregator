@@ -133,12 +133,6 @@ h3 { font-size: 1.1875rem; font-weight: 500; }
 
 /* Approved street photograph: full landscape on desktop, a separate phone crop. */
 .home-storefront { padding-bottom: 4rem; }
-/* Readable text-led homepage while the separate street-media PR is reviewed. */
-.campaign.campaign--text { background: var(--color-canvas); }
-.campaign--text::after { display: none; }
-.campaign--text .campaign-copy { position: relative; left: auto; bottom: auto; width: 100%; max-width: 45rem; padding: 3rem var(--gutter); color: var(--color-ink); }
-.campaign--text .campaign-cta { background: var(--color-accent); color: var(--color-on-accent); }
-.campaign--text :focus-visible { outline-color: var(--color-focus); }
 .campaign { position: relative; background: #161616; }
 .campaign-image { aspect-ratio: 2508 / 1412; }
 .campaign-image picture, .campaign-image img { display: block; width: 100%; height: 100%; }
