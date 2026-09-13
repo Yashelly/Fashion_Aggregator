@@ -204,7 +204,7 @@ test("construction compounds distinguish cargo pockets and explicit absent belt 
 // 15. A production query plan must preserve an actual range, not collapse it
 // to a max-price hint, and must expose the parsed hard constraints for review.
 test("multi-language query parsing produces a reviewable structured plan", () => {
-  const query = interpretQuery("[removed] [removed] [removed] [removed] [removed] [removed] [removed] [removed] 100-150 [removed]");
+  const query = interpretQuery("black grotesque hoodie with stars and fastening 100-150 euros");
 
   assert.equal(query.minPrice, 100);
   assert.equal(query.maxPrice, 150);
@@ -214,7 +214,7 @@ test("multi-language query parsing produces a reviewable structured plan", () =>
   assert.deepEqual(query.constraints.directAttributes, ["star"]);
   assert.ok(query.terms.includes("grotesque"));
   assert.ok(query.terms.includes("closure"));
-  assert.ok(!query.text.includes("[removed]"), "the whole price expression is removed before scoring");
+  assert.ok(!query.text.includes("euros"), "the whole price expression is removed before scoring");
 
   const verboseRange = interpretQuery("hoodie from €100 to €150");
   assert.equal(verboseRange.minPrice, 100);

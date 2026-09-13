@@ -60,7 +60,7 @@ Market is Lithuania now, so every candidate is also checked for EN/LT pronunciat
 |---|---|---|
 | .com | `GET https://rdap.verisign.com/com/v1/domain/lygina.com` | `HTTP 404`, `Content-Type: application/rdap+json`, empty body → **AVAILABLE** |
 | .lt | `whois.domreg.lt:43` query `lygina.lt` | `Domain: lygina.lt` / `Status: available` → **AVAILABLE** |
-| Instagram | Fetched `instagram.com/lygina/` | Existing profile: "[removed] [removed]," 9 followers, 1 following → **TAKEN** (bare handle only; very low activity, a variant like `@lygina.app` is plausible but unchecked) |
+| Instagram | Fetched `instagram.com/lygina/` | Existing profile: "Veronika Lygina," 9 followers, 1 following → **TAKEN** (bare handle only; very low activity, a variant like `@lygina.app` is plausible but unchecked) |
 | TikTok | Fetched `tiktok.com/@lygina` | "Please wait..." interstitial, no account data → **UNVERIFIABLE (bot-blocked)** |
 
 ---

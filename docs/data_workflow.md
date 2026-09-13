@@ -281,6 +281,36 @@ Failure rules:
 - Bad row: row is marked invalid; import continues.
 - Failed run never marks missing products out of stock.
 
+### Feed Row Validation
+
+Minimum fields for a public product card:
+
+- `title`
+- `store_id`
+- `product_url` or `affiliate_url`
+- `image_url`
+- `price`
+- `currency`
+- `availability` or `in_stock`
+
+Invalid or skipped row handling:
+
+| Problem | Action |
+|---|---|
+| Missing `external_product_id` | Mark the row invalid |
+| Missing `title` | Mark the row invalid |
+| Missing price or currency | Exclude it from public listings |
+| Missing image | Keep the raw row but skip the public card |
+| Malformed URL | Mark the row invalid |
+| Unknown availability | Conservatively mark it out of stock or skip it |
+| Disallowed destination | Block clickout |
+
+Suggested thresholds:
+
+- Warn when invalid rows exceed 5%.
+- Fail when invalid rows exceed 30%.
+- Fail when a previously working feed produces no valid public products.
+
 ## 10. Workflow 4: Product Normalization
 
 Purpose: make products from different stores searchable in one catalog.
@@ -296,6 +326,7 @@ Canonical product:
 | department/audience | `gender` |
 | displayed color | `color_label` |
 | filter color | `normalized_color` |
+| size | `size_label`, `normalized_size` |
 | current price | `price` |
 | discount price | `sale_price` |
 | previous price | `old_price` |
@@ -311,10 +342,14 @@ Normalization examples:
 | `Women > Shoes > Trainers` | category `sneakers`, gender `woman` |
 | `Black / Noir / Juoda` | normalized color `black` |
 | `EU 42` | normalized size `eu_42` |
+| `Extra Small` | normalized size `xs` |
+| `One Size` | normalized size `one_size` |
 | `Out of stock` | `in_stock = false`, status `out_of_stock` |
 
 Do not overwrite source values. Keep source values in raw payload and
 merchant-specific columns for debugging.
+
+Do not combine shoe sizes and clothing sizes into one scale.
 
 ## 11. Workflow 5: Product Lifecycle
 

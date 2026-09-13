@@ -117,61 +117,61 @@ Brownfield: Next.js 16 (App Router), React, TypeScript strict, custom CSS with s
 
 ### Round 0 — Topology
 **Q:** Confirm 3 top-level components: Visual Design, UX/Clarity, Product Functionality.
-**A:** [removed], [removed] [removed].
+**A:** Yes, that is all correct.
 
 ### Round 1 — Product Functionality / Goal
-**Q:** [removed] [removed] [removed] [removed] [removed] [removed]?
-**A:** [removed]+[removed] [removed] [removed] [removed] [removed] [removed] [removed] ([removed] 1+4).
+**Q:** What should the feature discussion produce?
+**A:** An audit and recommendations, plus a discussion of new features to add (options 1+4).
 **Ambiguity:** 82%
 
 ### Round 2 — Visual Design / Goal
-**Q:** [removed] [removed] [removed] [removed] [removed] [removed] [removed]?
-**A:** [removed] [removed] [removed].
+**Q:** Refine the current visual language or rethink it from scratch?
+**A:** Rethink it from scratch.
 **Ambiguity:** 83%
 
 ### Round 3 — UX/Clarity / Goal
-**Q:** [removed] [removed] [removed] [removed] [removed] «[removed]»?
-**A:** [removed] [removed] [removed]/[removed].
+**Q:** What specific problem lies behind "clarity"?
+**A:** The navigation/structure is unclear.
 **Ambiguity:** 73%
 
 ### Round 4 — Visual Design / Constraints
-**Q:** [removed] [removed] [removed] [removed] [removed] [removed], [removed] [removed] [removed] [removed]?
-**A:** [removed] [removed] [removed], [removed] [removed].
+**Q:** What remains fixed during the visual rethink, and what can change?
+**A:** I do not yet know what I want.
 **Ambiguity:** 72%
 
 ### Round 5 — Visual Design / Goal (Contrarian)
-**Q:** [removed] [removed] [removed] [removed] [removed] [removed], [removed] [removed] [removed] [removed]? [removed] [removed] [removed] [removed] — [removed] [removed] «[removed]»?
-**A:** [removed] [removed], [removed] [removed].
+**Q:** What if the problem is not the visual language, but unfinished execution? If it were polished, would it feel right?
+**A:** I am not sure; I need to see it.
 **Ambiguity:** 68%
 
 ### Round 6 — Product Functionality / Criteria
-**Q:** [removed] [removed] [removed] [removed] [removed], [removed] [removed] «[removed], [removed] [removed], [removed] [removed]»?
-**A:** [removed] [removed]-[removed].
+**Q:** What must the output be for you to say, "yes, this is what we need"?
+**A:** A written recommendation document.
 **Ambiguity:** 68%
 
 ### Round 7 — UX/Clarity / Criteria (Simplifier)
-**Q:** [removed] [removed] [removed] [removed] [removed] [removed] [removed] [removed]?
-**A:** [removed] [removed], [removed] [removed].
+**Q:** What minimum sufficient result would already count as success?
+**A:** I am not sure; an audit is needed.
 **Ambiguity:** 68%
 
 ### Round 8 — Cross-component (Ontologist)
-**Q:** [removed] [removed] [removed] [removed] [removed] [removed] [removed] [removed] — «[removed] [removed] [removed] [removed]»?
-**A:** [removed] [removed], [removed] [removed] [removed]/[removed].
+**Q:** Is the actual need a single artifact—"Site Audit and Recommendations"?
+**A:** One artifact, but with mockups/a prototype.
 **Ambiguity:** 56%
 
 ### Round 9 — Cross-component / Constraints
-**Q:** [removed] — [removed] [removed] [removed] [removed] [removed] [removed] [removed] [removed]?
-**A:** [removed] [removed] [removed] [removed] ([removed] [removed]/git).
+**Q:** Should the prototype be real repository changes or a separate non-invasive mockup?
+**A:** Changes directly in the repository (through a branch/Git).
 **Ambiguity:** 44%
 
 ### Round 10 — Visual Design / Goal
-**Q:** [removed] [removed] [removed] [removed], [removed] [removed] [removed] [removed] [removed] [removed] [removed] [removed]?
-**A:** 2 [removed]: [removed] ([removed]) + 1 [removed].
+**Q:** How many visual options should be shown, and should a polished version of the current one be included?
+**A:** Two options: the current one (polished) plus one new option.
 **Ambiguity:** 29%
 
 ### Round 11 — Cross-component / Criteria
-**Q:** [removed] [removed] [removed] [removed] [removed] [removed], [removed] [removed] live-[removed] [removed]?
-**A:** [removed] live-[removed] [removed].
+**Q:** One document with a branch link, or is a live comparison method needed?
+**A:** A live comparison method is needed.
 **Ambiguity:** 18%
 
 </details>

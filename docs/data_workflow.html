@@ -1,0 +1,1235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fashion Aggregator Data Workflow</title>
+    <style>
+      :root {
+        --bg: #fbfbf8;
+        --panel: #ffffff;
+        --text: #141414;
+        --muted: #646464;
+        --line: #deded7;
+        --soft: #f1f1ec;
+        --accent: #111111;
+        --ok: #176b4f;
+        --warn: #996900;
+        --bad: #a33131;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Arial,
+          Helvetica,
+          sans-serif;
+        line-height: 1.55;
+        margin: 0;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .page {
+        margin: 0 auto;
+        max-width: 1180px;
+        padding: 36px 24px 72px;
+      }
+
+      .hero {
+        border-bottom: 1px solid var(--line);
+        display: grid;
+        gap: 18px;
+        padding: 38px 0 30px;
+      }
+
+      .eyebrow {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-size: clamp(42px, 8vw, 92px);
+        letter-spacing: 0;
+        line-height: 0.9;
+        margin: 0;
+        max-width: 980px;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        border-top: 1px solid var(--line);
+        font-size: clamp(28px, 4vw, 48px);
+        line-height: 1;
+        margin: 48px 0 18px;
+        padding-top: 26px;
+        text-transform: uppercase;
+      }
+
+      h3 {
+        font-size: 18px;
+        margin: 28px 0 10px;
+        text-transform: uppercase;
+      }
+
+      p {
+        margin: 0 0 12px;
+      }
+
+      .lead {
+        color: var(--muted);
+        font-size: 20px;
+        max-width: 820px;
+      }
+
+      .meta-grid,
+      .two-col,
+      .three-col,
+      .four-col {
+        display: grid;
+        gap: 14px;
+      }
+
+      .meta-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .two-col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .three-col {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .four-col {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .card,
+      .note,
+      .flow-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+      }
+
+      .card strong,
+      .flow-card strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .note {
+        background: var(--soft);
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .tag {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        padding: 5px 9px;
+      }
+
+      table {
+        border-collapse: collapse;
+        font-size: 14px;
+        margin: 14px 0 24px;
+        width: 100%;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--soft);
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      code {
+        background: var(--soft);
+        border-radius: 4px;
+        font-family: Consolas, Monaco, monospace;
+        font-size: 0.95em;
+        padding: 2px 5px;
+      }
+
+      pre {
+        background: #111;
+        border-radius: 8px;
+        color: #fff;
+        overflow: auto;
+        padding: 16px;
+      }
+
+      .flow {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(6, minmax(120px, 1fr));
+        margin: 16px 0 26px;
+      }
+
+      .flow-card {
+        min-height: 96px;
+        position: relative;
+      }
+
+      .flow-card::after {
+        color: var(--muted);
+        content: "→";
+        font-size: 22px;
+        position: absolute;
+        right: -14px;
+        top: 34px;
+      }
+
+      .flow-card:last-child::after {
+        content: "";
+      }
+
+      .status {
+        display: inline-block;
+        font-weight: 800;
+      }
+
+      .status.ok {
+        color: var(--ok);
+      }
+
+      .status.warn {
+        color: var(--warn);
+      }
+
+      .status.bad {
+        color: var(--bad);
+      }
+
+      ul,
+      ol {
+        margin-top: 0;
+        padding-left: 22px;
+      }
+
+      li {
+        margin: 4px 0;
+      }
+
+      .toc {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 18px;
+      }
+
+      .toc a {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 10px 12px;
+        text-decoration: none;
+      }
+
+      @media (max-width: 920px) {
+        .meta-grid,
+        .two-col,
+        .three-col,
+        .four-col,
+        .toc {
+          grid-template-columns: 1fr;
+        }
+
+        .flow {
+          grid-template-columns: 1fr;
+        }
+
+        .flow-card::after {
+          bottom: -18px;
+          left: 16px;
+          right: auto;
+          top: auto;
+          transform: rotate(90deg);
+        }
+      }
+
+      @media print {
+        body {
+          background: #fff;
+        }
+
+        .page {
+          max-width: none;
+          padding: 0;
+        }
+
+        .card,
+        .note,
+        .flow-card,
+        .toc a {
+          break-inside: avoid;
+        }
+      }
+
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <div class="eyebrow">Fashion Aggregator / Data Workflow</div>
+        <h1>Project Data Workflow</h1>
+        <p class="lead">
+          An end-to-end view of data movement, from affiliate approval and product
+          feeds through search, product cards, store clickouts, analytics, and
+          scaling to 1k, 10k, and 100k users per day.
+        </p>
+        <div class="tag-row">
+          <span class="tag">Next.js</span>
+          <span class="tag">Supabase / Postgres</span>
+          <span class="tag">Affiliate feeds</span>
+          <span class="tag">Search</span>
+          <span class="tag">Clickout tracking</span>
+        </div>
+      </header>
+
+      <nav class="toc" aria-label="Contents">
+        <a href="#product-data-goal">Product Data Goal</a>
+        <a href="#data-principles">Data Principles</a>
+        <a href="#system-context">System Context</a>
+        <a href="#main-data-domains">Main Data Domains</a>
+        <a href="#mvp-data-states">MVP Data States</a>
+        <a href="#end-to-end-workflow-overview">End-to-End Workflow Overview</a>
+        <a href="#workflow-1-store-onboarding">Workflow 1: Store Onboarding</a>
+        <a href="#workflow-2-feed-configuration">Workflow 2: Feed Configuration</a>
+        <a href="#workflow-3-feed-import-job">Workflow 3: Feed Import Job</a>
+        <a href="#workflow-4-product-normalization">Workflow 4: Product Normalization</a>
+        <a href="#workflow-5-product-lifecycle">Workflow 5: Product Lifecycle</a>
+        <a href="#workflow-6-search-read-path">Workflow 6: Search Read Path</a>
+        <a href="#workflow-7-public-page-data">Workflow 7: Public Page Data</a>
+        <a href="#workflow-8-search-events">Workflow 8: Search Events</a>
+        <a href="#workflow-9-outbound-clickout">Workflow 9: Outbound Clickout</a>
+        <a href="#workflow-10-affiliate-report-reconciliation">Workflow 10: Affiliate Report Reconciliation</a>
+        <a href="#workflow-11-analytics-and-dashboards">Workflow 11: Analytics And Dashboards</a>
+        <a href="#workflow-12-error-handling-and-alerts">Workflow 12: Error Handling And Alerts</a>
+        <a href="#workflow-13-data-retention">Workflow 13: Data Retention</a>
+        <a href="#workflow-14-scaling-by-traffic-stage">Workflow 14: Scaling By Traffic Stage</a>
+        <a href="#future-data-workflows">Future Data Workflows</a>
+        <a href="#implementation-backlog">Implementation Backlog</a>
+        <a href="#acceptance-checklist">Acceptance Checklist</a>
+        <a href="#recommended-first-production-stack">Recommended First Production Stack</a>
+      </nav>
+
+        <p>Prepared: 2026-07-23</p>
+        <p>This document describes the end-to-end data workflow for the fashion discovery affiliate MVP: from affiliate program approval and product feed import to search, public product cards, outbound affiliate clicks, analytics, and later scale stages.</p>
+        <p>Related documents:</p>
+        <ul>
+          <li><code>mvp_prd.md</code></li>
+          <li><code>feed_import_spec.md</code></li>
+          <li><code>clickout_tracking_spec.md</code></li>
+          <li><code>../sql/001_pre_affiliate_schema.sql</code></li>
+          <li><code>../data/store_tracker.csv</code></li>
+          <li><code>../data/mock_products.csv</code></li>
+        </ul>
+      <section id="product-data-goal">
+        <h2>1. Product Data Goal</h2>
+        <p>The product is a visual fashion discovery site for Lithuanian shoppers. The site should help users search and browse products by vibe, category, color, size, price, and store, then click out to the official retailer through an approved affiliate link.</p>
+        <p>The data system must prove four things:</p>
+        <ol>
+          <li>Approved product feeds can be imported safely.</li>
+          <li>Products can be normalized into one searchable catalog.</li>
+          <li>Search and collection pages can generate outbound clicks.</li>
+          <li>Clicks can later be reconciled with affiliate network revenue reports.</li>
+        </ol>
+        <p>The MVP is not a scraper, marketplace, checkout system, or coupon engine.</p>
+      </section>
+      <section id="data-principles">
+        <h2>2. Data Principles</h2>
+        <ul>
+          <li>Use approved affiliate feeds or explicit partner feeds only.</li>
+          <li>Do not scrape retailer websites for catalog data.</li>
+          <li>Keep raw feed rows for debugging and audit.</li>
+          <li>Normalize product data into a common model without losing source payloads.</li>
+          <li>Treat every store as hidden until feed permission and program rules are</li>
+        </ul>
+        <p>  verified.</p>
+        <ul>
+          <li>Do not store raw IP addresses.</li>
+          <li>Do not put PII into affiliate subids.</li>
+          <li>Do not require login for browsing; anonymous traffic should stay anonymous.</li>
+          <li>Do not proxy merchant images unless feed rules and cost controls allow it.</li>
+          <li>Make every import idempotent.</li>
+          <li>Never let a failed import mark products out of stock.</li>
+          <li>Cache public catalog reads aggressively before scaling paid traffic.</li>
+        </ul>
+      </section>
+      <section id="system-context">
+        <h2>3. System Context</h2>
+        <pre><code class="language-mermaid">flowchart LR
+  networks[&quot;Affiliate networks\nVIVnetworks/CJ, Awin&quot;]
+  feeds[&quot;Approved product feeds\nXML, CSV, JSON&quot;]
+  importer[&quot;Feed importer\nscheduled job&quot;]
+  db[&quot;Supabase/Postgres\ncatalog + events&quot;]
+  search[&quot;Search layer\nPostgres first, Meili/Typesense later&quot;]
+  web[&quot;Next.js web app\nhome, search, stores, collections&quot;]
+  user[&quot;Shopper&quot;]
+  merchant[&quot;Retailer / affiliate destination&quot;]
+  reports[&quot;Network reports\norders, commission, status&quot;]
+
+  networks --&gt; feeds
+  feeds --&gt; importer
+  importer --&gt; db
+  db --&gt; search
+  search --&gt; web
+  user --&gt; web
+  web --&gt; db
+  web --&gt; merchant
+  merchant --&gt; reports
+  reports --&gt; db</code></pre>
+      </section>
+      <section id="main-data-domains">
+        <h2>4. Main Data Domains</h2>
+        <table>
+          <thead><tr><th>Domain</th><th>Purpose</th><th>Primary tables/files</th></tr></thead>
+          <tbody>
+            <tr><td>Store registry</td><td>Which stores exist and whether they can be public</td><td><code>stores</code>, <code>store_tracker.csv</code></td></tr>
+            <tr><td>Program rules</td><td>Commission, cookie, feed, deeplink, traffic restrictions</td><td><code>affiliate_program_rules</code></td></tr>
+            <tr><td>Feed operations</td><td>Import run status, counts, errors, feed freshness</td><td><code>feed_import_runs</code></td></tr>
+            <tr><td>Raw source data</td><td>Audit/debug source rows</td><td><code>raw_feed_items</code></td></tr>
+            <tr><td>Catalog</td><td>Normalized product cards and variants</td><td><code>products</code>, <code>product_variants</code></td></tr>
+            <tr><td>Search metadata</td><td>Optional embeddings or style metadata</td><td><code>product_embeddings</code></td></tr>
+            <tr><td>User behavior</td><td>Search and filter events</td><td><code>search_events</code></td></tr>
+            <tr><td>Affiliate clickout</td><td>Outbound redirect and subid tracking</td><td><code>outbound_clicks</code></td></tr>
+            <tr><td>Demo data</td><td>Synthetic products before approval</td><td><code>mock_products.csv</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section id="mvp-data-states">
+        <h2>5. MVP Data States</h2>
+        <h3>5.1 Store Status</h3>
+        <p>The store moves through this lifecycle:</p>
+        <pre><code class="language-text">target
+  -&gt; applied
+  -&gt; approved_deeplink
+  -&gt; approved_feed
+  -&gt; live</code></pre>
+        <p>Exceptional states:</p>
+        <pre><code class="language-text">rejected
+paused
+blocked</code></pre>
+        <p>Rules:</p>
+        <ul>
+          <li><code>target</code>: research only, not public as a live source.</li>
+          <li><code>applied</code>: application sent, no live products.</li>
+          <li><code>approved_deeplink</code>: product links may be possible, but full feed may still</li>
+        </ul>
+        <p>  be unavailable.</p>
+        <ul>
+          <li><code>approved_feed</code>: store can enter feed import workflow.</li>
+          <li><code>live</code>: store can be shown in public product discovery pages.</li>
+          <li><code>paused</code> or <code>blocked</code>: clickouts and public listing should stop.</li>
+        </ul>
+        <p>Current first-wave stores:</p>
+        <ul>
+          <li>Reserved LT</li>
+          <li>Sinsay LT</li>
+          <li>Sizeer LT</li>
+          <li>MODIVO LT</li>
+          <li>Cropp LT</li>
+          <li>ABOUT YOU LT</li>
+        </ul>
+        <p>Monitoring-only:</p>
+        <ul>
+          <li>Factcool LT, because the official LT site currently states sales were suspended from 2025-03-06.</li>
+        </ul>
+      </section>
+      <section id="end-to-end-workflow-overview">
+        <h2>6. End-to-End Workflow Overview</h2>
+        <pre><code class="language-mermaid">flowchart TD
+  A[&quot;Research store&quot;] --&gt; B[&quot;Record store tracker row&quot;]
+  B --&gt; C[&quot;Apply to affiliate program&quot;]
+  C --&gt; D{&quot;Approved?&quot;}
+  D -- no --&gt; E[&quot;Keep hidden or reject&quot;]
+  D -- yes --&gt; F[&quot;Record final program rules&quot;]
+  F --&gt; G{&quot;Feed access?&quot;}
+  G -- no --&gt; H[&quot;Deeplink-only backlog&quot;]
+  G -- yes --&gt; I[&quot;Create feed config&quot;]
+  I --&gt; J[&quot;Run import job&quot;]
+  J --&gt; K[&quot;Store raw rows&quot;]
+  K --&gt; L[&quot;Normalize products and variants&quot;]
+  L --&gt; M[&quot;Validate public card fields&quot;]
+  M --&gt; N[&quot;Activate searchable products&quot;]
+  N --&gt; O[&quot;Serve search and collections&quot;]
+  O --&gt; P[&quot;Track search event&quot;]
+  P --&gt; Q[&quot;User clicks product&quot;]
+  Q --&gt; R[&quot;Create outbound click&quot;]
+  R --&gt; S[&quot;Redirect via affiliate URL&quot;]
+  S --&gt; T[&quot;Reconcile network reports later&quot;]</code></pre>
+      </section>
+      <section id="workflow-1-store-onboarding">
+        <h2>7. Workflow 1: Store Onboarding</h2>
+        <p>Purpose: ensure each public store is legally and operationally allowed.</p>
+        <p>Inputs:</p>
+        <ul>
+          <li>Store name, market, website.</li>
+          <li>Affiliate network and program URL.</li>
+          <li>Public signals for product feeds.</li>
+          <li>Commission and cookie information.</li>
+          <li>Traffic restrictions.</li>
+          <li>Feed/deeplink permission after approval.</li>
+        </ul>
+        <p>Output:</p>
+        <ul>
+          <li><code>stores</code> row.</li>
+          <li><code>affiliate_program_rules</code> row.</li>
+          <li>Updated <code>store_tracker.csv</code> until a real admin UI exists.</li>
+        </ul>
+        <p>Detailed steps:</p>
+        <ol>
+          <li>Add target store to <code>store_tracker.csv</code>.</li>
+          <li>Verify affiliate network path.</li>
+          <li>Check whether product feeds are publicly mentioned.</li>
+          <li>Apply to affiliate program.</li>
+          <li>After approval, record final program rules:</li>
+        </ol>
+        <p>   - commission text    - cookie days    - feed availability    - deeplinking allowed    - paid social allowed    - brand SEM allowed or forbidden    - coupon/cashback/content restrictions</p>
+        <ol>
+          <li>Insert or update <code>stores</code>.</li>
+          <li>Insert or update <code>affiliate_program_rules</code>.</li>
+          <li>Only then allow a feed configuration to be created.</li>
+        </ol>
+        <p>Acceptance criteria:</p>
+        <ul>
+          <li>Store has a unique slug.</li>
+          <li>Store has a known affiliate network.</li>
+          <li>Store has final rules recorded after approval.</li>
+          <li>Store is not public until permission is confirmed.</li>
+        </ul>
+      </section>
+      <section id="workflow-2-feed-configuration">
+        <h2>8. Workflow 2: Feed Configuration</h2>
+        <p>Purpose: define how one approved feed should be imported.</p>
+        <p>Feed config should include:</p>
+        <table>
+          <thead><tr><th>Field</th><th>Example</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><code>store_slug</code></td><td><code>reserved_lt</code></td><td>Maps to <code>stores.slug</code></td></tr>
+            <tr><td><code>source_type</code></td><td><code>affiliate_feed</code></td><td>Not scraper</td></tr>
+            <tr><td><code>source_format</code></td><td><code>xml</code></td><td><code>xml</code>, <code>csv</code>, <code>tsv</code>, <code>json</code></td></tr>
+            <tr><td><code>source_url</code></td><td>network feed URL</td><td>Credentials stay in env/secrets</td></tr>
+            <tr><td><code>is_full_snapshot</code></td><td><code>true</code></td><td>Controls out-of-stock logic</td></tr>
+            <tr><td>category map</td><td><code>reserved_v1</code></td><td>Internal mapping version</td></tr>
+            <tr><td>image policy</td><td><code>feed_image_allowed</code></td><td>Must match program rules</td></tr>
+            <tr><td>deeplink policy</td><td><code>direct_affiliate_url</code></td><td>Must match program rules</td></tr>
+            <tr><td>schedule</td><td><code>daily</code></td><td>Hourly only after need</td></tr>
+          </tbody>
+        </table>
+        <p>Storage:</p>
+        <ul>
+          <li>Do not commit live feed URLs with credentials.</li>
+          <li>Put credentials in deployment secrets.</li>
+          <li>Store non-secret metadata in database or config.</li>
+        </ul>
+      </section>
+      <section id="workflow-3-feed-import-job">
+        <h2>9. Workflow 3: Feed Import Job</h2>
+        <p>Purpose: download, parse, normalize, and upsert a feed safely.</p>
+        <pre><code class="language-mermaid">sequenceDiagram
+  participant Job as Feed job
+  participant Rules as Program rules
+  participant Feed as Affiliate feed
+  participant DB as Postgres
+  participant Search as Search index
+
+  Job-&gt;&gt;DB: Load store
+  Job-&gt;&gt;Rules: Check feed and image permission
+  Job-&gt;&gt;DB: Create feed_import_runs(started)
+  Job-&gt;&gt;Feed: Download feed
+  Feed--&gt;&gt;Job: XML/CSV/JSON payload
+  Job-&gt;&gt;Job: Parse rows
+  Job-&gt;&gt;Job: Validate required fields
+  Job-&gt;&gt;Job: Normalize category, color, size, price
+  Job-&gt;&gt;DB: Insert raw_feed_items
+  Job-&gt;&gt;DB: Upsert products
+  Job-&gt;&gt;DB: Upsert variants
+  Job-&gt;&gt;DB: Mark missing products out_of_stock if full snapshot
+  Job-&gt;&gt;DB: Complete feed_import_runs
+  Job-&gt;&gt;Search: Reindex changed products</code></pre>
+        <p>Detailed stages:</p>
+        <ol>
+          <li>Load store and rules.</li>
+          <li>Abort if store is not approved for feed usage.</li>
+          <li>Create <code>feed_import_runs</code> with <code>status = started</code>.</li>
+          <li>Download feed into temporary storage.</li>
+          <li>Compute feed-level hash.</li>
+          <li>If unchanged, mark run completed with unchanged counts.</li>
+          <li>Parse rows with strict format-specific parser.</li>
+          <li>Validate minimum fields.</li>
+          <li>Normalize canonical fields.</li>
+          <li>Compute <code>raw_hash</code> and <code>content_hash</code>.</li>
+          <li>Insert <code>raw_feed_items</code>.</li>
+          <li>Upsert <code>products</code> by <code>store_id + external_product_id</code>.</li>
+          <li>Upsert variants when variant/size data exists.</li>
+          <li>For full snapshots, mark products not seen as out of stock.</li>
+          <li>Queue changed products for search reindexing/enrichment.</li>
+          <li>Complete run with counts and warnings.</li>
+        </ol>
+        <p>Failure rules:</p>
+        <ul>
+          <li>Download failure: run fails, products unchanged.</li>
+          <li>Parse failure: run fails, products unchanged.</li>
+          <li>Too many invalid rows: run fails, products unchanged.</li>
+          <li>Bad row: row is marked invalid; import continues.</li>
+          <li>Failed run never marks missing products out of stock.</li>
+        </ul>
+        <h3>Feed Row Validation</h3>
+        <p>Minimum fields for a public product card:</p>
+        <ul>
+          <li><code>title</code></li>
+          <li><code>store_id</code></li>
+          <li><code>product_url</code> or <code>affiliate_url</code></li>
+          <li><code>image_url</code></li>
+          <li><code>price</code></li>
+          <li><code>currency</code></li>
+          <li><code>availability</code> or <code>in_stock</code></li>
+        </ul>
+        <p>Invalid or skipped row handling:</p>
+        <table>
+          <thead><tr><th>Problem</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>Missing <code>external_product_id</code></td><td>Mark the row invalid</td></tr>
+            <tr><td>Missing <code>title</code></td><td>Mark the row invalid</td></tr>
+            <tr><td>Missing price or currency</td><td>Exclude it from public listings</td></tr>
+            <tr><td>Missing image</td><td>Keep the raw row but skip the public card</td></tr>
+            <tr><td>Malformed URL</td><td>Mark the row invalid</td></tr>
+            <tr><td>Unknown availability</td><td>Conservatively mark it out of stock or skip it</td></tr>
+            <tr><td>Disallowed destination</td><td>Block clickout</td></tr>
+          </tbody>
+        </table>
+        <p>Suggested thresholds:</p>
+        <ul>
+          <li>Warn when invalid rows exceed 5%.</li>
+          <li>Fail when invalid rows exceed 30%.</li>
+          <li>Fail when a previously working feed produces no valid public products.</li>
+        </ul>
+      </section>
+      <section id="workflow-4-product-normalization">
+        <h2>10. Workflow 4: Product Normalization</h2>
+        <p>Purpose: make products from different stores searchable in one catalog.</p>
+        <p>Canonical product:</p>
+        <table>
+          <thead><tr><th>Source concept</th><th>Canonical field</th></tr></thead>
+          <tbody>
+            <tr><td>merchant product ID</td><td><code>external_product_id</code></td></tr>
+            <tr><td>product name</td><td><code>title</code></td></tr>
+            <tr><td>merchant category path</td><td><code>merchant_category</code></td></tr>
+            <tr><td>internal category</td><td><code>normalized_category</code></td></tr>
+            <tr><td>department/audience</td><td><code>gender</code></td></tr>
+            <tr><td>displayed color</td><td><code>color_label</code></td></tr>
+            <tr><td>filter color</td><td><code>normalized_color</code></td></tr>
+            <tr><td>size</td><td><code>size_label</code>, <code>normalized_size</code></td></tr>
+            <tr><td>current price</td><td><code>price</code></td></tr>
+            <tr><td>discount price</td><td><code>sale_price</code></td></tr>
+            <tr><td>previous price</td><td><code>old_price</code></td></tr>
+            <tr><td>product page</td><td><code>product_url</code></td></tr>
+            <tr><td>tracked link</td><td><code>affiliate_url</code></td></tr>
+            <tr><td>image</td><td><code>image_url</code></td></tr>
+            <tr><td>stock</td><td><code>availability</code>, <code>in_stock</code>, <code>status</code></td></tr>
+          </tbody>
+        </table>
+        <p>Normalization examples:</p>
+        <table>
+          <thead><tr><th>Input</th><th>Output</th></tr></thead>
+          <tbody>
+            <tr><td><code>Women &gt; Shoes &gt; Trainers</code></td><td>category <code>sneakers</code>, gender <code>woman</code></td></tr>
+            <tr><td><code>Black / Noir / Juoda</code></td><td>normalized color <code>black</code></td></tr>
+            <tr><td><code>EU 42</code></td><td>normalized size <code>eu_42</code></td></tr>
+            <tr><td><code>Extra Small</code></td><td>normalized size <code>xs</code></td></tr>
+            <tr><td><code>One Size</code></td><td>normalized size <code>one_size</code></td></tr>
+            <tr><td><code>Out of stock</code></td><td><code>in_stock = false</code>, status <code>out_of_stock</code></td></tr>
+          </tbody>
+        </table>
+        <p>Do not overwrite source values. Keep source values in raw payload and merchant-specific columns for debugging.</p>
+        <p>Do not combine shoe sizes and clothing sizes into one scale.</p>
+      </section>
+      <section id="workflow-5-product-lifecycle">
+        <h2>11. Workflow 5: Product Lifecycle</h2>
+        <pre><code class="language-mermaid">stateDiagram-v2
+  [*] --&gt; demo
+  demo --&gt; active: approved feed replaces mock
+  active --&gt; active: seen in successful import
+  active --&gt; out_of_stock: missing from full snapshot or unavailable
+  out_of_stock --&gt; active: seen in later import
+  out_of_stock --&gt; removed: missing for retention window
+  active --&gt; blocked: rules violation or bad data
+  blocked --&gt; active: operator review
+  removed --&gt; [*]</code></pre>
+        <p>Rules:</p>
+        <ul>
+          <li><code>demo</code>: synthetic data only.</li>
+          <li><code>active</code>: can appear in public catalog and search.</li>
+          <li><code>out_of_stock</code>: hidden from default search, may appear in internal reports.</li>
+          <li><code>removed</code>: old item retained for history but not public.</li>
+          <li><code>blocked</code>: operator or validation blocked item.</li>
+        </ul>
+        <p>Suggested retention:</p>
+        <ul>
+          <li>Keep active products indefinitely while feed keeps seeing them.</li>
+          <li>Keep out-of-stock products for 30-90 days.</li>
+          <li>Keep raw feed rows for 30-90 days in MVP, longer only if cheap storage is used.</li>
+          <li>Keep clickout events for at least affiliate reconciliation window.</li>
+        </ul>
+      </section>
+      <section id="workflow-6-search-read-path">
+        <h2>12. Workflow 6: Search Read Path</h2>
+        <p>MVP search:</p>
+        <pre><code class="language-mermaid">flowchart LR
+  user[&quot;User enters query/filter&quot;] --&gt; web[&quot;Next.js /search&quot;]
+  web --&gt; db[&quot;Postgres products query&quot;]
+  db --&gt; web
+  web --&gt; event[&quot;Create search_events row&quot;]
+  web --&gt; user</code></pre>
+        <p>MVP approach:</p>
+        <ul>
+          <li>Use Postgres filters first.</li>
+          <li>Query active products only.</li>
+          <li>Filter by store, category, color, gender, price, availability.</li>
+          <li>Start with simple text matching across title, brand, category, tags.</li>
+          <li>Record search events after result count is known.</li>
+        </ul>
+        <p>Later search approach:</p>
+        <pre><code class="language-mermaid">flowchart LR
+  importer[&quot;Changed products&quot;] --&gt; indexer[&quot;Search indexer&quot;]
+  indexer --&gt; meili[&quot;Meilisearch / Typesense&quot;]
+  web[&quot;Next.js search&quot;] --&gt; meili
+  meili --&gt; web
+  web --&gt; db[&quot;Fetch product details by IDs if needed&quot;]</code></pre>
+        <p>When to move beyond Postgres:</p>
+        <ul>
+          <li>100k+ active products.</li>
+          <li>Autocomplete is needed.</li>
+          <li>Facets become slow.</li>
+          <li>Relevance needs typo tolerance and synonyms.</li>
+          <li>Product discovery needs more vibe/style ranking.</li>
+        </ul>
+        <p>Cost guardrails:</p>
+        <ul>
+          <li>Do not use Algolia early unless budget allows it.</li>
+          <li>Debounce autocomplete.</li>
+          <li>Cache common collection pages.</li>
+          <li>Do not search on every keystroke without limits.</li>
+        </ul>
+      </section>
+      <section id="workflow-7-public-page-data">
+        <h2>13. Workflow 7: Public Page Data</h2>
+        <p>Page types:</p>
+        <table>
+          <thead><tr><th>Page</th><th>Data source</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Home</td><td>static/editorial + selected products</td><td>Cache aggressively</td></tr>
+            <tr><td>Search</td><td>products + filters</td><td>MVP dynamic, later cached by popular params</td></tr>
+            <tr><td>Store page</td><td>store + products</td><td>Static/ISR candidate</td></tr>
+            <tr><td>Collection page</td><td>normalized category/style query</td><td>SEO + paid landing page candidate</td></tr>
+            <tr><td>Data sources</td><td>store/rule summary</td><td>Trust page</td></tr>
+            <tr><td>Out route</td><td>product + affiliate rules</td><td>Must stay server-side</td></tr>
+          </tbody>
+        </table>
+        <p>Public product card fields:</p>
+        <ul>
+          <li>image</li>
+          <li>title</li>
+          <li>store name</li>
+          <li>brand</li>
+          <li>price/currency</li>
+          <li>sale/old price when available</li>
+          <li>category or style tags</li>
+          <li>availability</li>
+          <li>affiliate disclosure context</li>
+          <li>clickout link to <code>/out/:productId</code></li>
+        </ul>
+        <p>Do not expose:</p>
+        <ul>
+          <li>raw affiliate feed URL</li>
+          <li>feed credentials</li>
+          <li>internal validation errors</li>
+          <li>raw IP</li>
+          <li>internal affiliate subid mapping</li>
+        </ul>
+      </section>
+      <section id="workflow-8-search-events">
+        <h2>14. Workflow 8: Search Events</h2>
+        <p>Purpose: understand user intent and connect search to clickout.</p>
+        <p>Event creation:</p>
+        <ol>
+          <li>User searches or changes filters.</li>
+          <li>Backend normalizes query and filters.</li>
+          <li>Backend computes result count.</li>
+          <li>Backend inserts <code>search_events</code>.</li>
+          <li>Frontend receives products and optional <code>search_event_id</code>.</li>
+          <li>Product clickout includes <code>search_event_id</code>.</li>
+        </ol>
+        <p>Data fields:</p>
+        <ul>
+          <li><code>session_id</code></li>
+          <li><code>anonymous_user_id</code></li>
+          <li><code>query_text</code></li>
+          <li><code>normalized_query</code></li>
+          <li><code>filters</code></li>
+          <li><code>sort_key</code></li>
+          <li><code>result_count</code></li>
+          <li><code>source_page</code></li>
+          <li><code>referrer_url</code></li>
+          <li><code>user_agent</code></li>
+          <li><code>ip_hash</code></li>
+        </ul>
+        <p>Privacy:</p>
+        <ul>
+          <li>Do not store email in search events.</li>
+          <li>Hash IP with private salt only if abuse prevention needs it.</li>
+          <li>Consider truncating or dropping user agent later.</li>
+          <li>Keep analytics event schema stable.</li>
+        </ul>
+      </section>
+      <section id="workflow-9-outbound-clickout">
+        <h2>15. Workflow 9: Outbound Clickout</h2>
+        <p>Purpose: send users to stores safely and generate affiliate attribution.</p>
+        <pre><code class="language-mermaid">sequenceDiagram
+  participant User
+  participant Web as Next.js app
+  participant DB as Postgres
+  participant Store as Merchant / network
+
+  User-&gt;&gt;Web: Click View in store
+  Web-&gt;&gt;DB: Load product, store, rules
+  Web-&gt;&gt;Web: Validate status and destination
+  Web-&gt;&gt;DB: Insert outbound_clicks(pending)
+  Web-&gt;&gt;Web: Generate affiliate_subid
+  Web-&gt;&gt;DB: Update outbound_clicks(redirected)
+  Web--&gt;&gt;User: HTTP 302 redirect
+  User-&gt;&gt;Store: Opens merchant page</code></pre>
+        <p>Validation:</p>
+        <ul>
+          <li>Product exists.</li>
+          <li>Product status is active.</li>
+          <li>Store is live.</li>
+          <li>Store affiliate rules allow clickout.</li>
+          <li>Destination URL is HTTPS.</li>
+          <li>Destination host is allowed.</li>
+          <li>Destination is not checkout/cart/admin.</li>
+        </ul>
+        <p>Destination priority:</p>
+        <ol>
+          <li>Variant-level <code>affiliate_url</code>.</li>
+          <li>Product-level <code>affiliate_url</code>.</li>
+          <li>Approved deeplink template + product URL.</li>
+          <li>Product URL only if direct tracking is explicitly allowed.</li>
+        </ol>
+        <p>Subid:</p>
+        <ul>
+          <li>Use opaque internal ID, for example <code>fa_&lt;short_click_id&gt;</code>.</li>
+          <li>Do not include email, query text, IP, or user identity.</li>
+          <li>Store mapping internally in <code>outbound_clicks</code>.</li>
+        </ul>
+      </section>
+      <section id="workflow-10-affiliate-report-reconciliation">
+        <h2>16. Workflow 10: Affiliate Report Reconciliation</h2>
+        <p>Purpose: connect network-reported orders/commission to our click data.</p>
+        <p>MVP can start manual. Later add table(s), for example:</p>
+        <ul>
+          <li><code>affiliate_report_import_runs</code></li>
+          <li><code>affiliate_report_rows</code></li>
+          <li><code>affiliate_conversions</code></li>
+        </ul>
+        <p>Manual MVP workflow:</p>
+        <ol>
+          <li>Export report from affiliate network.</li>
+          <li>Include date range, store, click/subid, order status, commission.</li>
+          <li>Match network subid to <code>outbound_clicks.affiliate_subid</code>.</li>
+          <li>Compute EPC, conversion rate, approval rate.</li>
+          <li>Update store/category performance dashboard manually or via SQL view.</li>
+        </ol>
+        <p>Metrics:</p>
+        <table>
+          <thead><tr><th>Metric</th><th>Formula</th></tr></thead>
+          <tbody>
+            <tr><td>Clicks</td><td>count of <code>outbound_clicks</code></td></tr>
+            <tr><td>Approved orders</td><td>network approved conversions</td></tr>
+            <tr><td>Conversion rate</td><td>approved orders / clicks</td></tr>
+            <tr><td>EPC</td><td>commission / clicks</td></tr>
+            <tr><td>Approval rate</td><td>approved orders / tracked orders</td></tr>
+            <tr><td>Revenue per session</td><td>commission / sessions</td></tr>
+          </tbody>
+        </table>
+        <p>Important:</p>
+        <ul>
+          <li>Affiliate networks may delay reporting by days.</li>
+          <li>Orders can be pending, rejected, cancelled, or approved.</li>
+          <li>Do not optimize stores only on raw clicks; use EPC after enough data exists.</li>
+        </ul>
+      </section>
+      <section id="workflow-11-analytics-and-dashboards">
+        <h2>17. Workflow 11: Analytics And Dashboards</h2>
+        <p>Core product metrics:</p>
+        <ul>
+          <li>sessions</li>
+          <li>searches</li>
+          <li>zero-result searches</li>
+          <li>filter usage</li>
+          <li>product impressions</li>
+          <li>outbound clicks</li>
+          <li>search-to-click CTR</li>
+          <li>store CTR</li>
+          <li>category CTR</li>
+          <li>clickout error rate</li>
+        </ul>
+        <p>Feed health metrics:</p>
+        <ul>
+          <li>latest successful run per store</li>
+          <li>import success rate</li>
+          <li>invalid row rate</li>
+          <li>missing image rate</li>
+          <li>duplicate rate</li>
+          <li>products inserted/updated/unchanged</li>
+          <li>products out of stock</li>
+          <li>products removed</li>
+        </ul>
+        <p>Affiliate metrics:</p>
+        <ul>
+          <li>clicks by store</li>
+          <li>clicks by source page</li>
+          <li>clicks by query/category</li>
+          <li>EPC after report import</li>
+          <li>conversion rate after report import</li>
+          <li>commission by store</li>
+        </ul>
+        <p>Dashboard phases:</p>
+        <ol>
+          <li>MVP: SQL queries/manual dashboard.</li>
+          <li>Early traffic: simple admin page or Supabase dashboard.</li>
+          <li>Scale: warehouse or analytics export if needed.</li>
+        </ol>
+      </section>
+      <section id="workflow-12-error-handling-and-alerts">
+        <h2>18. Workflow 12: Error Handling And Alerts</h2>
+        <p>Feed import alerts:</p>
+        <ul>
+          <li>feed download failed</li>
+          <li>parse failed</li>
+          <li>zero valid public products</li>
+          <li>invalid row rate above 30 percent</li>
+          <li>missing image rate above 10 percent</li>
+          <li>price parse error above 2 percent</li>
+          <li>store has no successful import in 24-48 hours</li>
+        </ul>
+        <p>Search alerts:</p>
+        <ul>
+          <li>zero-result rate spike</li>
+          <li>search response time spike</li>
+          <li>external search index unavailable</li>
+        </ul>
+        <p>Clickout alerts:</p>
+        <ul>
+          <li>blocked/failed redirect rate above 1 percent</li>
+          <li>unknown destination host detected</li>
+          <li>product missing affiliate URL</li>
+          <li>paused store receiving clicks</li>
+        </ul>
+        <p>Security/privacy alerts:</p>
+        <ul>
+          <li>unexpected raw IP logging</li>
+          <li>affiliate URL contains PII</li>
+          <li>public API exposes hidden products</li>
+          <li>feed credentials appear in logs</li>
+        </ul>
+      </section>
+      <section id="workflow-13-data-retention">
+        <h2>19. Workflow 13: Data Retention</h2>
+        <p>Suggested MVP retention:</p>
+        <table>
+          <thead><tr><th>Data</th><th>Retention</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Products</td><td>indefinite while active</td><td>Needed for catalog</td></tr>
+            <tr><td>Out-of-stock products</td><td>30-90 days</td><td>Keep for reactivation/history</td></tr>
+            <tr><td>Raw feed rows</td><td>30-90 days</td><td>Move snapshots to R2 later</td></tr>
+            <tr><td>Feed import runs</td><td>12 months</td><td>Cheap and useful</td></tr>
+            <tr><td>Search events</td><td>6-12 months</td><td>Aggregate later</td></tr>
+            <tr><td>Outbound clicks</td><td>12-24 months</td><td>Needed for affiliate reconciliation</td></tr>
+            <tr><td>User accounts</td><td>until deletion request</td><td>Only after accounts exist</td></tr>
+            <tr><td>Logs</td><td>7-30 days</td><td>Avoid storing PII</td></tr>
+            <tr><td>Affiliate reports</td><td>24+ months</td><td>Accounting/revenue support</td></tr>
+          </tbody>
+        </table>
+        <p>Cost controls:</p>
+        <ul>
+          <li>Archive raw feed snapshots to Cloudflare R2.</li>
+          <li>Keep detailed logs short-lived.</li>
+          <li>Aggregate old search events by day/query/category.</li>
+          <li>Do not store product image binaries unless required.</li>
+        </ul>
+      </section>
+      <section id="workflow-14-scaling-by-traffic-stage">
+        <h2>20. Workflow 14: Scaling By Traffic Stage</h2>
+        <h3>Development / Pre-Affiliate</h3>
+        <p>Data sources:</p>
+        <ul>
+          <li><code>mock_products.csv</code></li>
+          <li><code>store_tracker.csv</code></li>
+          <li>legal/trust docs</li>
+        </ul>
+        <p>Stack:</p>
+        <ul>
+          <li>Next.js local/Vercel</li>
+          <li>CSV mock products</li>
+          <li>SQL schema ready</li>
+          <li>no live merchant data</li>
+        </ul>
+        <p>Goal:</p>
+        <ul>
+          <li>Look credible for affiliate applications.</li>
+          <li>Prove demo search and legal positioning.</li>
+        </ul>
+        <h3>First Approved Feed</h3>
+        <p>Data sources:</p>
+        <ul>
+          <li>one approved affiliate feed</li>
+          <li>final affiliate program rules</li>
+        </ul>
+        <p>Stack:</p>
+        <ul>
+          <li>Supabase Postgres</li>
+          <li>scheduled import</li>
+          <li>Postgres search</li>
+          <li><code>/out/:productId</code></li>
+        </ul>
+        <p>Goal:</p>
+        <ul>
+          <li>Import one feed end to end.</li>
+          <li>Re-import without duplicates.</li>
+          <li>Track clickouts.</li>
+        </ul>
+        <h3>1k Users/Day</h3>
+        <p>Expected:</p>
+        <ul>
+          <li>90k-150k pageviews/month depending on sessions.</li>
+          <li>Postgres search still acceptable.</li>
+          <li>Daily feed imports enough for most stores.</li>
+        </ul>
+        <p>Focus:</p>
+        <ul>
+          <li>cache public pages</li>
+          <li>avoid image proxy</li>
+          <li>record only key analytics events</li>
+          <li>monitor clickout errors</li>
+        </ul>
+        <h3>10k Users/Day</h3>
+        <p>Expected:</p>
+        <ul>
+          <li>900k-1.5M pageviews/month.</li>
+          <li>Product count may be 100k+.</li>
+          <li>Search relevance and speed become important.</li>
+        </ul>
+        <p>Changes:</p>
+        <ul>
+          <li>add Meilisearch/Typesense if Postgres is slow</li>
+          <li>improve indexes</li>
+          <li>batch click/event writes if needed</li>
+          <li>cache collection/store pages</li>
+          <li>use R2 for feed snapshots</li>
+        </ul>
+        <h3>100k Users/Day</h3>
+        <p>Expected:</p>
+        <ul>
+          <li>9M-15M pageviews/month.</li>
+          <li>Search, analytics, and bandwidth become major cost drivers.</li>
+        </ul>
+        <p>Changes:</p>
+        <ul>
+          <li>Cloudflare-heavy CDN strategy</li>
+          <li>separate search cluster</li>
+          <li>separate import worker</li>
+          <li>batched analytics/event writes</li>
+          <li>sampled product analytics/session replay</li>
+          <li>aggregate old event data</li>
+          <li>strict spend caps on SaaS tools</li>
+        </ul>
+        <p>Avoid:</p>
+        <ul>
+          <li>Algolia autocomplete without budget controls</li>
+          <li>Vercel image proxy for all merchant images</li>
+          <li>mandatory anonymous auth for every visitor</li>
+          <li>writing every impression synchronously to primary Postgres</li>
+        </ul>
+      </section>
+      <section id="future-data-workflows">
+        <h2>21. Future Data Workflows</h2>
+        <h3>Saved Boards / Accounts</h3>
+        <p>Add only after traffic validation.</p>
+        <p>Possible tables:</p>
+        <ul>
+          <li><code>user_profiles</code></li>
+          <li><code>saved_boards</code></li>
+          <li><code>saved_board_items</code></li>
+        </ul>
+        <p>Rules:</p>
+        <ul>
+          <li>Browsing stays anonymous.</li>
+          <li>Login is optional.</li>
+          <li>Saved items use product IDs, not copied merchant data.</li>
+          <li>Deletion request removes user-owned data.</li>
+        </ul>
+        <h3>Subscription Features</h3>
+        <p>Possible paid features:</p>
+        <ul>
+          <li>saved boards</li>
+          <li>advanced style filters</li>
+          <li>AI stylist</li>
+          <li>3D try-on</li>
+        </ul>
+        <p>Rules:</p>
+        <ul>
+          <li>Put subscription logic outside MVP feed import.</li>
+          <li>Do not mix billing provider IDs into public analytics.</li>
+          <li>Keep paid feature events separate from affiliate click events.</li>
+        </ul>
+        <h3>AI / Style Enrichment</h3>
+        <p>Potential sources:</p>
+        <ul>
+          <li>product title</li>
+          <li>description</li>
+          <li>category</li>
+          <li>image alt/style text</li>
+        </ul>
+        <p>Workflow:</p>
+        <ol>
+          <li>Import product.</li>
+          <li>Detect changed <code>content_hash</code>.</li>
+          <li>Queue enrichment.</li>
+          <li>Generate tags/embeddings.</li>
+          <li>Store in <code>product_embeddings</code> or later vector column.</li>
+          <li>Reindex search.</li>
+        </ol>
+        <p>Guardrails:</p>
+        <ul>
+          <li>Batch offline.</li>
+          <li>Only enrich changed products.</li>
+          <li>Cap daily spend.</li>
+          <li>Do not send unauthorized images if rules forbid it.</li>
+        </ul>
+      </section>
+      <section id="implementation-backlog">
+        <h2>22. Implementation Backlog</h2>
+        <h3>Phase A: Current Mock MVP</h3>
+        <ul>
+          <li>Keep <code>mock_products.csv</code> as demo-only source.</li>
+          <li>Keep demo source labels clear.</li>
+          <li>Add search event skeleton.</li>
+          <li>Add <code>/out/:productId</code> skeleton with safe demo behavior.</li>
+        </ul>
+        <h3>Phase B: Database Activation</h3>
+        <ul>
+          <li>Apply <code>001_pre_affiliate_schema.sql</code> to Supabase.</li>
+          <li>Seed first-wave stores from <code>store_tracker.csv</code>.</li>
+          <li>Seed affiliate rules after approval.</li>
+          <li>Replace CSV product reads with database reads.</li>
+        </ul>
+        <h3>Phase C: First Feed Import</h3>
+        <ul>
+          <li>Build feed config format.</li>
+          <li>Build importer for one XML feed.</li>
+          <li>Insert <code>feed_import_runs</code>.</li>
+          <li>Insert <code>raw_feed_items</code>.</li>
+          <li>Upsert <code>products</code>.</li>
+          <li>Upsert <code>product_variants</code>.</li>
+          <li>Add import summary logs.</li>
+        </ul>
+        <h3>Phase D: Search And Clickout</h3>
+        <ul>
+          <li>Query active products from database.</li>
+          <li>Save <code>search_events</code>.</li>
+          <li>Include <code>search_event_id</code> in clickout links.</li>
+          <li>Implement <code>/out/:productId</code>.</li>
+          <li>Validate affiliate destinations.</li>
+          <li>Save <code>outbound_clicks</code>.</li>
+        </ul>
+        <h3>Phase E: Operator Visibility</h3>
+        <ul>
+          <li>Create simple import status view.</li>
+          <li>Create clickout metrics query.</li>
+          <li>Create top queries query.</li>
+          <li>Create store freshness query.</li>
+          <li>Add alerts for feed failure and clickout failure.</li>
+        </ul>
+      </section>
+      <section id="acceptance-checklist">
+        <h2>23. Acceptance Checklist</h2>
+        <p>The data workflow is MVP-ready when:</p>
+        <ul>
+          <li>No unapproved store is public as a live source.</li>
+          <li>At least one approved feed imports successfully.</li>
+          <li>Re-importing the same feed does not duplicate products.</li>
+          <li>Products missing from a failed import are not marked out of stock.</li>
+          <li>Product cards show only valid public fields.</li>
+          <li>Search returns active products only.</li>
+          <li>Search events record query, filters, and result count.</li>
+          <li>Clickout creates an <code>outbound_clicks</code> row before redirect.</li>
+          <li>Clickout destination is validated.</li>
+          <li>Affiliate subid contains no PII.</li>
+          <li>Feed errors are visible to the operator.</li>
+          <li>Legal/data source pages explain affiliate data usage.</li>
+          <li>Analytics can answer which store/query/category generated clicks.</li>
+        </ul>
+      </section>
+      <section id="recommended-first-production-stack">
+        <h2>24. Recommended First Production Stack</h2>
+        <p>For the first real launch:</p>
+        <table>
+          <thead><tr><th>Layer</th><th>Recommendation</th></tr></thead>
+          <tbody>
+            <tr><td>Web</td><td>Next.js on Vercel Pro</td></tr>
+            <tr><td>Database</td><td>Supabase Postgres Pro</td></tr>
+            <tr><td>Search</td><td>Postgres filters/text search</td></tr>
+            <tr><td>Feed jobs</td><td>GitHub Actions or Supabase scheduled job</td></tr>
+            <tr><td>Assets/feed snapshots</td><td>none at first, Cloudflare R2 later</td></tr>
+            <tr><td>Analytics</td><td><code>search_events</code>, <code>outbound_clicks</code>, GA4/PostHog limited</td></tr>
+            <tr><td>Monitoring</td><td>Sentry + Better Stack/Uptime monitor</td></tr>
+            <tr><td>Email</td><td>Google Workspace + Resend</td></tr>
+          </tbody>
+        </table>
+        <p>Revisit the stack when:</p>
+        <ul>
+          <li>active products exceed 100k</li>
+          <li>search response time degrades</li>
+          <li>traffic reaches 10k users/day</li>
+          <li>analytics cost grows faster than revenue</li>
+          <li>outbound clicks justify deeper affiliate reconciliation</li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

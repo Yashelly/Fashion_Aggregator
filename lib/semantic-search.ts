@@ -102,7 +102,7 @@ const LEXICON: Record<string, string[]> = {
   tee: ["tee", "tees", "tshirt", "t-shirt", "tshirts", "marskineliai", "marskinelis", "marskineliu"],
   top: ["top", "tops", "virsus", "palaidine", "palaidines"],
   tank: ["tank", "tanks", "camisole", "petnesos"],
-  hoodie: ["hoodie", "hoodies", "hood", "gobtuvas", "dzemperis", "dzemperiai", "dzemperiu", "[removed]", "[removed]"],
+  hoodie: ["hoodie", "hoodies", "hood", "gobtuvas", "dzemperis", "dzemperiai", "dzemperiu"],
   sweatshirt: ["sweatshirt", "sweatshirts", "sweat", "sweats", "crewneck"],
   sweater: ["sweater", "sweaters", "jumper", "megztinis", "megztiniai", "megztini"],
   // Kept distinct from `sweater`: a pullover can be a hooded top, and making
@@ -183,7 +183,7 @@ const LEXICON: Record<string, string[]> = {
   utility: ["utility", "cargo", "tactical", "darbinis"],
   tracksuit: ["tracksuit", "tracksuits", "sportkostiumas"],
   graphic: ["graphic", "print", "printed", "logo", "logos", "piesinys", "printas", "spauda"],
-  grotesque: ["grotesque", "[removed]", "[removed]", "[removed]"],
+  grotesque: ["grotesque"],
 
   // Motifs and construction read off the product photos. Only vocabulary the
   // catalog actually contains is listed — there are no stars, stripes, checks
@@ -193,14 +193,14 @@ const LEXICON: Record<string, string[]> = {
   abstract: ["abstract", "abstraktus", "abstrakcija"],
   floral: ["floral", "flower", "flowers", "blossom", "gelete", "geles", "geliu", "geletas"],
   stripe: ["stripe", "stripes", "striped", "dryzuotas", "dryzuota"],
-  star: ["star", "stars", "starred", "[removed]", "[removed]", "[removed]", "[removed]", "[removed]", "[removed]", "[removed]"],
+  star: ["star", "stars", "starred"],
   circle: ["circle", "circles", "round", "dot", "dots", "apskritimas", "apskritimai", "taskai"],
   square: ["square", "squares", "rectangle", "rectangles", "kvadratas", "kvadratai", "staciakampis"],
   triangle: ["triangle", "triangles", "trikampis", "trikampiai"],
   hood: ["hood", "hooded", "gobtuvu"],
   drawstring: ["drawstring", "drawcord", "raiscia", "virvute"],
   zip: ["zip", "zipper", "zipped", "uztrauktukas", "uztrauktuku"],
-  closure: ["closure", "fastening", "fastener", "[removed]", "[removed]", "[removed]", "[removed]"],
+  closure: ["closure", "fastening", "fastener"],
   pocket: ["pocket", "pockets", "kisene", "kisenes", "kiseniu"],
   pleated: ["pleat", "pleats", "pleated", "klostes", "klostuotas"],
   laceup: ["lace", "laces", "laced", "lacing", "raisteliai", "sunerti"],
@@ -233,7 +233,7 @@ const LEXICON: Record<string, string[]> = {
   soft: ["soft", "soft-looking", "brushed", "plush", "minkstas", "minksta"],
 
   // Colours and colour families
-  black: ["black", "juoda", "juodas", "juodi", "juodos", "juoduma", "[removed]", "[removed]", "[removed]", "[removed]", "[removed]", "[removed]", "[removed]", "[removed]"],
+  black: ["black", "juoda", "juodas", "juodi", "juodos", "juoduma"],
   white: ["white", "ivory", "cream", "balta", "baltas", "balti", "baltos"],
   grey: ["grey", "gray", "charcoal", "pilka", "pilkas", "pilki"],
   blue: ["blue", "navy", "melyna", "melynas", "melyni", "melynos"],
@@ -483,14 +483,13 @@ const STOPWORDS = new Set([
   "reikia", "ieskau", "rodyk", "labai", "kad", "kuris", "kuri", "apie", "yra", "buti", "tai",
   "koks", "kokia", "kokie", "gerai", "geras", "gera", "prie", "per", "pas", "nes", "bet", "ar",
   "not", "without", "no", "rather", "than", "actually", "quite", "over", "now", "ne",
-  "[removed]", "[removed]", "[removed]", "[removed]", "[removed]", "[removed]", "[removed]", "[removed]", "[removed]", "[removed]", "[removed]",
 ]);
 
 const PRICE_RANGE_PATTERNS = [
-  /\b(?:between|from|nuo|[removed])\s*(\d+(?:[.,]\d+)?)\s*(?:to|and|iki|[removed]|-)\s*(\d+(?:[.,]\d+)?)(?:\s*(?:euros?|eur|euro|[removed]))?/,
-  /\b(\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)(?:\s*(?:euros?|eur|euro|[removed]))?/,
+  /\b(?:between|from|nuo)\s*(\d+(?:[.,]\d+)?)\s*(?:to|and|iki|-)\s*(\d+(?:[.,]\d+)?)(?:\s*(?:euros?|eur|euro))?/,
+  /\b(\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)(?:\s*(?:euros?|eur|euro))?/,
 ] as const;
-const PRICE_PATTERN = /\b(?:under|below|less than|up to|no more than|at|iki|pigiau nei|maziau nei|[removed])\s*(\d+(?:[.,]\d+)?)(?:\s*(?:euros?|eur|euro|[removed]))?(?:\s+or\s+less)?/;
+const PRICE_PATTERN = /\b(?:under|below|less than|up to|no more than|at|iki|pigiau nei|maziau nei)\s*(\d+(?:[.,]\d+)?)(?:\s*(?:euros?|eur|euro))?(?:\s+or\s+less)?/;
 
 /** Field weights when building a product's own term vector. */
 const FIELD_WEIGHTS = {

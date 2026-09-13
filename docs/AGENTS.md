@@ -15,12 +15,12 @@ Planning, strategy, and pre-affiliate-application reference material for Weft �
 | `no_design_wireframes.md` | Functional page-structure skeleton (global shell, nav, footer) for affiliate review and implementation, deliberately excluding visual design. |
 | `clickout_tracking_spec.md` | Spec for the `/out/:productId[?variant=&search_event_id=]` clickout route: first-party click IDs, no IP storage, no on-site checkout, no redirects without affiliate approval. |
 | `feed_import_spec.md` | Spec for importing only approved affiliate/partner feeds (never scraping); first-wave feed targets table; idempotent-import and audit-trail principles. |
-| `data_workflow.md` | End-to-end data workflow: affiliate approval → feed import → search/product cards → outbound clicks → analytics → scaling. Cross-references `sql/001_pre_affiliate_schema.sql` and both `data/*.csv` files. |
-| `data_workflow.md` | English version of `data_workflow.md` (same scope, includes reconciliation/scaling-to-100k-users/day notes). |
+| `data_workflow.md` | End-to-end data workflow: affiliate approval → feed import → search/product cards → outbound clicks → analytics, reconciliation, and scaling to 100k users/day. Cross-references `sql/001_pre_affiliate_schema.sql` and both `data/*.csv` files. |
+| `data_workflow.html` | Standalone English HTML rendering of the extended data workflow. |
 | `pre_affiliate_application_pack.md` | Copy-ready positioning statements and reviewer-facing application answers for affiliate network applications, with `[PROJECT_NAME]`/`[DOMAIN]`/`[CONTACT_EMAIL]`/`[OWNER_NAME_OR_COMPANY]` placeholders (current working value: `Weft`). |
-| `affiliate_application_readiness.md` | English. Phase-1B checklist of what an affiliate-network reviewer needs to see (review-mode labeling, synthetic-catalog disclosure, Factcool LT blocked status, etc). |
-| `lyst_reference_strategy.md` | English. Positions Lyst as a product/business-model reference ("under the hood: Lyst; in feel: Zara + Pinterest + SSENSE/Farfetch") without being the visual reference. |
-| `glami_affiliate_provider_discovery.md` | English. Notes on using GLAMI LT as a store-discovery source (not a direct affiliate-network source), with a discovery pipeline: GLAMI → Awin/VIVnetworks/FlexOffers → apply → feed → import. |
+| `affiliate_application_readiness.md` | Phase-1B checklist of what an affiliate-network reviewer needs to see (review-mode labeling, synthetic-catalog disclosure, Factcool LT blocked status, etc). |
+| `lyst_reference_strategy.md` | Positions Lyst as a product/business-model reference ("under the hood: Lyst; in feel: Zara + Pinterest + SSENSE/Farfetch") without making it the visual reference. |
+| `glami_affiliate_provider_discovery.md` | Notes on using GLAMI LT as a store-discovery source (not a direct affiliate-network source), with a discovery pipeline: GLAMI → Awin/VIVnetworks/FlexOffers → apply → feed → import. |
 | `frontend_design_references.md` | Frontend/design references (e.g. Motion for React animation) evaluated against the current stack (plain CSS + lucide-react, no Tailwind/shadcn yet) — candidate tools, not committed dependencies. |
 | `service_connections.md` | Tracks external service/MCP access for Codex/OMX bootstrap work (Supabase, Vercel, PostHog, Sentry, Cloudflare configuration state). Operational/infra notes, not product docs. |
 | `demo-product-imagery.md` | Spec for the synthetic demo product imagery: expected filenames (`product-01.webp`…`product-64.webp` + `-tryon` variants), 4:5 portrait aspect ratio, non-branded/original-artwork requirement, graceful placeholder fallback behavior. |
@@ -31,7 +31,7 @@ Planning, strategy, and pre-affiliate-application reference material for Weft �
 
 ### Working In This Directory
 
-- Treat everything here as **planning/reference material for a not-yet-live affiliate business**, written mostly in 2026-05 through 2026-07-29. Several documents (marked `` suffix) are in English and mirror an English counterpart at a similar scope (e.g. `data_workflow.md` / `data_workflow.md`) — check both if updating workflow logic, since they can drift out of sync with each other and with `data_workflow.html` referenced inside one of them.
+- Treat everything here as **planning/reference material for a not-yet-live affiliate business**, written mostly in 2026-05 through 2026-07-29. The workflow material is maintained in English in `data_workflow.md` and its standalone `data_workflow.html` rendering; keep them aligned when updating workflow logic.
 - Do not treat store/commission/status data quoted inside these `.md` files as current — always cross-check against `data/store_tracker.csv`, which is the live-updated version of the same information.
 - Do not treat legal-copy templates referenced from `pre_affiliate_application_pack.md` or `artifact_index.md` as what actually ships — the live legal pages (`app/privacy`, `app/terms`, etc.) pull their copy from `lib/i18n.ts`, not from these docs (see `docs/legal/AGENTS.md` for the verified detail).
 - If asked to update product behavior/specs, prefer editing `DESIGN.md`/`README.md`/`CLAUDE.md` at the repo root and the actual code; only touch these planning docs when the task is explicitly about affiliate-application strategy, data workflow planning, or historical record-keeping.

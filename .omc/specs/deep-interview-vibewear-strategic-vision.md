@@ -70,8 +70,8 @@ sets the actual order of operations and the *why* behind it.
     external lawyer, and not something left open until it's urgent.
   - **Timing:** must be in place before the first live affiliate link goes
     out.
-- **Data feed format from a real brand:** unknown today ("[removed] [removed], [removed] [removed]
-  [removed] [removed] [removed] [removed] [removed]") — genuinely can't be known until a brand
+- **Data feed format from a real brand:** unknown today ("this needs research; I
+  have no idea how they provide it") — genuinely can't be known until a brand
   actually agrees. **Resolution:** the assistant researches typical
   affiliate-feed formats (CSV/XML/API patterns from networks like
   Admitad/CJ, and common direct-brand handoff shapes) ahead of time so the DB
@@ -97,14 +97,14 @@ sets the actual order of operations and the *why* behind it.
 answer of "visual/UX first" — confirmed explicitly by the user as an
 intentional revision, not a misread question):**
 
-1. **Name / rebrand** — "VIBEWEAR" is confirmed **not** final ("[removed] [removed]
-   [removed], [removed] [removed] [removed] [removed]"). Process: the assistant proposes
+1. **Name / rebrand** — "VIBEWEAR" is confirmed **not** final ("it will
+   definitely be changed; there are already far too many names like that"). Process: the assistant proposes
    candidate names (accounting for project identity, domain/social-handle
    availability); the user picks. This blocks the visual work below, because
    colors/video built now would partially need redoing under a new brand.
 2. **Semantic visual search + cross-store price/size comparison** — the
    actual headline differentiators, verified not yet built. Explicitly ranked
-   above visual polish: "[removed] [removed] [removed]."
+   above visual polish: "this is more important than the visuals."
 3. **Visual / branding execution** — light canvas from Variant B, dark canvas
    from Variant A, a replacement for the disliked acid-lime accent, hero
    video. (See §5 for full detail — unchanged in substance, just reordered to
@@ -136,7 +136,7 @@ artifact):**
   affiliate feed exists, specifically flexible enough to absorb an unknown
   future format (see §2 feed-format research task).
 - **Semantic search / product-matching implementation approach:** fully
-  delegated — "[removed] [removed] [removed]." No existing technical preference for
+  delegated — "propose the best approach." No existing technical preference for
   embeddings/vector DB/LLM-tagging.
 - **Quality bar for semantic search before shipping:** a concrete pass/fail
   threshold, not a subjective gut-check (unlike the visual work). Process:
@@ -170,7 +170,7 @@ artifact):**
   - Target merged direction: light = Variant B canvas tokens, dark = Variant
     A canvas tokens, accent = neither current acid-lime, **plus** a hero
     video (user has source material ready, needs assembly — timeline
-    explicitly left dependent on "[removed] [removed] [removed] [removed]", i.e. AI-polish
+    explicitly left dependent on "how the AI puts it together," i.e. AI-polish
     quality, accepted as open).
 
 ---

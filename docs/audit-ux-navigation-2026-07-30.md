@@ -11,7 +11,7 @@
 Scope: this document addresses only the UX/Navigation facet of the Site Audit
 and Recommendations effort (PRD story US-005). It is a written audit only —
 no navigation restructure or other source code was changed to produce it.
-The interview's stated concern was specifically **"[removed] [removed] [removed]/[removed]"**
+The interview's stated concern was specifically **"the navigation/structure is unclear"**
 (navigation/structure is not clear to users), so every issue below is judged
 against that concern, not a generic UX pass.
 
