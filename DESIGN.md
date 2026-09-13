@@ -22,6 +22,8 @@ Weft helps people find clothing across stores. Fashion-led, sparse, confident, w
 
 ## Product goals
 
+Owner-selected discovery priorities, 13 September 2026: reduce repeated shopping across stores (SHOP-01), help express an intended look without knowing product terminology (SHOP-02), narrow excessive choice to relevant pieces (SHOP-03), make comparable costs understandable (SHOP-04), and expose whether the required variant/destination is actually available (SHOP-07). Preserve these original IDs; they are selected problems, not a frequency ranking or approval to implement specific features. The Russian record, evidence/inference boundaries and all ten single-site UX concerns are in [Shopping pain points](docs/design/shopping-pain-points-ru.md). Validate with the target audience; live availability, prices, shipping and returns require approved data, and the synthetic-demo boundary remains in force.
+
 Understand clothing discovery immediately; submit a natural-language query above the fold; refine without losing the query; evaluate actual catalog attributes; save a piece and return to the same results. Preserve existing AI-assisted search and deterministic fallback. Do not promise exact recommendations, live stock, checkout or an AI fitting result.
 
 ## Personas and jobs
