@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import traceback
 from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
@@ -101,13 +102,10 @@ def seed_locale(context: BrowserContext, locale: str, page: Page | None = None) 
 SEARCH_LINK = '.desktop-nav a[href^="/search"]'
 MOBILE_SEARCH_LINK = '.mobile-menu nav a[href^="/search"]'
 
-# Breakpoints from app/globals.css. The header serves the same links from two
-# different places depending on width, so which one is clickable is decided by
-# the viewport, not by probing — `is_visible()` is an instantaneous check and
-# returns False while the header is still painting, which would send a desktop
-# run down the mobile path.
-DESKTOP_NAV_MIN_WIDTH = 1181  # .desktop-nav is display:none at <= 1180px
-LANGUAGE_SWITCHER_MIN_WIDTH = 641  # .language-switcher is display:none at <= 640px
+# Breakpoint from app/globals.css. Below it we deliberately exercise the
+# duplicate mobile-menu controls even though the compact header also keeps its
+# language switcher visible.
+LANGUAGE_SWITCHER_MIN_WIDTH = 768
 
 
 def open_mobile_menu(page: Page) -> None:
@@ -125,9 +123,8 @@ def click_search(page: Page) -> None:
     with `/search`, so `.first` picks the leading department entry — any of them
     lands on `/search` and satisfies the locale assertions.
     """
-    if page.viewport_size["width"] >= DESKTOP_NAV_MIN_WIDTH:
-        link = page.locator(SEARCH_LINK).first
-        link.wait_for(state="visible")
+    link = page.locator(SEARCH_LINK).first
+    if link.is_visible():
         link.click()
         return
     open_mobile_menu(page)
@@ -374,8 +371,57 @@ def run_search_matrix(browser) -> int:
     assert current.get("lang") == ["lt"]
     assertions += 5
 
-    page.locator("#catalog-query").fill("sneaker")
-    page.locator("#catalog-query").press("Enter")
+    # On phones filters are committed through a native modal dialog. Cancelling must
+    # discard its draft and restore focus; applying must preserve locale and
+    # publish the complete state to the URL.
+    page.set_viewport_size({"width": 390, "height": 844})
+    filter_trigger = page.locator(".catalog-toolbar .filter-toggle")
+    filter_trigger.click()
+    filter_dialog = page.locator(".filter-dialog")
+    filter_dialog.wait_for(state="visible")
+    category_group = filter_dialog.locator('.filter-group:has(input[type="radio"][name="category"])')
+    category_group.locator(":scope > summary").click()
+    category = category_group.locator('input[type="radio"][name="category"][value="outerwear"]')
+    category.locator("xpath=ancestor::label").click()
+    assert category.is_checked()
+    filter_dialog.locator('input[name="minPrice"]').fill("50")
+    filter_dialog.locator('input[name="maxPrice"]').fill("200")
+    filter_dialog.locator(".filter-dialog-actions .secondary").click()
+    page.wait_for_function("() => !document.querySelector('.filter-dialog').open")
+    assert page.evaluate(
+        "() => document.activeElement === document.querySelector('.catalog-toolbar .filter-toggle')"
+    )
+    current = parse_qs(urlparse(page.url).query)
+    assert current.get("category") == ["shoes"]
+    assert "minPrice" not in current and "maxPrice" not in current
+    assertions += 5
+
+    filter_trigger.click()
+    filter_dialog.wait_for(state="visible")
+    category_group = filter_dialog.locator('.filter-group:has(input[type="radio"][name="category"])')
+    if not category_group.locator('input[value="outerwear"]').is_visible():
+        category_group.locator(":scope > summary").click()
+    category = category_group.locator('input[type="radio"][name="category"][value="outerwear"]')
+    category.locator("xpath=ancestor::label").click()
+    assert category.is_checked()
+    filter_dialog.locator('input[name="minPrice"]').fill("50")
+    filter_dialog.locator('input[name="maxPrice"]').fill("200")
+    filter_dialog.locator(".filter-dialog-actions .button:not(.secondary)").click()
+    page.wait_for_function(
+        """() => {
+          const query = new URL(location.href).searchParams;
+          return query.get('category') === 'outerwear'
+            && query.get('minPrice') === '50'
+            && query.get('maxPrice') === '200'
+            && query.get('lang') === 'lt';
+        }"""
+    )
+    assert_locale(page, context, "lt")
+    assertions += 5
+
+    catalog_query = page.locator('.catalog-form input[name="query"]')
+    catalog_query.fill("sneaker")
+    catalog_query.press("Enter")
     page.wait_for_function(
         """() => {
           const query = new URL(location.href).searchParams;
@@ -415,6 +461,93 @@ def run_search_matrix(browser) -> int:
     assert "/preview/" not in page.url
     assert_locale(page, context, "lt")
     assertions += 4
+
+    context.close()
+    return assertions
+
+
+def run_saved_collection_matrix(browser) -> int:
+    context = browser.new_context(viewport={"width": 1440, "height": 1000})
+    page = context.new_page()
+    assertions = 0
+
+    page.goto(f"{BASE_URL}/search?query=black&lang=lt", wait_until="domcontentloaded")
+    assert_locale(page, context, "lt")
+    product = page.locator(".product-tile").first
+    title = product.locator(".product-title").inner_text().strip()
+    save = product.locator(".wishlist-button")
+    page.wait_for_function(
+        "button => button.getAttribute('aria-pressed') === 'false'",
+        arg=save.element_handle(),
+    )
+    save.click()
+    assert save.get_attribute("aria-pressed") == "true"
+    page.wait_for_timeout(350)  # recent-search recorder is intentionally debounced
+
+    page.locator('.account-link[href^="/account"]').click()
+    page.wait_for_function("() => location.pathname === '/account'")
+    assert_locale(page, context, "lt")
+    saved_product = page.locator(".saved-product", has_text=title)
+    saved_product.wait_for(state="visible")
+    assert saved_product.locator('.saved-product-copy a[href^="/out/"]').count() == 1
+    recent = page.locator('.recent-search-list a[href*="query=black"]')
+    recent.wait_for(state="visible")
+    assert parse_qs(urlparse(recent.get_attribute("href")).query).get("lang") == ["lt"]
+    assertions += 8
+
+    # The collection persists across navigation and removing it updates every
+    # mounted saved-item control through the shared browser store.
+    page.reload(wait_until="domcontentloaded")
+    assert_locale(page, context, "lt")
+    saved_product = page.locator(".saved-product", has_text=title)
+    saved_product.wait_for(state="visible")
+    remove = saved_product.locator(".wishlist-button")
+    assert remove.get_attribute("aria-pressed") == "true"
+    remove.click()
+    page.locator(".account-empty").wait_for(state="visible")
+    assert page.locator(".saved-product").count() == 0
+    assertions += 5
+
+    context.close()
+    return assertions
+
+
+def run_no_script_matrix(browser) -> int:
+    """Prove the core search and filter forms still work without hydration."""
+
+    context = browser.new_context(
+        viewport={"width": 1440, "height": 1000},
+        java_script_enabled=False,
+    )
+    page = context.new_page()
+    assertions = 0
+
+    response = page.goto(f"{BASE_URL}/?lang=lt", wait_until="domcontentloaded")
+    assert response and response.status == 200
+    assert page.locator("html").get_attribute("lang") == "lt"
+    page.locator('.header-search input[name="query"]').fill("juodas paltas")
+    page.locator('.header-search button[type="submit"]').click()
+    current = parse_qs(urlparse(page.url).query)
+    assert urlparse(page.url).path == "/search"
+    assert current.get("query") == ["juodas paltas"]
+    assert current.get("lang") == ["lt"]
+    assertions += 5
+
+    fallback = page.locator(".filter-panel form")
+    category_group = fallback.locator('.filter-group:has(input[type="radio"][name="category"])')
+    category_group.locator(":scope > summary").click()
+    category = category_group.locator('input[type="radio"][name="category"][value="outerwear"]')
+    category.locator("xpath=ancestor::label").click()
+    assert category.is_checked()
+    fallback.locator('input[name="minPrice"]').fill("50")
+    fallback.locator('button[type="submit"]').click()
+    current = parse_qs(urlparse(page.url).query)
+    assert current.get("query") == ["juodas paltas"]
+    assert current.get("category") == ["outerwear"]
+    assert current.get("minPrice") == ["50"]
+    assert current.get("lang") == ["lt"]
+    assert page.locator("html").get_attribute("lang") == "lt"
+    assertions += 5
 
     context.close()
     return assertions
@@ -461,7 +594,7 @@ def run_history_and_stress_matrix(browser) -> int:
         for selector, path in (
             (SEARCH_LINK, "/search"),
             ('.desktop-nav a[href^="/stores"]', "/stores"),
-            ('.desktop-nav a[href^="/ai-fitting-room"]', "/ai-fitting-room"),
+            ('.footer-links a[href^="/ai-fitting-room"]', "/ai-fitting-room"),
             (".brand", "/"),
         ):
             page.locator(selector).first.click()
@@ -494,7 +627,7 @@ def run_atomic_switch_matrix(browser) -> int:
             page.evaluate(
                 """() => {
                   document.querySelector('.language-switcher a:last-child').click();
-                  document.querySelector('.title-page-cta').click();
+                  document.querySelector('.campaign-cta').click();
                 }"""
             )
             page.wait_for_function(
@@ -520,7 +653,7 @@ def run_atomic_switch_matrix(browser) -> int:
             page.evaluate(
                 """() => {
                   document.querySelector('.language-switcher a:first-child').click();
-                  document.querySelector('.title-page-cta').click();
+                  document.querySelector('.campaign-cta').click();
                 }"""
             )
             page.wait_for_function(
@@ -577,6 +710,8 @@ def main() -> None:
         switch_assertions = run_switch_matrix(browser)
         link_assertions, clicked_links = run_internal_link_matrix(browser)
         search_assertions = run_search_matrix(browser)
+        saved_collection_assertions = run_saved_collection_matrix(browser)
+        no_script_assertions = run_no_script_matrix(browser)
         history_assertions = run_history_and_stress_matrix(browser)
         atomic_switch_assertions = run_atomic_switch_matrix(browser)
         browser.close()
@@ -595,6 +730,8 @@ def main() -> None:
             "language_switch_matrix": switch_assertions,
             "internal_link_matrix": link_assertions,
             "search_filter_matrix": search_assertions,
+            "saved_collection_matrix": saved_collection_assertions,
+            "no_script_search_matrix": no_script_assertions,
             "history_and_stress_matrix": history_assertions,
             "zero_delay_atomic_switch_matrix": atomic_switch_assertions,
         },
@@ -603,6 +740,8 @@ def main() -> None:
             "known_out_route": "public path retained",
             "unknown_out_route": "404 and public path retained",
             "search_filters": "preserved across EN/LT switches",
+            "saved_collection": "browser-local save, reload, recent search, and remove",
+            "progressive_enhancement": "search and filters submit without JavaScript",
             "history": "locale restored across back/forward",
         },
     }
@@ -615,4 +754,21 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as error:
+        REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+        REPORT_PATH.write_text(
+            json.dumps(
+                {
+                    "status": "failed",
+                    "base_url": BASE_URL,
+                    "error": str(error),
+                    "traceback": traceback.format_exc(),
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        raise

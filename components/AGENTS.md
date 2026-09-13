@@ -3,6 +3,16 @@
 
 # components
 
+## Current frontend contract — 2026-09-12
+
+Responsive correction: the216px panel below is the1440px reference measurement, not a universal fixed size. Shared and scoped styles use rem with the root display scale; `search-controls` uses matching em media queries and a12.625rem minimum desktop tile width. Preserve browser zoom/font preferences and the3/4/5 view preference across responsive changes. See DESIGN responsive behavior and `.omx/artifacts/frontend/responsive-display-final/`.
+
+Catalog-control correction: no native select boxes/popups in catalog filters, sorting or density. Filter accordions expose named radio rows directly, with one visible heading. `option-picker` shares restrained details/summary disclosures between sort and density; sorting options are real named submit buttons. `search-form` must include the actual SubmitEvent submitter in FormData and still stamp synchronous locale intent. Keep keyboard/focus dismissal, no-JS GET, draft Apply/Cancel/Reset and disabled/persistent density behavior. Evidence: `.omx/artifacts/frontend/catalog-controls-final/`.
+
+Category-navigation correction: the global header says Catalog/Katalogas; the category row no longer repeats All clothing above its H1. Every category link preserves query and other filters, changes only category and resets page. Jeans uses `category=jeans`, shared with sidebar/active chips, never `query=denim`. Do not reintroduce generated search text or the special-case deletion of a literal denim query.
+
+The generated inventory below predates the redesign. `DESIGN.md` and actual code are authoritative: `search-form`/`search-input` replace mascot search; `search-controls` wraps server-rendered catalog children with a13.5rem desktop filter panel, mobile dialog and quiet persistent3/4/5 density disclosure. `category-nav` uses supported public query/category URLs. Header search floats over the home campaign; `theme-toggle` is secondary in footer/mobile menu. `locale-provider` supplies synchronous language intent and server-initialized locale. `product-image` and `lib/public-product.ts` retain resilient imagery and explicit client DTOs. Product metadata is minimal, price/store share a row; images alternate available source/styled photographs without reranking data. Account shows browser-local saved products/recent queries, not profile or alert forms. The existing approximate mannequin stays local, not AI generation. Native dialogs contain/restore focus. Do not restore obsolete components or promises below.
+
 ## Purpose
 Shared, route-agnostic React components for the Weft demo storefront: page chrome (header/footer), the product results grid, informational-page scaffolding, an account preferences panel, a browser-only "AI fitting room" mockup, a cinematic homepage hero, a decorative loading mascot with global search-transition state, and two fire-and-forget analytics beacon components. All are demo-safe — no real retailer data, no checkout, no external redirects — and all EN/LT copy is sourced from `lib/i18n.ts` rather than hardcoded ad hoc, with the exception of a handful of components that inline bilingual ternaries (`locale === "lt" ? … : …`) directly rather than going through the `copy` object.
 

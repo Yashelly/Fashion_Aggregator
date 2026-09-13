@@ -129,6 +129,19 @@ export function getStoreOptions(
     }));
 }
 
+function matchesCategory(product: MockProduct, category: string) {
+  // Jeans is a garment facet, not the broader denim material or a search term.
+  return category === "jeans"
+    ? product.category === "bottoms" && product.subcategory === "jeans"
+    : product.category === category;
+}
+
+export function getCategoryOptions(products: MockProduct[]) {
+  const categories = new Set(products.map((product) => product.category).filter(Boolean));
+  if (products.some((product) => matchesCategory(product, "jeans"))) categories.add("jeans");
+  return [...categories].sort();
+}
+
 export function hasDemoProductImage(imagePath: string): boolean {
   if (!/^\/demo-products\/product-\d+(?:-tryon)?\.(?:png|webp)$/.test(imagePath)) return false;
   return fs.existsSync(path.join(demoProductDirectory, path.basename(imagePath)));
@@ -163,7 +176,7 @@ export function filterProducts(
   const saleOnly = params.sale === "on" || status === "sale";
 
   return filterProductsByPublicDemoStore(products, params.store).filter((product) => {
-    if (params.category && product.category !== params.category) return false;
+    if (params.category && !matchesCategory(product, params.category)) return false;
     if (params.color && product.color !== params.color) return false;
     if (saleOnly && !product.old_price_eur) return false;
     if (availability && product.availability !== availability) return false;

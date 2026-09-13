@@ -1,12 +1,13 @@
 import { ArrowRight, ShoppingBag } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import { ProductImage } from "@/components/product-image";
 import { getCatalogProducts } from "@/lib/catalog";
 import {
   getPublicDemoStoreLabel,
   getPublicDemoStores,
 } from "@/lib/demo-stores";
 import { getCopy, getLocale, type SearchParamsInput, withLocale } from "@/lib/i18n";
+import { getSecondaryCopy } from "@/lib/secondary-copy";
 
 type StoresPageProps = {
   searchParams: Promise<SearchParamsInput>;
@@ -15,6 +16,7 @@ type StoresPageProps = {
 export default async function StoresPage({ searchParams }: StoresPageProps) {
   const locale = getLocale(await searchParams);
   const copy = getCopy(locale).pages.stores;
+  const secondaryCopy = getSecondaryCopy(locale).stores;
   const products = await getCatalogProducts();
   const stores = getPublicDemoStores();
 
@@ -49,24 +51,16 @@ export default async function StoresPage({ searchParams }: StoresPageProps) {
               key={store.id}
             >
               <div className="demo-store-copy">
-                {/* The brand used to lead this line, which printed it once per
-                    store card. The eyebrow's job is to say the selection is
-                    curated, not to say whose site you are on. */}
-                <p className="store-eyebrow">{locale === "lt" ? "ATRANKA" : "THE EDIT"}</p>
                 <h2>{storeLabel}</h2>
                 <p>{copy.fallbackDescription}</p>
-                <span>
-                  {locale === "lt"
-                    ? `${storeProducts.length} prekių · ${categoryCount} kategorijos`
-                    : `${storeProducts.length} products · ${categoryCount} categories`}
-                </span>
+                <span>{secondaryCopy.summary(storeProducts.length, categoryCount)}</span>
                 <ArrowRight aria-hidden="true" className="demo-store-arrow" size={22} />
               </div>
               {collage.length > 0 ? (
                 <div className="demo-store-collage" aria-hidden="true">
                   {collage.map((product) => (
                     <span className="demo-store-thumb" key={product.mock_product_id}>
-                      <Image alt="" fill sizes="180px" src={product.image_path} />
+                      <ProductImage alt="" sizes="(max-width: 43.75em) 34vw, (min-width: 2560px) 427px, 17vw" src={product.image_path} unavailableLabel={secondaryCopy.imageUnavailable} />
                     </span>
                   ))}
                 </div>

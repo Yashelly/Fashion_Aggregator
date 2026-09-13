@@ -3,6 +3,10 @@
 
 # public
 
+## Approved homepage assets — 2026-09-13
+
+`hero-assets/weft-street-desktop-{1280,1920,2508}.webp` and `weft-street-mobile-{640,960,1128}.webp` are the owner-approved synthetic street campaign, rendered by the native picture in `app/page.tsx`. The phone crop is4:5 with both full figures. `scripts/prepare-home-hero.cjs --source <approved-master>` reproduces these delivery assets from the2508×1412 refined Gemini master without generative processing. The inventory below is historical; these six files are now referenced by the homepage. Do not ship the large private master or old generation candidates just because they are locally present.
+
 ## Purpose
 
 Static assets served by Next.js from the site root. Two large asset dumps live here: the synthetic demo-product photography (`demo-products/`) that backs the entire product catalog, and hero/keyframe imagery (`hero-assets/`) for landing-page visuals. Per repo policy (`docs/demo-product-imagery.md`), all imagery must be original/synthetic and non-branded — no real retailer photography, logos, or trademarks.
