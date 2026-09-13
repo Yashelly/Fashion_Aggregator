@@ -2,27 +2,23 @@
 
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { getLocale, withLocale } from "@/lib/i18n";
+import { withLocale } from "@/lib/i18n";
+import { useClientLocale } from "@/lib/use-client-locale";
+import { getSecondaryCopy } from "@/lib/secondary-copy";
 
-export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-  const params = useSearchParams();
-  const lang = params.get("lang");
-  const locale = lang
-    ? getLocale({ lang })
-    : typeof document !== "undefined" && document.documentElement.lang === "lt"
-      ? "lt"
-      : "en";
+export default function ErrorPage({ error }: { error: Error & { digest?: string } }) {
+  const locale = useClientLocale();
+  const copy = getSecondaryCopy(locale).state;
   useEffect(() => { console.error(error); }, [error]);
   return (
-    <div className="route-shell state-page" role="alert">
+    <div aria-labelledby="error-title" className="route-shell state-page">
       <AlertTriangle aria-hidden="true" size={32} />
-      <h1>{locale === "lt" ? "Pametėme giją." : "We lost the thread."}</h1>
-      <p>{locale === "lt" ? "Katalogo nepavyko įkelti. Pirkimas ar veiksmas parduotuvėje nebuvo pradėtas." : "The catalog could not be loaded. No purchase or retailer action was started."}</p>
+      <h1 id="error-title">{copy.errorTitle}</h1>
+      <p role="alert">{copy.errorLead}</p>
       <div className="state-actions">
-        <button className="button" onClick={reset} type="button"><RotateCcw aria-hidden="true" size={18} />{locale === "lt" ? "Bandyti dar kartą" : "Try again"}</button>
-        <Link className="button secondary" href={withLocale("/", locale)}>{locale === "lt" ? "Grįžti į pradžią" : "Return home"}</Link>
+        <button className="button" onClick={() => window.location.reload()} type="button"><RotateCcw aria-hidden="true" size={18} />{copy.retry}</button>
+        <Link className="button secondary" href={withLocale("/", locale)}>{copy.home}</Link>
       </div>
     </div>
   );

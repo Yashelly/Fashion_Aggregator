@@ -1,12 +1,10 @@
 "use client";
 
-import { RefreshCcw, Rotate3D } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCcw, Rotate3D } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
-import { FontLoader, type Font } from "three/examples/jsm/loaders/FontLoader.js";
-import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 
 type Measurements = {
   height: number;
@@ -274,7 +272,7 @@ function buildAvatar(
   });
   const shell = category === "outerwear" ? d.height * 0.012 : d.height * 0.007;
 
-  if (category === "tops" || category === "outerwear") {
+  if (category === "tops" || category === "knitwear" || category === "outerwear") {
     const hemY = category === "outerwear"
       ? d.crotchY + d.pelvisHeight * 0.18
       : d.pelvisCenterY;
@@ -373,34 +371,6 @@ function buildAvatar(
   return { group, height: d.height };
 }
 
-// The 3D "SOON" wordmark shown in the stage in place of the mannequin. Extruded,
-// bevelled, and given a slightly metallic material so the studio env map catches
-// the edges. Centred at the origin, then lifted so it floats above the shadow
-// floor with a soft contact shadow beneath it.
-function buildSoonText(font: Font, color: string) {
-  const group = new THREE.Group();
-  const geometry = new TextGeometry("SOON", {
-    font,
-    size: 0.52,
-    depth: 0.18,
-    curveSegments: 10,
-    bevelEnabled: true,
-    bevelThickness: 0.022,
-    bevelSize: 0.015,
-    bevelSegments: 4,
-  });
-  geometry.center();
-  const material = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.28 });
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  mesh.position.y = 1.0;
-  group.add(mesh);
-  // A framing height that lets setCameraView pull back enough to hold the full
-  // four-letter word without clipping.
-  return { group, height: 2.1 };
-}
-
 function setCameraView(camera: THREE.PerspectiveCamera, controls: OrbitControls, height: number) {
   controls.target.set(0, height * 0.5, 0);
   camera.position.set(height * 0.82, height * 0.58, height * 1.85);
@@ -438,7 +408,7 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container || webglError) return;
 
     // Constructing the renderer is the one step that can throw on a device
     // without a usable WebGL context. Catch it here and fall back rather than
@@ -488,7 +458,8 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
     // MeshStandardMaterial gentle reflections and ambient occlusion-like falloff,
     // the single biggest jump from "grey primitives" to "lit studio".
     const pmrem = new THREE.PMREMGenerator(renderer);
-    const environmentTexture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    const roomEnvironment = new RoomEnvironment();
+    const environmentTexture = pmrem.fromScene(roomEnvironment, 0.04).texture;
     scene.environment = environmentTexture;
 
     // A soft three-point rig on top of the env: a warm key with a wide soft
@@ -561,6 +532,7 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
       disposeObject(studio);
       scene.environment = null;
       environmentTexture.dispose();
+      roomEnvironment.dispose();
       pmrem.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
@@ -569,56 +541,55 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
       cameraRef.current = null;
       controlsRef.current = null;
     };
-  }, [retryKey]);
+  }, [retryKey, webglError]);
 
   useEffect(() => {
     const scene = sceneRef.current;
-    if (!scene) return;
+    if (!scene || webglError) return;
 
-    let group: THREE.Group | null = null;
-    let cancelled = false;
-    const accent =
-      getComputedStyle(containerRef.current ?? document.body)
-        .getPropertyValue("--color-accent")
-        .trim() || "#b7410e";
+    const built = buildAvatar(measurements, garment, skinColor, garmentColor);
+    const group = built.group;
+    modelHeightRef.current = built.height;
+    modelRef.current = group;
+    scene.add(group);
 
-    new FontLoader().load("/fonts/helvetiker_bold.typeface.json", (font) => {
-      const activeScene = sceneRef.current;
-      if (cancelled || !activeScene) return;
-      const built = buildSoonText(font, accent);
-      group = built.group;
-      modelHeightRef.current = built.height;
-      modelRef.current = group;
-      activeScene.add(group);
-
-      const controls = controlsRef.current;
-      const camera = cameraRef.current;
-      if (controls) {
-        controls.minDistance = built.height * 0.72;
-        controls.maxDistance = built.height * 3.5;
-      }
-      if (camera && controls) setCameraView(camera, controls, built.height);
-    });
+    const controls = controlsRef.current;
+    const camera = cameraRef.current;
+    if (controls) {
+      controls.minDistance = built.height * 0.72;
+      controls.maxDistance = built.height * 3.5;
+    }
+    if (camera && controls) setCameraView(camera, controls, built.height);
 
     return () => {
-      cancelled = true;
-      if (group) {
-        scene.remove(group);
-        disposeObject(group);
-        if (modelRef.current === group) modelRef.current = null;
-      }
+      scene.remove(group);
+      disposeObject(group);
+      if (modelRef.current === group) modelRef.current = null;
     };
-    // retryKey re-adds the text into the scene rebuilt after a context recovery.
-  }, [retryKey]);
+  }, [garment, garmentColor, measurements, retryKey, skinColor, webglError]);
 
   useEffect(() => {
-    if (controlsRef.current) controlsRef.current.autoRotate = autoRotate && !reducedMotion;
+    if (controlsRef.current) {
+      controlsRef.current.autoRotate = autoRotate && !reducedMotion;
+      controlsRef.current.enableDamping = !reducedMotion;
+    }
   }, [autoRotate, reducedMotion]);
 
   function resetView() {
     const camera = cameraRef.current;
     const controls = controlsRef.current;
     if (camera && controls) setCameraView(camera, controls, modelHeightRef.current);
+  }
+
+  function rotateView(direction: -1 | 1) {
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+    if (!camera || !controls) return;
+    const offset = camera.position.clone().sub(controls.target);
+    offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), direction * Math.PI / 8);
+    camera.position.copy(controls.target).add(offset);
+    camera.lookAt(controls.target);
+    controls.update();
   }
 
   if (webglError) {
@@ -668,12 +639,19 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
 
   return (
     <div
-      aria-label={isLt ? "3D peržiūra – netrukus" : "3D preview – coming soon"}
+      aria-label={isLt ? "Interaktyvi 3D drabužio peržiūra" : "Interactive 3D clothing preview"}
       className="avatar-stage"
-      ref={containerRef}
       role="group"
     >
       <div className="avatar-controls">
+        <button aria-label={isLt ? "Pasukti vaizdą į kairę" : "Rotate view left"} onClick={() => rotateView(-1)} type="button">
+          <ChevronLeft aria-hidden="true" size={17} />
+          {isLt ? "Kairėn" : "Left"}
+        </button>
+        <button aria-label={isLt ? "Pasukti vaizdą į dešinę" : "Rotate view right"} onClick={() => rotateView(1)} type="button">
+          <ChevronRight aria-hidden="true" size={17} />
+          {isLt ? "Dešinėn" : "Right"}
+        </button>
         <button
           aria-label={isLt ? "Perjungti automatinį sukimą" : "Toggle automatic rotation"}
           aria-pressed={autoRotate}
@@ -689,15 +667,17 @@ export function FittingRoomAvatar({ measurements, garment, garmentColor, skinCol
           {isLt ? "Atkurti vaizdą" : "Reset view"}
         </button>
       </div>
-      <p className="avatar-hint">{isLt ? "Vilkite, kad pasuktumėte · slinkite, kad priartintumėte" : "Drag to rotate · scroll to zoom"}</p>
+      <div aria-hidden="true" className="avatar-canvas" ref={containerRef} />
+      <p className="avatar-hint">{isLt ? "Vilkite arba naudokite mygtukus · slinkite, kad priartintumėte" : "Drag or use the buttons · scroll to zoom"}</p>
       <style>{avatarStyles}</style>
     </div>
   );
 }
 
 const avatarStyles = `
-.avatar-stage{position:relative;min-height:460px;width:100%;overflow:hidden;background:radial-gradient(72% 54% at 50% 30%, color-mix(in srgb, var(--color-surface) 96%, transparent) 0%, transparent 68%), linear-gradient(to bottom, var(--color-surface-soft) 0%, var(--color-surface-soft) 52%, color-mix(in srgb, var(--color-surface-soft) 80%, var(--color-ink) 20%) 100%);border:1px solid var(--color-line);isolation:isolate}.avatar-stage canvas{position:absolute;inset:0;display:block;width:100%;height:100%;z-index:0;touch-action:none}.avatar-controls{position:absolute;z-index:2;top:12px;left:12px;display:flex;flex-wrap:wrap;gap:8px}.avatar-controls button{display:flex;align-items:center;gap:7px;min-height:44px;padding:9px 12px;border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-ink);font:inherit;font-size:12px;font-weight:600;cursor:pointer}.avatar-controls button[aria-pressed="true"]{background:var(--color-ink);border-color:var(--color-ink);color:var(--color-canvas)}.avatar-controls button:disabled{opacity:.45;cursor:not-allowed}.avatar-controls button:focus-visible{outline:3px solid var(--color-accent);outline-offset:2px}.avatar-hint{position:absolute;z-index:2;left:12px;bottom:10px;margin:0;padding:7px 9px;background:var(--color-surface);color:var(--color-ink-muted);font-size:11px}
+.avatar-stage{position:relative;width:100%;overflow:hidden;background:radial-gradient(72% 54% at 50% 30%, color-mix(in srgb, var(--color-surface) 96%, transparent) 0%, transparent 68%), linear-gradient(to bottom, var(--color-surface-soft) 0%, var(--color-surface-soft) 52%, color-mix(in srgb, var(--color-surface-soft) 80%, var(--color-ink) 20%) 100%);border:1px solid var(--color-line);isolation:isolate;display:grid;gap:8px;padding:12px}.avatar-canvas{position:relative;width:100%;height:420px;overflow:hidden}.avatar-canvas canvas{position:absolute;inset:0;display:block;width:100%;height:100%;touch-action:none}.avatar-controls{display:flex;flex-wrap:wrap;gap:8px}.avatar-controls button{display:flex;align-items:center;gap:7px;min-height:44px;padding:9px 12px;border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-ink);font:inherit;font-size:12px;font-weight:600;cursor:pointer}.avatar-controls button[aria-pressed="true"]{background:var(--color-ink);border-color:var(--color-ink);color:var(--color-canvas)}.avatar-controls button:disabled{opacity:.45;cursor:not-allowed}.avatar-controls button:focus-visible{outline:3px solid var(--color-accent);outline-offset:2px}.avatar-hint{justify-self:start;margin:0;padding:7px 9px;background:var(--color-surface);color:var(--color-ink-muted);font-size:11px}
 .avatar-fallback{display:grid;place-items:center;padding:28px}.avatar-fallback-inner{max-width:340px;text-align:center}.avatar-fallback-title{font-family:var(--font-display);font-size:18px;margin:0 0 8px}.avatar-fallback-body{color:var(--color-ink-muted);font-size:13px;line-height:1.5;margin:0 0 18px}.avatar-fallback-specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 18px;text-align:left}.avatar-fallback-specs>div{border:1px solid var(--color-line);padding:8px 10px}.avatar-fallback-garment{grid-column:1/-1}.avatar-fallback-specs dt{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--color-ink-muted)}.avatar-fallback-specs dd{margin:3px 0 0;font-size:13px;font-weight:600}.avatar-fallback button{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:9px 16px;border:1px solid var(--color-ink);background:var(--color-ink);color:var(--color-canvas);font:inherit;font-size:12px;font-weight:600;cursor:pointer}.avatar-fallback button:focus-visible{outline:3px solid var(--color-accent);outline-offset:2px}
-@media(max-width:520px){.avatar-stage{min-height:380px}.avatar-controls{right:12px}.avatar-controls button{flex:1;justify-content:center}.avatar-hint{right:12px;text-align:center}}
+.avatar-fallback{min-height:460px}
+@media(max-width:520px){.avatar-canvas{height:320px}.avatar-controls button{flex:1;justify-content:center}.avatar-hint{justify-self:stretch;text-align:center}.avatar-fallback{min-height:380px}}
 @media(prefers-reduced-motion:reduce){.avatar-controls button{transition:none}}
 `;
