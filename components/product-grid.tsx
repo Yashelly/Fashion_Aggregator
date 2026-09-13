@@ -1,177 +1,42 @@
-import type { MockProduct } from "@/lib/mock-products";
-import { Footprints, ImageOff, Shirt, ShoppingBag } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import type { MockProduct } from "@/lib/mock-products";
 import { getPublicDemoStoreById, getPublicDemoStoreLabel } from "@/lib/demo-stores";
-import { summariseAvailability } from "@/lib/product-listings";
 import { WishlistButton } from "@/components/wishlist-button";
-import {
-  formatAvailabilityLabel,
-  formatCategoryLabel,
-  getCopy,
-  type Locale,
-} from "@/lib/i18n";
+import { ProductImage } from "@/components/product-image";
+import { formatAvailabilityLabel, getCopy, type Locale, withLocale } from "@/lib/i18n";
+import { formatPrice } from "@/lib/format-price";
 
-function price(amount: string, currency: string, locale: Locale) {
-  const value = Number(amount);
-  if (Number.isNaN(value)) return `${amount} ${currency}`;
-  return new Intl.NumberFormat(locale === "lt" ? "lt-LT" : "en-IE", {
-    currency,
-    style: "currency",
-  }).format(value);
-}
-
-function ProductGlyph({ category }: { category: string }) {
-  if (category === "shoes") return <Footprints aria-hidden="true" />;
-  if (category === "bags" || category === "accessories") return <ShoppingBag aria-hidden="true" />;
-  if (["tops", "outerwear", "knitwear", "sweats", "dresses"].includes(category)) return <Shirt aria-hidden="true" />;
-  return <ImageOff aria-hidden="true" />;
-}
-
-export function ProductGrid({
-  ariaLabel,
-  locale = "en",
-  products,
-}: {
-  ariaLabel?: string;
-  locale?: Locale;
-  products: MockProduct[];
+export function ProductGrid({ ariaLabel, locale = "en", products, returnTo = "/search" }: {
+  ariaLabel?: string; locale?: Locale; products: MockProduct[]; returnTo?: string;
 }) {
-  const t = getCopy(locale).productGrid;
-  const comparisonCopy = getCopy(locale).comparison;
-  const resultsLabel =
-    ariaLabel ??
-    (locale === "lt"
-      ? `Produktų rezultatai: ${products.length}`
-      : `Product results: ${products.length}`);
-
-  if (!products.length) {
-    return (
-      <section className="empty-state" role="status">
-        <div>
-          <h2>{t.noResults}</h2>
-          <p>{locale === "lt" ? "Pabandykite platesnį terminą arba pašalinkite filtrą." : "Try a broader phrase or remove a filter."}</p>
-          <Link className="button secondary" href={locale === "lt" ? "/search?lang=lt" : "/search"}>{t.clearFilters}</Link>
+  const t = getCopy(locale).frontend;
+  return <section className="product-grid" aria-label={ariaLabel ?? t.resultAria(products.length)}>
+    {products.map((product, index) => {
+      const href = withLocale(`/out/${product.mock_product_id}?returnTo=${encodeURIComponent(returnTo)}`, locale);
+      const store = getPublicDemoStoreById(product.public_store_id);
+      const storeLabel = store ? getPublicDemoStoreLabel(store, locale) : t.storeFallback;
+      const styled = index % 2 === 0 && product.detail_image_available;
+      const image = styled ? product.detail_image_path : product.image_available ? product.image_path : null;
+      return <article className={`product-tile${product.availability === "out_of_stock" ? " is-sold-out" : ""}`} key={product.mock_product_id}>
+        <div className="product-media-wrap">
+          <Link className="product-media" href={href} aria-label={`${t.viewDetails}: ${product.title}`}>
+            <ProductImage src={image} alt={styled ? getCopy(locale).productDetail.styledAlt(product.title) : product.title}
+              unavailableLabel={t.imageUnavailable} eager={index < 4} sizes="(max-width: 43.75em) 50vw, (max-width: 56.25em) 34vw, (min-width: 2560px) 854px, 34vw" />
+          </Link>
+          <WishlistButton locale={locale} label={product.title} productId={product.mock_product_id} />
         </div>
-      </section>
-    );
-  }
-
-  return (
-    <section className="product-grid" aria-label={resultsLabel}>
-      {products.map((product, index) => {
-        const unavailable = product.availability === "out_of_stock";
-        const href = `/out/${product.mock_product_id}${locale === "lt" ? "?lang=lt" : ""}`;
-        const store = getPublicDemoStoreById(product.public_store_id);
-        const storeLabel = store
-          ? getPublicDemoStoreLabel(store, locale)
-          : locale === "lt"
-            ? "Parduotuvė"
-            : "Store";
-        const categoryLabel = formatCategoryLabel(product.category, locale);
-        const multiStore = summariseAvailability(product);
-        const mediaAlt =
-          locale === "lt"
-            ? `${product.title}, ${categoryLabel}, ${storeLabel}`
-            : `${product.title}, ${categoryLabel}, ${storeLabel}`;
-        return (
-          <article className={`product-tile tone-${index % 4}${unavailable ? " is-sold-out" : ""}`} key={product.mock_product_id}>
-            <div className="product-media-wrap">
-              {unavailable ? (
-                <div
-                  aria-label={product.image_available ? undefined : mediaAlt}
-                  className={`product-media${product.image_available ? " has-image" : ""}`}
-                  role={product.image_available ? undefined : "img"}
-                >
-                  {product.image_available ? (
-                    <Image
-                      alt={mediaAlt}
-                      fill
-                      sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                      src={product.image_path}
-                    />
-                  ) : (
-                    <>
-                      <span className="demo-media-label">{locale === "lt" ? "VIETA NUOTRAUKAI" : "IMAGE PLACEHOLDER"}</span>
-                      <ProductGlyph category={product.category} />
-                      <span className="media-category">{categoryLabel}</span>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <Link className={`product-media${product.image_available ? " has-image" : ""}`} href={href} aria-label={mediaAlt}>
-                  {product.image_available ? (
-                    <>
-                      <Image
-                        alt={mediaAlt}
-                        fill
-                        sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                        src={product.image_path}
-                      />
-                      {product.detail_image_available ? (
-                        <Image
-                          alt=""
-                          aria-hidden="true"
-                          className="product-media-hover"
-                          fill
-                          sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                          src={product.detail_image_path}
-                        />
-                      ) : null}
-                    </>
-                  ) : (
-                    <>
-                      <span className="demo-media-label">{locale === "lt" ? "VIETA NUOTRAUKAI" : "IMAGE PLACEHOLDER"}</span>
-                      <span aria-hidden="true" className="product-glyph"><ProductGlyph category={product.category} /></span>
-                      <span className="media-category">{categoryLabel}</span>
-                    </>
-                  )}
-                </Link>
-              )}
-              <WishlistButton locale={locale} label={product.title} productId={product.mock_product_id} />
+        <div className="product-body">
+          <h2 className="product-title"><Link className="product-link" href={href}>{product.title}</Link></h2>
+          <div className="product-meta">
+            <Link className="product-store" href={withLocale(`/search?store=${product.public_store_id}`, locale)}>{storeLabel}</Link>
+            <div className="product-price-row">
+            <span className="price"><span className="sr-only">{t.currentPrice}: </span><data value={product.price_eur}>{formatPrice(product.price_eur, product.currency, locale)}</data></span>
+            {product.old_price_eur && Number(product.old_price_eur) > Number(product.price_eur) ? <span className="old-price"><span className="sr-only">{t.previousPrice}: </span><del>{formatPrice(product.old_price_eur, product.currency, locale)}</del></span> : null}
             </div>
-            <div className="product-body">
-              <p className="product-kicker">{categoryLabel}</p>
-              <h2 className="product-title">
-                <Link href={href}>{product.title}</Link>
-              </h2>
-              <Link
-                className="product-store"
-                href={`/search?store=${product.public_store_id}${locale === "lt" ? "&lang=lt" : ""}`}
-              >
-                {storeLabel}
-              </Link>
-              <div className="product-price-row">
-                <span className="price">
-                  <span className="sr-only">{locale === "lt" ? "Dabartinė kaina: " : "Current price: "}</span>
-                  <data value={product.price_eur}>{price(product.price_eur, product.currency, locale)}</data>
-                </span>
-                {product.old_price_eur ? (
-                  <span className="old-price">
-                    <span className="sr-only">{locale === "lt" ? "Ankstesnė kaina: " : "Previous price: "}</span>
-                    <del>{price(product.old_price_eur, product.currency, locale)}</del>
-                  </span>
-                ) : null}
-              </div>
-              {multiStore ? (
-                <p className="product-multi-store">
-                  {comparisonCopy.inStores(multiStore.storeCount)}
-                  <span aria-hidden="true"> · </span>
-                  {comparisonCopy.from}{" "}
-                  <data value={multiStore.lowestPrice}>
-                    {price(String(multiStore.lowestPrice), multiStore.currency, locale)}
-                  </data>
-                </p>
-              ) : null}
-              {product.availability !== "in_stock" ? (
-                <p className={`availability availability-${product.availability}`}>
-                  {unavailable ? t.soldOut : formatAvailabilityLabel(product.availability, locale)}
-                </p>
-              ) : null}
-            </div>
-          </article>
-        );
-      })}
-    </section>
-  );
+          </div>
+          {product.availability !== "in_stock" && <p className={`availability availability-${product.availability}`}>{formatAvailabilityLabel(product.availability, locale)}</p>}
+        </div>
+      </article>;
+    })}
+  </section>;
 }

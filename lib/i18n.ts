@@ -45,7 +45,7 @@ const genderLabels: Record<Locale, Record<string, string>> = {
   },
   lt: {
     men: "Vyrams",
-    unisex: "Unisex",
+    unisex: "Visiems",
     women: "Moterims",
   },
 };
@@ -57,6 +57,7 @@ const categoryLabels: Record<Locale, Record<string, string>> = {
     bags: "Bags",
     bottoms: "Trousers",
     dresses: "Dresses",
+    jeans: "Jeans",
     knitwear: "Knitwear",
     outerwear: "Outerwear",
     shoes: "Shoes",
@@ -69,6 +70,7 @@ const categoryLabels: Record<Locale, Record<string, string>> = {
     bags: "Rankinės",
     bottoms: "Kelnės",
     dresses: "Suknelės",
+    jeans: "Džinsai",
     knitwear: "Megztiniai",
     outerwear: "Striukės ir paltai",
     shoes: "Avalynė",
@@ -80,6 +82,7 @@ const categoryLabels: Record<Locale, Record<string, string>> = {
 const colorLabels: Record<Locale, Record<string, string>> = {
   en: {
     beige: "Beige",
+    burgundy: "Burgundy", camel: "Camel", charcoal: "Charcoal", chocolate: "Chocolate", dark_brown: "Dark brown", emerald: "Emerald", forest_green: "Forest green", ivory: "Ivory", khaki: "Khaki", light_blue: "Light blue", lilac: "Lilac", mint: "Mint", navy: "Navy", olive: "Olive", orange: "Orange", powder_blue: "Powder blue", purple: "Purple", rose_gold: "Rose gold", sage: "Sage", sand: "Sand", silver: "Silver", stone: "Stone", tan: "Tan", washed_blue: "Washed blue",
     black: "Black",
     blue: "Blue",
     brown: "Brown",
@@ -93,6 +96,7 @@ const colorLabels: Record<Locale, Record<string, string>> = {
   },
   lt: {
     beige: "Smėlinė",
+    burgundy: "Bordo", camel: "Kupranugario vilnos", charcoal: "Tamsiai pilka", chocolate: "Šokoladinė", dark_brown: "Tamsiai ruda", emerald: "Smaragdinė", forest_green: "Tamsiai žalia", ivory: "Dramblio kaulo", khaki: "Chaki", light_blue: "Šviesiai mėlyna", lilac: "Alyvinė", mint: "Mėtinė", navy: "Tamsiai mėlyna", olive: "Alyvuogių", orange: "Oranžinė", powder_blue: "Blyškiai mėlyna", purple: "Violetinė", rose_gold: "Rausvo aukso", sage: "Šalavijų", sand: "Smėlio", silver: "Sidabrinė", stone: "Akmens pilkumo", tan: "Rusva", washed_blue: "Blukinta mėlyna",
     black: "Juoda",
     blue: "Mėlyna",
     brown: "Ruda",
@@ -171,6 +175,73 @@ export function formatTagLabel(value: string, locale: Locale) {
 
 export const copy = {
   en: {
+    frontend: {
+      heroTitle: "Find your\nnext layer.",
+      heroLead: "Clothing from different stores, in one search.",
+      heroLabel: "Clothing search, in your own words",
+      aiLabel: "A little AI. A lot more possibility.",
+      searchLabel: "What are you looking for?",
+      searchPlaceholder: "Describe a piece, colour or budget",
+      shortSearchPlaceholder: "What are you looking for?",
+      catalog: "Catalog", savedShort: "Saved", stores: "Stores",
+      search: "Search", clearSearch: "Clear search", pending: "Finding clothes…",
+      examplesLabel: "Try a search", browse: "Explore clothing", browseAll: "Explore all clothing",
+      startTitle: "Explore clothing", startLead: "Explore the clothes. Save what feels like you.", viewAll: "View all",
+      categoryNav: "Browse categories", allClothing: "All clothing",
+      results: "Search results", browseTitle: "All clothing",
+      browseLead: "Follow an idea, or see where the clothes take you.",
+      filters: "Filters", applyFilters: "Apply filters", clearFilters: "Clear filters",
+      hideFilters: "Hide filters", showFilters: "Show filters", view: "View",
+      columns: (n: number) => `${n} columns`, recommended: "Recommended",
+      priceFrom: "From, €", priceTo: "To, €",
+      resetDraft: "Clear selections", cancel: "Cancel", close: "Close",
+      category: "Category", department: "Department", store: "Store", colour: "Colour", status: "Availability",
+      budget: "Budget", minPrice: "Minimum price (€)", maxPrice: "Maximum price (€)",
+      priceHint: "Leave either amount empty for no limit. Your description and these limits both apply.",
+      priceError: "Enter a valid price range: minimum must not exceed maximum.",
+      invalidFilters: "A filter isn’t recognised. Clear the filters and choose from the available options.",
+      queryTooLong: "Keep your description to 500 characters or fewer.",
+      sort: "Sort by", relevance: "Relevance", availableFirst: "Available first",
+      priceLow: "Price: low to high", priceHigh: "Price: high to low", sale: "Largest price reduction",
+      count: (n: number) => `${n} ${n === 1 ? "piece" : "pieces"}`,
+      showing: (start: number, end: number, total: number) => `Showing ${start}–${end} of ${total}`,
+      removeFilter: (label: string) => `Remove filter: ${label}`,
+      resultAria: (n: number) => `Search results: ${n}`,
+      noResults: "Nothing quite like that here.",
+      noResultsLead: "Try a different description, or explore the clothing collection.",
+      noFilteredResults: "No pieces match these filters.",
+      noFilteredLead: "Remove a filter or widen your budget. Your search stays in place.",
+      retry: "Try again", errorTitle: "We couldn’t load the results.", errorLead: "Try again. Your search is still here.",
+      imageUnavailable: "Image unavailable", viewDetails: "View details", storeFallback: "Store",
+      currentPrice: "Price", previousPrice: "Previous price", saved: "Saved pieces", savedLead: "Your finds, kept in this browser.",
+      localCollectionNote: "Kept in this browser only. No sign-in needed.",
+      saveItem: "Save item", removeSaved: "Remove saved item", noSaved: "Your collection starts here.",
+      noSavedLead: "Save pieces with the heart beside a photo. You can return to them here.",
+      storageUnavailable: "Browser storage is unavailable. Your selections will last for this visit.",
+      preferences: "Your space", recentSearches: "Recent searches", noRecent: "Your recent searches will appear here.",
+      preview3d: "3D preview", menu: "Open navigation", closeMenu: "Close navigation",
+      home: "Weft home", lightMode: "Use light mode", darkMode: "Use dark mode",
+      storeSummary: (items: number, categories: number) => `${items} pieces across ${categories} categories`,
+      next: "Next", previous: "Previous", pages: "Result pages", perPage: "Products per page", show: "Show",
+      examples: [
+        { label: "A wool coat", query: "wool coat under 150" },
+        { label: "Easy knitwear", query: "knitwear" },
+        { label: "White trainers", query: "white sneakers under 80" },
+        { label: "Linen shirts", query: "linen shirt" },
+        { label: "Wide-leg trousers", query: "wide leg trousers" },
+        { label: "Summer dresses", query: "summer dress" },
+        { label: "Leather boots", query: "leather boots" },
+        { label: "Winter layers", query: "something warm for winter" },
+      ],
+    },
+    productDetail: {
+      metadataDescription: (title: string) => `Explore information and photographs of ${title} on Weft.`,
+      breadcrumbAria: "Breadcrumb", search: "Search", galleryAria: "Product images", enlargeImage: "Enlarge image",
+      productView: "Product view", styledView: "Styled view", styledAlt: (title: string) => `${title} in a styled look`,
+      sizesTitle: "Sizes listed", sizesAria: "Size list", colour: "Colour", forLabel: "For", category: "Category",
+      preview3d: "3D preview", backToSearch: "Back to search", relatedAria: "Related products", relatedTitle: "More in this category",
+      dialogAria: "Enlarged image", close: "Close", zoomInHint: "Click the photo to zoom in", zoomOutHint: "Move to pan · click to zoom out", storeFallback: "Store",
+    },
     common: {
       skipToContent: "Skip to content",
     },
@@ -217,7 +288,7 @@ export const copy = {
       },
     },
     titlePage: {
-      demoLabel: "DEMO · SYNTHETIC CATALOG",
+      demoLabel: "Clothing search",
       slogan: "Find your vibe.",
       lead: "Search fashion the way you actually think about it — by mood, by occasion, by the thing you half-remember seeing.",
       cta: "Start searching",
@@ -227,7 +298,7 @@ export const copy = {
       // naming the brand again put two display-size wordmarks on one screen.
       title: "Search",
       lead:
-        "Search by item, mood, color, store, or occasion.",
+        "Describe a piece. Find a place to start.",
       labels: {
         search: "Search",
         store: "Store",
@@ -239,7 +310,7 @@ export const copy = {
         advanced: "More filters",
       },
       placeholders: {
-        search: "black sneakers under 100",
+        search: "A black wool coat under €150",
       },
       options: {
         allStores: "All stores",
@@ -253,8 +324,8 @@ export const copy = {
         bestSale: "Best sale",
       },
       actions: {
-        clearAll: "Clear all",
-        showResults: "Show results",
+        clearAll: "Clear filters",
+        showResults: "Search",
       },
       active: {
         aria: "Active filters",
@@ -316,9 +387,9 @@ export const copy = {
       about: {
         title: "About Weft",
         paragraphs: [
-          "Weft is a visual fashion search and discovery site for Lithuanian shoppers. The service helps users browse styles, stores, colors, prices, and categories before clicking through to official retailer websites.",
+          "Weft helps you find clothing in your own words. Describe a colour, a material, an occasion or a budget, and explore pieces from different stores in one place.",
           "Weft does not operate checkout or resell products. It focuses on helping shoppers search, filter, and compare styles.",
-          "Live retailer catalogs are not enabled yet. Real products and links will appear only when Weft has permission to use them.",
+          "Open a piece to see its details, save it for later, or refine your search. You stay in control of the conditions you choose.",
         ],
       },
       affiliate: {
@@ -331,7 +402,7 @@ export const copy = {
       contact: {
         title: "Contact",
         intro:
-          "Questions about this version, data use, corrections, or future collaboration will have a clear contact path before live catalogs are enabled.",
+          "A public contact address has not been provided. You can read about the service, product information and privacy below.",
       },
       dataSources: {
         title: "Product Sources",
@@ -339,7 +410,7 @@ export const copy = {
           "Weft will show real retailer product data only when it has permission to use that information.",
           "The current catalog supports browsing, search, filters, and store-based discovery.",
           "We do not use scraped retailer photos, logos, product pages, or trademarks.",
-          "Retailers can request a correction, removal, or conversation through the contact page.",
+          "A public contact address is listed on the contact page when available.",
         ],
         reviewTitle: "Current catalog rules",
         reviewItems: [
@@ -356,7 +427,7 @@ export const copy = {
         shoppers: [
           "Search by vibe, category, color, size, price, or store.",
           "Browse visual product cards from clearly labelled stores.",
-          "Click through to the official retailer page to buy.",
+          "Open the details of a piece, or save it to your collection in this browser.",
         ],
         retailers: [
           "Real products are added only with permission.",
@@ -373,10 +444,10 @@ export const copy = {
       privacy: {
         title: "Privacy Policy",
         paragraphs: [
-          "Weft processes only the information needed to operate fashion discovery, improve product search, answer contact messages, and measure outbound retailer clicks.",
-          "This may include technical browser data, search events, saved preferences if enabled, outbound click events, UTM parameters, and messages sent through contact channels. Purchases happen on retailer websites, and retailer privacy policies apply to checkout, delivery, returns, and account activity on those sites.",
-          "Cookies and similar technologies are used for essential site functionality and for anonymous analytics. Your language choice is remembered in a cookie so the site opens in the language you picked. If non-essential cookies are introduced later, you will be asked to consent first.",
-          "You can ask to see, correct, delete, or restrict the processing of your personal data. If EU or EEA law applies to you, you can also object to processing, ask for your data in a portable form, withdraw consent where processing relies on it, and lodge a complaint with a data protection authority. Use the contact page to make any of these requests.",
+          "Weft receives search text and selected filters to return clothing results. Opening an item stays on Weft; there are no active retailer purchase links or contact-message forms.",
+          "The browser sends search events and item-detail openings to Weft’s analytics endpoints. When configured, Supabase storage can include the query, filters, result count, browser identifier and technical request information. PostHog receives summary counts, search timing and item-opening metadata, not search text, body measurements or photos. These events are not records of a purchase or a visit to a retailer.",
+          "A cookie remembers your language. Your theme, saved pieces, recent searches, preview measurements and browser identifier use local browser storage. If analytics storage is enabled, cookies also link related search and item-opening events. A photo selected for the 3D preview is processed in the browser and is not uploaded. You can remove locally stored information by clearing this site’s browser data.",
+          "You can ask to see, correct, delete, or restrict the processing of your personal data. If EU or EEA law applies to you, you can also object to processing, ask for your data in a portable form, withdraw consent where processing relies on it, and lodge a complaint with a data protection authority. A public contact for these requests has not yet been provided.",
         ],
       },
       stores: {
@@ -389,7 +460,7 @@ export const copy = {
         demoNotice: "Purchase links are not enabled yet.",
         // Printed once per store card, so the brand name here appeared six
         // times on /stores. The reader already knows whose site they are on.
-        fallbackDescription: "A curated fashion selection.",
+        fallbackDescription: "Explore the collection.",
       },
       terms: {
         title: "Terms of Use",
@@ -402,6 +473,62 @@ export const copy = {
     },
   },
   lt: {
+    frontend: {
+      heroTitle: "Atrask kitą\nsluoksnį.",
+      heroLead: "Drabužiai iš skirtingų parduotuvių vienoje paieškoje.",
+      heroLabel: "Drabužių paieška savais žodžiais",
+      aiLabel: "Truputis DI. Daugiau galimybių.",
+      searchLabel: "Kokių drabužių ieškai?", searchPlaceholder: "Aprašyk drabužį, spalvą ar biudžetą",
+      shortSearchPlaceholder: "Ko ieškai?",
+      catalog: "Katalogas", savedShort: "Išsaugota", stores: "Parduotuvės",
+      search: "Ieškoti", clearSearch: "Išvalyti paiešką", pending: "Ieškome drabužių…",
+      examplesLabel: "Išbandyk paiešką", browse: "Atrask drabužius", browseAll: "Peržiūrėti visus drabužius",
+      startTitle: "Atrask drabužius", startLead: "Atrask drabužius. Išsaugok tai, kas patinka.", viewAll: "Visos prekės",
+      categoryNav: "Naršyti kategorijas", allClothing: "Visi drabužiai",
+      results: "Paieškos rezultatai", browseTitle: "Visi drabužiai", browseLead: "Ieškok pagal idėją arba tiesiog apsižvalgyk.",
+      filters: "Filtrai", applyFilters: "Taikyti filtrus", clearFilters: "Išvalyti filtrus", resetDraft: "Išvalyti pasirinkimus", cancel: "Atšaukti", close: "Uždaryti",
+      hideFilters: "Slėpti filtrus", showFilters: "Rodyti filtrus", view: "Rodymas",
+      columns: (n: number) => `${n} stulpeliai`, recommended: "Rekomenduojama",
+      priceFrom: "Nuo, €", priceTo: "Iki, €",
+      category: "Kategorija", department: "Skyrius", store: "Parduotuvė", colour: "Spalva", status: "Prieinamumas",
+      budget: "Biudžetas", minPrice: "Mažiausia kaina (€)", maxPrice: "Didžiausia kaina (€)",
+      priceHint: "Tuščias laukelis reiškia, kad ribos nėra. Taikomos ir aprašymo, ir šios kainos ribos.",
+      priceError: "Įvesk tinkamas kainos ribas: mažiausia kaina negali viršyti didžiausios.",
+      invalidFilters: "Filtras neatpažintas. Išvalyk filtrus ir pasirink iš pateiktų parinkčių.", queryTooLong: "Aprašymą sutrumpink iki 500 ženklų.",
+      sort: "Rikiuoti pagal", relevance: "Aktualumą", availableFirst: "Pirmiausia turimos", priceLow: "Kainą: nuo mažiausios", priceHigh: "Kainą: nuo didžiausios", sale: "Didžiausią kainos sumažėjimą",
+      count: (n: number) => `Prekių: ${n}`, showing: (start: number, end: number, total: number) => `Rodoma ${start}–${end} iš ${total}`,
+      removeFilter: (label: string) => `Pašalinti filtrą: ${label}`, resultAria: (n: number) => `Paieškos rezultatų: ${n}`,
+      noResults: "Tokio drabužio čia neradome.", noResultsLead: "Pabandyk kitą aprašymą arba peržiūrėk drabužių kolekciją.",
+      noFilteredResults: "Šiuos filtrus atitinkančių prekių nėra.", noFilteredLead: "Pašalink filtrą arba padidink biudžetą. Paieškos tekstas išliks.",
+      retry: "Bandyti dar kartą", errorTitle: "Nepavyko įkelti rezultatų.", errorLead: "Bandyk dar kartą. Paieškos sąlygos išsaugotos.",
+      imageUnavailable: "Nuotrauka nepasiekiama", viewDetails: "Peržiūrėti", storeFallback: "Parduotuvė", currentPrice: "Kaina", previousPrice: "Ankstesnė kaina",
+      saved: "Išsaugotos prekės", savedLead: "Tavo atradimai šioje naršyklėje.", saveItem: "Išsaugoti prekę", removeSaved: "Pašalinti išsaugotą prekę",
+      localCollectionNote: "Išsaugota tik šioje naršyklėje. Prisijungti nereikia.",
+      noSaved: "Kolekcija prasideda čia.", noSavedLead: "Išsaugok patikusias prekes paspausdamas širdelę prie nuotraukos. Jas rasi čia.",
+      storageUnavailable: "Naršyklės saugykla nepasiekiama. Pasirinkimai išliks šio apsilankymo metu.",
+      preferences: "Tavo erdvė", recentSearches: "Naujausios paieškos", noRecent: "Čia bus rodomos naujausios paieškos.",
+      preview3d: "3D peržiūra", menu: "Atverti navigaciją", closeMenu: "Uždaryti navigaciją", home: "Weft pradinis puslapis", lightMode: "Įjungti šviesų režimą", darkMode: "Įjungti tamsų režimą",
+      storeSummary: (items: number, categories: number) => `Prekių: ${items}. Kategorijų: ${categories}.`,
+      next: "Kitas", previous: "Ankstesnis", pages: "Rezultatų puslapiai", perPage: "Prekių skaičius puslapyje", show: "Rodyti",
+      examples: [
+        { label: "Vilnonis paltas", query: "vilnonis paltas iki 150" },
+        { label: "Jaukūs megztiniai", query: "megztiniai" },
+        { label: "Balti sportbačiai", query: "balti sportbačiai iki 80" },
+        { label: "Lininiai marškiniai", query: "lininiai marškiniai" },
+        { label: "Plačios kelnės", query: "plačios kelnės" },
+        { label: "Vasarinės suknelės", query: "vasarinė suknelė" },
+        { label: "Odiniai batai", query: "odiniai batai" },
+        { label: "Šiluma žiemai", query: "kažkas šilto žiemai" },
+      ],
+    },
+    productDetail: {
+      metadataDescription: (title: string) => `Peržiūrėk ${title} informaciją ir nuotraukas Weft svetainėje.`,
+      breadcrumbAria: "Kelias", search: "Paieška", galleryAria: "Prekės nuotraukos", enlargeImage: "Padidinti nuotrauką",
+      productView: "Prekės vaizdas", styledView: "Derinio vaizdas", styledAlt: (title: string) => `${title} stilizuotame derinyje`,
+      sizesTitle: "Nurodyti dydžiai", sizesAria: "Dydžių sąrašas", colour: "Spalva", forLabel: "Skirta", category: "Kategorija",
+      preview3d: "3D peržiūra", backToSearch: "Grįžti į paiešką", relatedAria: "Panašios prekės", relatedTitle: "Daugiau šioje kategorijoje",
+      dialogAria: "Padidinta nuotrauka", close: "Uždaryti", zoomInHint: "Spustelėkite nuotrauką, kad priartintumėte", zoomOutHint: "Judinkite pelę · spustelėkite, kad sumažintumėte", storeFallback: "Parduotuvė",
+    },
     common: {
       skipToContent: "Pereiti prie pagrindinio turinio",
     },
@@ -448,7 +575,7 @@ export const copy = {
       },
     },
     titlePage: {
-      demoLabel: "DEMO · SINTETINIS KATALOGAS",
+      demoLabel: "Drabužių paieška",
       slogan: "Rask savo stilių.",
       lead: "Ieškok mados taip, kaip apie ją galvoji — pagal nuotaiką, progą ar tai, ką vos prisimeni mačiusi.",
       cta: "Pradėti paiešką",
@@ -545,9 +672,9 @@ export const copy = {
       about: {
         title: "Apie Weft",
         paragraphs: [
-          "Weft yra vizuali mados paieškos ir atradimo svetainė Lietuvos pirkėjams. Ji padeda naršyti stilius, parduotuves, spalvas, kainas ir kategorijas prieš pereinant į oficialias parduotuvių svetaines.",
+          "Weft padeda ieškoti drabužių savais žodžiais. Apibūdink spalvą, medžiagą, progą ar biudžetą ir atrask skirtingų parduotuvių prekes vienoje vietoje.",
           "Weft nevaldo atsiskaitymo ir neperparduoda prekių. Svetainė skirta stilių paieškai, filtravimui ir palyginimui.",
-          "Tikri parduotuvių katalogai dar neįjungti. Realios prekės ir nuorodos atsiras tik turint leidimą jas naudoti.",
+          "Atverk prekės informaciją, išsaugok ją vėlesniam laikui arba patikslink paiešką. Pasirinktos sąlygos lieka tavo rankose.",
         ],
       },
       affiliate: {
@@ -560,7 +687,7 @@ export const copy = {
       contact: {
         title: "Kontaktai",
         intro:
-          "Prieš įjungiant realius katalogus čia bus aiškiai nurodyta, kur kreiptis dėl šios versijos, duomenų naudojimo, pataisymų ar bendradarbiavimo.",
+          "Viešas kontaktinis adresas dar nepateiktas. Toliau gali sužinoti apie paslaugą, prekių informaciją ir privatumą.",
       },
       dataSources: {
         title: "Prekių šaltiniai",
@@ -568,7 +695,7 @@ export const copy = {
           "Weft rodys tik tuos realių parduotuvių prekių duomenis, kuriuos turi teisę naudoti.",
           "Dabartinis katalogas leidžia naršyti, ieškoti, filtruoti ir atrasti prekes pagal parduotuvę.",
           "Nenaudojame nukopijuotų parduotuvių nuotraukų, logotipų, prekių puslapių ar prekių ženklų.",
-          "Dėl pataisymo, pašalinimo ar bendradarbiavimo galima kreiptis kontaktų puslapyje.",
+          "Viešas kontaktinis adresas pateikiamas kontaktų puslapyje, kai jis yra prieinamas.",
         ],
         reviewTitle: "Dabartinės katalogo taisyklės",
         reviewItems: [
@@ -585,7 +712,7 @@ export const copy = {
         shoppers: [
           "Ieškok pagal stilių, kategoriją, spalvą, dydį, kainą ar parduotuvę.",
           "Naršyk vizualias prekių korteles iš aiškiai pažymėtų parduotuvių.",
-          "Norėdamas pirkti, pereik į oficialų parduotuvės puslapį.",
+          "Atverk prekės informaciją arba išsaugok ją savo kolekcijoje šioje naršyklėje.",
         ],
         retailers: [
           "Realios prekės pridedamos tik turint leidimą.",
@@ -602,10 +729,10 @@ export const copy = {
       privacy: {
         title: "Privatumo politika",
         paragraphs: [
-          "Weft tvarko tik informaciją, kurios reikia mados paieškai veikti, prekių paieškai gerinti, atsakyti į kontaktines žinutes ir matuoti išeinančius paspaudimus į parduotuves.",
-          "Tai gali apimti techninius naršyklės duomenis, paieškos įvykius, išsaugotas nuostatas, jei jos įjungtos, išeinančių paspaudimų įvykius, UTM parametrus ir per kontaktinius kanalus atsiųstas žinutes. Pirkimai vyksta parduotuvių svetainėse, o jų privatumo politikos taikomos atsiskaitymui, pristatymui, grąžinimui ir paskyros veiklai tose svetainėse.",
-          "Slapukai ir panašios technologijos naudojami būtinam svetainės veikimui ir anoniminei analitikai. Jūsų pasirinkta kalba įsimenama slapuke, kad svetainė atsidarytų ta kalba, kurią pasirinkote. Jei vėliau bus įdiegti nebūtini slapukai, pirmiausia bus paprašyta jūsų sutikimo.",
-          "Galite prašyti susipažinti su savo asmens duomenimis, juos ištaisyti, ištrinti arba apriboti jų tvarkymą. Jei jums taikoma ES arba EEE teisė, taip pat galite nesutikti su duomenų tvarkymu, prašyti perkelti duomenis, atšaukti sutikimą, kai tvarkymas juo grindžiamas, ir pateikti skundą duomenų apsaugos priežiūros institucijai. Dėl bet kurio iš šių prašymų kreipkitės per kontaktų puslapį.",
+          "Weft gauna paieškos tekstą ir pasirinktus filtrus, kad pateiktų drabužių rezultatus. Prekės informacija atveriama Weft svetainėje; aktyvių parduotuvių pirkimo nuorodų ar kontaktinių žinučių formų nėra.",
+          "Naršyklė siunčia paieškos ir prekės informacijos atvėrimo įvykius į Weft analitikos adresus. Jei Supabase saugykla įjungta, joje gali būti saugoma užklausa, filtrai, rezultatų skaičius, naršyklės identifikatorius ir techninė užklausos informacija. PostHog gauna suvestinius skaičius, paieškos trukmę ir prekės atvėrimo metaduomenis, bet ne paieškos tekstą, kūno išmatavimus ar nuotraukas. Tai nėra pirkimo ar apsilankymo parduotuvės svetainėje įrašai.",
+          "Slapukas įsimena kalbą. Tema, išsaugotos prekės, naujausios paieškos, peržiūros išmatavimai ir naršyklės identifikatorius saugomi vietinėje naršyklės saugykloje. Jei analitikos saugykla įjungta, slapukai taip pat susieja paieškos ir prekės atvėrimo įvykius. 3D peržiūrai pasirinkta nuotrauka apdorojama naršyklėje ir nėra įkeliama į serverį. Vietoje saugomą informaciją galima pašalinti išvalius šios svetainės naršyklės duomenis.",
+          "Galite prašyti susipažinti su savo asmens duomenimis, juos ištaisyti, ištrinti arba apriboti jų tvarkymą. Jei jums taikoma ES arba EEE teisė, taip pat galite nesutikti su duomenų tvarkymu, prašyti perkelti duomenis, atšaukti sutikimą, kai tvarkymas juo grindžiamas, ir pateikti skundą duomenų apsaugos priežiūros institucijai. Viešas kontaktas šiems prašymams dar nepateiktas.",
         ],
       },
       stores: {
@@ -616,7 +743,7 @@ export const copy = {
           "Pasirinkite parduotuvę ir peržiūrėkite jos atranką.",
         browseCta: "Naršyti prekes",
         demoNotice: "Pirkimo nuorodos dar neįjungtos.",
-        fallbackDescription: "Atrinkta mados kolekcija.",
+        fallbackDescription: "Peržiūrėk kolekciją.",
       },
       terms: {
         title: "Naudojimo sąlygos",
