@@ -10,7 +10,19 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const photographed = products.filter((product) => product.image_available && product.availability !== "out_of_stock");
 
   return <div className="home-storefront">
-    <section className="campaign campaign--text" aria-labelledby="home-title">
+    <section className="campaign" aria-labelledby="home-title">
+      <div className="campaign-image" aria-hidden="true">
+        {/* Native art direction selects one crop before download, including without JavaScript. */}
+        <picture>
+          <source media="(max-width: 43.75em)" width={1128} height={1410}
+            srcSet="/hero-assets/weft-street-mobile-640.webp 640w, /hero-assets/weft-street-mobile-960.webp 960w, /hero-assets/weft-street-mobile-1128.webp 1128w"
+            sizes="100vw" />
+          <img src="/hero-assets/weft-street-desktop-1920.webp"
+            srcSet="/hero-assets/weft-street-desktop-1280.webp 1280w, /hero-assets/weft-street-desktop-1920.webp 1920w, /hero-assets/weft-street-desktop-2508.webp 2508w"
+            sizes="(min-width: 2560px) 2560px, 100vw"
+            width={2508} height={1412} alt="" fetchPriority="high" decoding="async" />
+        </picture>
+      </div>
       <div className="campaign-copy">
         <h1 id="home-title">{t.heroTitle}</h1>
         <p>{t.heroLead}</p>
