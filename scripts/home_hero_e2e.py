@@ -176,7 +176,11 @@ def hero_geometry(page: Page, width: int) -> dict[str, Any]:
         assert cta["y"] >= image_wrap["y"] + image_wrap["height"] - 1, (cta, image_wrap)
     else:
         assert DESKTOP_SOURCE.search(source), source
-        assert abs(image_wrap["height"] / image_wrap["width"] - 1412 / 2508) <= 0.025, image_wrap
+        assert abs(image_wrap["width"] - campaign["width"]) <= 1, image_wrap
+        assert abs(image_wrap["width"] - width) <= 1 and abs(image_wrap["x"]) <= 1, image_wrap
+        expected_height = min(image_wrap["width"] * 1412 / 2508, page.viewport_size["height"] - header["height"])
+        assert abs(image_wrap["height"] - expected_height) <= 1, image_wrap
+        assert image.evaluate("element => getComputedStyle(element).objectFit") == "cover"
         people_start = image_wrap["x"] + image_wrap["width"] * 0.39
         assert copy["x"] + copy["width"] <= people_start + 2, (copy, people_start)
         assert copy["y"] >= image_wrap["y"] and copy["y"] + copy["height"] <= image_wrap["y"] + image_wrap["height"] + 1

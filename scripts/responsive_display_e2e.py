@@ -417,7 +417,11 @@ def main() -> int:
                         assert copy["y"] >= image_wrap["y"] + image_wrap["height"] - 1
                     else:
                         assert "weft-street-desktop-" in current_source, current_source
-                        assert abs(image_wrap["height"] / image_wrap["width"] - 1412 / 2508) <= 0.03
+                        assert abs(image_wrap["width"] - campaign["width"]) <= 1
+                        assert abs(image_wrap["width"] - width) <= 1 and abs(image_wrap["x"]) <= 1
+                        expected_height = min(image_wrap["width"] * 1412 / 2508, height - header["height"])
+                        assert abs(image_wrap["height"] - expected_height) <= 1
+                        assert image.evaluate("element => getComputedStyle(element).objectFit") == "cover"
                         assert copy["x"] + copy["width"] <= image_wrap["x"] + image_wrap["width"] * 0.39 + 2
                     assert header["y"] + header["height"] <= image_wrap["y"] + 1
                     assert search["x"] >= header["x"] and search["x"] + search["width"] <= header["x"] + header["width"] + 1

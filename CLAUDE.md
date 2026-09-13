@@ -144,6 +144,10 @@ Homepage addendum, 13 September 2026: the owner-approved Gemini-refined street p
 
 ## Viewport and spacing
 
+The full-width hero also extends to the real viewport on ultrawide screens. Only the home shell is uncapped; home navigation/footer retain 2560px, merchandise retains 92% of 2560px, and catalog/other routes keep their existing bounds. Desktop image `sizes` is `100vw`.
+
+Latest owner correction: desktop `.campaign-frame` now fills the storefront width. The image keeps its natural aspect ratio until capped by `100svh - --home-header-h`, then uses cover cropping above/below with `object-position: 50% 20%`. No canvas side fields. Mobile keeps the separate 4:5 crop and flowing copy without a height cap. This supersedes the complete-photo frame described in the earlier correction below; catalog gutters and focus remain unchanged.
+
 Viewport/spacing correction, 13 September 2026: `--collection-width:92%` in the existing CSS gives home merchandise and search four-percent side fields; phones use0.75rem. Search's enclosing focus outline is replaced by an inset underline, with a forced-colors border fallback and unchanged button keyboard outlines. Home photo now sits in `.campaign-frame`, constrained by the smaller of full width and `(100svh - --home-header-h) × 2508/1412`; the header consumes the same height token. Full image and no-JS behavior are preserved; unused side space uses the theme canvas. Below512px desktop viewport height, copy flows below the complete image. This supersedes the earlier height-only-by-width/scrolling behavior. Hero screenshot tests now keep the real viewport instead of enlarging it. Evidence and limitations: `docs/design/viewport-spacing-verification.md`.
 
 ## Authentication

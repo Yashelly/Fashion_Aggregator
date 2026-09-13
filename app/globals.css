@@ -83,6 +83,8 @@ h1 { font-size: clamp(1.875rem, 3vw, 2.625rem); margin-bottom: 1.5rem; }
 h2 { font-size: 1.6875rem; margin-bottom: 1rem; }
 h3 { font-size: 1.1875rem; font-weight: 500; }
 .shell { min-height: 100dvh; max-width: 2560px; margin-inline: auto; position: relative; }
+.shell:has(.home-storefront) { max-width: none; }
+.shell:has(.home-storefront) > .site-header, .shell:has(.home-storefront) > .site-footer { max-width: 2560px; margin-inline: auto; }
 .main { min-height: 65vh; }
 .main:focus { outline: none; }
 .route-shell { max-width: var(--max); margin-inline: auto; padding: 2.5rem var(--gutter) 4rem; }
@@ -133,22 +135,22 @@ h3 { font-size: 1.1875rem; font-weight: 500; }
 .footer-links { display: flex; flex-wrap: wrap; gap: 0 1.5rem; justify-content: flex-end; max-width: 43.125rem; }
 .footer-links a { padding: 0.625rem 0; min-height: 2.75rem; font-size: 0.8125rem; text-decoration: underline; text-underline-offset: 0.25rem; }
 
-/* Approved street photograph: full landscape on desktop, a separate phone crop. */
+/* Full-width desktop photograph with vertical crop; separate phone art direction. */
 .home-storefront { padding-bottom: 4rem; }
 .campaign { position: relative; background: var(--color-canvas); }
-.campaign-frame { position: relative; width: min(100%, calc((100svh - var(--home-header-h)) * 2508 / 1412)); margin-inline: auto; container-type: inline-size; }
-.campaign-image { aspect-ratio: 2508 / 1412; }
+.campaign-frame { position: relative; width: 100%; container-type: inline-size; }
+.campaign-image { width: 100%; aspect-ratio: 2508 / 1412; max-height: calc(100svh - var(--home-header-h)); overflow: hidden; }
 .campaign-image picture, .campaign-image img { display: block; width: 100%; height: 100%; }
-.campaign-image img { object-fit: contain; }
+.campaign-image img { object-fit: cover; object-position: 50% 20%; }
 /* Contrast support ends before the people; it is not a filter on the photograph. */
 .campaign-frame::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgb(0 0 0 / 64%) 0%, rgb(0 0 0 / 60%) 26%, transparent 39%); }
 .campaign-copy { position: absolute; z-index: 1; left: var(--gutter); bottom: clamp(1rem, 3svh, 3rem); width: 33%; max-width: 34rem; color: white; }
-.campaign-copy h1 { font-size: clamp(1.5rem, 5cqw, 4.5rem); letter-spacing: -.04em; line-height: 1.03; margin: 0; white-space: pre-line; }
+.campaign-copy h1 { font-size: clamp(1.5rem, min(5cqw, 10svh), 4.5rem); letter-spacing: -.04em; line-height: 1.03; margin: 0; white-space: pre-line; }
 .campaign-copy p { font-size: 1rem; max-width: 26ch; margin: 1.25rem 0; }
 .campaign-cta { display: inline-flex; align-items: center; justify-content: center; background: white; color: #161616; min-height: 2.9375rem; padding: 0 1.4375rem; font-size: 0.875rem; }
 .campaign-cta:hover { text-decoration: underline; text-underline-offset: 0.25rem; }
 .campaign :focus-visible { outline-color: white; }
-/* Extremely short/zoomed windows keep the full photo; text flows below instead
+/* Extremely short/zoomed windows keep the full-width crop; text flows below instead
    of becoming an unreadable overlay or covering the people. */
 @media (min-width: 43.7501em) and (max-height: 32em) {
   .campaign-frame::after { display: none; }
@@ -157,7 +159,7 @@ h3 { font-size: 1.1875rem; font-weight: 500; }
   .campaign-cta { background: var(--color-accent); color: var(--color-on-accent); }
   .campaign :focus-visible { outline-color: var(--color-focus); }
 }
-.home-section { width: var(--collection-width); margin-inline: auto; }
+.home-section { width: var(--collection-width); max-width: calc(2560px * .92); margin-inline: auto; }
 .home-section-head { display: flex; justify-content: space-between; align-items: center; gap: 1.25rem; padding: 1.8125rem 1.5625rem 1.375rem; }
 .home-section-head h2 { margin: 0; font-size: 1.5rem; letter-spacing: -.65px; }
 
@@ -450,7 +452,7 @@ summary::-webkit-details-marker { display: none; }
   .campaign { background: var(--color-canvas); }
   .campaign-frame { width: 100%; container-type: normal; }
   .campaign-frame::after { display: none; }
-  .campaign-image { aspect-ratio: 4 / 5; background: var(--color-surface-soft); }
+  .campaign-image { aspect-ratio: 4 / 5; max-height: none; background: var(--color-surface-soft); }
   .campaign-copy { position: static; width: auto; max-width: none; padding: 1.25rem var(--gutter) 1.5rem; color: var(--color-ink); }
   .campaign-copy h1 { font-size: clamp(2.25rem, 9vw, 3.25rem); max-width: 20ch; white-space: normal; }
   .campaign-copy p { font-size: 1rem; max-width: 36ch; margin: 0.875rem 0 1rem; }
