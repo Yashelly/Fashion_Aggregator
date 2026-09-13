@@ -291,3 +291,9 @@ This is the single most important cross-cutting constraint in the codebase:
 - After completing and verifying changes, commit and push the task's `codex/` branch and open a pull request targeting `main` without asking again.
 - If a pull request already exists for the task branch, update it instead of creating a duplicate. Report its URL and verification status.
 - Never commit directly to `main` or merge a pull request. Only the repository owner merges changes into `main`.
+
+## Language policy
+
+- Communicate with the repository owner in Russian unless the owner requests another language.
+- Write all persisted development artifacts in English, including source code, identifiers, code comments, tests, documentation, plans, reports, analysis artifacts, commit messages, pull request titles, and pull request descriptions.
+- Keep intentional application localization in its required locales. This project continues to ship English and Lithuanian user-facing copy where the product contract requires both.
