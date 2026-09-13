@@ -1,13 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans, Syne } from "next/font/google";
-import { Suspense } from "react";
+import { cookies } from "next/headers";
+import { Syne } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { CookieConsent } from "@/components/cookie-consent";
+import { LocaleProvider } from "@/components/locale-provider";
 import { SiteHeader } from "@/components/site-header";
+import type { Locale } from "@/lib/i18n";
 import "./globals.css";
 
-const syne = Syne({ subsets: ["latin", "latin-ext"], variable: "--font-display", display: "swap" });
-const plex = IBM_Plex_Sans({ subsets: ["latin", "latin-ext"], weight: ["400", "500", "600"], variable: "--font-body", display: "swap" });
+const syne = Syne({ subsets: ["latin", "latin-ext"], variable: "--font-wordmark", display: "swap" });
 
 export const metadata: Metadata = {
   title: "Weft — Fashion discovery",
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#161412" },
+    { media: "(prefers-color-scheme: dark)", color: "#161616" },
   ],
 };
 
@@ -31,24 +32,27 @@ const themeScript = `
     const theme = savedTheme === "dark" ? "dark" : "light";
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
-    const cookieMatch = document.cookie.match(/(?:^|; )weft-locale=([^;]+)/);
-    document.documentElement.lang = cookieMatch && decodeURIComponent(cookieMatch[1]) === "lt" ? "lt" : "en";
   })();
 `;
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const localeCookie = (await cookies()).get("weft-locale")?.value;
+  const initialLocale: Locale = localeCookie === "lt" ? "lt" : "en";
+
   return (
-    <html data-theme="light" data-visual-variant="a" lang="en" suppressHydrationWarning>
+    <html data-theme="light" lang={initialLocale} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${syne.variable} ${plex.variable}`}>
-        <div className="shell">
-          <Suspense fallback={<div className="header-skeleton" aria-hidden="true" />}><SiteHeader /></Suspense>
-          <main className="main" id="main-content">{children}</main>
-          <Suspense fallback={null}><SiteFooter /></Suspense>
-        </div>
-        <Suspense fallback={null}><CookieConsent /></Suspense>
+      <body className={syne.variable}>
+        <LocaleProvider initialLocale={initialLocale}>
+          <div className="shell">
+            <SiteHeader />
+            <main className="main" id="main-content" tabIndex={-1}>{children}</main>
+            <SiteFooter />
+          </div>
+          <CookieConsent />
+        </LocaleProvider>
       </body>
     </html>
   );

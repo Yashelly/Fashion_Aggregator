@@ -2,19 +2,22 @@ import type { Metadata } from "next";
 import { AiFittingRoom } from "@/components/ai-fitting-room";
 import { getCatalogProducts } from "@/lib/catalog";
 import { getLocale, type SearchParamsInput } from "@/lib/i18n";
+import { getSecondaryCopy } from "@/lib/secondary-copy";
 
 type AiFittingRoomPageProps = {
   searchParams: Promise<SearchParamsInput>;
 };
 
-export const metadata: Metadata = {
-  title: "AI fitting room — Weft",
-  description: "Preview the private photo and product selection flow for Weft's AI fitting room.",
-};
+export async function generateMetadata({ searchParams }: AiFittingRoomPageProps): Promise<Metadata> {
+  const locale = getLocale(await searchParams);
+  const copy = getSecondaryCopy(locale).fitting;
+  return { title: copy.metadataTitle, description: copy.metadataDescription };
+}
 
 export default async function AiFittingRoomPage({ searchParams }: AiFittingRoomPageProps) {
   const query = await searchParams;
   const locale = getLocale(query);
+  const copy = getSecondaryCopy(locale).fitting;
   const requestedProduct = Array.isArray(query.product) ? query.product[0] : query.product;
   const products = (await getCatalogProducts())
     .filter((product) => product.image_available && product.availability !== "out_of_stock")
@@ -41,12 +44,8 @@ export default async function AiFittingRoomPage({ searchParams }: AiFittingRoomP
     <div className="route-shell">
       <header className="route-heading">
         <div>
-          <h1>{locale === "lt" ? "AI matavimosi kabina" : "AI fitting room"}</h1>
-          <p className="lead">
-            {locale === "lt"
-              ? "Pridėkite išmatavimus, pasirinkite drabužį ir pasukite apytikslį 3D manekeną."
-              : "Add measurements, choose an item, and rotate an approximate 3D mannequin."}
-          </p>
+          <h1>{copy.title}</h1>
+          <p className="lead">{copy.lead}</p>
         </div>
       </header>
       <AiFittingRoom initialProductId={initialProductId} locale={locale} products={products} />

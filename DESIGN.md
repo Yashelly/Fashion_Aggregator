@@ -1,203 +1,99 @@
-# Weft Design Contract
-
-> **Partially superseded — read this first.**
->
-> Sequencing and status for all project work now live in
-> [`ROADMAP.md`](./ROADMAP.md); this document defers to it and no longer
-> describes what happens next. The direction below was revisited in
-> [`.omc/specs/deep-interview-vibewear-strategic-vision.md`](.omc/specs/deep-interview-vibewear-strategic-vision.md)
-> §5, which changes three things:
->
-> - **The product is now called Weft** (chosen 2026-07-31, replacing the
->   placeholder name it launched this document under). The wordmark is set in
->   caps — `WEFT` — but prose uses `Weft`.
-> - **Light mode is now the crisp white/near-black base** (shipped 2026-08-01),
->   replacing the warm-paper canvas. Its neutrals are true greys, not the
->   lavender-tinted ones the Variant B comparison carried.
-> - **The accent is rust `#b7410e`**, chosen 2026-08-01; acid-lime is gone.
->   Two roles: `--color-accent` for text and borders, `--color-acid` for fills
->   that sit under near-black text (now a peach tint of the same hue). Ignore
->   the acid-lime guidance in "Visual language" below.
-> - **Dark mode is confirmed, not superseded.** The espresso-charcoal
->   direction described below is the one that stays; a cooler blue-tinted
->   alternative was evaluated and rejected.
->
-> Everything else here — typography, spacing, accessibility, motion,
-> responsive behavior, and the demo-data boundary — remains in force.
+# Design
 
 ## Source of truth
 
-- **Status:** Active
-- **Last refreshed:** 2026-07-29
-- **Primary product surfaces:** Home, search, demo stores, demo product guard,
-  information/legal pages
-- **Evidence reviewed:** `docs/mvp_prd.md`,
-  `docs/frontend_design_references.md`, `data/store_tracker.csv`,
-  `data/mock_products.csv`, `app/`, `components/`, `lib/`
-- **Priority:** Public safety, shopping usability, accessibility, and responsive
-  behavior override decorative styling.
+Homepage update, 13 September 2026: the owner approved the Gemini-refined two-person street photograph and its local face refinement, then requested it on the homepage. This supersedes the earlier jacket close-up and linked product inset, not the selected catalog/search design. Desktop uses the full landscape photograph; phones use a separately exported 4:5 crop with both people and all footwear intact, followed by the heading, lead and CTA. Header/search stays in normal flow above the photograph at every width so it cannot cover the faces.
+
+Status: Active, selected hybrid with responsive-display and catalog-control corrections. 12 September 2026: the owner selected homepage/search A and catalog B with C-inspired left filters, required readable scaling on their2K monitor, then rejected operating-system dropdowns and duplicated filter headings. The earlier cream/serif and cold-studio versions are rejected, not alternate production themes. Approved composition references: `.omx/artifacts/frontend/visual-concepts-02/a-home-*.png` and `.omx/artifacts/frontend/visual-selected-03/*compact*.png`. The1440px references do not prescribe fixed dimensions for other monitors. Current control evidence: `.omx/artifacts/frontend/catalog-controls-final/`; responsive evidence: `responsive-display-final/` and `responsive-display-regression/`; initial hybrid evidence: `selected-hybrid-qa/`. Applies to every public route, EN/LT, light/dark and320–3840 CSS px. Research and prototypes remain private artifacts, not public routes or shipped competitor assets.
+
+Owner evidence, 12 September 2026: “[removed] acne rains, [removed] [removed] [removed], [removed] [removed] [removed]”. Positive references are Acne Studios catalog / Rains homepage; Vinted / GLAMI are explicitly excluded. Three same-data composition studies live in `.omx/artifacts/frontend/visual-concepts-02/`.
+
+Selection: homepage A, catalog B, four products per row by default, with a 3/4/5-column preference and C-like left-side filters. The annotated owner screenshot selects A's left-aligned, bounded, underlined search with a text Search button. Both the large Display button group and the subsequent native-select boxes were explicitly rejected; use a quiet “View: 4” site-styled disclosure beside sorting. “Four things on screen” means four columns, not four total results. Do not reopen A/B/C or introduce another palette pivot.
 
 ## Brand
 
-- **Personality:** Independent, fashion-aware, direct, energetic, and clear.
-- **Trust signals:** A calm persistent demo label, neutral demo-store names, clear
-  purchase boundaries, and accessible product/data notes.
-- **Avoid:** Internal ledgers, application or feed status, arbitrary section
-  numbering, debug labels, retailer logos, fake partnership signals, generic
-  dark-SaaS styling, and “pill everything” UI.
+Weft helps people find clothing across stores. Fashion-led, sparse, confident, with clothing occupying most of the screen. Positive references: Acne Studios catalog and Rains homepage. Negative references: Vinted and GLAMI. White, ink, restrained utility typography and actual garment photography define the selected system. Avoid cream/Georgia/rust, cold-blue chrome, promotional card stacks, decorative AI sparkles, invented popularity and decorative gradients.
 
 ## Product goals
 
-- Make fashion search the first obvious action.
-- Make the public MVP feel like a consumer fashion discovery product.
-- Demonstrate store filtering and product browsing with clearly synthetic data.
-- Keep real retailer catalogs, names, imagery, logos, and trademarks out of the
-  public experience until they may be used.
-- **Non-goals:** Checkout, cart, live products, real retailer detail
-  pages, application tracking, or merchant operations.
-- **Success signals:** A shopper can search, filter by demo store, inspect demo
-  products, and understand that no live catalog is enabled.
+Understand clothing discovery immediately; submit a natural-language query above the fold; refine without losing the query; evaluate actual catalog attributes; save a piece and return to the same results. Preserve existing AI-assisted search and deterministic fallback. Do not promise exact recommendations, live stock, checkout or an AI fitting result.
 
 ## Personas and jobs
 
-- **Primary personas:** Lithuanian mobile shoppers, desktop comparison shoppers,
-  and reviewers checking the product’s data boundaries.
-- **Jobs:** Search by item/vibe/category/price; refine results; browse a neutral
-  demo store; understand the demo state; find privacy, terms, and product-data
-  information.
-- **Contexts:** One-handed mobile browsing, keyboard desktop use, slow networks,
-  light or night mode, and Lithuanian or English copy.
+Lithuanian shoppers with a specific item/budget, exploratory shoppers starting with a category, and returning visitors comparing saved pieces. Lithuanian and English are equally supported, including keyboard and assistive technology use.
 
 ## Information architecture
 
-- **Primary navigation:** Search, stores, AI fitting room, How it works, About.
-- **Core routes:** `/`, `/search`, `/stores`, `/out/:productId`,
-  `/account`, `/ai-fitting-room`, `/how-it-works`, `/about`, `/data-sources`, `/affiliate-disclosure`,
-  `/privacy`, `/terms`, `/contact`.
-- Demo store cards link to filtered search through stable public IDs such as
-  `demo-store-01`. Internal retailer slugs remain data-join details only.
-- Product and store discovery precedes legal explanation; safety context remains
-  close to product-heavy surfaces and in the footer.
+Home → search/results → product details → results or saved collection. Stores are an alternate search entry. The existing approximate 3D preview is secondary. About, how it works, data sources, contact, privacy, terms and disclosure remain reachable in the footer. No merchant redirect.
 
 ## Design principles
 
-1. **Search first:** Search is the strongest action on every surface that has
-   one, and it is always reachable from the site header. Home is a storefront —
-   a cinematic hero over "Shop by category" tiles and a "Popular now" grid
-   (`app/page.tsx`) — where every tile and product is an entry into search, and
-   the header keeps search one action away. (This supersedes the earlier
-   "home is a single title page with no header/footer" contract, which the
-   navigation/storefront rework replaced; the layout now renders the shared
-   header and footer on every route.)
-2. **Fashion editorial, not editorial system:** Use typography, contrast, and
-   space for energy; do not use arbitrary issue/index numbers.
-3. **Public-safe by construction:** Only strict neutral store mappings may reach
-   public labels or URLs.
-4. **Demo without apology:** State the synthetic boundary clearly once, then let
-   shoppers browse normally.
-5. **Say the name once:** The brand appears once per screen. Home states it in
-   its h1 and therefore carries no header wordmark and no footer; every other
-   page states it in the header wordmark, so page titles and repeated card
-   labels must not name it again ("Search", not "Search Weft"; "The edit", not
-   "Weft edit"). Prose on `/about` and the legal pages is exempt — there,
-   naming the service is the content.
-5. **Mobile is first-class:** No clipped display text, hidden actions, tiny type,
-   or desktop-only interaction.
+Clothing and working search before explanation. Compact results header. URL is committed state; filter edits are drafts with apply/cancel. Factual information without fabricated comparisons. Server rendering with small interactive islands.
 
 ## Visual language
 
-- **Color:** Crisp white and near-black in light mode; espresso-charcoal layered
-  surfaces in night mode. Rust is the single accent (coral in dark mode); a
-  peach tint of it carries fills that sit under dark text.
-- **Typography:** Syne for brand/display and IBM Plex Sans for body/utility.
-- **Spacing:** 4/8-based rhythm with 16px mobile gutters and fluid larger
-  gutters.
-- **Shape/elevation:** Mostly sharp editorial edges, subtle small radii for
-  controls, restrained elevation for menus and interactive demo-store cards.
-- **Motion:** 150–220ms state transitions only; no layout-shifting decoration.
-- **Imagery/iconography:** 4:5 product media, stable repo-local paths, Lucide
-  icons, and synthetic non-branded placeholders.
+Selected base: the owner-approved street homepage with A's header/search language, A's bounded catalog search row, B's nearly seamless product grid, and C-inspired left-side filters. Default desktop density is four columns; three and five are view preferences, not catalog filters or page-size changes. The owner rejected the large3/4/5 button group as too visually prominent. Use a quiet, borderless text disclosure labelled “View: 4” beside sorting, available whether the filter panel is shown or hidden. Its open options share the site's typography, fine boundary and selected checkmark; no operating-system popup. Use0.8125rem regular text (13px at the reference size), no dark selected box, and at least2.75rem interaction height with visible keyboard focus. The filter panel is visible on desktop and can be hidden; mobile uses a filter sheet and two readable columns. Preserve the preferred desktop density when changing viewport size; disable a density only when the available grid would make a tile narrower than the scaled readability floor.
+
+Home uses the owner-approved synthetic street photograph, exported as responsive WebP assets under `public/hero-assets/weft-street-*`. Desktop preserves the full2508:1412 composition, without cover cropping or zoom transforms. The lower-left heading/CTA uses only the empty street area; a contrast scrim ends before the people at39% image width. The shared header/search sits above the photograph, not over heads. At≤43.75em, select the separate4:5 crop and put all copy/CTA below the image in normal flow, using theme canvas/ink tokens and no scrim. No linked product inset or suggestion that the photographed outfits are a specific catalog item. Short viewports scroll rather than cutting heads or shoes. The home collection and catalog retain actual runtime order; the eight-item private comparison fixture is not injected into search results. Available source and styled photographs alternate in the shared grid; no tint filters or hover zoom.
+
+Typography: Arial/Helvetica utility text and headings; existing Syne700 only for the small wordmark (`--font-wordmark`). `--font-display` aliases the body family for supporting-route consistency. Home heading up to4.5rem desktop /3.25rem mobile; catalog1.375rem; product title0.875rem, normal weight; phone price/store0.8125rem. At the reference scale these maxima are72/52,22,14 and13px respectively; on2560px desktop the product title becomes21px. No additional font family. Price and store sit on one restrained metadata row, wrapping when necessary rather than truncating factual values.
+
+Light tokens: canvas/surface #FFFFFF; ink/action/focus #161616; muted #575757; subtle #F2F2EF; line #D9D9D6; control border #888888; hover #383838; action text #FFFFFF; success #286145; error #A22C26; warning #785414; disabled #686868. Dark: canvas #161616; surface #1C1C1C; ink/action/focus #F6F6F3; muted #BCBCB6; line #474745; control #8C8C87; action text #161616. Photograph colours remain unchanged, with dark save icons over their light backgrounds. Theme choice is secondary in the footer/mobile navigation.
+
+Catalog/header fill the viewport up to the centered2560px storefront cap; supporting prose/detail routes retain a96rem maximum, with narrower prose measures. Catalog search has a51.25rem outer bound and1.5625rem inline padding (actual x=25/width=770 at1440). Sidebar13.5rem; toolbar3.625rem; grid starts at y238 on a blank1440px desktop search. Grid gaps2px horizontal/0.75rem vertical, imagery4:5, contain, reserved dimensions and honest failure fallback. At1440 the4-column tile width is304.5px. Controls keep at least2.75rem interaction height, square corners and visible focus. Shadows belong to overlays only.
 
 ## Components
 
-- **Reuse:** `SiteHeader`, `SiteFooter`, `CinematicHero`, `ProductGrid`,
-  `FilterDisclosure`, and `InfoPage`.
-- **Changed components:** Header includes a theme toggle; product cards include a
-  neutral demo store and local-image fallback; footer uses product/legal columns;
-  info pages have no arbitrary numbering.
-- **States:** Hover, focus-visible, selected, disabled, missing image, empty
-  results, invalid filters, loading, and unavailable demo product.
-- **Ownership:** Semantic palette and component states live in
-  `app/globals.css`; public store identity lives in `lib/demo-stores.ts`.
+Compact header with Catalog/Women/Men/Stores, permanent EN/LT and Saved; mobile menu; labelled search with clear/submit; quiet category navigation; four-column desktop/two-column mobile catalog; factual price/store and source old-price; labelled save toggle. SearchControls wraps server-rendered children with a desktop left panel and mobile dialog: Price opens first, then Category/Stores/Department/Colour/Availability accordions. Desktop Apply/Cancel/Clear selections appear when a draft changes; native GET submit remains available without JavaScript. Removable chips, sort and page-size/pagination remain separate from view density. Native gallery, local saved collection, readable legal/recovery states and secondary approximate 3D preview remain functional.
+
+Navigation correction: the global route is Catalog/Katalogas, the category row contains only specific categories, and All clothing/Visi drabužiai appears once as the content heading. Do not restore the repeated All clothing shortcut. Category removal remains available via its active chip and the sidebar's All categories choice; global Catalog returns to an unfiltered catalog. Jeans/Džinsai is a real `category=jeans` facet from exact `bottoms` + `subcategory=jeans` data, not an injected `query=denim`. Category navigation preserves a shopper's query and all other filters, resets page and never adds, hides or erases search text. Blank category browsing does not show a semantic-ranking explanation. Old ambiguous typed/shortcut denim URLs are not silently rewritten.
+
+Owner correction: no operating-system select boxes/blue popups in catalog controls. This supersedes the earlier native-select choice. Each filter accordion opens directly into labelled single-choice radio rows with a small checkmark; its visible heading is not repeated inside. Store checkboxes and numeric price inputs retain their semantics. Long lists scroll within a bounded panel. Sorting and density share a quiet OptionPicker disclosure: text/value/chevron when closed, restrained site-styled choice buttons when open. Sorting shows its current value without a redundant external label; its accessible label still identifies the action. Use native details/summary, named submit buttons and radio inputs, not simulated combobox semantics. Arrow/Home/End focus navigation, Enter selection, Escape and selection focus restoration, outside-click/focus-departure dismissal, disabled density and no-JS GET are required. The per-page text links remain unchanged. Check open and closed states in EN/LT, light/dark, desktop2K and phone.
+
+Keep the enhanced sidebar/dialog button separate from the native fallback disclosure. Without JavaScript or dialog support, show the genuine native disclosure and GET form with no stale explicit expanded state. Hide it only after capability detection; unexpected errors from a supported dialog must not silently switch interaction models. Picker dismissal also handles focus departure with no related target.
 
 ## Accessibility
 
-- Target WCAG 2.2 AA.
-- Minimum 44×44px interactive targets.
-- Visible 3px focus indicator and `:focus-within` treatment on compound search
-  fields.
-- Product media links and placeholders use product-specific accessible names.
-- Color is never the only state signal.
-- One route `h1`, logical headings, and correct localized accessible labels.
-- `prefers-reduced-motion` removes meaningful animation and transforms.
+Visible focus, skip link, logical landmarks/headings, persistent labels, normal text contrast ≥4.5:1, large text and control boundaries ≥3:1. Native controls/dialog, Escape/focus restoration, no background modal scroll. Errors retain input and explain recovery. Polite atomic result status. No colour-only meaning. Reduced motion removes nonessential motion. 200% zoom and narrow reflow remain usable. Automated checks supplement keyboard and visual review, not formal compliance certification.
 
 ## Responsive behavior
 
-- Supported checks: 375/390, 768, 1024, and 1440 CSS pixels.
-- Mobile header keeps brand, theme, and menu visible; language controls move into
-  the menu on narrow screens. The title page has no brand and no menu, so it is
-  the one place the language control stays visible at every width — otherwise a
-  Lithuanian shopper landing on `/` could not reach LT without entering the app.
-- Home display text must fit within the viewport without horizontal overflow.
-- Results use two columns on normal phones, one below 350px, three on tablet, and
-  four on desktop.
-- Demo-store and footer columns collapse cleanly to one column.
+Homepage art direction uses native `picture` media selection at43.75em, matching the layout breakpoint without client viewport detection or duplicate hidden images. Desktop sources:1280/1920/2508px; phone sources:640/960/1128px. Mobile master crop is x840/y0/1128×1410 within the approved2508×1412 image; exported crops retain both complete figures. Image dimensions/aspect ratios reserve layout before load, `fetchPriority=high` applies to the selected image only, and no-JS clients get the same crop. The phone header keeps search on its second row. Height follows the photograph and flowing text; a short viewport may require scrolling to the CTA. The2560px storefront cap and existing rem scale remain unchanged.
+
+Owner correction, 12 September 2026: the actual2K screenshot showed fixed-size typography/search/filters disproportionately small beside fluid product images. Absence of horizontal overflow is not sufficient responsive acceptance. The1440px reference remains the composition baseline, not a universal fixed size.
+
+Use one rem-based UI scale for text, navigation, sidebar, search, controls and spacing: default browser root16px through1440 CSS px, growing continuously to24px at2560, capped above that. Respect browser font preferences and zoom with relative endpoints; no CSS zoom, page transform or hardware/DPR sizing heuristic. Hairline borders and2px image seams stay crisp. At2560: sidebar324px, search outer1230px, product title21px, navigation22.5px. Cap and center the storefront at2560 CSS px on ultrawide/4K so four photographs do not grow without limit. Supporting routes share the type scale; prose keeps its bounded line length. Campaign height also responds to the available viewport height.
+
+Desktop left panel is visible and hideable. Preferred density is stored under `weft-catalog-columns`;3/4/5 selections change layout immediately without changing URL, ranking or page size. Disable columns below a12.625rem desktop tile floor (202px at the reference size), so text and readable tile size grow together. At≤56.25em (900px with default browser font) use three columns and a filter sheet; at≤43.75em (700px) use two columns. CSS and JavaScript use the same relative breakpoints. The density disclosure is hidden on compact layouts and the preferred desktop value returns when space allows. Mobile category navigation scrolls locally, without masking page overflow. Header search and locale remain visible; phone text inputs stay at least1rem/16px. Check320/360/390/430/768/1024/1280/1440/1920/2048/2560/3440/3840 CSS px, plus DPR1/1.25/2 and a narrowed viewport equivalent to browser zoom. Check type/geometry growth, header/toolbar overlap, usable first-row metadata and keyboard/modal interactions, not just page overflow.
 
 ## Interaction states
 
-- **Loading:** Stable 4:5 skeletons; no fast motion with reduced motion.
-- **Empty:** Plain explanation and one reset action.
-- **Error:** Specific message, visible error treatment, preserved query.
-- **Success:** Results update is the feedback; no decorative toast.
-- **Disabled:** Native or ARIA disabled semantics plus readable reduced emphasis.
-- **Missing image:** Category glyph in a stable semantic-color media frame.
+Native GET search without JavaScript; real transition feedback, no artificial timer. Root/detail streaming loading boundaries were removed after a real no-JS failure: they hid the route content until hydration. The pending submit state supplies feedback without hiding the current page. Blank queries browse. Over-500-character queries and bad bounds show recoverable errors. Filters reset page, preserve query/sort. Clear filters keeps query. Apply commits; cancel/Escape/backdrop discard. Unknown URL values differ from valid zero results. Back/forward restore state. Images and blocked storage fail gracefully. Errors offer a fresh GET of the same URL; missing optional product facts stay absent. Language intent survives a same-tick click on a stale server-rendered link, and earlier responses do not erase an edited search draft.
 
 ## Content voice
 
-- **Tone:** Natural, shopper-friendly, concise, and transparent.
-- **Primary Lithuanian term:** `parduotuvė`, never `šaltinis` as a shopper-facing
-  substitute for store.
-- **Required labels:** `Demo parduotuvė 01`, `Demo parduotuvė 02`, and so on.
-- **Required safety statement:** Real retailer catalogs are not enabled yet; the
-  current catalog is a synthetic demo.
-- **Avoid:** Network names, application/feed/approval status, commission,
-  tracker language, “review mode,” debug labels, and machine-heavy policy copy.
+Direct and specific. Centralised EN/LT UI; catalog titles remain source data. “Search”, “View details”, “Save”, “3D preview”; no “Buy”, fake login or live-price claims. Remove ordinary demo/synthetic/MVP/stage labels; preserve substantive privacy, rights and approximation disclosures. Missing public contact is a release gap, not a fabricated address.
 
 ## Implementation constraints
 
-- Next.js App Router, React, TypeScript, custom CSS, and existing Lucide icons.
-- Use semantic CSS variables with explicit light and dark token maps.
-- Theme defaults to light on a new browser profile; a visible header control
-  persists an explicit choice in `localStorage`.
-- No new dependencies for this polish pass.
-- No real retailer names, photos, logos, trademarks, scraped assets, or live
-  product/deeplink behavior.
-- Expected product files and specs are documented in
-  `docs/demo-product-imagery.md`; missing files must not cause layout shift.
-- Verify with fresh typecheck, production build, public-exposure search, and
-  rendered desktop/mobile inspection.
+Next 16 App Router, React, strict TS, existing icons/fonts. Preserve Supabase RLS view, CSV fallback, ranking/evaluation, origin checks and non-redirecting /out. Whitelist client DTOs; no internal merchant identity/notes/source metadata. No new production service, deployment, payment or tracking. Pinned axe-core is local verification only. Prototypes/research are not public routes/assets.
 
 ## Open questions
 
-- [ ] Brand/domain ownership before a commercial launch.
-- [ ] Public contact address before live catalogs or contact intake are enabled.
-- [ ] Provenance and rights log for future synthetic demo product images.
-- [ ] Permission record and activation checklist before any real retailer data
-  can enter public rendering.
+- [x] Owner selected the composition: A home and search, B catalog, C-like left filters, default four columns with 3/4/5 preference. No need to choose A/B/C again.
+- [x] Combined desktop frame and 3/4/5 densities checked in a private prototype; A's search stays at x=25 px and 770 px wide within its 820 px outer row at 1440 px. Sidebar is 216 px; four-card width is about 305 px and five-card width about 243 px. Prototype screenshots/evidence are under visual-selected-03.
+- [x] Carry the selected hybrid into the application with actual filters, persistent view density and production-browser regression evidence. The private prototype remains distinct from the running application.
+- [x] Owner/design: the Gemini-refined street campaign is approved for the homepage, with a separate mobile crop. This does not approve replacement catalog product photographs or change product data.
+- [ ] Public contact address; future licensing/affiliate approval; production field performance and physical-device assistive technology. No invented content or live commerce is authorized.
 
 ## Stop condition
 
-This polish pass is complete when public pages contain only neutral demo stores,
-no internal retailer/application language is rendered, header/footer/index
-issues are removed, stable image fallbacks work, both themes are usable, mobile
-has no clipping or overflow, and typecheck/build pass.
+Completion requires the selected composition in the actual app, real filter/search/density behavior, inspected EN/LT desktop/mobile screenshots, fresh typecheck/build/unit/integration/locale and bounded browser/a11y evidence. The implementation is local: no commit, merge or deployment is implied. Functional tests and screenshot similarity do not establish owner aesthetic acceptance. Do not claim blanket WCAG compliance, field CWV, physical-device screen-reader testing or live Gemini validation from local evidence.
+
+Verified implementation handoff: [selected-hybrid-verification](docs/design/selected-hybrid-verification.md), 12 September 2026. The final visual verdict is PASS and independent code/architecture reviews have no remaining findings. Same-task form submission now reads the synchronous locale intent, matching existing stale-link protection. Test totals, screenshot comparisons and the unrelated REGRESSION-012 search limitation are recorded in the handoff.
+
+Latest correction: [responsive-display-verification](docs/design/responsive-display-verification.md). The owner's2K feedback replaces fixed-reference sizing with coherent relative scaling and viewport-height adaptation. Fresh tests check readable proportions and collisions through3840 CSS px, not only document overflow. Image size hints match the scaled thumbnails and capped storefront.
+
+Catalog-control handoff: [catalog-controls-verification](docs/design/catalog-controls-verification.md). All catalog native selects are replaced with direct radio lists or shared text disclosures. Open-state screenshots, keyboard and compatibility regressions, full locale verification and independent review pass; the selected composition and responsive scale remain unchanged.
+
+Category-navigation handoff: [category-navigation-verification](docs/design/category-navigation-verification.md). The repeated generic category shortcut is removed and the global route is Catalog. Jeans is an exact garment category, never generated search text. Query/filter preservation, no-JS links, responsive screenshots and regression suites pass; explicit legacy denim queries are not silently erased.

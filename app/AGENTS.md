@@ -3,6 +3,14 @@
 
 # app
 
+## Current frontend contract — 2026-09-12
+
+Responsive correction: `DESIGN.md` now defines a rem-based interface scale from the1440 reference through2560 CSS px, a centered2560px storefront cap, and matched em breakpoints for mobile/tablet. Text, controls, filters and spacing grow with the display; do not restore fixed-pixel desktop UI beside fluid product imagery. Current evidence is under `.omx/artifacts/frontend/responsive-display-final/`.
+
+Catalog-control correction: filter accordions now expose radio choices without duplicate visible labels. Sorting and density use compact site-styled disclosures, not operating-system select menus. Keep rem scaling, native GET and real sort submitters, keyboard dismissal/focus, and mobile-sheet draft behavior. Verify open controls as well as closed states; evidence is under `.omx/artifacts/frontend/catalog-controls-final/`.
+
+The generated inventory below is historical. See `DESIGN.md` and actual code: home uses the owner-approved two-person street campaign with search above the photo, a complete desktop frame and a separate4:5 phone crop followed by copy/CTA. Search uses A's bounded underlined search, URL-backed left budget/multi-store filters, a compact persistent3/4/5-column preference and native GET enhancement; compact screens use a filter sheet and3/2 columns. White/ink utility type is shared across routes; Syne is only the wordmark. Account is a local saved collection. Root layout server-initializes locale from the request cookie. Streaming loading wrappers stay removed because they hid essential HTML without JavaScript; real pending-submit feedback remains. Error Retry reloads the current URL. `/out` never redirects and passes only public DTOs. Do not restore obsolete mascot or fake account/AI-generation flows.
+
 ## Purpose
 
 Next.js App Router tree — every routable page plus the two analytics API routes. All pages are async server components; locale-aware ones accept `searchParams: Promise<SearchParamsInput>` (Next 16 convention) and resolve the current `Locale` via `lib/i18n.ts`'s `getLocale()`. `layout.tsx` renders the shared shell (header/footer/theme bootstrap/locale cookie read); route-level `loading.tsx`, `error.tsx`, and `not-found.tsx` provide the shared loading/error/404 states for the whole tree.
