@@ -27,6 +27,7 @@ Before/after screenshots and geometry: `.omx/artifacts/frontend/layout-spacing/`
 ## Results
 
 - Production build and TypeScript passed; all 84 unit tests passed.
+- Integration smoke: 15/15. Full EN/LT browser regression: 3,112 assertions across 14 routes, 229 internal links clicked, no browser errors.
 - Layout: 26/26 page/viewport cases, keyboard and forced-colors focus checks passed; no browser errors.
 - Hero: 8/8 scenarios passed. Responsive display: 7/7 scenarios passed, including 3/4/5 density restoration, 125% root font, no-JS and DPR checks.
 - Visually inspected final 2560×1294 home, catalog and home collection, plus the 390×744 phone screenshot. Full desktop photo and CTA are visible; product grids have side space without shrinking their typography.
