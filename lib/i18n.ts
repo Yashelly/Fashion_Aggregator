@@ -244,7 +244,7 @@ export const copy = {
     },
     productDetail: {
       metadataDescription: (title: string) => `Explore information and photographs of ${title} on Weft.`,
-      breadcrumbAria: "Breadcrumb", search: "Search", galleryAria: "Product images", enlargeImage: "Enlarge image",
+      breadcrumbAria: "Breadcrumb", search: "Search", galleryAria: "Product images", galleryNavigationAria: "Photo navigation", previousImage: "Previous photo", nextImage: "Next photo", enlargeImage: "Enlarge image",
       productView: "Product view", styledView: "Styled view", styledAlt: (title: string) => `${title} in a styled look`,
       sizesTitle: "Sizes listed", sizesAria: "Size list", colour: "Colour", forLabel: "For", category: "Category",
       preview3d: "3D preview", backToSearch: "Back to search", relatedAria: "Related products", relatedTitle: "More in this category",
@@ -550,7 +550,7 @@ export const copy = {
     },
     productDetail: {
       metadataDescription: (title: string) => `Peržiūrėk ${title} informaciją ir nuotraukas Weft svetainėje.`,
-      breadcrumbAria: "Kelias", search: "Paieška", galleryAria: "Prekės nuotraukos", enlargeImage: "Padidinti nuotrauką",
+      breadcrumbAria: "Kelias", search: "Paieška", galleryAria: "Prekės nuotraukos", galleryNavigationAria: "Nuotraukų navigacija", previousImage: "Ankstesnė nuotrauka", nextImage: "Kita nuotrauka", enlargeImage: "Padidinti nuotrauką",
       productView: "Prekės vaizdas", styledView: "Derinio vaizdas", styledAlt: (title: string) => `${title} stilizuotame derinyje`,
       sizesTitle: "Nurodyti dydžiai", sizesAria: "Dydžių sąrašas", colour: "Spalva", forLabel: "Skirta", category: "Kategorija",
       preview3d: "3D peržiūra", backToSearch: "Grįžti į paiešką", relatedAria: "Panašios prekės", relatedTitle: "Daugiau šioje kategorijoje",
