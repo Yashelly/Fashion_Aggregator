@@ -99,8 +99,11 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         <span>{copy.search.interpretation.understood}</span>
         {understood.map((chip)=><Link key={chip.key} aria-label={copy.search.interpretation.remove(chip.label)} href={chip.href}>{chip.label}<X aria-hidden="true" size={14}/></Link>)}
       </nav>}
-      {runtime?.approximate && results.length > 0 && <p className="search-interpretation"><span>{copy.search.interpretation.alternatives}</span>
-        {runtime.relaxedConstraints.length>0 && <span>{copy.search.interpretation.relaxed(runtime.relaxedConstraints.join(", "))}</span>}</p>}
+      {runtime?.approximate && results.length > 0 && <p className="search-interpretation">
+        <span>{copy.search.interpretation.approximate}</span>
+        <span>{copy.search.interpretation.alternatives}</span>
+        {runtime.relaxedConstraints.length>0 && <span>{copy.search.interpretation.relaxed(runtime.relaxedConstraints.join(", "))}</span>}
+      </p>}
       {!runtime?.approximate && results.length > 0 && query && <p className="search-interpretation"><span>{copy.search.interpretation.exact}</span></p>}
       {invalid ? <section className="empty-state is-error" role="alert"><SearchX aria-hidden="true" size={32}/><h2>{invalidQuery ? t.queryTooLong : invalidPrice ? t.priceError : t.invalidFilters}</h2><p>{invalidQuery ? t.searchLabel : t.noFilteredLead}</p>{query && <p>{t.originalQuery(query)}</p>}<Link className="button secondary" href={invalidQuery ? searchHref(params,{query:undefined,page:undefined}) : searchHref(clearFilterValues(params))}>{invalidQuery?t.clearSearch:t.clearFilters}</Link></section>
         : results.length === 0 ? <section className="empty-state" role="status"><SearchX aria-hidden="true" size={32}/>
