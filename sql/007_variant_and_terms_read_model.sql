@@ -157,7 +157,7 @@ where s.public_id is not null
 
 revoke all on public.catalog_variants, public.catalog_product_terms from public, anon, authenticated;
 grant select on public.catalog_variants, public.catalog_product_terms to anon, authenticated;
-grant select, insert, update on public.retailer_offer_terms to weft_feed_importer;
+grant select, insert, update, delete on public.retailer_offer_terms to weft_feed_importer;
 grant select on public.catalog_variants, public.catalog_product_terms to weft_feed_importer;
 
 commit;
