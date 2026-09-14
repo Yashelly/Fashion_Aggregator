@@ -80,6 +80,35 @@ to weft_feed_importer;
 grant select on table private.catalog_product_rows to weft_feed_importer;
 grant select on table public.catalog_products to weft_feed_importer, service_role;
 
+-- The public catalog view intentionally uses security_invoker so its caller's
+-- RLS context is preserved.  The importer refreshes the search index through
+-- that view, therefore it needs an explicit, least-privilege read policy on
+-- the private backing table as well as the table grant above.
+drop policy if exists "Feed importer reads eligible catalog rows"
+  on private.catalog_product_rows;
+create policy "Feed importer reads eligible catalog rows"
+  on private.catalog_product_rows
+  for select
+  to weft_feed_importer
+  using (
+    exists (
+      select 1
+      from public.stores
+      where stores.id = catalog_product_rows.source_store_id
+        and (
+          stores.public_listing_status = 'demo'
+          or (
+            stores.affiliate_status = 'approved_feed'
+            and stores.feed_status in ('available_verified', 'importing')
+          )
+          or (
+            stores.affiliate_status = 'direct_permission'
+            and stores.feed_status <> 'paused'
+          )
+        )
+    )
+  );
+
 drop policy if exists "Feed importer reads eligible stores" on public.stores;
 create policy "Feed importer reads eligible stores"
   on public.stores
