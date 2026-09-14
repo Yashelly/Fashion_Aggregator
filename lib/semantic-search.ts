@@ -734,18 +734,16 @@ function extractExcludedTerms(text: string): string[] {
       cursor += 1;
     }
 
-    // "not black shoes" means shoes are the positive subject and black is the
-    // excluded attribute. In all other cases the short exclusion phrase is a
-    // list ("not a coat or parka"), so retain every recognised term.
-    if (
+    // A trailing garment is the positive subject only when the negation phrase
+    // also contains a non-garment constraint ("not red or blue dress").
+    // Keep every recognised exclusion in a pure list ("not coat or parka")
+    // so the connector cannot silently turn the second item positive.
+    const hasTrailingSubject =
       candidates.length >= 2 &&
-      (COLOR_TERMS.has(candidates[0]) && GARMENT_TERMS.has(candidates[1]) ||
-        GARMENT_TERMS.has(candidates[candidates.length - 1]))
-    ) {
-      excluded.add(candidates[0]);
-    } else {
-      for (const candidate of candidates) excluded.add(candidate);
-    }
+      GARMENT_TERMS.has(candidates[candidates.length - 1]) &&
+      candidates.slice(0, -1).some((candidate) => !GARMENT_TERMS.has(candidate));
+    const excludedCandidates = hasTrailingSubject ? candidates.slice(0, -1) : candidates;
+    for (const candidate of excludedCandidates) excluded.add(candidate);
   }
 
   return [...excluded];
@@ -834,12 +832,29 @@ export function removeInterpretedConstraint(rawQuery: string, kind: EditableCons
     return next.replace(/\s+/g, " ").trim();
   }
 
+  // Interpretation collapses natural-language phrases into one canonical chip
+  // (for example `night out` -> `party`). Remove the source phrase as a unit;
+  // otherwise the chip has no literal token to delete and immediately returns.
+  if (kind === "term") {
+    let phraseRemoved = rawQuery;
+    for (const [pattern, replacement] of PHRASES) {
+      const replacementTerms = tokenize(normalizeText(replacement))
+        .map((value) => canonicalize(value))
+        .filter((value): value is string => Boolean(value));
+      if (!replacementTerms.includes(term)) continue;
+      phraseRemoved = phraseRemoved.replace(new RegExp(pattern.source, "giu"), " ");
+    }
+    if (phraseRemoved !== rawQuery) return removeInterpretedConstraint(phraseRemoved, kind, term);
+  }
+
   const words = [...rawQuery.matchAll(/[\p{L}\p{N}]+(?:[-'][\p{L}\p{N}]+)*/gu)];
   const normalizedWords = words.map((match) => normalizeText(match[0]));
   const originalExclusions = new Set(extractExcludedTerms(normalizeText(rawQuery)));
   const remove = new Set<number>();
   words.forEach((match, index) => {
-    const canonicals = normalizedWords[index].split(/[-']/).map((token) => canonicalize(token)).filter(Boolean);
+    const wholeCanonical = canonicalize(normalizedWords[index]);
+    const canonicals = [wholeCanonical, ...normalizedWords[index].split(/[-']/).map((token) => canonicalize(token))]
+      .filter((value): value is string => Boolean(value));
     if (canonicals.includes(term) || (kind === "availability" && canonicals.includes("available"))) {
       if (kind === "exclusion") {
         if (!originalExclusions.has(term)) return;
@@ -875,6 +890,10 @@ export function removeInterpretedConstraint(rawQuery: string, kind: EditableCons
         return;
       }
       remove.add(index);
+      // Hyphenated modifiers form one interpreted phrase with the following
+      // noun ("button-up shirt", "high-top sneakers"). Removing the noun
+      // must not leave a fragment that reparses into a different constraint.
+      if (index > 0 && /[-']/.test(normalizedWords[index - 1])) remove.add(index - 1);
     }
   });
   if (remove.size === 0) return rawQuery.trim();
@@ -1210,7 +1229,11 @@ function rankProducts<T extends SearchableProduct>(
     .sort((first, second) =>
       second.score - first.score ||
       first.product.mock_product_id.localeCompare(second.product.mock_product_id),
-    );
+    )
+    // Keep broad intent queries useful and bounded. The UI paginates the
+    // resulting catalogue, but an unconstrained semantic expansion should not
+    // turn into an effectively unbounded result set.
+    .slice(0, 12);
 }
 
 /**

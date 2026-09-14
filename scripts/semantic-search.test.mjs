@@ -308,6 +308,37 @@ test("removing one exclusion preserves the negation scope of the remaining exclu
   }
 });
 
+test("negation connectors keep every excluded colour before a positive garment subject", () => {
+  for (const query of ["no red or blue dress", "without red or blue dress"]) {
+    const interpretation = interpretQuery(query);
+    assert.deepEqual(interpretation.constraints.excludedTerms, ["red", "blue"], query);
+    assert.deepEqual(interpretation.constraints.garmentTypes, ["dress"], query);
+    assert.deepEqual(interpretation.constraints.colors, [], query);
+  }
+});
+
+test("removing a compound garment chip removes the whole phrase", () => {
+  assert.equal(removeInterpretedConstraint("button-up shirt", "term", "shirt"), "");
+  assert.equal(removeInterpretedConstraint("t-shirt black", "term", "tee"), "black");
+  assert.equal(removeInterpretedConstraint("high-top sneakers", "term", "sneakers"), "");
+});
+
+test("removing a phrase-derived interpretation chip removes its source wording", () => {
+  for (const [query, term, remainder] of [
+    ["night out dress", "party", "dress"],
+    ["work out hoodie", "gym", "hoodie"],
+    ["front pouch bag", "pocket", "bag"],
+    ["no visible closure dress", "open", "dress"],
+    ["quiet luxury coat", "quietluxury", "coat"],
+    ["keeps its shape bag", "structured", "bag"],
+    ["full outfit", "dress", ""],
+  ]) {
+    const edited = removeInterpretedConstraint(query, "term", term);
+    assert.equal(edited, remainder, query);
+    assert.ok(!interpretQuery(edited).terms.includes(term), `${query} still parses ${term}`);
+  }
+});
+
 test("material near-misses are labelled alternatives with the relaxed material named", () => {
   const cotton = product({ mock_product_id: "cotton", subcategory: "coat", color: "black", style_tags: "cotton" });
   const result = semanticSearch([cotton], "black wool coat");
