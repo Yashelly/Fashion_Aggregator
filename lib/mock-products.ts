@@ -154,6 +154,9 @@ function controlledFacts(
   const material = description ? extractControlledMaterial(description) : undefined;
   const sizeSystem = inferSizeSystem(sizeOptions);
   const fitNote = construction ? inferFitNote(construction) : undefined;
+  const sizeAvailability = sizeOptions
+    ? Object.fromEntries(splitImagePaths(sizeOptions).map((size) => [size, "unknown" as const]))
+    : undefined;
   const hasFacts = Boolean(description || material || surface || construction || sizeSystem || fitNote);
 
   return {
@@ -164,6 +167,7 @@ function controlledFacts(
     size_system: sizeSystem,
     fit_note: fitNote,
     fact_provenance: hasFacts ? "controlled_synthetic" as const : undefined,
+    size_availability: sizeAvailability,
   };
 }
 
