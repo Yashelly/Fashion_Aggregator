@@ -342,6 +342,16 @@ summary::-webkit-details-marker { display: none; }
 .product-detail-facts>div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.75rem 0; border-top: 1px solid var(--color-line); }
 .product-detail-facts dt { display: flex; align-items: center; gap: 0.5rem; color: var(--color-ink-muted); }
 .product-detail-facts dd { margin: 0; }
+.product-facts-section { border-top: 1px solid var(--color-line); margin-top: 1.5rem; padding-top: 1.25rem; }
+.product-facts-section h2, .product-measurements h3 { font: 500 0.9375rem var(--font-body),Arial,sans-serif; margin: 0 0 0.75rem; }
+.product-facts-provenance { color: var(--color-ink-muted); font-size: 0.75rem; margin: 0 0 0.75rem; }
+.product-facts-description { line-height: 1.6; margin: 0 0 0.75rem; }
+.product-measurements dl { margin: 0; }
+.product-measurements dl>div { display:flex; justify-content:space-between; border-top:1px solid var(--color-line); padding:0.5rem 0; font-size:0.8125rem; }
+.product-measurements dd { margin:0; }
+.product-size-section li { display:flex; flex-direction:column; align-items:center; gap:0.2rem; }
+.product-size-section li small { color: var(--color-ink-muted); font-size: 0.6875rem; }
+.product-size-section li a { color: var(--color-accent); font-size: 0.6875rem; text-decoration: underline; }
 .product-detail-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
 .related-products { margin-top: 4rem; }
 .lightbox { padding: 3.5rem 1.5rem 1.5rem; border: 1px solid var(--color-line); width: min(68.75rem,95vw); height: min(56.25rem,94dvh); color: var(--color-ink); background: var(--color-surface); border-radius: 0.5rem; }

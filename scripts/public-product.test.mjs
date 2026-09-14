@@ -97,6 +97,7 @@ test("public product DTOs serialize only explicitly allowlisted shopper fields",
     "publicStoreId",
     "sizeOptions",
     "storeLabel",
+    "surface",
     "title",
   ]);
 
@@ -266,6 +267,30 @@ test("public gallery keeps only valid, deduplicated demo images in stable order"
     product.imageGallery,
     ["/demo-products/product-01.webp", "/demo-products/product-01-tryon.webp"],
   );
+  assert.equal(product.imagePath, product.imageGallery[0]);
+  assert.equal(product.detailImagePath, product.imageGallery[1]);
+  assert.equal(product.imageAvailable, true);
+  assert.equal(product.detailImageAvailable, true);
+});
+
+test("controlled facts and provenance are allowlisted when supplied", () => {
+  const product = toPublicProduct({
+    ...catalogProduct,
+    image_gallery: ["/demo-products/product-01.webp"],
+    description: "A visible cotton shirt",
+    material: "cotton",
+    construction_details: "point collar",
+    size_system: "Lettered",
+    fit_note: "Relaxed",
+    fact_provenance: "controlled_synthetic",
+    garment_measurements: { chest: "52 cm" },
+    measurement_source: "Controlled sample",
+    size_availability: { M: "out_of_stock" },
+  }, null);
+  assert.equal(product.description, "A visible cotton shirt");
+  assert.equal(product.factProvenance, "controlled_synthetic");
+  assert.deepEqual(product.garmentMeasurements, { chest: "52 cm" });
+  assert.deepEqual(product.sizeAvailability, { M: "out_of_stock" });
 });
 
 test("missing or invalid prices are not rendered as free products or NaN", () => {

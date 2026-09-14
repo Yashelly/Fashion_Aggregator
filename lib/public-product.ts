@@ -39,6 +39,16 @@ export type PublicProduct = Readonly<{
   detailImagePath: string;
   detailImageAvailable: boolean;
   imageGallery: string[];
+  description?: string;
+  material?: string;
+  surface?: string;
+  constructionDetails?: string;
+  sizeSystem?: string;
+  garmentMeasurements?: Record<string, string>;
+  measurementSource?: string;
+  fitNote?: string;
+  factProvenance?: "controlled_synthetic" | "retailer_verified";
+  sizeAvailability?: Record<string, "in_stock" | "limited" | "out_of_stock" | "unknown">;
 }>;
 
 export type PublicRelatedProduct = Readonly<{
@@ -63,6 +73,25 @@ export function toPublicProduct(
   product: MockProduct,
   storeLabel: PublicStoreLabel | null,
 ): PublicProduct {
+  const gallery = sanitizeImageGallery([
+    ...(product.image_gallery ?? []),
+    product.image_path,
+    product.detail_image_path,
+  ]);
+  const imagePath = gallery[0] ?? "";
+  const detailImagePath = gallery[1] ?? "";
+  const optional = {
+    ...(product.description ? { description: product.description } : {}),
+    ...(product.material ? { material: product.material } : {}),
+    ...(product.surface ? { surface: product.surface } : {}),
+    ...(product.construction_details ? { constructionDetails: product.construction_details } : {}),
+    ...(product.size_system ? { sizeSystem: product.size_system } : {}),
+    ...(product.garment_measurements ? { garmentMeasurements: product.garment_measurements } : {}),
+    ...(product.measurement_source ? { measurementSource: product.measurement_source } : {}),
+    ...(product.fit_note ? { fitNote: product.fit_note } : {}),
+    ...(product.fact_provenance ? { factProvenance: product.fact_provenance } : {}),
+    ...(product.size_availability ? { sizeAvailability: product.size_availability } : {}),
+  };
   return {
     id: product.mock_product_id,
     title: product.title,
@@ -76,12 +105,13 @@ export function toPublicProduct(
     availability: product.availability,
     publicStoreId: product.public_store_id,
     storeLabel,
-    imagePath: product.image_path,
-    imageAvailable: product.image_available,
-  detailImagePath: product.detail_image_path,
-  detailImageAvailable: product.detail_image_available,
-  imageGallery: sanitizeImageGallery(product.image_gallery),
-};
+    imagePath,
+    imageAvailable: Boolean(imagePath),
+    detailImagePath,
+    detailImageAvailable: Boolean(detailImagePath),
+    imageGallery: gallery,
+    ...optional,
+  };
 }
 
 export function toPublicRelatedProduct(

@@ -7,7 +7,7 @@ import {
   getPublicDemoStores,
   type DemoStoreLocale,
 } from "@/lib/demo-stores";
-import { getProductAttributes } from "@/lib/product-attributes";
+import { getProductAttributes, type ProductAttributes } from "@/lib/product-attributes";
 import { interpretQuery, semanticSearch, type QueryInterpretation } from "@/lib/semantic-search";
 
 type CsvMockProduct = {
@@ -38,6 +38,16 @@ export type MockProduct = CsvMockProduct & {
   detail_image_path: string;
   detail_image_available: boolean;
   image_gallery: string[];
+  /** Optional facts are populated only when a controlled source supplies them. */
+  description?: string;
+  material?: string;
+  construction_details?: string;
+  size_system?: string;
+  garment_measurements?: Record<string, string>;
+  measurement_source?: string;
+  fit_note?: string;
+  fact_provenance?: ProductFactProvenance;
+  size_availability?: Record<string, ProductAvailability>;
   /** Visual attributes read off the product photo; empty when unenriched. */
   motif: string;
   surface: string;
@@ -45,17 +55,24 @@ export type MockProduct = CsvMockProduct & {
   visual_description: string;
 };
 
+export type ProductFactProvenance = "controlled_synthetic" | "retailer_verified";
+export type ProductAvailability = "in_stock" | "limited" | "out_of_stock" | "unknown";
+
 const csvPath = path.join(process.cwd(), "data", "mock_products.csv");
 const demoProductDirectory = path.join(process.cwd(), "public", "demo-products");
 
 let productCache: { mtimeMs: number; products: MockProduct[] } | null = null;
-const imageExtensionPattern = /\/demo-products\/(product-\d+(?:-tryon)?\.(?:png|webp))/;
+const imageExtensionPattern = /^\/demo-products\/product-\d+(?:-tryon)?\.(?:png|webp)$/;
 
-function splitImagePaths(raw: string): string[] {
-  return raw.split("|").map((path) => path.trim()).filter(Boolean);
+export function splitImagePaths(raw: string | undefined): string[] {
+  return (raw ?? "").split("|").map((path) => path.trim()).filter(Boolean);
 }
 
-function collectValidImagePaths(paths: string[]): string[] {
+/**
+ * Keep the demo image boundary in one place. Feed values may contain a
+ * pipe-delimited collection; source order is meaningful, duplicates are not.
+ */
+export function normalizeDemoImageGallery(paths: Iterable<string>, checkExists = true): string[] {
   const seen = new Set<string>();
   const images: string[] = [];
 
@@ -63,13 +80,91 @@ function collectValidImagePaths(paths: string[]): string[] {
     const imagePath = rawPath.trim();
     if (!imagePath || seen.has(imagePath)) continue;
     if (!imageExtensionPattern.test(imagePath)) continue;
-    if (!hasDemoProductImage(imagePath)) continue;
+    if (checkExists && !hasDemoProductImage(imagePath)) continue;
 
     seen.add(imagePath);
     images.push(imagePath);
   }
 
   return images;
+}
+
+export function detailImagePath(imagePath: string): string {
+  return imagePath.replace(/\.(png|webp)$/i, "-tryon.$1");
+}
+
+function inferSizeSystem(sizeOptions: string): string | undefined {
+  const sizes = splitImagePaths(sizeOptions);
+  if (sizes.length === 0) return undefined;
+  if (sizes.every((size) => size.toLowerCase() === "one_size")) return "One size";
+  if (sizes.every((size) => /^(?:xxs|xs|s|m|l|xl|xxl)$/i.test(size))) return "Lettered";
+  if (sizes.every((size) => /^\d+(?:-\d+)?$/.test(size))) return "Numeric";
+  return undefined;
+}
+
+const materialPatterns: Array<[RegExp, string]> = [
+  [/cashmere-feel wool/i, "cashmere-feel wool"],
+  [/linen-blend/i, "linen blend"],
+  [/wool-blend/i, "wool blend"],
+  [/faux[- ]leather/i, "faux leather"],
+  [/smooth leather|grained leather|leather upper/i, "leather"],
+  [/brushed fleece/i, "fleece"],
+  [/brushed wool|soft wool|wool melton|wool flannel/i, "wool"],
+  [/washed cotton|heavy cotton|cotton jersey|cotton twill|cotton canvas/i, "cotton"],
+  [/slubbed linen/i, "linen"],
+  [/viscose/i, "viscose"],
+  [/nylon/i, "nylon"],
+  [/denim/i, "denim"],
+  [/satin/i, "satin"],
+  [/velvet/i, "velvet"],
+  [/mesh/i, "mesh"],
+  [/suede/i, "suede"],
+  [/jersey/i, "jersey"],
+  [/canvas/i, "canvas"],
+];
+
+/** Extract only materials explicitly stated in the controlled visual description. */
+export function extractControlledMaterial(description: string): string | undefined {
+  for (const [pattern, material] of materialPatterns) {
+    if (pattern.test(description)) return material;
+  }
+  return undefined;
+}
+
+function inferFitNote(details: string): string | undefined {
+  const values = new Set(splitImagePaths(details));
+  const fit = [
+    ["oversized", "Oversized"],
+    ["boxy_fit", "Boxy"],
+    ["tailored_fit", "Tailored"],
+    ["regular_fit", "Regular fit"],
+    ["fitted", "Fitted"],
+    ["relaxed", "Relaxed"],
+  ] as const;
+  return fit.find(([tag]) => values.has(tag))?.[1];
+}
+
+function controlledFacts(
+  visual: ProductAttributes | undefined,
+  sizeOptions: string,
+) {
+  const description = visual?.visualDescription?.trim() || undefined;
+  const surface = visual?.surface?.trim() || undefined;
+  const construction = visual?.details?.trim() || undefined;
+  const material = description ? extractControlledMaterial(description) : undefined;
+  const sizeSystem = inferSizeSystem(sizeOptions);
+  const fitNote = construction ? inferFitNote(construction) : undefined;
+  const hasFacts = Boolean(description || material || surface || construction || sizeSystem || fitNote);
+
+  return {
+    description,
+    material,
+    construction_details: construction,
+    surface,
+    size_system: sizeSystem,
+    fit_note: fitNote,
+    fact_provenance: hasFacts ? "controlled_synthetic" as const : undefined,
+  };
 }
 
 export function getMockProducts(): MockProduct[] {
@@ -94,24 +189,29 @@ export function getMockProducts(): MockProduct[] {
 
   const products = rawRecords
     .map((csvProduct, index) => {
-      const imagePath =
-        csvProduct.image_url || `/demo-products/product-${String(index + 1).padStart(2, "0")}.webp`;
-      const detailImagePath = `/demo-products/product-${String(index + 1).padStart(2, "0")}-tryon.webp`;
-      const imageGallery = collectValidImagePaths([
-        ...splitImagePaths(imagePath),
-        detailImagePath,
+      const fallbackImagePath = `/demo-products/product-${String(index + 1).padStart(2, "0")}.webp`;
+      const sourceImagePaths = splitImagePaths(csvProduct.image_url);
+      const hasSourceImage = sourceImagePaths.some((imagePath) => hasDemoProductImage(imagePath));
+      const baseImagePaths = hasSourceImage ? sourceImagePaths : [fallbackImagePath];
+      const imageGallery = normalizeDemoImageGallery([
+        ...baseImagePaths,
+        detailImagePath(baseImagePaths[0] ?? fallbackImagePath),
       ]);
+      const imagePath = imageGallery[0] ?? "";
+      const detailPath = imageGallery[1] ?? "";
 
       const visual = attributes.get(csvProduct.mock_product_id);
+      const facts = controlledFacts(visual, csvProduct.size_options);
 
       return {
         ...csvProduct,
         image_url: imagePath,
         image_path: imagePath,
-        image_available: hasDemoProductImage(imagePath),
-        detail_image_path: detailImagePath,
-        detail_image_available: hasDemoProductImage(detailImagePath),
+        image_available: Boolean(imagePath),
+        detail_image_path: detailPath,
+        detail_image_available: Boolean(detailPath),
         image_gallery: imageGallery,
+        ...facts,
         public_store_id: getPublicDemoStoreForProduct(csvProduct).id,
         motif: visual?.motif ?? "",
         surface: visual?.surface ?? "",

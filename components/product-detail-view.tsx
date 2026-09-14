@@ -184,13 +184,40 @@ export function ProductDetailView({
         <article className="product-detail-card">
           <ProductSummary locale={locale} product={product} />
 
+          {(product.description || product.material || product.surface || product.constructionDetails || product.sizeSystem || product.fitNote || product.factProvenance) ? (
+            <section className="product-facts-section" aria-labelledby="product-facts-title">
+              <h2 id="product-facts-title">{t.factsTitle}</h2>
+              {product.factProvenance ? <p className="product-facts-provenance">{t.provenance(product.factProvenance)}</p> : null}
+              {product.description ? <p className="product-facts-description">{product.description}</p> : null}
+              <dl className="product-detail-facts">
+                {product.material ? <div><dt>{t.material}</dt><dd>{product.material}</dd></div> : null}
+                {product.surface ? <div><dt>{t.surface}</dt><dd>{product.surface}</dd></div> : null}
+                {product.constructionDetails ? <div><dt>{t.details}</dt><dd>{product.constructionDetails}</dd></div> : null}
+                {product.sizeSystem ? <div><dt>{t.sizeSystem}</dt><dd>{product.sizeSystem}</dd></div> : null}
+                {product.fitNote ? <div><dt>{t.fitNote}</dt><dd>{product.fitNote}</dd></div> : null}
+                {product.measurementSource ? <div><dt>{t.measurementSource}</dt><dd>{product.measurementSource}</dd></div> : null}
+              </dl>
+              {product.garmentMeasurements ? <div className="product-measurements">
+                <h3>{t.measurements}</h3>
+                <dl>{Object.entries(product.garmentMeasurements).map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+              </div> : null}
+            </section>
+          ) : null}
+
           {product.sizeOptions.length > 0 && <section className="product-size-section">
             <div>
               <h2>{t.sizesTitle}</h2>
               <Ruler aria-hidden="true" size={18} />
             </div>
             <ul aria-label={t.sizesAria}>
-              {product.sizeOptions.map((size) => <li key={size}>{size}</li>)}
+              {product.sizeOptions.map((size) => {
+                const status = product.sizeAvailability?.[size];
+                return <li key={size} className={status === "out_of_stock" ? "is-unavailable" : undefined}>
+                  <span>{size}</span>
+                  {status ? <small>{formatAvailabilityLabel(status, locale)}</small> : null}
+                  {status === "out_of_stock" ? <Link href={withLocale(`/search?size=${encodeURIComponent(size)}&category=${encodeURIComponent(product.category)}`, locale)}>{t.findSimilarSize(size)}</Link> : null}
+                </li>;
+              })}
             </ul>
           </section>}
 

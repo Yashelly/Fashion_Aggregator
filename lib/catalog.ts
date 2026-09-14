@@ -2,7 +2,13 @@ import "server-only";
 
 import { assertUniqueBy } from "@/lib/csv";
 import { isPublicDemoStoreId } from "@/lib/demo-stores";
-import { getMockProducts, hasDemoProductImage, type MockProduct } from "@/lib/mock-products";
+import {
+  detailImagePath,
+  getMockProducts,
+  normalizeDemoImageGallery,
+  splitImagePaths,
+  type MockProduct,
+} from "@/lib/mock-products";
 import { getProductAttributes } from "@/lib/product-attributes";
 import { getSupabasePublicServerClient } from "@/lib/supabase-server";
 
@@ -23,15 +29,24 @@ type CatalogProductRow = {
   availability: string;
   style_tags: string;
   image_url: string;
+  image_gallery?: string;
   mock_url: string;
   notes: string;
+  material?: string;
+  description?: string;
+  surface?: string;
+  construction_details?: string;
+  size_system?: string;
+  measurement_source?: string;
+  fit_note?: string;
 };
 
 const selectColumns = [
   "public_product_id", "public_store_id", "source_status", "title", "category",
   "subcategory", "brand", "gender", "color", "size_options", "price_eur",
   "old_price_eur", "currency", "availability", "style_tags", "image_url",
-  "mock_url", "notes",
+  "mock_url", "notes", "image_gallery", "description", "material", "surface",
+  "construction_details", "size_system", "measurement_source", "fit_note",
 ].join(",");
 const successTtlMs = 60_000;
 const failureRetryMs = 15_000;
@@ -39,10 +54,6 @@ const failureRetryMs = 15_000;
 let cached: { expiresAt: number; products: MockProduct[] } | null = null;
 let inFlight: Promise<MockProduct[] | null> | null = null;
 let retryAfter = 0;
-
-function detailImagePath(imagePath: string) {
-  return imagePath.replace(/\.(png|webp)$/i, "-tryon.$1");
-}
 
 function mapCatalogRows(rows: CatalogProductRow[]): MockProduct[] {
   const attributes = getProductAttributes();
@@ -58,10 +69,13 @@ function mapCatalogRows(rows: CatalogProductRow[]): MockProduct[] {
       if (!Number.isFinite(Number(row.price_eur))) {
         throw new Error("Catalog row has a non-numeric price");
       }
-      const imagePath = row.image_url || "";
-      const detailPath = detailImagePath(imagePath);
-      const imageGallery = [imagePath, detailPath]
-        .filter((path, index, paths) => Boolean(path) && hasDemoProductImage(path) && paths.indexOf(path) === index);
+      const sourceImagePaths = splitImagePaths(row.image_gallery || row.image_url);
+      const imageGallery = normalizeDemoImageGallery([
+        ...sourceImagePaths,
+        detailImagePath(sourceImagePaths[0] || ""),
+      ]);
+      const imagePath = imageGallery[0] || "";
+      const detailPath = imageGallery[1] || "";
       const visual = attributes.get(row.public_product_id);
       return {
         mock_product_id: row.public_product_id,
@@ -84,12 +98,23 @@ function mapCatalogRows(rows: CatalogProductRow[]): MockProduct[] {
         notes: row.notes || "",
         public_store_id: row.public_store_id,
         image_path: imagePath,
-        image_available: hasDemoProductImage(imagePath),
+        image_available: Boolean(imagePath),
         detail_image_path: detailPath,
-        detail_image_available: hasDemoProductImage(detailPath),
+        detail_image_available: Boolean(detailPath),
         image_gallery: imageGallery,
+        description: row.description || visual?.visualDescription || undefined,
+        material: row.material || undefined,
+        construction_details: row.construction_details || visual?.details || undefined,
+        size_system: row.size_system || undefined,
+        measurement_source: row.measurement_source || undefined,
+        fit_note: row.fit_note || undefined,
+        fact_provenance: row.description || row.material || row.surface || row.construction_details
+          ? "retailer_verified" as const
+          : visual
+            ? "controlled_synthetic" as const
+            : undefined,
         motif: visual?.motif ?? "",
-        surface: visual?.surface ?? "",
+        surface: row.surface || visual?.surface || "",
         visual_details: visual?.details ?? "",
         visual_description: visual?.visualDescription ?? "",
       };
