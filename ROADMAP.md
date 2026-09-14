@@ -99,20 +99,17 @@ The two things that make this different from Google or a brand's own site.
         can reach `graphic` but not `stars`. This needs either per-product
         visual attributes or an image-embedding model, and belongs with the
         real catalog in Phase 5.
-- [x] **Cross-store comparison** (2026-08-01) — the same item across every
-      store that carries it, price and sizes side by side, on the product page,
-      with a "N stores · from €X" signal on search cards.
-      **Read this before trusting the demo:** the base catalog could not
-      support this at all — all 64 rows sit in one store and no two rows are
-      the same item, so there was literally nothing to compare. The multi-store
-      listings in `data/mock_listings.csv` are therefore *generated*
-      (`npm run data:listings`), and the UI says so on the page. The mechanism
-      is real; the prices are not.
-  - [x] Product-identity matching strategy — trivial here (listings are keyed
-        to `mock_product_id` by construction). The real strategy for a real
-        feed is tiered GTIN → brand+MPN → embedding similarity → manual, spec'd
-        in [`docs/feed-format-research-2026-07-31.md`](docs/feed-format-research-2026-07-31.md).
-        `lib/product-listings.ts` is shaped so only its loader changes.
+- [ ] **Cross-store comparison** — deferred from the public storefront.
+      `lib/product-listings.ts` and `data/mock_listings.csv` remain development
+      fixtures only; the public `app/` and `components/` trees must not import
+      or render them. No store counts, cross-store price claims, savings, or
+      comparison tables are shown until authorized live listings and confirmed
+      product identity exist.
+  - [x] Product-identity matching strategy — the current fixture loader is
+        keyed to `mock_product_id` for development tests only. A real feed still
+        requires the tiered GTIN → brand+MPN → embedding similarity → manual
+        strategy specified in
+        [`docs/feed-format-research-2026-07-31.md`](docs/feed-format-research-2026-07-31.md).
 
 ## Phase 3 — Visual (2026-08-01)
 
