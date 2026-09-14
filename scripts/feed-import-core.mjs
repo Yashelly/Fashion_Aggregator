@@ -21,6 +21,30 @@ const CANONICAL_FIELDS = [
   "old_price",
   "availability",
   "size_summary",
+  "external_variant_id",
+  "item_group_id",
+  "variant_sku",
+  "variant_gtin",
+  "variant_currency",
+  "size_system",
+  "variant_size",
+  "variant_color",
+  "variant_price",
+  "variant_sale_price",
+  "variant_old_price",
+  "variant_availability",
+  "variant_image_urls",
+  "source_observed_at",
+  "offer_delivers_to_lithuania",
+  "offer_delivery_price_eur",
+  "offer_free_delivery_threshold_eur",
+  "offer_delivery_min_days",
+  "offer_delivery_max_days",
+  "offer_return_window_days",
+  "offer_return_payer",
+  "offer_return_cost",
+  "offer_policy_url",
+  "offer_last_checked_at",
 ];
 
 const IN_STOCK_VALUES = new Set([
@@ -31,7 +55,20 @@ const IN_STOCK_VALUES = new Set([
   "preorder",
   "yes",
 ]);
+const OUT_OF_STOCK_VALUES = new Set(["out of stock", "out-of-stock", "sold out", "sold-out", "unavailable", "no"]);
 const REMOVED_VALUES = new Set(["discontinued", "removed"]);
+const TRUE_VALUES = new Set(["1", "true", "yes", "on"]);
+const FALSE_VALUES = new Set(["0", "false", "no", "off"]);
+const RETURN_PAYER_VALUES = new Set(["customer", "retailer", "seller"]);
+const IMAGE_COLLECTION_DELIMITERS = [",", "|"];
+
+function firstDefined(value) {
+  return value === undefined || value === null ? "" : String(value);
+}
+
+function toLocaleLowerTrimmed(value) {
+  return value.trim().toLocaleLowerCase("en");
+}
 
 function normalizeForJson(value) {
   if (Array.isArray(value)) return value.map(normalizeForJson);
@@ -167,11 +204,16 @@ export function parseXmlRecords(text, itemTag = "item") {
 
 export function parseFeedText(text, config) {
   switch (config.format) {
-    case "csv": return parseDelimitedRecords(text, ",");
-    case "tsv": return parseDelimitedRecords(text, "\t");
-    case "json": return parseJsonRecords(text, config.recordPath ?? "");
-    case "xml": return parseXmlRecords(text, config.itemTag ?? "item");
-    default: throw new Error(`Unsupported feed format: ${config.format}`);
+    case "csv":
+      return parseDelimitedRecords(text, ",");
+    case "tsv":
+      return parseDelimitedRecords(text, "\t");
+    case "json":
+      return parseJsonRecords(text, config.recordPath ?? "");
+    case "xml":
+      return parseXmlRecords(text, config.itemTag ?? "item");
+    default:
+      throw new Error(`Unsupported feed format: ${config.format}`);
   }
 }
 
@@ -194,7 +236,9 @@ function mappedValue(raw, field, config) {
 
 function parsePrice(value) {
   if (!value) return null;
-  let cleaned = value.replace(/[^0-9,.-]/g, "");
+  const trimmed = value.trim();
+  if (!/^[+-]?(?:\d+(?:[.,]\d{1,2})?|[.,]\d{1,2})$/.test(trimmed)) return Number.NaN;
+  let cleaned = trimmed;
   if (cleaned.includes(",") && cleaned.includes(".")) {
     cleaned = cleaned.lastIndexOf(",") > cleaned.lastIndexOf(".")
       ? cleaned.replace(/\./g, "").replace(",", ".")
@@ -204,6 +248,59 @@ function parsePrice(value) {
   }
   const number = Number(cleaned);
   return Number.isFinite(number) && number >= 0 ? number : Number.NaN;
+}
+
+function parseNonNegativeInteger(value) {
+  if (!value) return null;
+  if (!/^\d+$/.test(value)) return Number.NaN;
+  const number = Number(value);
+  return Number.isSafeInteger(number) && number >= 0 ? number : Number.NaN;
+}
+
+function parseBoolean(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const normalized = toLocaleLowerTrimmed(value);
+  if (TRUE_VALUES.has(normalized)) return true;
+  if (FALSE_VALUES.has(normalized)) return false;
+  return Number.NaN;
+}
+
+function parseObservationTime(value) {
+  if (!value) return { value: null, valid: true };
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return { value: null, valid: false };
+  return { value: parsed.toISOString(), valid: true };
+}
+
+export function freshnessAdjustedAvailability(status, observedAt, slaHours, now = new Date()) {
+  if (!Number.isFinite(slaHours) || slaHours <= 0 || !observedAt) return status;
+  const observed = new Date(observedAt);
+  if (Number.isNaN(observed.getTime()) || observed.getTime() > now.getTime()) return "unknown";
+  return now.getTime() - observed.getTime() > slaHours * 60 * 60 * 1000 ? "unknown" : status;
+}
+
+export function variantIdentity(payload) {
+  return [
+    payload.external_variant_id,
+    payload.item_group_id,
+    payload.variant_sku,
+    payload.variant_gtin,
+    payload.normalized_variant_size,
+    payload.normalized_variant_color,
+  ].map((value) => String(value ?? "").trim()).join("|");
+}
+
+export function groupVariantRows(rows) {
+  const groups = new Map();
+  for (const row of rows) {
+    if (!row?.isVariant || row.validationStatus === "invalid") continue;
+    const productId = row.normalizedPayload.external_product_id;
+    if (!productId) continue;
+    const variants = groups.get(productId) ?? [];
+    variants.push(row);
+    groups.set(productId, variants);
+  }
+  return groups;
 }
 
 function normalizeToken(value) {
@@ -216,7 +313,8 @@ function normalizeToken(value) {
 }
 
 function normalizeAvailability(value, config) {
-  const normalized = value.trim().toLocaleLowerCase("en");
+  if (value === "") return { in_stock: false, status: "unknown" };
+  const normalized = toLocaleLowerTrimmed(value);
   const configured = config.availabilityMap?.[normalized];
   if (configured) {
     return {
@@ -225,8 +323,9 @@ function normalizeAvailability(value, config) {
     };
   }
   if (REMOVED_VALUES.has(normalized)) return { in_stock: false, status: "removed" };
+  if (OUT_OF_STOCK_VALUES.has(normalized)) return { in_stock: false, status: "out_of_stock" };
   if (IN_STOCK_VALUES.has(normalized)) return { in_stock: true, status: "active" };
-  return { in_stock: false, status: "out_of_stock" };
+  return { in_stock: false, status: "unknown" };
 }
 
 function validHttpsUrl(value) {
@@ -245,16 +344,6 @@ function validDemoPath(value, kind) {
     ? /^\/demo-products\/product-\d+(?:-tryon)?\.(?:png|webp)$/
     : /^\/mock\/products\/[A-Za-z0-9_-]+$/;
   return pattern.test(value);
-}
-
-function contentHashPayload(product) {
-  return Object.fromEntries([
-    "external_product_id", "source_sku", "title", "brand", "description",
-    "merchant_category", "normalized_category", "subcategory", "gender", "color_label",
-    "normalized_color", "material", "style_tags", "product_url", "affiliate_url", "image_url",
-    "currency", "price", "sale_price", "old_price", "availability", "in_stock",
-    "size_summary", "status",
-  ].map((key) => [key, product[key] ?? null]));
 }
 
 function validateConfig(config) {
@@ -278,10 +367,110 @@ function validateConfig(config) {
   }
 }
 
+function parseDelimitedImageList(value, allowRelativeDemoUrls, warnings) {
+  if (!value) return [];
+
+  const delimiter = value.includes("|")
+    ? "|"
+    : IMAGE_COLLECTION_DELIMITERS.find((candidate) => value.includes(candidate)) ?? ",";
+  const seen = new Set();
+  const images = [];
+
+  for (const rawImage of value.split(delimiter)) {
+    const valueImage = rawImage.trim();
+    if (!valueImage) continue;
+    const validImageUrl = validHttpsUrl(valueImage)
+      || (allowRelativeDemoUrls && validDemoPath(valueImage, "image"));
+    if (!validImageUrl) {
+      warnings.push("invalid_variant_image_url");
+      continue;
+    }
+    if (!seen.has(valueImage)) {
+      seen.add(valueImage);
+      images.push(valueImage);
+    }
+  }
+  return images;
+}
+
+function parseImageList(value, warnings, allowRelativeDemoUrls) {
+  return parseDelimitedImageList(value, allowRelativeDemoUrls, warnings);
+}
+
+function imageListSummary(value) {
+  if (!value) return "";
+  return value.join("|");
+}
+
+function isVariantRow(mapped) {
+  const check = [
+    mapped.external_variant_id,
+    mapped.item_group_id,
+    mapped.variant_sku,
+    mapped.variant_gtin,
+    mapped.size_system,
+    mapped.variant_size,
+    mapped.variant_color,
+    mapped.variant_price,
+    mapped.variant_sale_price,
+    mapped.variant_old_price,
+    mapped.variant_availability,
+    mapped.variant_image_urls,
+  ];
+  return check.some((value) => String(value ?? "").trim() !== "");
+}
+
+function isOfferRow(mapped) {
+  const check = [
+    mapped.offer_delivers_to_lithuania,
+    mapped.offer_delivery_price_eur,
+    mapped.offer_free_delivery_threshold_eur,
+    mapped.offer_delivery_min_days,
+    mapped.offer_delivery_max_days,
+    mapped.offer_return_window_days,
+    mapped.offer_return_payer,
+    mapped.offer_return_cost,
+    mapped.offer_policy_url,
+    mapped.offer_last_checked_at,
+  ];
+  return check.some((value) => String(value ?? "").trim() !== "");
+}
+
+function contentHashPayload(product, includesVariant = false) {
+  const basePayload = [
+    "external_product_id", "source_sku", "title", "brand", "description",
+    "merchant_category", "normalized_category", "subcategory", "gender", "color_label",
+    "normalized_color", "material", "style_tags", "product_url", "affiliate_url", "image_url",
+    "currency", "price", "sale_price", "old_price", "availability", "in_stock",
+    "size_summary", "status",
+  ];
+  const variantPayload = includesVariant
+    ? [
+      "external_variant_id", "item_group_id", "variant_sku", "variant_gtin",
+      "size_system", "variant_size", "normalized_variant_size", "variant_color",
+      "normalized_variant_color", "variant_currency", "variant_price",
+      "variant_sale_price", "variant_old_price", "variant_availability",
+      "variant_in_stock", "image_url_list",
+    ]
+    : [];
+  const offerPayload = [
+    "offer_delivers_to_lithuania", "offer_delivery_price_eur",
+    "offer_free_delivery_threshold_eur", "offer_delivery_min_days",
+    "offer_delivery_max_days", "offer_return_window_days", "offer_return_payer",
+    "offer_return_cost", "offer_policy_url", "offer_last_checked_at",
+  ];
+  return Object.fromEntries([
+    ...basePayload.map((key) => [key, product[key] ?? null]),
+    ...variantPayload.map((key) => [key, product[key] ?? null]),
+    ...offerPayload.map((key) => [key, product[key] ?? null]),
+  ]);
+}
+
 export function buildImportPlan(text, config, { allowRelativeDemoUrls = false } = {}) {
   validateConfig(config);
   const parsedRows = parseFeedText(text, config);
   const seenProductIds = new Set();
+  const seenVariantIds = new Set();
   const rows = parsedRows.map((rawPayload, index) => {
     const mapped = Object.fromEntries(
       CANONICAL_FIELDS.map((field) => [field, mappedValue(rawPayload, field, config)]),
@@ -291,29 +480,127 @@ export function buildImportPlan(text, config, { allowRelativeDemoUrls = false } 
     const price = parsePrice(mapped.price);
     const salePrice = parsePrice(mapped.sale_price);
     const oldPrice = parsePrice(mapped.old_price);
-    const currency = mapped.currency.toUpperCase();
-    const availability = normalizeAvailability(mapped.availability, config);
-    const categoryKey = mapped.merchant_category.trim().toLocaleLowerCase("en");
+
+    const variantPrice = parsePrice(mapped.variant_price);
+    const variantSalePrice = parsePrice(mapped.variant_sale_price);
+    const variantOldPrice = parsePrice(mapped.variant_old_price);
+    const offerReturnCost = parsePrice(mapped.offer_return_cost);
+
+    const offerDeliveryPrice = parsePrice(mapped.offer_delivery_price_eur);
+    const offerDeliveryThreshold = parsePrice(mapped.offer_free_delivery_threshold_eur);
+    const offerDeliveryMinDays = parseNonNegativeInteger(mapped.offer_delivery_min_days);
+    const offerDeliveryMaxDays = parseNonNegativeInteger(mapped.offer_delivery_max_days);
+    const offerReturnWindow = parseNonNegativeInteger(mapped.offer_return_window_days);
+    const variantImageUrls = parseImageList(mapped.variant_image_urls, warnings, allowRelativeDemoUrls);
+    if (warnings.includes("invalid_variant_image_url")) {
+      errors.push("invalid_variant_image_url");
+      while (warnings.includes("invalid_variant_image_url")) {
+        warnings.splice(warnings.indexOf("invalid_variant_image_url"), 1);
+      }
+    }
+
     const normalized = {
       ...mapped,
-      currency,
+      currency: firstDefined(mapped.currency).toUpperCase(),
+      variant_currency: firstDefined(mapped.variant_currency || mapped.currency).toUpperCase(),
       price,
       sale_price: salePrice,
       old_price: oldPrice,
-      normalized_category: config.categoryMap?.[categoryKey] ?? normalizeToken(mapped.merchant_category),
+      variant_price: variantPrice,
+      variant_sale_price: variantSalePrice,
+      variant_old_price: variantOldPrice,
+      variant_image_urls: variantImageUrls,
+      image_url_list: imageListSummary(variantImageUrls),
+      normalized_category: config.categoryMap?.[toLocaleLowerTrimmed(mapped.merchant_category)] ?? normalizeToken(mapped.merchant_category),
       normalized_color: normalizeToken(mapped.color_label),
+      normalized_variant_size: normalizeToken(mapped.variant_size),
+      normalized_variant_color: normalizeToken(mapped.variant_color),
       gender: normalizeToken(mapped.gender),
-      ...availability,
+      source_observation_at: null,
+      offer_return_payer: firstDefined(mapped.offer_return_payer).toLocaleLowerCase("en"),
     };
+    const parsedObservation = parseObservationTime(mapped.source_observed_at || mapped.observation_at);
+    const parsedOfferCheck = parseObservationTime(mapped.offer_last_checked_at);
+
+    const availability = normalizeAvailability(mapped.availability, config);
+    normalized.in_stock = availability.in_stock;
+    normalized.status = availability.status;
+    normalized.offer_last_checked_at = parsedOfferCheck.value;
+    normalized.source_observation_at = parsedObservation.value;
+
+    const variantAvailability = normalizeAvailability(firstDefined(mapped.variant_availability), config);
+    const isVariant = isVariantRow(mapped);
+    normalized.variant_in_stock = variantAvailability.in_stock;
+    normalized.variant_availability = mapped.variant_availability
+      ? variantAvailability.status
+      : availability.status;
+    normalized.offer_delivers_to_lithuania = parseBoolean(mapped.offer_delivers_to_lithuania);
+    normalized.offer_delivery_price_eur = offerDeliveryPrice;
+    normalized.offer_free_delivery_threshold_eur = offerDeliveryThreshold;
+    normalized.offer_delivery_min_days = offerDeliveryMinDays;
+    normalized.offer_delivery_max_days = offerDeliveryMaxDays;
+    normalized.offer_return_window_days = offerReturnWindow;
+    normalized.offer_return_cost = offerReturnCost;
+    normalized.is_variant = isVariant;
+    normalized.has_offer_terms = isOfferRow(mapped);
+
+
+    const categoryKey = firstDefined(mapped.merchant_category).toLocaleLowerCase("en");
+    normalized.normalized_category = config.categoryMap?.[categoryKey] ?? normalizeToken(mapped.merchant_category);
+    const canonicalColor = normalizeToken(mapped.color_label);
+    normalized.normalized_color = canonicalColor;
 
     if (!mapped.external_product_id) errors.push("missing_external_product_id");
     if (!mapped.title) errors.push("missing_title");
-    if (!mapped.price) errors.push("missing_price");
-    else if (Number.isNaN(price)) errors.push("invalid_price");
+    const hasProductPrice = mapped.price !== "";
+    const hasVariantPrice = mapped.variant_price !== "";
+    if (isVariant ? !hasProductPrice && !hasVariantPrice : !hasProductPrice) {
+      errors.push("missing_price");
+    } else {
+      if (!hasProductPrice && Number.isNaN(variantPrice)) errors.push("invalid_variant_price");
+      else if (Number.isNaN(price)) errors.push("invalid_price");
+    }
     if (mapped.sale_price && Number.isNaN(salePrice)) errors.push("invalid_sale_price");
     if (mapped.old_price && Number.isNaN(oldPrice)) errors.push("invalid_old_price");
-    if (!/^[A-Z]{3}$/.test(currency)) errors.push("invalid_currency");
-    if (!mapped.availability) errors.push("missing_availability");
+
+    if (mapped.variant_price && Number.isNaN(variantPrice)) errors.push("invalid_variant_price");
+    if (mapped.variant_sale_price && Number.isNaN(variantSalePrice)) errors.push("invalid_variant_sale_price");
+    if (mapped.variant_old_price && Number.isNaN(variantOldPrice)) errors.push("invalid_variant_old_price");
+    if (mapped.offer_delivery_price_eur && Number.isNaN(offerDeliveryPrice)) errors.push("invalid_offer_delivery_price");
+    if (mapped.offer_free_delivery_threshold_eur && Number.isNaN(offerDeliveryThreshold)) errors.push("invalid_offer_free_delivery_threshold");
+    if (mapped.offer_delivery_min_days && Number.isNaN(offerDeliveryMinDays)) errors.push("invalid_offer_delivery_min_days");
+    if (mapped.offer_delivery_max_days && Number.isNaN(offerDeliveryMaxDays)) errors.push("invalid_offer_delivery_max_days");
+    if (mapped.offer_return_window_days && Number.isNaN(offerReturnWindow)) errors.push("invalid_offer_return_window_days");
+    if (mapped.offer_return_cost && Number.isNaN(offerReturnCost)) errors.push("invalid_offer_return_cost");
+    if (offerDeliveryMinDays !== null && offerDeliveryMaxDays !== null
+      && Number.isFinite(offerDeliveryMinDays) && Number.isFinite(offerDeliveryMaxDays)
+      && offerDeliveryMinDays > offerDeliveryMaxDays) errors.push("invalid_offer_delivery_range");
+    if (!/^[A-Z]{3}$/.test(normalized.currency)) errors.push("invalid_currency");
+    if (!/^[A-Z]{3}$/.test(normalized.variant_currency)) errors.push("invalid_variant_currency");
+    if (!mapped.availability && !mapped.variant_availability) errors.push("missing_availability");
+
+    if (Number.isNaN(normalized.offer_delivers_to_lithuania)) {
+      errors.push("invalid_offer_delivers_to_lithuania");
+      normalized.offer_delivers_to_lithuania = null;
+    }
+    if (
+      normalized.offer_return_payer
+      && !RETURN_PAYER_VALUES.has(normalized.offer_return_payer)
+    ) errors.push("invalid_offer_return_payer");
+
+    if (parsedObservation.value === null && (mapped.source_observed_at || mapped.observation_at)) {
+      errors.push("invalid_source_observation_at");
+    }
+    if (parsedObservation.value && new Date(parsedObservation.value).getTime() > Date.now()) {
+      errors.push("future_source_observation_at");
+    }
+    if (parsedOfferCheck.value === null && mapped.offer_last_checked_at) {
+      errors.push("invalid_offer_last_checked_at");
+    }
+    if (parsedOfferCheck.value && new Date(parsedOfferCheck.value).getTime() > Date.now()) {
+      errors.push("future_offer_last_checked_at");
+    }
+
     const validProductUrl = validHttpsUrl(mapped.product_url)
       || (allowRelativeDemoUrls && validDemoPath(mapped.product_url, "product"));
     const validAffiliateUrl = validHttpsUrl(mapped.affiliate_url);
@@ -325,14 +612,42 @@ export function buildImportPlan(text, config, { allowRelativeDemoUrls = false } 
     if (mapped.product_url && !validProductUrl) errors.push("invalid_product_url");
     if (mapped.affiliate_url && !validAffiliateUrl) errors.push("invalid_affiliate_url");
     if (!mapped.image_url) warnings.push("missing_image_url");
-    else if (!validImageUrl) errors.push("invalid_image_url");
-    if (mapped.external_product_id && seenProductIds.has(mapped.external_product_id)) {
-      errors.push("duplicate_external_product_id");
+    else if (!validImageUrl) {
+      errors.push("invalid_image_url");
+      normalized.image_url = null;
     }
-    if (mapped.external_product_id) seenProductIds.add(mapped.external_product_id);
+
+    if (!isVariant && mapped.external_product_id) {
+      if (seenProductIds.has(mapped.external_product_id)) errors.push("duplicate_external_product_id");
+      else seenProductIds.add(mapped.external_product_id);
+    }
+    if (isVariant && mapped.external_product_id) {
+      const key = [
+        mapped.external_product_id,
+        mapped.external_variant_id || "",
+        mapped.item_group_id || "",
+        mapped.variant_sku || "",
+        mapped.variant_gtin || "",
+        normalized.normalized_variant_size || "",
+        normalized.normalized_variant_color || "",
+      ].join("|");
+      if (seenVariantIds.has(key)) errors.push("duplicate_variant_identity");
+      else seenVariantIds.add(key);
+    }
+    if (isVariant && !(
+      mapped.external_variant_id || mapped.item_group_id || mapped.variant_sku || mapped.variant_gtin
+      || mapped.variant_size || mapped.variant_color || normalized.image_url_list
+    )) {
+      errors.push("incomplete_variant_identity");
+    }
+
+    if (mapped.offer_policy_url && !validHttpsUrl(mapped.offer_policy_url)) errors.push("invalid_offer_policy_url");
 
     const rawHash = sha256(stableStringify(rawPayload));
     const contentHash = sha256(stableStringify(contentHashPayload(normalized)));
+    const variantContentHash = isVariant
+      ? sha256(stableStringify(contentHashPayload(normalized, true)))
+      : null;
     const validationStatus = errors.length > 0
       ? "invalid"
       : warnings.includes("missing_image_url")
@@ -343,12 +658,14 @@ export function buildImportPlan(text, config, { allowRelativeDemoUrls = false } 
 
     return {
       contentHash,
+      variantContentHash,
       normalizedPayload: normalized,
       rawHash,
       rawPayload,
       rowNumber: index + 1,
       validationErrors: [...errors, ...warnings],
       validationStatus,
+      isVariant,
     };
   });
 

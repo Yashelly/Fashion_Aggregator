@@ -1,5 +1,5 @@
 import postgres from "postgres";
-import { classifyProductChange } from "./feed-import-core.mjs";
+import { classifyProductChange, variantIdentity } from "./feed-import-core.mjs";
 
 function postgresSsl(databaseUrl) {
   const host = new URL(databaseUrl).hostname;
@@ -50,7 +50,15 @@ export function assertProgramRules(rules, sourceType, rows) {
 
 function productStatus(row, sourceType) {
   if (sourceType === "manual_mock" && row.normalizedPayload.in_stock) return "demo";
-  return row.normalizedPayload.status;
+  const status = row.normalizedPayload.status;
+  return new Set(["active", "out_of_stock", "removed", "blocked", "demo"]).has(status)
+    ? status
+    : "active";
+}
+
+function availabilityForProduct(product) {
+  if (product.status === "unknown") return "unknown";
+  return product.status;
 }
 
 export async function applyImportPlan({
@@ -105,6 +113,9 @@ export async function applyImportPlan({
 
     const counters = await sql.begin(async (transaction) => {
       const result = { inserted: 0, outOfStock: 0, unchanged: 0, updated: 0 };
+      const seenVariantKeys = new Map();
+      const seenProductIds = new Set();
+      const seenOfferProducts = new Set();
       await transaction`
         select pg_advisory_xact_lock(hashtextextended(${store.id}::text, 0))
       `;
@@ -166,7 +177,7 @@ export async function applyImportPlan({
               ${product.style_tags || null},
               ${product.product_url || null}, ${product.affiliate_url || null},
               ${product.image_url || null}, ${product.currency}, ${product.price},
-              ${product.sale_price}, ${product.old_price}, ${product.availability || null},
+              ${product.sale_price}, ${product.old_price}, ${availabilityForProduct(product) || null},
               ${product.in_stock}, ${product.size_summary || null},
               ${productStatus(row, sourceType)}, ${row.rawHash}, ${row.contentHash}, ${runId}
             ) returning id
@@ -187,7 +198,7 @@ export async function applyImportPlan({
               product_url = ${product.product_url || null}, affiliate_url = ${product.affiliate_url || null},
               image_url = ${product.image_url || null}, currency = ${product.currency},
               price = ${product.price}, sale_price = ${product.sale_price}, old_price = ${product.old_price},
-              availability = ${product.availability || null}, in_stock = ${product.in_stock},
+              availability = ${availabilityForProduct(product) || null}, in_stock = ${product.in_stock},
               size_summary = ${product.size_summary || null}, status = ${productStatus(row, sourceType)},
               raw_hash = ${row.rawHash}, content_hash = ${row.contentHash},
               last_seen_at = now(), last_import_run_id = ${runId}
@@ -197,7 +208,7 @@ export async function applyImportPlan({
           productId = existing.id;
           await transaction`
             update public.products set
-              availability = ${product.availability || null}, in_stock = ${product.in_stock},
+              availability = ${availabilityForProduct(product) || null}, in_stock = ${product.in_stock},
               status = ${productStatus(row, sourceType)}, raw_hash = ${row.rawHash},
               last_seen_at = now(), last_import_run_id = ${runId}
             where id = ${existing.id}
@@ -207,7 +218,107 @@ export async function applyImportPlan({
         await transaction`
           update public.raw_feed_items set product_id = ${productId} where id = ${rawItem.id}
         `;
+        seenProductIds.add(productId);
+
+        if (row.isVariant) {
+          const variantKey = variantIdentity(product);
+          const keys = seenVariantKeys.get(productId) ?? new Set();
+          keys.add(variantKey);
+          seenVariantKeys.set(productId, keys);
+          await transaction`
+            insert into public.product_variants (
+              product_id, external_variant_id, item_group_id, sku, gtin,
+              size_system, size_label, normalized_size, color_label, normalized_color,
+              currency, price, sale_price, old_price, availability, in_stock,
+              product_url, affiliate_url, image_urls, source_observed_at,
+              raw_payload, raw_hash, variant_key, last_seen_at
+            ) values (
+              ${productId}, ${product.external_variant_id || null}, ${product.item_group_id || null},
+              ${product.variant_sku || null}, ${product.variant_gtin || null},
+              ${product.size_system || null}, ${product.variant_size || null},
+              ${product.normalized_variant_size || null}, ${product.variant_color || null},
+              ${product.normalized_variant_color || null}, ${product.variant_currency},
+              ${product.variant_price}, ${product.variant_sale_price}, ${product.variant_old_price},
+              ${product.variant_availability}, ${product.variant_in_stock},
+              ${product.product_url || null}, ${product.affiliate_url || null},
+              ${product.variant_image_urls}::text[], ${product.source_observation_at},
+              ${JSON.stringify(row.rawPayload)}::jsonb, ${row.rawHash}, ${variantKey}, now()
+            )
+            on conflict (product_id, variant_key) do update set
+              external_variant_id = excluded.external_variant_id,
+              item_group_id = excluded.item_group_id,
+              sku = excluded.sku,
+              gtin = excluded.gtin,
+              size_system = excluded.size_system,
+              size_label = excluded.size_label,
+              normalized_size = excluded.normalized_size,
+              color_label = excluded.color_label,
+              normalized_color = excluded.normalized_color,
+              currency = excluded.currency,
+              price = excluded.price,
+              sale_price = excluded.sale_price,
+              old_price = excluded.old_price,
+              availability = excluded.availability,
+              in_stock = excluded.in_stock,
+              product_url = excluded.product_url,
+              affiliate_url = excluded.affiliate_url,
+              image_urls = excluded.image_urls,
+              source_observed_at = excluded.source_observed_at,
+              raw_payload = excluded.raw_payload,
+              raw_hash = excluded.raw_hash,
+              last_seen_at = now()
+          `;
+        }
+
+        if (product.has_offer_terms) {
+          seenOfferProducts.add(productId);
+          await transaction`
+            insert into public.retailer_offer_terms (
+              store_id, product_id, delivers_to_lithuania,
+              delivery_price_eur, free_delivery_threshold_eur,
+              delivery_min_days, delivery_max_days, return_window_days,
+              return_payer, return_cost, policy_url, last_checked_at
+            ) values (
+              ${store.id}, ${productId}, ${product.offer_delivers_to_lithuania},
+              ${product.offer_delivery_price_eur}, ${product.offer_free_delivery_threshold_eur},
+              ${product.offer_delivery_min_days}, ${product.offer_delivery_max_days},
+              ${product.offer_return_window_days}, ${product.offer_return_payer || null},
+              ${product.offer_return_cost}, ${product.offer_policy_url || null},
+              ${product.offer_last_checked_at}
+            )
+            on conflict (store_id, product_id) do update set
+              delivers_to_lithuania = excluded.delivers_to_lithuania,
+              delivery_price_eur = excluded.delivery_price_eur,
+              free_delivery_threshold_eur = excluded.free_delivery_threshold_eur,
+              delivery_min_days = excluded.delivery_min_days,
+              delivery_max_days = excluded.delivery_max_days,
+              return_window_days = excluded.return_window_days,
+              return_payer = excluded.return_payer,
+              return_cost = excluded.return_cost,
+              policy_url = excluded.policy_url,
+              last_checked_at = excluded.last_checked_at,
+              updated_at = now()
+          `;
+        }
         result[change] += 1;
+      }
+
+      if (fullSnapshot) {
+        for (const [productId, keys] of seenVariantKeys) {
+          await transaction`
+            delete from public.product_variants
+            where product_id = ${productId}
+              and not (variant_key = any(${[...keys]}::text[]))
+          `;
+        }
+        for (const productId of seenProductIds) {
+          if (!seenOfferProducts.has(productId)) {
+            await transaction`
+              delete from public.retailer_offer_terms
+              where product_id = ${productId} and store_id = ${store.id}
+            `;
+          }
+        }
       }
 
       if (fullSnapshot) {

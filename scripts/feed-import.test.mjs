@@ -8,6 +8,8 @@ import {
   parseDelimitedRecords,
   parseJsonRecords,
   parseXmlRecords,
+  freshnessAdjustedAvailability,
+  groupVariantRows,
 } from "./feed-import-core.mjs";
 import {
   assertProgramRules,
@@ -145,4 +147,32 @@ test("mapping profiles cannot carry feed credentials", () => {
     () => buildImportPlan(fixture, { ...config, token: "must-not-be-committed" }),
     /must not contain secret\/source field/,
   );
+});
+
+test("phase 5 validates variants, Lithuania terms, and freshness", () => {
+  const variantConfig = {
+    ...config,
+    fields: {
+      ...config.fields,
+      external_variant_id: ["variant_id"],
+      variant_size: ["variant_size"],
+      variant_color: ["variant_color"],
+      variant_price: ["variant_price"],
+      offer_delivers_to_lithuania: ["lt_delivery"],
+    },
+  };
+  const csv = [
+    "id,name,product_link,image_link,currency,price,availability,variant_id,variant_size,variant_color,variant_price,lt_delivery",
+    "P-1,Variant coat,https://merchant.invalid/p,https://merchant.invalid/i.webp,EUR,10,in stock,V-1,M,black,12,true",
+  ].join("\n");
+  const plan = buildImportPlan(csv, variantConfig);
+  assert.equal(plan.summary.canApply, true);
+  assert.equal(plan.rows[0].isVariant, true);
+  assert.equal(plan.rows[0].normalizedPayload.offer_delivers_to_lithuania, true);
+  assert.equal(groupVariantRows(plan.rows).get("P-1").length, 1);
+
+  const blocked = buildImportPlan(csv.replace(",true", ",false"), variantConfig);
+  assert.equal(blocked.rows[0].validationStatus, "valid");
+  assert.equal(blocked.rows[0].normalizedPayload.offer_delivers_to_lithuania, false);
+  assert.equal(freshnessAdjustedAvailability("active", "2020-01-01T00:00:00Z", 24, new Date("2020-01-03T00:00:00Z")), "unknown");
 });

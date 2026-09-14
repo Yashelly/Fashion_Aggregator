@@ -13,7 +13,7 @@
     "lint": "tsc --noEmit",
     "test:locale": "python scripts/locale_e2e.py",
     "typecheck": "tsc --noEmit",
-    "test:unit": "node --test scripts/semantic-search.test.mjs scripts/search-runtime-cache.test.mjs scripts/search-routing.test.mjs scripts/search-runtime-routing.test.mjs scripts/search-cloud-runtime.test.mjs scripts/feed-import.test.mjs scripts/feed-operation.test.mjs scripts/search-catalog-postgres.test.mjs scripts/public-product.test.mjs scripts/search-params.test.mjs scripts/saved-items.test.mjs scripts/recent-searches.test.mjs scripts/analytics-retention-gate.test.mjs scripts/locale-proxy.test.mjs",
+    "test:unit": "node --test scripts/semantic-search.test.mjs scripts/search-runtime-cache.test.mjs scripts/search-routing.test.mjs scripts/search-runtime-routing.test.mjs scripts/search-cloud-runtime.test.mjs scripts/feed-import.test.mjs scripts/feed-operation.test.mjs scripts/search-catalog-postgres.test.mjs scripts/public-product.test.mjs scripts/search-params.test.mjs scripts/saved-items.test.mjs scripts/recent-searches.test.mjs scripts/analytics-retention-gate.test.mjs scripts/locale-proxy.test.mjs scripts/product-listings.test.mjs scripts/public-ui-product-listings-boundary.test.mjs",
     "test:search": "node scripts/semantic-eval.mjs --set=development",
     "eval:blind": "node scripts/final-blind-v3-eval.mjs",
     "eval:blind:validate": "node scripts/validate-final-blind-v3.mjs --require-manifest",

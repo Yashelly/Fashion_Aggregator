@@ -58,6 +58,42 @@ type ListingRow = {
   availability: string;
 };
 
+const LISTING_ID = /^LST-[A-Z0-9][A-Z0-9_-]*$/;
+const PRODUCT_ID = /^MOCK-[A-Z0-9][A-Z0-9_-]*$/;
+const PUBLIC_STORE_ID = /^demo-store-0[1-6]$/;
+const AVAILABILITY = new Set(["in_stock", "limited", "out_of_stock", "unknown"]);
+
+export function parseListingRow(row: Partial<ListingRow> | null | undefined): ListingRow | null {
+  if (!row) return null;
+  const value = (key: keyof ListingRow) => String(row[key] ?? "").trim();
+  const listing_id = value("listing_id");
+  const mock_product_id = value("mock_product_id");
+  const demo_store_id = value("demo_store_id");
+  const price_eur = value("price_eur");
+  const old_price_eur = value("old_price_eur");
+  const currency = value("currency").toUpperCase();
+  const size_options = value("size_options");
+  const availability = value("availability");
+  const validMoney = (input: string, required: boolean) =>
+    (!required && input === "") || /^\d+(?:\.\d{1,2})?$/.test(input);
+  const sizes = size_options.split("|").map((size) => size.trim()).filter(Boolean);
+  if (!LISTING_ID.test(listing_id) || !PRODUCT_ID.test(mock_product_id)
+    || !PUBLIC_STORE_ID.test(demo_store_id) || !validMoney(price_eur, true)
+    || !validMoney(old_price_eur, false) || !/^[A-Z]{3}$/.test(currency)
+    || sizes.length === 0 || sizes.length !== size_options.split("|").length
+    || !AVAILABILITY.has(availability)) return null;
+  return {
+    listing_id,
+    mock_product_id,
+    demo_store_id,
+    price_eur,
+    old_price_eur,
+    currency,
+    size_options: sizes.join("|"),
+    availability,
+  };
+}
+
 const listingsPath = path.join(process.cwd(), "data", "mock_listings.csv");
 
 let cachedListings: Map<string, ListingRow[]> | null = null;
@@ -71,13 +107,15 @@ function loadListings(): Map<string, ListingRow[]> {
   // case every product simply reports one store — the truthful answer for a
   // catalog with no overlap.
   for (const listing of readCsvFile<ListingRow>(listingsPath)) {
+    const parsed = parseListingRow(listing);
+    if (!parsed) continue;
     // A listing pointing at a store id we do not publish is dropped rather than
     // rendered, so the public store vocabulary stays closed.
-    if (!getPublicDemoStoreById(listing.demo_store_id)) continue;
+    if (!getPublicDemoStoreById(parsed.demo_store_id)) continue;
 
-    const existing = byProduct.get(listing.mock_product_id);
-    if (existing) existing.push(listing);
-    else byProduct.set(listing.mock_product_id, [listing]);
+    const existing = byProduct.get(parsed.mock_product_id);
+    if (existing) existing.push(parsed);
+    else byProduct.set(parsed.mock_product_id, [parsed]);
   }
 
   cachedListings = byProduct;
