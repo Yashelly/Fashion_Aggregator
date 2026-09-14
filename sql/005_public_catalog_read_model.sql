@@ -150,7 +150,7 @@ begin
     coalesce(product_row.image_url, ''),
     coalesce(product_row.description, ''),
     coalesce(product_row.material, ''),
-    '', '', '', '',
+    '', '', '', '', '',
     '/out/' || route_product_id,
     case
       when store_listing_status = 'demo'
@@ -180,6 +180,11 @@ begin
     image_gallery = excluded.image_gallery,
     description = excluded.description,
     material = excluded.material,
+    surface = excluded.surface,
+    construction_details = excluded.construction_details,
+    size_system = excluded.size_system,
+    measurement_source = excluded.measurement_source,
+    fit_note = excluded.fit_note,
     mock_url = excluded.mock_url,
     notes = excluded.notes,
     refreshed_at = excluded.refreshed_at;
