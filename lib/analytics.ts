@@ -3,6 +3,18 @@ import "server-only";
 const DEFAULT_POSTHOG_HOST = "https://eu.i.posthog.com";
 const CAPTURE_TIMEOUT_MS = 1_000;
 
+/**
+ * Raw anonymous analytics is deliberately fail-closed. Operators may enable it
+ * only after both configured sinks have automatic raw-event retention of no
+ * more than 30 days. This is server-only and intentionally accepts one exact
+ * value so typos, casing changes, or whitespace never opt a deployment in.
+ */
+export function isRawAnonymousAnalyticsEnabled(
+  value: unknown = process.env.RAW_ANONYMOUS_ANALYTICS_ENABLED,
+) {
+  return value === "true";
+}
+
 export type AnalyticsCaptureStatus = "disabled" | "failed" | "sent";
 
 type AnalyticsEvent = "outbound_click_intent" | "search_performed";
@@ -13,6 +25,8 @@ type AnalyticsProperties = Record<
 >;
 
 function getPostHogConfig() {
+  if (!isRawAnonymousAnalyticsEnabled()) return null;
+
   const apiKey = process.env.POSTHOG_PROJECT_API_KEY?.trim();
 
   if (!apiKey) return null;

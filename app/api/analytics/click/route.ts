@@ -1,10 +1,14 @@
 import { type NextRequest, NextResponse, after } from "next/server";
 import {
   captureAnalyticsEvent,
+  isPostHogConfigured,
   logAnalyticsOutcome,
   normalizeAnonymousId,
 } from "@/lib/analytics";
-import { saveBlockedPreviewClick } from "@/lib/analytics-storage";
+import {
+  isSupabaseAnalyticsEnabled,
+  saveBlockedPreviewClick,
+} from "@/lib/analytics-storage";
 import { getCatalogProducts } from "@/lib/catalog";
 import { isSameOrigin } from "@/lib/request-security";
 
@@ -50,6 +54,10 @@ export async function POST(request: NextRequest) {
   );
   if (!product) {
     return NextResponse.json({ error: "Unknown item" }, { status: 404 });
+  }
+
+  if (!isPostHogConfigured() && !isSupabaseAnalyticsEnabled()) {
+    return NextResponse.json({ analytics: "disabled" }, { status: 202 });
   }
 
   const clickId = crypto.randomUUID();

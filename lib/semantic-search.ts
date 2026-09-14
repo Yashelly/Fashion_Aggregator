@@ -72,6 +72,7 @@ export type QueryInterpretation = {
 export type QueryConstraints = {
   garmentTypes: string[];
   colors: string[];
+  materials: string[];
   directAttributes: string[];
   departments: string[];
   excludedTerms: string[];
@@ -570,6 +571,10 @@ const DIRECT_ATTRIBUTE_TERMS = new Set([
   "floral", "geometric", "abstract", "stripe", "star",
 ]);
 
+const MATERIAL_TERMS = new Set([
+  "cotton", "leather", "wool", "linen", "satin", "velvet", "nylon", "denim", "canvas", "fleece", "jersey",
+]);
+
 /**
  * Naming a colour excludes the wrong colours outright, exactly as naming a
  * garment excludes the wrong categories. Without this, an unstocked colour only
@@ -689,6 +694,7 @@ function tokenize(text: string): string[] {
 }
 
 const NEGATION_STARTERS = new Set(["not", "without", "no", "ne", "be"]);
+const NEGATION_CONNECTORS = new Set(["and", "or", "ir", "ar"]);
 
 /** Shared color families for structured catalog data; never repair data typos. */
 export function catalogColorFamilies(color: string): string[] {
@@ -719,7 +725,7 @@ function extractExcludedTerms(text: string): string[] {
     while (cursor < rawTokens.length && candidates.length < 3) {
       const candidate = rawTokens[cursor];
       if (NEGATION_BREAKERS.has(candidate) || NEGATION_STARTERS.has(candidate)) break;
-      if (candidate === "and" || candidate === "or") {
+      if (NEGATION_CONNECTORS.has(candidate)) {
         cursor += 1;
         continue;
       }
@@ -728,18 +734,16 @@ function extractExcludedTerms(text: string): string[] {
       cursor += 1;
     }
 
-    // "not black shoes" means shoes are the positive subject and black is the
-    // excluded attribute. In all other cases the short exclusion phrase is a
-    // list ("not a coat or parka"), so retain every recognised term.
-    if (
+    // A trailing garment is the positive subject only when the negation phrase
+    // also contains a non-garment constraint ("not red or blue dress").
+    // Keep every recognised exclusion in a pure list ("not coat or parka")
+    // so the connector cannot silently turn the second item positive.
+    const hasTrailingSubject =
       candidates.length >= 2 &&
-      (COLOR_TERMS.has(candidates[0]) && GARMENT_TERMS.has(candidates[1]) ||
-        GARMENT_TERMS.has(candidates[candidates.length - 1]))
-    ) {
-      excluded.add(candidates[0]);
-    } else {
-      for (const candidate of candidates) excluded.add(candidate);
-    }
+      GARMENT_TERMS.has(candidates[candidates.length - 1]) &&
+      candidates.slice(0, -1).some((candidate) => !GARMENT_TERMS.has(candidate));
+    const excludedCandidates = hasTrailingSubject ? candidates.slice(0, -1) : candidates;
+    for (const candidate of excludedCandidates) excluded.add(candidate);
   }
 
   return [...excluded];
@@ -802,7 +806,8 @@ export function interpretQuery(rawQuery: string): QueryInterpretation {
     constraints: {
       garmentTypes: scoredTerms.filter((term) => GARMENT_TERMS.has(term)),
       colors: scoredTerms.filter((term) => COLOR_TERMS.has(term)),
-      directAttributes: scoredTerms.filter((term) => DIRECT_ATTRIBUTE_TERMS.has(term)),
+      materials: scoredTerms.filter((term) => MATERIAL_TERMS.has(term)),
+      directAttributes: scoredTerms.filter((term) => DIRECT_ATTRIBUTE_TERMS.has(term) && !MATERIAL_TERMS.has(term)),
       departments: scoredTerms.filter((term) => DEPARTMENT_TERMS.has(term)),
       excludedTerms,
       minPrice,
@@ -810,6 +815,98 @@ export function interpretQuery(rawQuery: string): QueryInterpretation {
       availability: requiresInStock ? "in_stock" : undefined,
     },
   };
+}
+
+export type EditableConstraintKind = "term" | "exclusion" | "price" | "availability";
+
+/**
+ * Remove one interpreted constraint while retaining the shopper's original
+ * spelling and the rest of their sentence. The next parse therefore cannot
+ * silently restore a constraint the shopper explicitly dismissed.
+ */
+export function removeInterpretedConstraint(rawQuery: string, kind: EditableConstraintKind, term = ""): string {
+  if (kind === "price") {
+    let next = rawQuery;
+    for (const pattern of PRICE_RANGE_PATTERNS) next = next.replace(new RegExp(pattern.source, "giu"), " ");
+    next = next.replace(new RegExp(PRICE_PATTERN.source, "giu"), " ");
+    return next.replace(/\s+/g, " ").trim();
+  }
+
+  // Interpretation collapses natural-language phrases into one canonical chip
+  // (for example `night out` -> `party`). Remove the source phrase as a unit;
+  // otherwise the chip has no literal token to delete and immediately returns.
+  if (kind === "term") {
+    let phraseRemoved = rawQuery;
+    for (const [pattern, replacement] of PHRASES) {
+      const replacementTerms = tokenize(normalizeText(replacement))
+        .map((value) => canonicalize(value))
+        .filter((value): value is string => Boolean(value));
+      if (!replacementTerms.includes(term)) continue;
+      phraseRemoved = phraseRemoved.replace(new RegExp(pattern.source, "giu"), " ");
+    }
+    if (phraseRemoved !== rawQuery) return removeInterpretedConstraint(phraseRemoved, kind, term);
+  }
+
+  const words = [...rawQuery.matchAll(/[\p{L}\p{N}]+(?:[-'][\p{L}\p{N}]+)*/gu)];
+  const normalizedWords = words.map((match) => normalizeText(match[0]));
+  const originalExclusions = new Set(extractExcludedTerms(normalizeText(rawQuery)));
+  const remove = new Set<number>();
+  words.forEach((match, index) => {
+    const wholeCanonical = canonicalize(normalizedWords[index]);
+    const canonicals = [wholeCanonical, ...normalizedWords[index].split(/[-']/).map((token) => canonicalize(token))]
+      .filter((value): value is string => Boolean(value));
+    if (canonicals.includes(term) || (kind === "availability" && canonicals.includes("available"))) {
+      if (kind === "exclusion") {
+        if (!originalExclusions.has(term)) return;
+
+        let starter = index - 1;
+        while (starter >= 0) {
+          const token = normalizedWords[starter];
+          if (NEGATION_BREAKERS.has(token)) return;
+          if (NEGATION_STARTERS.has(token)) break;
+          starter -= 1;
+        }
+        if (starter < 0) return;
+
+        remove.add(index);
+        let hasRemainingExclusion = false;
+        for (let wordIndex = starter + 1; wordIndex < normalizedWords.length; wordIndex += 1) {
+          const token = normalizedWords[wordIndex];
+          if (NEGATION_BREAKERS.has(token) || NEGATION_STARTERS.has(token)) break;
+          if (wordIndex === index) continue;
+          const canonical = canonicalize(token);
+          if (canonical !== undefined && canonical !== term && originalExclusions.has(canonical)) {
+            hasRemainingExclusion = true;
+            break;
+          }
+        }
+
+        if (hasRemainingExclusion) {
+          if (NEGATION_CONNECTORS.has(normalizedWords[index + 1])) remove.add(index + 1);
+          else if (NEGATION_CONNECTORS.has(normalizedWords[index - 1])) remove.add(index - 1);
+        } else {
+          remove.add(starter);
+        }
+        return;
+      }
+      remove.add(index);
+      // Hyphenated modifiers form one interpreted phrase with the following
+      // noun ("button-up shirt", "high-top sneakers"). Removing the noun
+      // must not leave a fragment that reparses into a different constraint.
+      if (index > 0 && /[-']/.test(normalizedWords[index - 1])) remove.add(index - 1);
+    }
+  });
+  if (remove.size === 0) return rawQuery.trim();
+  let cursor = 0;
+  let next = "";
+  words.forEach((match, index) => {
+    const start = match.index ?? cursor;
+    next += rawQuery.slice(cursor, start);
+    if (!remove.has(index)) next += match[0];
+    cursor = start + match[0].length;
+  });
+  next += rawQuery.slice(cursor);
+  return next.replace(/\s+([,.;!?])/g, "$1").replace(/\s+/g, " ").trim();
 }
 
 /**
@@ -1132,7 +1229,11 @@ function rankProducts<T extends SearchableProduct>(
     .sort((first, second) =>
       second.score - first.score ||
       first.product.mock_product_id.localeCompare(second.product.mock_product_id),
-    );
+    )
+    // Keep broad intent queries useful and bounded. The UI paginates the
+    // resulting catalogue, but an unconstrained semantic expansion should not
+    // turn into an effectively unbounded result set.
+    .slice(0, 12);
 }
 
 /**
@@ -1182,7 +1283,10 @@ export function semanticSearch<T extends SearchableProduct>(
     return { matches, alternatives: [], relaxedConstraints: [], interpretation };
   }
 
-  const relaxedConstraints = interpretation.constraints.directAttributes;
+  const relaxedConstraints = [
+    ...interpretation.constraints.materials,
+    ...interpretation.constraints.directAttributes,
+  ];
   if (relaxedConstraints.length === 0) {
     return { matches: [], alternatives: [], relaxedConstraints: [], interpretation };
   }

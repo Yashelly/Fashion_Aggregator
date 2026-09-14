@@ -12,10 +12,13 @@ function loadPublicProductModule(filename = "public-product.ts") {
     compilerOptions: { module: "CommonJS", target: "ES2022" },
   }).outputText;
   const moduleScope = { exports: {} };
+  const localRequire = (name) => name.startsWith("@/lib/")
+    ? loadPublicProductModule(`${name.slice("@/lib/".length)}.ts`)
+    : require(name);
   new Function("exports", "module", "require", transpiled)(
     moduleScope.exports,
     moduleScope,
-    require,
+    localRequire,
   );
   return moduleScope.exports;
 }
@@ -26,6 +29,16 @@ const {
   toPublicRelatedProduct,
 } = loadPublicProductModule();
 const { formatPrice } = loadPublicProductModule("format-price.ts");
+const { formatAvailabilityLabel } = loadPublicProductModule("i18n.ts");
+const {
+  consumeSearchContinuityPayload,
+  createSearchContinuityPayload,
+  parseSearchContinuityPayload,
+  productLinkDomId,
+  saveSearchContinuityPayload,
+  SEARCH_CONTINUITY_MAX_AGE_MS,
+  SEARCH_CONTINUITY_STORAGE_KEY,
+} = loadPublicProductModule("search-continuity.ts");
 
 const privateSentinels = {
   brand: "PRIVATE_BRAND_SENTINEL",
@@ -77,6 +90,7 @@ test("public product DTOs serialize only explicitly allowlisted shopper fields",
     "gender",
     "id",
     "imageAvailable",
+    "imageGallery",
     "imagePath",
     "oldPriceEur",
     "priceEur",
@@ -95,10 +109,11 @@ test("public product DTOs serialize only explicitly allowlisted shopper fields",
 
 test("search return URL keeps supported state and removes unrecognised query keys", () => {
   assert.equal(
-    sanitizeSearchReturnTo("/search?query=black+coat&category=outerwear&page=2&debug=private"),
-    "/search?query=black+coat&category=outerwear&page=2",
+    sanitizeSearchReturnTo("/search?query=black+coat&category=outerwear&department=women&color=navy,black&size=M,S&store=demo-store-02,demo-store-01&status=limited&sale=on&page=2&debug=private"),
+    "/search?query=black+coat&category=outerwear&department=women&color=black%2Cnavy&size=M%2CS&store=demo-store-01%2Cdemo-store-02&status=limited&sale=on&page=2",
   );
-  assert.equal(sanitizeSearchReturnTo(["/search?lang=lt&sort=price-low"]), "/search?lang=lt&sort=price-low");
+  assert.equal(sanitizeSearchReturnTo(["/search?lang=lt&sort=price-low"]), "/search?sort=price-low&lang=lt");
+  assert.equal(sanitizeSearchReturnTo("/search?gender=men&availability=in_stock&stores=demo-store-02,demo-store-01"), "/search?department=men&store=demo-store-01%2Cdemo-store-02&status=in_stock");
 });
 
 test("search return URL rejects external, malformed, and non-search destinations", () => {
@@ -118,11 +133,139 @@ test("search return URL rejects external, malformed, and non-search destinations
   }
 });
 
+test("search continuity payload is canonical, versioned, scoped, and one-navigation sized", () => {
+  const focusTarget = productLinkDomId("MOCK-001", "title");
+  const payload = createSearchContinuityPayload({
+    searchHref: "/search?query=black+coat&page=2&perPage=20&lang=lt",
+    productId: "MOCK-001",
+    scrollX: 0,
+    scrollY: 1480,
+    focusTarget,
+    capturedAt: 1_000,
+  });
+  assert.deepEqual(payload, {
+    version: 1,
+    searchHref: "/search?query=black+coat&page=2&perPage=20&lang=lt",
+    productId: "MOCK-001",
+    scrollX: 0,
+    scrollY: 1480,
+    focusTarget,
+    capturedAt: 1_000,
+  });
+  assert.deepEqual(
+    parseSearchContinuityPayload(JSON.stringify(payload), payload.searchHref, 1_500),
+    payload,
+  );
+});
+
+test("search continuity rejects stale, mismatched, malformed, and noncanonical payloads", () => {
+  const base = createSearchContinuityPayload({
+    searchHref: "/search?query=coat&page=2",
+    productId: "MOCK-001",
+    scrollX: 0,
+    scrollY: 900,
+    focusTarget: productLinkDomId("MOCK-001", "media"),
+    capturedAt: 10_000,
+  });
+  assert.ok(base);
+
+  assert.equal(parseSearchContinuityPayload(JSON.stringify(base), "/search?query=other&page=2", 11_000), null);
+  assert.equal(parseSearchContinuityPayload(JSON.stringify(base), base.searchHref, 10_000 + SEARCH_CONTINUITY_MAX_AGE_MS + 1), null);
+  assert.equal(parseSearchContinuityPayload(JSON.stringify({ ...base, version: 2 }), base.searchHref, 11_000), null);
+  assert.equal(parseSearchContinuityPayload(JSON.stringify({ ...base, focusTarget: "private-store-slug" }), base.searchHref, 11_000), null);
+  assert.equal(parseSearchContinuityPayload(JSON.stringify({ ...base, searchHref: "/search?page=2&query=coat" }), base.searchHref, 11_000), null);
+  assert.equal(parseSearchContinuityPayload("not-json", base.searchHref, 11_000), null);
+  assert.equal(createSearchContinuityPayload({ ...base, productId: "bad/id" }), null);
+});
+
+test("search continuity storage is fail-safe and consumed exactly once", () => {
+  const values = new Map();
+  const storage = {
+    getItem: (key) => values.get(key) ?? null,
+    removeItem: (key) => values.delete(key),
+    setItem: (key, value) => values.set(key, value),
+  };
+  const payload = createSearchContinuityPayload({
+    searchHref: "/search?query=coat",
+    productId: "MOCK-001",
+    scrollX: 0,
+    scrollY: 500,
+    focusTarget: productLinkDomId("MOCK-001", "title"),
+    capturedAt: 1_000,
+  });
+  assert.ok(payload);
+  assert.equal(saveSearchContinuityPayload(storage, payload), true);
+  assert.equal(values.has(SEARCH_CONTINUITY_STORAGE_KEY), true);
+  assert.deepEqual(consumeSearchContinuityPayload(storage, payload.searchHref, 1_100), payload);
+  assert.equal(values.has(SEARCH_CONTINUITY_STORAGE_KEY), false);
+  assert.equal(consumeSearchContinuityPayload(storage, payload.searchHref, 1_100), null);
+
+  const blockedStorage = {
+    getItem() { throw new Error("blocked"); },
+    removeItem() { throw new Error("blocked"); },
+    setItem() { throw new Error("blocked"); },
+  };
+  assert.equal(saveSearchContinuityPayload(blockedStorage, payload), false);
+  assert.equal(consumeSearchContinuityPayload(blockedStorage, payload.searchHref, 1_100), null);
+
+  const blockedGetter = () => { throw new Error("sessionStorage getter blocked"); };
+  assert.equal(saveSearchContinuityPayload(blockedGetter, payload), false);
+  assert.equal(consumeSearchContinuityPayload(blockedGetter, payload.searchHref, 1_100), null);
+});
+
+test("continuity treats explicit page one as the canonical first page", () => {
+  const payload = createSearchContinuityPayload({
+    searchHref: "/search?query=coat",
+    productId: "MOCK-001",
+    scrollX: 0,
+    scrollY: 500,
+    focusTarget: productLinkDomId("MOCK-001", "title"),
+    capturedAt: 1_000,
+  });
+  assert.ok(payload);
+  assert.deepEqual(parseSearchContinuityPayload(JSON.stringify(payload), "/search?query=coat&page=1", 1_100), payload);
+});
+
+test("availability labels expose the four shopper-facing stock states exactly", () => {
+  assert.deepEqual(
+    ["in_stock", "limited", "out_of_stock", "unknown"].map((value) => formatAvailabilityLabel(value, "en")),
+    ["In stock", "Low stock", "Out of stock", "Unknown"],
+  );
+  assert.deepEqual(
+    ["in_stock", "limited", "out_of_stock", "unknown"].map((value) => formatAvailabilityLabel(value, "lt")),
+    ["Yra sandėlyje", "Liko nedaug", "Išparduota", "Nežinoma"],
+  );
+});
+
 test("absent optional product facts remain absent rather than acquiring invented defaults", () => {
   const product = toPublicProduct({ ...catalogProduct, size_options: "", old_price_eur: "", gender: "", color: "", availability: "" }, null);
   assert.deepEqual(product.sizeOptions, []);
   for (const key of ["oldPriceEur", "gender", "color", "availability"]) assert.equal(product[key], "");
   assert.equal(product.storeLabel, null);
+});
+
+test("public gallery keeps only valid, deduplicated demo images in stable order", () => {
+  const duplicateSource = {
+    ...catalogProduct,
+    image_url: "/demo-products/product-01.webp|/demo-products/product-01.webp",
+    image_available: true,
+    detail_image_path: "/demo-products/product-01-tryon.webp",
+    detail_image_available: true,
+  };
+  const product = toPublicProduct({
+    ...duplicateSource,
+    image_gallery: [
+      "/demo-products/product-01.webp",
+      "/demo-products/product-01.webp",
+      "/demo-products/product-01-tryon.webp",
+      "/invalid/nonexistent.webp",
+    ],
+  }, null);
+
+  assert.deepEqual(
+    product.imageGallery,
+    ["/demo-products/product-01.webp", "/demo-products/product-01-tryon.webp"],
+  );
 });
 
 test("missing or invalid prices are not rendered as free products or NaN", () => {

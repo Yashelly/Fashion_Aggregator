@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { recordRecentSearch } from "@/lib/recent-searches";
 import type { SearchRuntimeDiagnostics } from "@/lib/search-runtime-cache";
 
-const FILTER_KEYS = ["availability", "category", "color", "gender", "sale", "status", "store"] as const;
+const FILTER_KEYS = ["category", "color", "department", "maxPrice", "minPrice", "sale", "size", "status", "store"] as const;
 
 function getAnonymousId() {
   const key = "weft-anonymous-id";
@@ -26,9 +26,13 @@ function getAnonymousId() {
 
 export function SearchAnalyticsTracker({
   diagnostics,
+  committedUrl,
+  label,
   resultCount,
 }: {
   diagnostics: SearchRuntimeDiagnostics;
+  committedUrl: string;
+  label: string;
   resultCount: number;
 }) {
   const params = useSearchParams();
@@ -42,8 +46,12 @@ export function SearchAnalyticsTracker({
       }),
     );
 
-    // Remember the free-text query for the account "Recent searches" card.
-    recordRecentSearch(params.get("query"));
+    // Browser-local continuity is committed immediately and is independent of
+    // the delayed, best-effort analytics request below.
+    recordRecentSearch({
+      url: committedUrl,
+      label,
+    });
 
     const timer = window.setTimeout(() => {
       void fetch("/api/analytics/search", {
@@ -65,7 +73,7 @@ export function SearchAnalyticsTracker({
     }, 250);
 
     return () => window.clearTimeout(timer);
-  }, [diagnostics, params, resultCount, signature]);
+  }, [committedUrl, diagnostics, label, params, resultCount, signature]);
 
   return null;
 }

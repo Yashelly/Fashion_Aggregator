@@ -29,6 +29,7 @@ PUBLIC_ROUTES = [
     "/search?query=black",
     "/stores",
     "/ai-fitting-room",
+    "/saved",
     "/account",
     "/how-it-works",
     "/about",
@@ -45,7 +46,7 @@ LINK_SOURCE_ROUTES = [
     "/search?query=black&category=shoes&lang=lt",
     "/stores?lang=lt",
     "/ai-fitting-room?lang=lt",
-    "/account?lang=lt",
+    "/saved?lang=lt",
     "/how-it-works?lang=lt",
     "/about?lang=lt",
     "/contact?lang=lt",
@@ -384,6 +385,19 @@ def run_search_matrix(browser) -> int:
     category = category_group.locator('input[type="radio"][name="category"][value="outerwear"]')
     category.locator("xpath=ancestor::label").click()
     assert category.is_checked()
+    color_group = filter_dialog.locator('.filter-group:has(input[type="checkbox"][name="color"])')
+    color_group.locator(":scope > summary").click()
+    second_color = color_group.locator('input[name="color"]:not([value="black"])').first
+    second_color.locator("xpath=ancestor::label").click()
+    selected_colors = filter_dialog.locator('input[name="color"]:checked')
+    assert selected_colors.count() == 2
+    size_group = filter_dialog.locator('.filter-group:has(input[type="checkbox"][name="size"])')
+    size_group.locator(":scope > summary").click()
+    size_group.locator('input[name="size"]').nth(0).locator("xpath=ancestor::label").click()
+    size_group.locator('input[name="size"]').nth(1).locator("xpath=ancestor::label").click()
+    sale_group = filter_dialog.locator('.filter-group:has(input[type="checkbox"][name="sale"])')
+    sale_group.locator(":scope > summary").click()
+    sale_group.locator('input[name="sale"]').locator("xpath=ancestor::label").click()
     filter_dialog.locator('input[name="minPrice"]').fill("50")
     filter_dialog.locator('input[name="maxPrice"]').fill("200")
     filter_dialog.locator(".filter-dialog-actions .secondary").click()
@@ -404,6 +418,19 @@ def run_search_matrix(browser) -> int:
     category = category_group.locator('input[type="radio"][name="category"][value="outerwear"]')
     category.locator("xpath=ancestor::label").click()
     assert category.is_checked()
+    color_group = filter_dialog.locator('.filter-group:has(input[type="checkbox"][name="color"])')
+    if not color_group.locator('input[name="color"]').first.is_visible():
+        color_group.locator(":scope > summary").click()
+    color_group.locator('input[name="color"]:not([value="black"])').first.locator("xpath=ancestor::label").click()
+    size_group = filter_dialog.locator('.filter-group:has(input[type="checkbox"][name="size"])')
+    if not size_group.locator('input[name="size"]').first.is_visible():
+        size_group.locator(":scope > summary").click()
+    size_group.locator('input[name="size"]').nth(0).locator("xpath=ancestor::label").click()
+    size_group.locator('input[name="size"]').nth(1).locator("xpath=ancestor::label").click()
+    sale_group = filter_dialog.locator('.filter-group:has(input[type="checkbox"][name="sale"])')
+    if not sale_group.locator('input[name="sale"]').is_visible():
+        sale_group.locator(":scope > summary").click()
+    sale_group.locator('input[name="sale"]').locator("xpath=ancestor::label").click()
     filter_dialog.locator('input[name="minPrice"]').fill("50")
     filter_dialog.locator('input[name="maxPrice"]').fill("200")
     filter_dialog.locator(".filter-dialog-actions .button:not(.secondary)").click()
@@ -411,13 +438,16 @@ def run_search_matrix(browser) -> int:
         """() => {
           const query = new URL(location.href).searchParams;
           return query.get('category') === 'outerwear'
+            && query.get('color').split(',').length === 2
+            && query.get('size').split(',').length === 2
+            && query.get('sale') === 'on'
             && query.get('minPrice') === '50'
             && query.get('maxPrice') === '200'
             && query.get('lang') === 'lt';
         }"""
     )
     assert_locale(page, context, "lt")
-    assertions += 5
+    assertions += 9
 
     catalog_query = page.locator('.catalog-form input[name="query"]')
     catalog_query.fill("sneaker")
@@ -484,8 +514,8 @@ def run_saved_collection_matrix(browser) -> int:
     assert save.get_attribute("aria-pressed") == "true"
     page.wait_for_timeout(350)  # recent-search recorder is intentionally debounced
 
-    page.locator('.account-link[href^="/account"]').click()
-    page.wait_for_function("() => location.pathname === '/account'")
+    page.locator('.account-link[href^="/saved"]').click()
+    page.wait_for_function("() => location.pathname === '/saved'")
     assert_locale(page, context, "lt")
     saved_product = page.locator(".saved-product", has_text=title)
     saved_product.wait_for(state="visible")
@@ -495,18 +525,26 @@ def run_saved_collection_matrix(browser) -> int:
     assert parse_qs(urlparse(recent.get_attribute("href")).query).get("lang") == ["lt"]
     assertions += 8
 
-    # The collection persists across navigation and removing it updates every
-    # mounted saved-item control through the shared browser store.
+    # The compatibility route retains locale while redirecting to the canonical
+    # browser-local collection URL.
+    page.goto(f"{BASE_URL}/account?lang=lt", wait_until="domcontentloaded")
+    page.wait_for_function("() => location.pathname === '/saved'")
+    assert parse_qs(urlparse(page.url).query).get("lang") == ["lt"]
+    assertions += 2
+
+    # The collection persists across navigation and clear-all updates the
+    # mounted browser-local collection through the shared store.
     page.reload(wait_until="domcontentloaded")
     assert_locale(page, context, "lt")
     saved_product = page.locator(".saved-product", has_text=title)
     saved_product.wait_for(state="visible")
-    remove = saved_product.locator(".wishlist-button")
-    assert remove.get_attribute("aria-pressed") == "true"
-    remove.click()
+    assert saved_product.locator(".wishlist-button").get_attribute("aria-pressed") == "true"
+    page.get_by_role("button", name="Išvalyti išsaugotas prekes").click()
     page.locator(".account-empty").wait_for(state="visible")
     assert page.locator(".saved-product").count() == 0
-    assertions += 5
+    page.get_by_role("button", name="Išvalyti naujausias paieškas").click()
+    assert page.locator(".recent-search-list").count() == 0
+    assertions += 6
 
     context.close()
     return assertions
@@ -740,7 +778,7 @@ def main() -> None:
             "known_out_route": "public path retained",
             "unknown_out_route": "404 and public path retained",
             "search_filters": "preserved across EN/LT switches",
-            "saved_collection": "browser-local save, reload, recent search, and remove",
+            "saved_collection": "browser-local save, canonical recent URL, clear-all, and account redirect",
             "progressive_enhancement": "search and filters submit without JavaScript",
             "history": "locale restored across back/forward",
         },

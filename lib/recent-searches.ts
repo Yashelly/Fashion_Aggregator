@@ -1,50 +1,171 @@
-/**
- * Recent-search history, persisted per-browser in localStorage. Client-only and
- * best-effort, in line with the synthetic-demo boundary: no server, no account.
- * Written by the search page's analytics tracker and read by the account
- * dashboard, so the "Recent searches" card reflects real activity instead of a
- * hard-coded empty state.
- */
+/** Browser-local recent search history. No search data leaves this module. */
 
-const STORAGE_KEY = "weft-recent-searches";
-const MAX_ENTRIES = 8;
+import { canonicalizeSearchHref } from "@/lib/search-params";
 
-export type RecentSearch = { query: string; at: number };
+export const RECENT_SEARCHES_STORAGE_KEY = "weft-recent-searches";
+export const RECENT_SEARCH_VERSION = 1;
+export const MAX_RECENT_SEARCHES = 8;
 
-export function readRecentSearches(): RecentSearch[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .filter(
-        (entry): entry is RecentSearch =>
-          Boolean(entry) &&
-          typeof entry === "object" &&
-          typeof (entry as RecentSearch).query === "string",
-      )
-      .map((entry) => ({
-        query: entry.query,
-        at: typeof entry.at === "number" ? entry.at : 0,
-      }))
-      .slice(0, MAX_ENTRIES);
-  } catch {
-    // Storage can be unavailable or hold incompatible data; fall back to empty.
-    return [];
-  }
+type StorageLike = Pick<Storage, "getItem" | "setItem">;
+
+export type RecentSearch = Readonly<{
+  version: typeof RECENT_SEARCH_VERSION;
+  url: string;
+  label: string;
+  timestamp: number;
+}>;
+
+export type RecentSearchInput = Readonly<{
+  url: string;
+  label: string;
+  timestamp?: number;
+}>;
+
+function validTimestamp(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
 }
 
-export function recordRecentSearch(query: string | null | undefined): void {
-  const trimmed = query?.trim();
-  if (!trimmed) return;
+function browserStorage(): StorageLike | null {
+  return typeof window === "undefined" ? null : window.localStorage;
+}
 
-  try {
-    const deduped = readRecentSearches().filter(
-      (entry) => entry.query.toLowerCase() !== trimmed.toLowerCase(),
-    );
-    const next = [{ query: trimmed, at: Date.now() }, ...deduped].slice(0, MAX_ENTRIES);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  } catch {
-    // Best-effort: a failed write just means this search isn't remembered.
+function cleanLabel(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const label = value.trim().replace(/\s+/g, " ").slice(0, 160);
+  return label || null;
+}
+
+export function canonicalizeRecentSearchUrl(value: unknown): string | null {
+  return canonicalizeSearchHref(value);
+}
+
+function normalizeEntry(value: unknown): RecentSearch | null {
+  if (!value || typeof value !== "object") return null;
+  const candidate = value as Record<string, unknown>;
+
+  if (typeof candidate.query === "string") {
+    const label = cleanLabel(candidate.query);
+    if (!label) return null;
+    const url = canonicalizeRecentSearchUrl(`/search?query=${encodeURIComponent(label)}`);
+    if (!url) return null;
+    return {
+      version: RECENT_SEARCH_VERSION,
+      url,
+      label,
+      timestamp: validTimestamp(candidate.at) ? candidate.at : 0,
+    };
   }
+
+  const url = canonicalizeRecentSearchUrl(candidate.url);
+  const label = cleanLabel(candidate.label);
+  if (!url || !label) return null;
+  return {
+    version: RECENT_SEARCH_VERSION,
+    url,
+    label,
+    timestamp: validTimestamp(candidate.timestamp) ? candidate.timestamp : 0,
+  };
+}
+
+function normalizeEntries(value: unknown): RecentSearch[] {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  const entries: RecentSearch[] = [];
+  for (const valueEntry of value) {
+    const entry = normalizeEntry(valueEntry);
+    if (!entry || seen.has(entry.url)) continue;
+    seen.add(entry.url);
+    entries.push(entry);
+    if (entries.length === MAX_RECENT_SEARCHES) break;
+  }
+  return entries;
+}
+
+export function createRecentSearchStore(getStorage: () => StorageLike | null = browserStorage) {
+  let memoryEntries: RecentSearch[] = [];
+  let storageUnavailable = false;
+
+  function read(): RecentSearch[] {
+    if (storageUnavailable) return [...memoryEntries];
+    try {
+      const storage = getStorage();
+      if (!storage) throw new Error("Storage unavailable");
+      const raw = storage.getItem(RECENT_SEARCHES_STORAGE_KEY);
+      let parsed: unknown = [];
+      if (raw) {
+        try {
+          parsed = JSON.parse(raw);
+        } catch {
+          storage.setItem(RECENT_SEARCHES_STORAGE_KEY, "[]");
+        }
+      }
+      const entries = normalizeEntries(parsed);
+      memoryEntries = entries;
+      if (raw && JSON.stringify(parsed) !== JSON.stringify(entries)) {
+        storage.setItem(RECENT_SEARCHES_STORAGE_KEY, JSON.stringify(entries));
+      }
+      return [...entries];
+    } catch {
+      storageUnavailable = true;
+      return [...memoryEntries];
+    }
+  }
+
+  function record(input: RecentSearchInput): RecentSearch[] {
+    const url = canonicalizeRecentSearchUrl(input.url);
+    const label = cleanLabel(input.label);
+    if (!url || !label) return read();
+    const entry: RecentSearch = {
+      version: RECENT_SEARCH_VERSION,
+      url,
+      label,
+      timestamp: validTimestamp(input.timestamp) ? input.timestamp : Date.now(),
+    };
+    const next = [entry, ...read().filter((existing) => existing.url !== url)].slice(0, MAX_RECENT_SEARCHES);
+    memoryEntries = next;
+    if (!storageUnavailable) {
+      try {
+        const storage = getStorage();
+        if (!storage) throw new Error("Storage unavailable");
+        storage.setItem(RECENT_SEARCHES_STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        storageUnavailable = true;
+      }
+    }
+    return [...next];
+  }
+
+  function clear(): boolean {
+    memoryEntries = [];
+    if (storageUnavailable) return false;
+    try {
+      const storage = getStorage();
+      if (!storage) throw new Error("Storage unavailable");
+      storage.setItem(RECENT_SEARCHES_STORAGE_KEY, "[]");
+      return true;
+    } catch {
+      storageUnavailable = true;
+      return false;
+    }
+  }
+
+  return { read, record, clear };
+}
+
+const recentSearchStore = createRecentSearchStore();
+
+export const readRecentSearches = () => recentSearchStore.read();
+export const clearRecentSearches = () => recentSearchStore.clear();
+
+/**
+ * Preferred API: pass the committed canonical URL and a shopper-facing label.
+ * The string form keeps older query-only callers working until they pass URLs.
+ */
+export function recordRecentSearch(input: RecentSearchInput | string | null | undefined): void {
+  if (typeof input === "string") {
+    const label = cleanLabel(input);
+    if (label) recentSearchStore.record({ url: `/search?query=${encodeURIComponent(label)}`, label });
+    return;
+  }
+  if (input) recentSearchStore.record(input);
 }

@@ -13,7 +13,7 @@ import { useLocaleContext } from "@/lib/use-client-locale";
 type Option = { value: string; label: string };
 type Density = 3 | 4 | 5;
 type Props = {
-  locale: Locale; params: SearchValues; categories: Option[]; colors: Option[]; genders: Option[];
+  locale: Locale; params: SearchValues; categories: Option[]; colors: Option[]; departments: Option[]; sizes: Option[];
   stores: Option[]; count: number; title: string; children: ReactNode;
 };
 
@@ -24,7 +24,7 @@ const phoneQuery = "(max-width: 43.75em)";
 let volatileDensity: Density = 4;
 const isDensity = (value: unknown): value is Density => value === 3 || value === 4 || value === 5;
 
-export function SearchControls({ params, categories, colors, genders, stores, count, title, children }: Props) {
+export function SearchControls({ params, categories, colors, departments, sizes, stores, count, title, children }: Props) {
   const { locale: clientLocale, getNavigationLocale } = useLocaleContext();
   const currentCopy = getCopy(clientLocale);
   const t = currentCopy.frontend, old = currentCopy.search, storeHeading = currentCopy.header.nav.stores;
@@ -108,6 +108,13 @@ export function SearchControls({ params, categories, colors, genders, stores, co
       </label>)}
     </fieldset>;
   }
+  function multipleChoiceField(name: "color" | "size" | "store", label: string, options: Option[]) {
+    const selected = new Set(draft[name]?.split(",").filter(Boolean));
+    return <fieldset className="store-options"><legend className="sr-only">{label}</legend>{options.map((option) => <label key={option.value}>
+      <input type="checkbox" name={name} value={option.value} checked={selected.has(option.value)} onChange={(event) => {
+        const next = new Set(selected); if (event.target.checked) next.add(option.value); else next.delete(option.value);
+        setValue(name, [...next].sort().join(",")); }} /><span>{option.label}</span></label>)}</fieldset>;
+  }
   function filterGroup(label: string, content: ReactNode, open = false) {
     return <details className="filter-group" open={open || undefined}><summary>{label}</summary>
       <div className="filter-group-body">{content}</div></details>;
@@ -122,14 +129,14 @@ export function SearchControls({ params, categories, colors, genders, stores, co
         <p className="field-hint" id={`${prefix}-hint`}>{t.priceHint}</p>{error && <p className="field-error" id={`${prefix}-error`} role="alert">{t.priceError}</p>}
       </fieldset>, true)}
       {filterGroup(t.category, choiceField("category", t.category, categories, old.options.allCategories))}
-      {filterGroup(storeHeading, <fieldset className="store-options"><legend className="sr-only">{storeHeading}</legend>{stores.map((store) => <label key={store.value}>
-        <input type="checkbox" name="stores" value={store.value} checked={(draft.store?.split(",") ?? []).includes(store.value)} onChange={(event) => {
-          const next = new Set(draft.store?.split(",").filter(Boolean)); if (event.target.checked) next.add(store.value); else next.delete(store.value);
-          setValue("store", [...next].sort().join(",")); }} /><span>{store.label}</span></label>)}</fieldset>)}
-      {filterGroup(t.department, choiceField("gender", t.department, genders, old.options.allDepartments))}
-      {filterGroup(t.colour, choiceField("color", t.colour, colors, old.options.allColors))}
-      {filterGroup(t.status, choiceField("status", t.status, ["in_stock", "limited", "out_of_stock", "sale"].map((value) =>
+      {filterGroup(storeHeading, multipleChoiceField("store", storeHeading, stores))}
+      {filterGroup(t.department, choiceField("department", t.department, departments, old.options.allDepartments))}
+      {filterGroup(t.colour, multipleChoiceField("color", t.colour, colors))}
+      {filterGroup(t.size, multipleChoiceField("size", t.size, sizes))}
+      {filterGroup(t.status, choiceField("status", t.status, ["in_stock", "limited", "out_of_stock", "unknown"].map((value) =>
         ({ value, label: formatAvailabilityLabel(value, clientLocale) })), old.options.allItems))}
+      {filterGroup(t.saleOnly, <label className="filter-choice"><input type="checkbox" name="sale" value="on" checked={draft.sale === "on"}
+        onChange={(event) => setValue("sale", event.target.checked ? "on" : "")} /><span>{t.saleOnly}</span><Check aria-hidden="true" size={15} /></label>)}
     </div>;
   }
 

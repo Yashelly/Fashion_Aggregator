@@ -18,8 +18,12 @@ const FILTER_KEYS = [
   "availability",
   "category",
   "color",
+  "department",
   "gender",
+  "maxPrice",
+  "minPrice",
   "sale",
+  "size",
   "status",
   "store",
 ] as const;

@@ -8,23 +8,48 @@ import { fileURLToPath } from "node:url";
 const require = createRequire(import.meta.url);
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
+function product(mock_product_id, overrides = {}) {
+  return {
+    mock_product_id,
+    title: "Black Hoodie",
+    category: "tops",
+    subcategory: "hoodie",
+    brand: "Demo",
+    gender: "unisex",
+    color: "black",
+    style_tags: "",
+    old_price_eur: "",
+    availability: "in_stock",
+    price_eur: "20",
+    public_store_id: "demo-store-01",
+    size_options: "M|L",
+    motif: "",
+    surface: "",
+    visual_details: "",
+    visual_description: "",
+    ...overrides,
+  };
+}
+
 const products = [
-  { mock_product_id: "P-1", price_eur: "10", availability: "in_stock" },
-  { mock_product_id: "P-2", price_eur: "20", availability: "in_stock" },
+  product("P-1", { motif: "stars", style_tags: "wool", old_price_eur: "30", price_eur: "10" }),
+  product("P-2"),
 ];
 
-function fallbackResult(inputProducts) {
+function fallbackResult(inputProducts, params = {}) {
+  const approximate = params.query?.includes("approximate") ?? false;
   return {
     results: [inputProducts[1]],
     relevance: new Map([["P-2", 0.5]]),
     interpretation: { source: "deterministic" },
-    approximate: true,
-    relaxedConstraints: ["style"],
+    approximate,
+    relaxedConstraints: approximate ? ["style"] : [],
   };
 }
 
 function loadHybridSearch() {
   const deadlineSource = fs.readFileSync(path.join(rootDir, "lib", "search-deadline.ts"), "utf8");
+  const semanticSource = fs.readFileSync(path.join(rootDir, "lib", "semantic-search.ts"), "utf8");
   const hybridSource = fs.readFileSync(path.join(rootDir, "lib", "hybrid-search.ts"), "utf8");
   const compilerOptions = { module: "CommonJS", target: "ES2022" };
   const transpile = (source) => require("typescript").transpileModule(source, { compilerOptions }).outputText;
@@ -36,13 +61,31 @@ function loadHybridSearch() {
     (specifier) => specifier === "server-only" ? {} : require(specifier),
   );
 
+  const semanticModule = { exports: {} };
+  new Function("exports", "module", "require", transpile(semanticSource))(
+    semanticModule.exports,
+    semanticModule,
+    require,
+  );
+
   const moduleScope = { exports: {} };
   const localRequire = (specifier) => {
     if (specifier === "server-only") return {};
     if (specifier === "@/lib/search-deadline") return deadlineModule.exports;
     if (specifier === "@/lib/mock-products") {
       return {
-        filterProducts: (inputProducts) => inputProducts,
+        filterProducts: (inputProducts, params = {}) => inputProducts.filter((candidate) => {
+          if (params.store && candidate.public_store_id !== params.store) return false;
+          if (params.category && candidate.category !== params.category) return false;
+          if (params.color && candidate.color !== params.color) return false;
+          if (params.size && !candidate.size_options.split("|").includes(params.size)) return false;
+          if (params.department && candidate.gender !== params.department) return false;
+          if (params.sale === "on" && !candidate.old_price_eur) return false;
+          if (params.availability && candidate.availability !== params.availability) return false;
+          if (params.minPrice !== undefined && Number(candidate.price_eur) < Number(params.minPrice)) return false;
+          if (params.maxPrice !== undefined && Number(candidate.price_eur) > Number(params.maxPrice)) return false;
+          return true;
+        }),
         searchProducts: fallbackResult,
       };
     }
@@ -53,16 +96,7 @@ function loadHybridSearch() {
       return { judgeSearchCandidates: async () => null };
     }
     if (specifier === "@/lib/semantic-search") {
-      return {
-        buildProductTerms: () => new Set(),
-        interpretQuery: () => ({ constraints: { departments: [], colors: [] } }),
-        semanticSearch: (inputProducts) => ({
-          matches: inputProducts.map((product, index) => ({ product, score: 1 - index / 10 })),
-          alternatives: [],
-          relaxedConstraints: [],
-          interpretation: { source: "graph" },
-        }),
-      };
+      return semanticModule.exports;
     }
     if (specifier === "@/lib/supabase-server") {
       return { getSupabasePublicServerClient: () => null };
@@ -143,12 +177,24 @@ test("judge failure returns the untouched deterministic fallback, never fused ca
   assert.equal(detailed.reason, "judge-unavailable");
   assert.deepEqual(detailed.result.results, fallbackResult(products).results);
   assert.deepEqual(detailed.result.relevance, fallbackResult(products).relevance);
+  assert.equal(detailed.result.approximate, false);
+  assert.deepEqual(detailed.result.relaxedConstraints, []);
+});
+
+test("cloud failure preserves an approximate fallback classification", async () => {
+  const detailed = await searchProductsHybridDetailed(products, { query: "approximate query" }, {
+    dependencies: successfulDependencies({ embed: async () => null }),
+    timeoutMs: 100,
+  });
+
+  assert.equal(detailed.outcome, "fallback");
+  assert.equal(detailed.reason, "embedding-unavailable");
   assert.equal(detailed.result.approximate, true);
   assert.deepEqual(detailed.result.relaxedConstraints, ["style"]);
 });
 
-test("a valid judge result remains a success when it equals the deterministic fallback", async () => {
-  const detailed = await searchProductsHybridDetailed(products, { query: "same query" }, {
+test("a valid judge result remains a success when it satisfies deterministic constraints", async () => {
+  const detailed = await searchProductsHybridDetailed(products, { query: "black hoodie" }, {
     dependencies: successfulDependencies({ judge: async () => ["P-2"] }),
     timeoutMs: 100,
   });
@@ -157,6 +203,64 @@ test("a valid judge result remains a success when it equals the deterministic fa
   assert.equal(detailed.reason, "judge-complete");
   assert.deepEqual(detailed.result.results, [products[1]]);
   assert.equal(detailed.result.approximate, false);
+});
+
+test("judge near-misses cannot be labelled exact", async () => {
+  const detailed = await searchProductsHybridDetailed(products, {
+    query: "black wool hoodie with stars",
+  }, {
+    dependencies: successfulDependencies({ judge: async () => ["P-2"] }),
+    timeoutMs: 100,
+  });
+
+  assert.equal(detailed.outcome, "success");
+  assert.deepEqual(detailed.result.results, [products[1]]);
+  assert.equal(detailed.result.approximate, true);
+  assert.deepEqual(detailed.result.relaxedConstraints, ["wool", "star"]);
+});
+
+test("judge results are post-validated against query constraints and explicit facets", async () => {
+  const wrongFacets = [
+    product("wrong-store", { public_store_id: "demo-store-02", old_price_eur: "30", price_eur: "10", motif: "stars", style_tags: "wool" }),
+    product("wrong-category", { category: "bottoms", old_price_eur: "30", price_eur: "10", motif: "stars", style_tags: "wool" }),
+    product("wrong-color", { color: "blue", old_price_eur: "30", price_eur: "10", motif: "stars", style_tags: "wool" }),
+    product("wrong-size", { size_options: "S", old_price_eur: "30", price_eur: "10", motif: "stars", style_tags: "wool" }),
+    product("wrong-department", { gender: "men", old_price_eur: "30", price_eur: "10", motif: "stars", style_tags: "wool" }),
+    product("wrong-sale", { price_eur: "10", motif: "stars", style_tags: "wool" }),
+    product("wrong-availability", { availability: "out_of_stock", old_price_eur: "30", price_eur: "10", motif: "stars", style_tags: "wool" }),
+    product("below-price", { old_price_eur: "30", price_eur: "4", motif: "stars", style_tags: "wool" }),
+    product("above-price", { old_price_eur: "30", price_eur: "16", motif: "stars", style_tags: "wool" }),
+  ];
+  const excluded = product("excluded", {
+    motif: "stars",
+    style_tags: "wool",
+    visual_details: "zip",
+    old_price_eur: "30",
+    price_eur: "10",
+  });
+  const candidates = [...products, ...wrongFacets, excluded];
+  const detailed = await searchProductsHybridDetailed(candidates, {
+    query: "black wool hoodie with stars not zip",
+    store: "demo-store-01",
+    category: "tops",
+    color: "black",
+    size: "M",
+    department: "unisex",
+    sale: "on",
+    availability: "in_stock",
+    minPrice: 5,
+    maxPrice: 15,
+  }, {
+    dependencies: successfulDependencies({
+      judge: async () => [...wrongFacets.map((candidate) => candidate.mock_product_id), "excluded", "P-2", "P-1"],
+    }),
+    timeoutMs: 100,
+  });
+
+  assert.equal(detailed.outcome, "success");
+  assert.deepEqual(detailed.result.results, [products[0]]);
+  assert.equal(detailed.result.approximate, false);
+  assert.deepEqual(detailed.result.relaxedConstraints, []);
 });
 
 test("the pipeline deadline bounds a dependency that ignores abort and stops later stages", async () => {
@@ -228,7 +332,7 @@ test("rejected dependencies are explicit fallbacks instead of escaping the searc
   assert.equal(detailed.outcome, "fallback");
   assert.equal(detailed.reason, "judge-unavailable");
   assert.deepEqual(detailed.result.results, fallbackResult(products).results);
-  assert.equal(detailed.result.approximate, true);
+  assert.equal(detailed.result.approximate, false);
 });
 
 test("the production path does not buy an embedding when vector storage is unavailable", async () => {
@@ -246,6 +350,8 @@ test("the production path does not buy an embedding when vector storage is unava
   assert.equal(detailed.outcome, "fallback");
   assert.equal(detailed.reason, "vector-unavailable");
   assert.equal(embeddingCalls, 0);
+  assert.equal(detailed.result.approximate, false);
+  assert.deepEqual(detailed.result.relaxedConstraints, []);
   assert.equal(detailed.timings.embeddingMs, undefined);
 });
 

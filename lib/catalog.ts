@@ -60,6 +60,8 @@ function mapCatalogRows(rows: CatalogProductRow[]): MockProduct[] {
       }
       const imagePath = row.image_url || "";
       const detailPath = detailImagePath(imagePath);
+      const imageGallery = [imagePath, detailPath]
+        .filter((path, index, paths) => Boolean(path) && hasDemoProductImage(path) && paths.indexOf(path) === index);
       const visual = attributes.get(row.public_product_id);
       return {
         mock_product_id: row.public_product_id,
@@ -85,6 +87,7 @@ function mapCatalogRows(rows: CatalogProductRow[]): MockProduct[] {
         image_available: hasDemoProductImage(imagePath),
         detail_image_path: detailPath,
         detail_image_available: hasDemoProductImage(detailPath),
+        image_gallery: imageGallery,
         motif: visual?.motif ?? "",
         surface: visual?.surface ?? "",
         visual_details: visual?.details ?? "",

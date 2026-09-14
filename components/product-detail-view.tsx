@@ -88,12 +88,14 @@ export function ProductDetailView({
   const [zoom, setZoom] = useState<{ src: string; alt: string } | null>(null);
   const [zoomedIn, setZoomedIn] = useState(false);
   const [zoomFailed, setZoomFailed] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [origin, setOrigin] = useState({ x: 50, y: 50 });
   const categoryLabel = formatCategoryLabel(product.category, locale);
   const storeLabel = product.storeLabel?.[locale] ?? t.storeFallback;
   const returnHref = withLocale(returnTo, locale);
+  const imageGallery = product.imageGallery.length > 0 ? product.imageGallery : [];
+  const selectedImage = imageGallery[activeImageIndex];
   const productAlt = `${product.title}, ${categoryLabel}, ${storeLabel}`;
-  const styledAlt = t.styledAlt(product.title);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -104,12 +106,15 @@ export function ProductDetailView({
     return () => { document.body.style.overflow = previousOverflow; };
   }, [zoom]);
 
-  function openGalleryImage(image: { src: string; alt: string }) {
+  function openGalleryImage(imageIndex: number) {
+    const image = imageGallery[imageIndex];
+    if (!image) return;
     restoreFocusRef.current = document.activeElement as HTMLElement | null;
     setZoomedIn(false);
     setZoomFailed(false);
     setOrigin({ x: 50, y: 50 });
-    setZoom(image);
+    setActiveImageIndex(imageIndex);
+    setZoom({ src: image, alt: `${product.title}, image ${imageIndex + 1}` });
   }
 
   function closeGallery() {
@@ -138,38 +143,41 @@ export function ProductDetailView({
 
       <div className="product-detail-layout">
         <section className="product-gallery" aria-label={t.galleryAria}>
-          <figure>
-            {product.imageAvailable ? (
+          <div className="product-gallery-main">
+            {selectedImage ? (
               <button
                 type="button"
                 className="product-detail-media product-zoom-trigger"
-                onClick={() => openGalleryImage({ src: product.imagePath, alt: productAlt })}
+                onClick={() => openGalleryImage(activeImageIndex)}
                 aria-label={t.enlargeImage}
               >
-                <ProductImage alt={productAlt} eager unavailableLabel={getCopy(locale).frontend.imageUnavailable} sizes="(max-width: 43.75em) 50vw, (max-width: 63.9375em) 25vw, (min-width: 2560px) 724px, 29vw" src={product.imagePath} />
+                <ProductImage alt={`${product.title}, image ${activeImageIndex + 1}`} eager unavailableLabel={getCopy(locale).frontend.imageUnavailable} sizes="(max-width: 43.75em) 50vw, (max-width: 63.9375em) 25vw, (min-width: 2560px) 724px, 29vw" src={selectedImage} />
                 <span className="product-zoom-badge" aria-hidden="true"><ZoomIn size={18} /></span>
               </button>
             ) : (
               <div className="product-detail-media" role="img" aria-label={productAlt}>
-                <ProductImage src={null} alt={productAlt} unavailableLabel={getCopy(locale).frontend.imageUnavailable} sizes="45vw" />
+                <ProductImage src={null} alt={productAlt} unavailableLabel={getCopy(locale).frontend.imageUnavailable} sizes="(max-width: 43.75em) 50vw, (max-width: 63.9375em) 25vw, (min-width: 2560px) 724px, 29vw" />
               </div>
             )}
-            <figcaption>{t.productView}</figcaption>
-          </figure>
+            <p className="product-gallery-caption">{t.productView}</p>
+          </div>
 
-          {product.detailImageAvailable ? (
-            <figure>
-              <button
-                type="button"
-                className="product-detail-media product-zoom-trigger"
-                onClick={() => openGalleryImage({ src: product.detailImagePath, alt: styledAlt })}
-                aria-label={t.enlargeImage}
-              >
-                <ProductImage alt={styledAlt} unavailableLabel={getCopy(locale).frontend.imageUnavailable} sizes="(max-width: 43.75em) 50vw, (max-width: 63.9375em) 25vw, (min-width: 2560px) 724px, 29vw" src={product.detailImagePath} />
-                <span className="product-zoom-badge" aria-hidden="true"><ZoomIn size={18} /></span>
-              </button>
-              <figcaption>{t.styledView}</figcaption>
-            </figure>
+          {imageGallery.length > 1 ? (
+            <div className="product-gallery-thumbs" role="tablist" aria-label={t.productView}>
+              {imageGallery.map((image, index) => (
+                <button
+                  key={image}
+                  className={`product-gallery-thumb${index === activeImageIndex ? " is-active" : ""}`}
+                  type="button"
+                  role="tab"
+                  aria-label={`${t.productView} ${index + 1}`}
+                  aria-selected={index === activeImageIndex}
+                  onClick={() => setActiveImageIndex(index)}
+                >
+                  <ProductImage alt={`${product.title}, image ${index + 1}`} unavailableLabel={getCopy(locale).frontend.imageUnavailable} sizes="72px" src={image} eager={index === 0} />
+                </button>
+              ))}
+            </div>
           ) : null}
         </section>
 

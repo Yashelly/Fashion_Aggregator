@@ -9,9 +9,15 @@ import { SearchForm } from "@/components/search-form";
 import { SearchInput } from "@/components/search-input";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { copy, formatGenderLabel, type Locale, withLocale } from "@/lib/i18n";
+import { canonicalizeSearchHref, normalizeSearchValues, searchHref } from "@/lib/search-params";
 import { useLocaleContext } from "@/lib/use-client-locale";
 
 function languageHref(pathname: string, params: { toString(): string }, locale: Locale) {
+  if (pathname === "/search") {
+    const canonical = canonicalizeSearchHref(`${pathname}?${params}`) ?? "/search";
+    const parsed = new URL(canonical, "https://weft.invalid");
+    return searchHref(normalizeSearchValues(Object.fromEntries(parsed.searchParams)), { lang: locale === "lt" ? "lt" : undefined });
+  }
   const next = new URLSearchParams(params.toString());
   next.set("lang", locale);
   return `${pathname}${next.size ? `?${next}` : ""}`;
@@ -35,8 +41,8 @@ export function SiteHeader() {
   const locationKey = `${visiblePathname}?${params}`;
   const isHome = visiblePathname === "/";
   const nav = [
-    { href: "/search", label: frontend.catalog, active: visiblePathname === "/search" && !params.get("gender") },
-    ...["women", "men"].map((gender) => ({ href: `/search?gender=${gender}`, label: formatGenderLabel(gender, locale), active: visiblePathname === "/search" && params.get("gender") === gender })),
+    { href: "/search", label: frontend.catalog, active: visiblePathname === "/search" && !params.get("department") },
+    ...["women", "men"].map((department) => ({ href: `/search?department=${department}`, label: formatGenderLabel(department, locale), active: visiblePathname === "/search" && params.get("department") === department })),
     { href: "/stores", label: header.nav.stores, active: visiblePathname === "/stores" },
   ];
 
@@ -101,8 +107,8 @@ export function SiteHeader() {
             </Link>
           </nav>
 
-          <Link aria-current={visiblePathname === "/account" ? "page" : undefined} aria-label={frontend.saved}
-            className="account-link" href={withLocale("/account", locale)} title={frontend.saved}>
+          <Link aria-current={visiblePathname === "/saved" ? "page" : undefined} aria-label={frontend.saved}
+            className="account-link" href={withLocale("/saved", locale)} title={frontend.saved}>
             <Heart aria-hidden="true" size={18} strokeWidth={1.4} /><span>{frontend.savedShort}</span>
           </Link>
 
@@ -129,9 +135,9 @@ export function SiteHeader() {
                 {frontend.preview3d}
               </Link>
               <Link
-                aria-current={visiblePathname === "/account" ? "page" : undefined}
+                aria-current={visiblePathname === "/saved" ? "page" : undefined}
                 className="mobile-account-link"
-                href={withLocale("/account", locale)}
+                href={withLocale("/saved", locale)}
                 onClick={closeMobileMenu}
               >
                 <Heart aria-hidden="true" size={18} />

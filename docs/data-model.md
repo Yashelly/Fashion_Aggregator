@@ -92,6 +92,13 @@ erDiagram
         text affiliate_subid
         text redirect_status "pending|redirected|blocked|failed"
     }
+    analytics_daily_aggregates {
+        date metric_date PK
+        bigint search_count
+        bigint zero_result_search_count
+        bigint search_result_count
+        bigint outbound_click_count
+    }
 ```
 
 ## Why it's shaped this way
@@ -159,6 +166,20 @@ database is hardened accordingly:
   writes only the two analytics tables.
 - **No raw PII.** `search_events` / `outbound_clicks` store an `ip_hash`, never a
   raw IP, and an `anonymous_user_id`, never an account.
+- **Raw anonymous analytics is disabled by default.** Supabase and PostHog writes
+  require the exact server-only opt-in `RAW_ANONYMOUS_ANALYTICS_ENABLED=true`;
+  credentials alone do not activate either sink, and the flag must never use a
+  `NEXT_PUBLIC_` prefix.
+- **Raw anonymous analytics may be enabled only with a verified 30-day maximum.**
+  Migration `007` provides a service-role-only aggregate-before-delete function.
+  The retained UTC-day table contains counts only and no user/session IDs,
+  queries, filters, products, URLs, or affiliate metadata. Before enabling the
+  flag, operations must verify migration `007` in the exact Supabase project,
+  guarantee an externally managed run at least once every 24 hours with failure
+  monitoring (the function deletes rows older than 29 days to leave one day of
+  scheduling margin), and verify that the exact PostHog project automatically
+  retains raw events for no more than 30 days. This repository does not install
+  or activate either provider's production retention scheduler/policy.
 - **`set_updated_at()` is locked down.** `execute` is revoked from everyone
   (including `service_role`), and migration `002` pins its `search_path` to
   `pg_catalog` — closing the mutable-search-path advisory that flagged the
@@ -173,4 +194,8 @@ Supabase project, confirming the current schema first:
 sql/001_pre_affiliate_schema.sql       # tables, checks, indexes, RLS, grants
 sql/002_pre_affiliate_hardening.sql    # missing FK indexes + function search_path
 sql/003_synthetic_click_boundary.sql   # store_id nullable for blocked synthetic clicks
+sql/004_search_vector_index.sql        # public vector-search index and RPC
+sql/005_public_catalog_read_model.sql  # safe storefront projection
+sql/006_feed_importer_role.sql         # least-privilege feed importer
+sql/007_anonymous_analytics_retention.sql # 30-day raw analytics retention
 ```

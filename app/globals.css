@@ -312,11 +312,18 @@ summary::-webkit-details-marker { display: none; }
 .product-breadcrumbs { display: flex; gap: 0.75rem; align-items: center; margin: 0 0 1.75rem; color: var(--color-ink-muted); font-size: 0.875rem; }
 .product-breadcrumbs a { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; }
 .product-detail-layout { display: grid; grid-template-columns: 1.3fr 1fr; gap: 3rem; align-items: start; }
-.product-gallery { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2px; }
-.product-gallery figure { min-width: 0; }
-.product-detail-media { position: relative; display: block; width: 100%; border: 0; aspect-ratio: 4/5.6; padding: 0; background: var(--color-product-media); }
-.product-detail-media img { object-fit: contain; }
-.product-gallery figcaption { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--color-ink-muted); }
+  .product-gallery { display: block; }
+  .product-gallery-main { min-width: 0; }
+  .product-detail-media { position: relative; display: block; width: 100%; border: 0; aspect-ratio: 4/5.6; padding: 0; background: var(--color-product-media); }
+  .product-detail-media img { object-fit: contain; }
+  .product-gallery-caption { margin: 0.5rem 0 0; font-size: 0.8125rem; color: var(--color-ink-muted); }
+  .product-gallery-thumbs { display: flex; overflow-x: auto; gap: 0.5rem; margin-top: 0.5rem; padding-bottom: 0.25rem; scroll-snap-type: x mandatory; }
+  .product-gallery-thumbs::-webkit-scrollbar { height: 0.45rem; }
+  .product-gallery-thumbs::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 999px; }
+  .product-gallery-thumb { flex: 0 0 min(6.25rem, 34vw); aspect-ratio: 4/5.6; border: 1px solid var(--color-line); padding: 0; background: var(--color-product-media); position: relative; }
+  .product-gallery-thumb + .product-gallery-thumb { margin-top: 0; }
+  .product-gallery-thumb.is-active { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+  .product-gallery-thumb img { object-fit: contain; }
 .product-zoom-badge { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; position: absolute; bottom: 0.5rem; right: 0.5rem; background: var(--color-surface); }
 .product-detail-category { font-size: 0.875rem; color: var(--color-accent); margin-bottom: 0.75rem; }
 .product-detail-title-row { display: flex; align-items: flex-start; gap: 1rem; }
