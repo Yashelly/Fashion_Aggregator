@@ -77,6 +77,7 @@ grant execute on function private.sync_catalog_product_trigger()
 to weft_feed_importer;
 grant execute on function private.sync_catalog_store_trigger()
 to weft_feed_importer;
+grant select on table private.catalog_product_rows to weft_feed_importer;
 grant select on table public.catalog_products to weft_feed_importer, service_role;
 
 drop policy if exists "Feed importer reads eligible stores" on public.stores;
