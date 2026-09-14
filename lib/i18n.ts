@@ -249,6 +249,7 @@ export const copy = {
       sizesTitle: "Sizes listed", sizesAria: "Size list", colour: "Colour", forLabel: "For", category: "Category",
       preview3d: "3D preview", backToSearch: "Back to search", relatedAria: "Related products", relatedTitle: "More in this category",
       dialogAria: "Enlarged image", close: "Close", zoomInHint: "Click the photo to zoom in", zoomOutHint: "Move to pan · click to zoom out", storeFallback: "Store",
+      factsTitle: "Product facts", provenance: (value: string) => value === "controlled_synthetic" ? "Based on the controlled demo catalogue" : "Verified product information", description: "Description", material: "Material", surface: "Surface", details: "Construction", sizeSystem: "Size system", measurements: "Garment measurements", measurementSource: "Measurement source", fitNote: "Fit note", findSimilarSize: (size: string) => `Find similar in size ${size}`,
     },
     common: {
       skipToContent: "Skip to content",
@@ -554,6 +555,7 @@ export const copy = {
       sizesTitle: "Nurodyti dydžiai", sizesAria: "Dydžių sąrašas", colour: "Spalva", forLabel: "Skirta", category: "Kategorija",
       preview3d: "3D peržiūra", backToSearch: "Grįžti į paiešką", relatedAria: "Panašios prekės", relatedTitle: "Daugiau šioje kategorijoje",
       dialogAria: "Padidinta nuotrauka", close: "Uždaryti", zoomInHint: "Spustelėkite nuotrauką, kad priartintumėte", zoomOutHint: "Judinkite pelę · spustelėkite, kad sumažintumėte", storeFallback: "Parduotuvė",
+      factsTitle: "Prekės faktai", provenance: (value: string) => value === "controlled_synthetic" ? "Remiamasi kontroliuojamu demonstraciniu katalogu" : "Patikrinta prekės informacija", description: "Aprašymas", material: "Medžiaga", surface: "Paviršius", details: "Konstrukcija", sizeSystem: "Dydžių sistema", measurements: "Drabužio išmatavimai", measurementSource: "Matavimų šaltinis", fitNote: "Pasiūtas siluetas", findSimilarSize: (size: string) => `Rasti panašių ${size} dydžio prekių`,
     },
     common: {
       skipToContent: "Pereiti prie pagrindinio turinio",

@@ -31,10 +31,28 @@ create table if not exists private.catalog_product_rows (
   availability text not null,
   style_tags text not null default '',
   image_url text not null default '',
+  image_gallery text not null default '',
+  description text not null default '',
+  material text not null default '',
+  surface text not null default '',
+  construction_details text not null default '',
+  size_system text not null default '',
+  measurement_source text not null default '',
+  fit_note text not null default '',
   mock_url text not null,
   notes text not null default '',
   refreshed_at timestamptz not null default now()
 );
+
+alter table private.catalog_product_rows
+  add column if not exists image_gallery text not null default '',
+  add column if not exists description text not null default '',
+  add column if not exists material text not null default '',
+  add column if not exists surface text not null default '',
+  add column if not exists construction_details text not null default '',
+  add column if not exists size_system text not null default '',
+  add column if not exists measurement_source text not null default '',
+  add column if not exists fit_note text not null default '';
 
 create index if not exists idx_catalog_product_rows_store
   on private.catalog_product_rows (public_store_id);
@@ -46,7 +64,8 @@ grant select (
   public_product_id, public_store_id, source_status, title, category,
   subcategory, brand, gender, color, size_options, price_eur,
   old_price_eur, currency, availability, style_tags, image_url,
-  mock_url, notes
+  mock_url, notes, image_gallery, description, material, surface,
+  construction_details, size_system, measurement_source, fit_note
 ) on private.catalog_product_rows to anon, authenticated;
 
 drop policy if exists "Public catalog rows are readable"
@@ -100,7 +119,8 @@ begin
     source_product_id, source_store_id, public_product_id, public_store_id,
     source_status, title, category, subcategory, brand, gender, color,
     size_options, price_eur, old_price_eur, currency, availability,
-    style_tags, image_url, mock_url, notes, refreshed_at
+    style_tags, image_url, image_gallery, description, material, surface,
+    construction_details, size_system, measurement_source, fit_note, mock_url, notes, refreshed_at
   ) values (
     product_row.id,
     product_row.store_id,
@@ -127,6 +147,10 @@ begin
     ),
     coalesce(product_row.style_tags, ''),
     coalesce(product_row.image_url, ''),
+    coalesce(product_row.image_url, ''),
+    coalesce(product_row.description, ''),
+    coalesce(product_row.material, ''),
+    '', '', '', '', '',
     '/out/' || route_product_id,
     case
       when store_listing_status = 'demo'
@@ -153,6 +177,14 @@ begin
     availability = excluded.availability,
     style_tags = excluded.style_tags,
     image_url = excluded.image_url,
+    image_gallery = excluded.image_gallery,
+    description = excluded.description,
+    material = excluded.material,
+    surface = excluded.surface,
+    construction_details = excluded.construction_details,
+    size_system = excluded.size_system,
+    measurement_source = excluded.measurement_source,
+    fit_note = excluded.fit_note,
     mock_url = excluded.mock_url,
     notes = excluded.notes,
     refreshed_at = excluded.refreshed_at;
@@ -238,7 +270,15 @@ select
   style_tags,
   image_url,
   mock_url,
-  notes
+  notes,
+  image_gallery,
+  description,
+  material,
+  surface,
+  construction_details,
+  size_system,
+  measurement_source,
+  fit_note
 from private.catalog_product_rows;
 
 revoke all on public.catalog_products from public, anon, authenticated;

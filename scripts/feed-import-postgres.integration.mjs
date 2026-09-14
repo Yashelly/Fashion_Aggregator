@@ -67,6 +67,7 @@ try {
     "002_pre_affiliate_hardening.sql",
     "003_synthetic_click_boundary.sql",
     "005_public_catalog_read_model.sql",
+    "008_product_facts_read_model.sql",
     "006_feed_importer_role.sql",
   ]) {
     await sql.unsafe(fs.readFileSync(path.join(rootDir, "sql", migration), "utf8"));
