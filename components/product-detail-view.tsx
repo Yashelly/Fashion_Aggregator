@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  ChevronLeft,
+  ChevronRight,
   Info,
   Palette,
   Rotate3D,
@@ -144,21 +146,45 @@ export function ProductDetailView({
       <div className="product-detail-layout">
         <section className="product-gallery" aria-label={t.galleryAria}>
           <div className="product-gallery-main">
-            {selectedImage ? (
-              <button
-                type="button"
-                className="product-detail-media product-zoom-trigger"
-                onClick={() => openGalleryImage(activeImageIndex)}
-                aria-label={t.enlargeImage}
-              >
-                <ProductImage alt={`${product.title}, image ${activeImageIndex + 1}`} eager unavailableLabel={getCopy(locale).frontend.imageUnavailable} sizes="(max-width: 43.75em) 50vw, (max-width: 63.9375em) 25vw, (min-width: 2560px) 724px, 29vw" src={selectedImage} />
-                <span className="product-zoom-badge" aria-hidden="true"><ZoomIn size={18} /></span>
-              </button>
-            ) : (
-              <div className="product-detail-media" role="img" aria-label={productAlt}>
-                <ProductImage src={null} alt={productAlt} unavailableLabel={getCopy(locale).frontend.imageUnavailable} sizes="(max-width: 43.75em) 50vw, (max-width: 63.9375em) 25vw, (min-width: 2560px) 724px, 29vw" />
-              </div>
-            )}
+            <div className="product-gallery-stage">
+              {selectedImage ? (
+                <button
+                  type="button"
+                  className="product-detail-media product-zoom-trigger"
+                  onClick={() => openGalleryImage(activeImageIndex)}
+                  aria-label={t.enlargeImage}
+                >
+                  <ProductImage alt={`${product.title}, image ${activeImageIndex + 1}`} eager unavailableLabel={getCopy(locale).frontend.imageUnavailable} sizes="(max-width: 43.75em) 50vw, (max-width: 63.9375em) 25vw, (min-width: 2560px) 724px, 29vw" src={selectedImage} />
+                  <span className="product-zoom-badge" aria-hidden="true"><ZoomIn size={18} /></span>
+                </button>
+              ) : (
+                <div className="product-detail-media" role="img" aria-label={productAlt}>
+                  <ProductImage src={null} alt={productAlt} unavailableLabel={getCopy(locale).frontend.imageUnavailable} sizes="(max-width: 43.75em) 50vw, (max-width: 63.9375em) 25vw, (min-width: 2560px) 724px, 29vw" />
+                </div>
+              )}
+              {imageGallery.length > 1 ? (
+                <div className="product-gallery-navigation" aria-label={t.galleryNavigationAria}>
+                  <button
+                    type="button"
+                    className="icon-button product-gallery-arrow"
+                    onClick={() => setActiveImageIndex((index) => Math.max(0, index - 1))}
+                    disabled={activeImageIndex === 0}
+                    aria-label={t.previousImage}
+                  >
+                    <ChevronLeft aria-hidden="true" size={22} />
+                  </button>
+                  <button
+                    type="button"
+                    className="icon-button product-gallery-arrow"
+                    onClick={() => setActiveImageIndex((index) => Math.min(imageGallery.length - 1, index + 1))}
+                    disabled={activeImageIndex === imageGallery.length - 1}
+                    aria-label={t.nextImage}
+                  >
+                    <ChevronRight aria-hidden="true" size={22} />
+                  </button>
+                </div>
+              ) : null}
+            </div>
             <p className="product-gallery-caption">{t.productView}</p>
           </div>
 

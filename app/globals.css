@@ -314,7 +314,7 @@ summary::-webkit-details-marker { display: none; }
 .product-detail-layout { display: grid; grid-template-columns: 1.3fr 1fr; gap: 3rem; align-items: start; }
   .product-gallery { display: block; }
   .product-gallery-main { min-width: 0; }
-  .product-detail-media { position: relative; display: block; width: 100%; border: 0; aspect-ratio: 4/5.6; padding: 0; background: var(--color-product-media); }
+  .product-detail-media { position: relative; display: block; width: 100%; border: 0; aspect-ratio: 4/4.35; padding: 0; background: var(--color-product-media); }
   .product-detail-media img { object-fit: contain; }
   .product-gallery-caption { margin: 0.5rem 0 0; font-size: 0.8125rem; color: var(--color-ink-muted); }
   .product-gallery-thumbs { display: flex; overflow-x: auto; gap: 0.5rem; margin-top: 0.5rem; padding-bottom: 0.25rem; scroll-snap-type: x mandatory; }
@@ -324,6 +324,9 @@ summary::-webkit-details-marker { display: none; }
   .product-gallery-thumb + .product-gallery-thumb { margin-top: 0; }
   .product-gallery-thumb.is-active { outline: 2px solid var(--color-accent); outline-offset: 1px; }
   .product-gallery-thumb img { object-fit: contain; }
+.product-gallery-stage { position: relative; }
+.product-gallery-navigation { position: absolute; inset: 50% 0 auto; transform: translateY(-50%); display: flex; justify-content: space-between; padding: 0 0.75rem; pointer-events: none; }
+.product-gallery-arrow { pointer-events: auto; background: var(--color-surface); border-color: var(--color-control); }
 .product-zoom-badge { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; position: absolute; bottom: 0.5rem; right: 0.5rem; background: var(--color-surface); }
 .product-detail-category { font-size: 0.875rem; color: var(--color-accent); margin-bottom: 0.75rem; }
 .product-detail-title-row { display: flex; align-items: flex-start; gap: 1rem; }
@@ -511,7 +514,7 @@ summary::-webkit-details-marker { display: none; }
   .product-breadcrumbs { margin-bottom: 1rem; }
   .product-detail-layout { display: block; }
   .product-gallery { margin-bottom: 1.75rem; }
-  .product-detail-media { aspect-ratio: 4/5; }
+  .product-detail-media { aspect-ratio: 4/4.2; }
   .product-detail-title-row h1 { font-size: 1.8125rem; }
   .product-detail-actions .button { flex: 1; font-size: 0.875rem; padding-inline: 0.75rem; }
   .related-products { margin-top: 2.5rem; }
