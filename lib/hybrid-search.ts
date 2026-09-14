@@ -235,13 +235,10 @@ export async function searchProductsHybridDetailed(
     ...options.dependencies,
   };
   const timings: HybridSearchTimings = { totalMs: 0 };
-  const fallbackForCloudFailure = fallback.results.length > 0
-    ? { ...fallback, approximate: true }
-    : fallback;
   const finish = (
     outcome: HybridSearchOutcome,
     reason: HybridSearchDetailedResult["reason"],
-    result = fallbackForCloudFailure,
+    result = fallback,
   ): HybridSearchDetailedResult => ({
     result,
     outcome,
@@ -330,12 +327,22 @@ export async function searchProductsHybridDetailed(
     const judgedResults = judgedIds
       .map((id) => byId.get(id))
       .filter((product): product is MockProduct => product !== undefined);
+    const validated = semanticSearch(judgedResults, query);
+    const selected = validated.matches.length > 0
+      ? validated.matches
+      : validated.alternatives;
+    const selectedIds = new Set(selected.map((match) => match.product.mock_product_id));
+    const results = judgedResults.filter((product) => selectedIds.has(product.mock_product_id));
+    const approximate = validated.matches.length === 0 && validated.alternatives.length > 0;
     return finish("success", "judge-complete", {
-      results: judgedResults,
-      relevance: new Map(judgedIds.map((id, index) => [id, 1 - index / 100])),
+      results,
+      relevance: new Map(results.map((product) => [
+        product.mock_product_id,
+        1 - judgedIds.indexOf(product.mock_product_id) / 100,
+      ])),
       interpretation: graphResult.interpretation,
-      approximate: false,
-      relaxedConstraints: [],
+      approximate,
+      relaxedConstraints: approximate ? validated.relaxedConstraints : [],
     });
   } finally {
     scope.dispose();

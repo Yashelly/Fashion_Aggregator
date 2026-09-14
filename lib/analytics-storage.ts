@@ -1,4 +1,5 @@
 import { getSupabaseServerClient } from "@/lib/supabase-server";
+import { isRawAnonymousAnalyticsEnabled } from "@/lib/analytics";
 
 const STORAGE_TIMEOUT_MS = 1_000;
 
@@ -6,6 +7,7 @@ export type SinkOutcome = "ok" | "failed" | "disabled";
 
 /** True when Supabase analytics persistence is actually configured. */
 export function isSupabaseAnalyticsEnabled() {
+  if (!isRawAnonymousAnalyticsEnabled()) return false;
   return getSupabaseServerClient() !== null;
 }
 
@@ -42,6 +44,10 @@ function reportStorageFailure(operation: string, timedOut: boolean) {
 export async function saveSearchEvent(
   input: SearchEventInput,
 ): Promise<{ id: string | null; status: SinkOutcome }> {
+  if (!isRawAnonymousAnalyticsEnabled()) {
+    return { id: null, status: "disabled" };
+  }
+
   const supabase = getSupabaseServerClient();
   if (!supabase) return { id: null, status: "disabled" };
 
@@ -89,6 +95,8 @@ export async function saveSearchEvent(
 export async function saveBlockedPreviewClick(
   input: PreviewClickInput,
 ): Promise<SinkOutcome> {
+  if (!isRawAnonymousAnalyticsEnabled()) return "disabled";
+
   const supabase = getSupabaseServerClient();
   if (!supabase) return "disabled";
 

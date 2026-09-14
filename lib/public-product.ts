@@ -1,4 +1,20 @@
 import type { MockProduct } from "@/lib/mock-products";
+import { normalizeSearchValues, SEARCH_PARAM_KEYS, searchHref } from "@/lib/search-params";
+
+const demoImagePattern = /^\/demo-products\/product-\d+(?:-tryon)?\.(?:png|webp)$/;
+
+function sanitizeImageGallery(value: string[] | undefined): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const image of value ?? []) {
+    if (!image || seen.has(image) || !demoImagePattern.test(image)) continue;
+    seen.add(image);
+    result.push(image);
+  }
+
+  return result;
+}
 
 export type PublicStoreLabel = Readonly<{
   en: string;
@@ -22,6 +38,7 @@ export type PublicProduct = Readonly<{
   imageAvailable: boolean;
   detailImagePath: string;
   detailImageAvailable: boolean;
+  imageGallery: string[];
 }>;
 
 export type PublicRelatedProduct = Readonly<{
@@ -35,21 +52,11 @@ export type PublicRelatedProduct = Readonly<{
   storeLabel: PublicStoreLabel | null;
 }>;
 
-const allowedSearchKeys = new Set([
+const allowedSearchKeys = new Set<string>([
+  ...SEARCH_PARAM_KEYS,
   "availability",
-  "category",
-  "color",
   "gender",
-  "lang",
-  "minPrice",
-  "maxPrice",
-  "page",
-  "perPage",
-  "query",
-  "sale",
-  "sort",
-  "status",
-  "store",
+  "stores",
 ]);
 
 export function toPublicProduct(
@@ -71,9 +78,10 @@ export function toPublicProduct(
     storeLabel,
     imagePath: product.image_path,
     imageAvailable: product.image_available,
-    detailImagePath: product.detail_image_path,
-    detailImageAvailable: product.detail_image_available,
-  };
+  detailImagePath: product.detail_image_path,
+  detailImageAvailable: product.detail_image_available,
+  imageGallery: sanitizeImageGallery(product.image_gallery),
+};
 }
 
 export function toPublicRelatedProduct(
@@ -103,14 +111,13 @@ export function sanitizeSearchReturnTo(value: string | string[] | undefined): st
     const url = new URL(raw, base);
     if (url.origin !== base || url.pathname !== "/search" || url.hash) return "/search";
 
-    const safe = new URLSearchParams();
+    const candidate: Record<string, string[]> = {};
     for (const [key, queryValue] of url.searchParams) {
       if (allowedSearchKeys.has(key) && queryValue.length <= 500) {
-        safe.set(key, queryValue);
+        (candidate[key] ??= []).push(queryValue);
       }
     }
-
-    return `/search${safe.size ? `?${safe}` : ""}`;
+    return searchHref(normalizeSearchValues(candidate));
   } catch {
     return "/search";
   }

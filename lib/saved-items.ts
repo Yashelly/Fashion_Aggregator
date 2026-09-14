@@ -89,6 +89,20 @@ export function createSavedItemsStore(
     return result;
   }
 
+  function clear(): SavedItemsSnapshot {
+    memoryIds = [];
+    if (!storageUnavailable) {
+      try {
+        const storage = getStorage();
+        if (!storage) throw new Error("Storage unavailable");
+        storage.setItem(SAVED_ITEMS_STORAGE_KEY, "[]");
+      } catch { storageUnavailable = true; }
+    }
+    const result = updateSnapshot([], !storageUnavailable);
+    notify();
+    return result;
+  }
+
   function subscribe(listener: Listener) {
     listeners.add(listener);
     if (!unsubscribeExternal) {
@@ -108,10 +122,11 @@ export function createSavedItemsStore(
     };
   }
 
-  return { read, subscribe, toggle, getSnapshot: () => snapshot };
+  return { read, subscribe, toggle, clear, getSnapshot: () => snapshot };
 }
 
 const savedItemsStore = createSavedItemsStore();
 export const readSavedItems = () => savedItemsStore.read();
 export const subscribeSavedItems = (listener: Listener) => savedItemsStore.subscribe(listener);
 export const toggleSavedItem = (productId: string) => savedItemsStore.toggle(productId);
+export const clearSavedItems = () => savedItemsStore.clear();

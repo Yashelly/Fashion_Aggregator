@@ -2,7 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { assertUniqueBy, parseCsvRecords } from "@/lib/csv";
 import {
-  filterProductsByPublicDemoStore,
   filterPublishableProducts,
   getPublicDemoStoreForProduct,
   getPublicDemoStores,
@@ -38,6 +37,7 @@ export type MockProduct = CsvMockProduct & {
   image_available: boolean;
   detail_image_path: string;
   detail_image_available: boolean;
+  image_gallery: string[];
   /** Visual attributes read off the product photo; empty when unenriched. */
   motif: string;
   surface: string;
@@ -49,6 +49,28 @@ const csvPath = path.join(process.cwd(), "data", "mock_products.csv");
 const demoProductDirectory = path.join(process.cwd(), "public", "demo-products");
 
 let productCache: { mtimeMs: number; products: MockProduct[] } | null = null;
+const imageExtensionPattern = /\/demo-products\/(product-\d+(?:-tryon)?\.(?:png|webp))/;
+
+function splitImagePaths(raw: string): string[] {
+  return raw.split("|").map((path) => path.trim()).filter(Boolean);
+}
+
+function collectValidImagePaths(paths: string[]): string[] {
+  const seen = new Set<string>();
+  const images: string[] = [];
+
+  for (const rawPath of paths) {
+    const imagePath = rawPath.trim();
+    if (!imagePath || seen.has(imagePath)) continue;
+    if (!imageExtensionPattern.test(imagePath)) continue;
+    if (!hasDemoProductImage(imagePath)) continue;
+
+    seen.add(imagePath);
+    images.push(imagePath);
+  }
+
+  return images;
+}
 
 export function getMockProducts(): MockProduct[] {
   // The synthetic catalog is a static, committed file, but this function is
@@ -75,6 +97,10 @@ export function getMockProducts(): MockProduct[] {
       const imagePath =
         csvProduct.image_url || `/demo-products/product-${String(index + 1).padStart(2, "0")}.webp`;
       const detailImagePath = `/demo-products/product-${String(index + 1).padStart(2, "0")}-tryon.webp`;
+      const imageGallery = collectValidImagePaths([
+        ...splitImagePaths(imagePath),
+        detailImagePath,
+      ]);
 
       const visual = attributes.get(csvProduct.mock_product_id);
 
@@ -85,6 +111,7 @@ export function getMockProducts(): MockProduct[] {
         image_available: hasDemoProductImage(imagePath),
         detail_image_path: detailImagePath,
         detail_image_available: hasDemoProductImage(detailImagePath),
+        image_gallery: imageGallery,
         public_store_id: getPublicDemoStoreForProduct(csvProduct).id,
         motif: visual?.motif ?? "",
         surface: visual?.surface ?? "",
@@ -152,11 +179,33 @@ export type SearchFilterParams = {
   store?: string;
   category?: string;
   color?: string;
+  size?: string;
+  department?: string;
+  /** Temporary input compatibility; canonical URLs use `department`. */
   gender?: string;
   sale?: string;
   availability?: string;
   status?: string;
+  minPrice?: number | string;
+  maxPrice?: number | string;
 };
+
+function splitSelectedValues(value: string | undefined): string[] {
+  return value?.split(",").map((item) => item.trim()).filter(Boolean) ?? [];
+}
+
+/** Product-level `size_options` are listed choices, not inferred body-size coverage. */
+export function getSizeOptions(products: MockProduct[]) {
+  return Array.from(new Set(
+    products.flatMap((product) => product.size_options.split("|").map((size) => size.trim()).filter(Boolean)),
+  )).sort((first, second) => first.localeCompare(second, undefined, { numeric: true }));
+}
+
+function finitePrice(value: number | string | undefined): number | undefined {
+  if (value === undefined || value === "") return undefined;
+  const price = typeof value === "number" ? value : Number(value.replace(",", "."));
+  return Number.isFinite(price) ? price : NaN;
+}
 
 /**
  * Structural filters only — the facets the shopper picked explicitly.
@@ -167,24 +216,30 @@ export type SearchFilterParams = {
  */
 export function filterProducts(
   products: MockProduct[],
-  params: SearchFilterParams & { minPrice?: number; maxPrice?: number },
+  params: SearchFilterParams,
 ) {
-  const minPrice = params.minPrice;
-  const maxPrice = params.maxPrice;
+  const minPrice = finitePrice(params.minPrice);
+  const maxPrice = finitePrice(params.maxPrice);
   const status = params.status ?? "";
   const availability = params.availability || (status !== "sale" ? status : "");
   const saleOnly = params.sale === "on" || status === "sale";
+  const stores = splitSelectedValues(params.store);
+  const colors = splitSelectedValues(params.color);
+  const sizes = splitSelectedValues(params.size).map((size) => size.toLocaleLowerCase());
+  const department = params.department ?? params.gender;
 
-  return filterProductsByPublicDemoStore(products, params.store).filter((product) => {
+  return products.filter((product) => {
+    if (stores.length > 0 && !stores.includes(product.public_store_id)) return false;
     if (params.category && !matchesCategory(product, params.category)) return false;
-    if (params.color && product.color !== params.color) return false;
+    if (colors.length > 0 && !colors.includes(product.color)) return false;
+    if (sizes.length > 0 && !product.size_options.split("|").some((size) => sizes.includes(size.trim().toLocaleLowerCase()))) return false;
     if (saleOnly && !product.old_price_eur) return false;
-    if (availability && product.availability !== availability) return false;
-    if (params.gender && product.gender.toLowerCase() !== params.gender.toLowerCase()) {
+    if (availability ? product.availability !== availability : product.availability === "out_of_stock") return false;
+    if (department && product.gender.toLowerCase() !== department.toLowerCase()) {
       return false;
     }
-    if (minPrice !== undefined && Number(product.price_eur) < minPrice) return false;
-    if (maxPrice !== undefined && Number(product.price_eur) > maxPrice) return false;
+    if (minPrice !== undefined && (!Number.isFinite(minPrice) || Number(product.price_eur) < minPrice)) return false;
+    if (maxPrice !== undefined && (!Number.isFinite(maxPrice) || Number(product.price_eur) > maxPrice)) return false;
 
     return true;
   });
@@ -224,10 +279,22 @@ export function searchProducts(
   }
 
   const interpretation = interpretQuery(rawQuery);
+  const explicitMinPrice = finitePrice(params.minPrice);
+  const explicitMaxPrice = finitePrice(params.maxPrice);
+  const minPrice = explicitMinPrice !== undefined && !Number.isFinite(explicitMinPrice)
+    ? NaN
+    : interpretation.minPrice === undefined
+      ? explicitMinPrice
+      : Math.max(explicitMinPrice ?? -Infinity, interpretation.minPrice);
+  const maxPrice = explicitMaxPrice !== undefined && !Number.isFinite(explicitMaxPrice)
+    ? NaN
+    : interpretation.maxPrice === undefined
+      ? explicitMaxPrice
+      : Math.min(explicitMaxPrice ?? Infinity, interpretation.maxPrice);
   const faceted = filterProducts(products, {
     ...params,
-    minPrice: interpretation.minPrice,
-    maxPrice: interpretation.maxPrice,
+    minPrice,
+    maxPrice,
   });
   const { matches, alternatives, relaxedConstraints } = semanticSearch(faceted, rawQuery);
   const selected = matches.length > 0 ? matches : alternatives;

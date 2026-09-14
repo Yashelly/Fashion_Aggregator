@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Six hand-written, numbered PostgreSQL/Supabase migration files define the pre-affiliate schema, analytics tables, public vector-search index, storefront catalog read model, and least-privilege feed runner. **There is no production migration runner wired into this repo** — apply them manually in numeric order against the exact target project. CI applies the non-pgvector subset to a disposable PostgreSQL service.
+Seven hand-written, numbered PostgreSQL/Supabase migration files define the pre-affiliate schema, analytics tables and retention contract, public vector-search index, storefront catalog read model, and least-privilege feed runner. **There is no production migration runner wired into this repo** — apply them manually in numeric order against the exact target project. CI applies the non-pgvector subset to a disposable PostgreSQL service.
 
 ## Key Files
 
@@ -17,6 +17,7 @@ Six hand-written, numbered PostgreSQL/Supabase migration files define the pre-af
 | `004_search_vector_index.sql` | Adds the Gemini 1024-dimensional public retrieval index, HNSW/GIN indexes, RLS, and the read-only vector-match RPC. |
 | `005_public_catalog_read_model.sql` | Adds safe public store IDs, importer enrichment columns, a trigger-maintained private catalog projection, and an RLS-protected `security_invoker` storefront view. |
 | `006_feed_importer_role.sql` | Adds a credential-unconfigured, connection-limited `weft_feed_importer` login plus explicit grants/RLS policies for guarded production imports. |
+| `007_anonymous_analytics_retention.sql` | Adds identifier-free daily aggregates and an atomic service-role-only function that aggregates, then deletes raw anonymous search/click events older than 30 days. |
 
 ## Migration Details
 
@@ -46,11 +47,17 @@ One change: `alter table public.outbound_clicks alter column store_id drop not n
 
 > **History note:** in the current baseline, `001` already defines `outbound_clicks.store_id` as nullable (`references public.stores(id) on delete restrict`, no `not null`). So on a clean `001 → 003` apply, `003`'s `drop not null` is a defensive no-op. It only does real work against a database that received an *earlier* revision of `001` where `store_id` was `not null`. Do not describe `003` as the migration that "introduced" nullability — `001` did.
 
+### `007_anonymous_analytics_retention.sql`
+
+Creates `analytics_daily_aggregates`, which keeps only UTC-day counts and summed search-result counts; it contains no anonymous/user/session IDs, query/filter text, URLs, product/store IDs, or affiliate metadata. `enforce_anonymous_analytics_retention()` serializes concurrent runs, accumulates eligible rows into the daily table, then deletes `search_events` and `outbound_clicks` older than 30 days in the same transaction. It is executable only by `service_role`.
+
+The migration defines the retention operation but deliberately does not install or enable a production scheduler. Operations must invoke the function at least daily after confirming the exact target project; without that external schedule, the 30-day policy is not active.
+
 ## For AI Agents
 
 ### Working In This Directory
 
-- **Apply migrations manually and in numeric order** (001 → 002 → 003 → 004 → 005 → 006) against Supabase — there is no automated production runner or schema-version table in this repo to do it for you. Use the SQL editor, CLI, or a direct Postgres connection after confirming the exact target project.
+- **Apply migrations manually and in numeric order** (001 → 002 → 003 → 004 → 005 → 006 → 007) against Supabase — there is no automated production runner or schema-version table in this repo to do it for you. Use the SQL editor, CLI, or a direct Postgres connection after confirming the exact target project.
 - **Treat applied migrations as immutable and apply each once.** The files use `create ... if not exists` / idempotent-trigger-check patterns, so a rerun is *usually* harmless — but do not rely on rerunning as a workflow. Always confirm the exact target schema before applying blind. The generic importer owns the application-level run state and hash idempotency; CI verifies those contracts against disposable PostgreSQL.
 - Keep private domain/analytics tables service-role-only. Public search data is the explicit exception: 004 grants read/execute only to `anon`/`authenticated`, keeps RLS enabled, restricts rows to `is_public`, and uses a `security invoker` function. Never expose write privileges or a service-role key to the search client.
 - Migration 005 follows the same least-privilege boundary: trigger-maintained source rows live in `private`, source UUIDs are not selectable by public roles, and `public.catalog_products` contains only shopper-safe fields. Preserve explicit grants because Supabase no longer auto-exposes new Data API relations.

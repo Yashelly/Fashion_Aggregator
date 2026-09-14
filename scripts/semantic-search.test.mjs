@@ -20,6 +20,7 @@ import { loadSemanticSearch } from "./load-search.mjs";
 const {
   interpretQuery,
   buildProductTerms,
+  removeInterpretedConstraint,
   semanticSearch,
 } = loadSemanticSearch();
 
@@ -258,4 +259,60 @@ test("a product satisfying every direct attribute remains an exact match", () =>
   assert.deepEqual(result.matches.map((entry) => entry.product.mock_product_id), ["starred"]);
   assert.deepEqual(result.alternatives, []);
   assert.deepEqual(result.relaxedConstraints, []);
+});
+
+test("interpretation separates materials from other editable attributes", () => {
+  const interpretation = interpretQuery("black wool cropped coat without zip under 150");
+  assert.deepEqual(interpretation.constraints.garmentTypes, ["coat"]);
+  assert.deepEqual(interpretation.constraints.colors, ["black"]);
+  assert.deepEqual(interpretation.constraints.materials, ["wool"]);
+  assert.deepEqual(interpretation.constraints.directAttributes, ["cropped"]);
+  assert.deepEqual(interpretation.constraints.excludedTerms, ["zip"]);
+  assert.equal(interpretation.maxPrice, 150);
+});
+
+test("removing an understood chip changes the literal query and cannot be restored by parsing", () => {
+  const original = "Juodas vilnonis paltas be užtrauktuko iki 150";
+  const withoutColor = removeInterpretedConstraint(original, "term", "black");
+  assert.equal(withoutColor, "vilnonis paltas be užtrauktuko iki 150");
+  assert.deepEqual(interpretQuery(withoutColor).constraints.colors, []);
+
+  const withoutExclusion = removeInterpretedConstraint(original, "exclusion", "zip");
+  assert.deepEqual(interpretQuery(withoutExclusion).constraints.excludedTerms, []);
+
+  const withoutPrice = removeInterpretedConstraint(original, "price", "price");
+  assert.equal(interpretQuery(withoutPrice).maxPrice, undefined);
+  assert.ok(withoutPrice.includes("Juodas vilnonis paltas"), "unrelated original text and casing stay intact");
+
+  const withoutAvailability = removeInterpretedConstraint("in-stock black coat", "availability", "available");
+  assert.equal(withoutAvailability, "black coat");
+  assert.equal(interpretQuery(withoutAvailability).requiresInStock, false);
+});
+
+test("removing one exclusion preserves the negation scope of the remaining exclusion", () => {
+  for (const [query, removed, remaining] of [
+    ["not red or blue", "red", "blue"],
+    ["not red and blue", "blue", "red"],
+    ["ne raudonas ar mėlynas", "red", "blue"],
+    ["ne raudonas ir mėlynas", "blue", "red"],
+  ]) {
+    const edited = removeInterpretedConstraint(query, "exclusion", removed);
+    const interpretation = interpretQuery(edited);
+
+    assert.deepEqual(
+      interpretation.constraints.excludedTerms,
+      [remaining],
+      `${query} -> ${edited}`,
+    );
+    assert.ok(!interpretation.terms.includes(remaining), `${remaining} must not become positive`);
+  }
+});
+
+test("material near-misses are labelled alternatives with the relaxed material named", () => {
+  const cotton = product({ mock_product_id: "cotton", subcategory: "coat", color: "black", style_tags: "cotton" });
+  const result = semanticSearch([cotton], "black wool coat");
+
+  assert.deepEqual(result.matches, []);
+  assert.deepEqual(result.alternatives.map((entry) => entry.product.mock_product_id), ["cotton"]);
+  assert.deepEqual(result.relaxedConstraints, ["wool"]);
 });
