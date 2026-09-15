@@ -308,11 +308,12 @@ summary::-webkit-details-marker { display: none; }
 .pagination a, .pagination>span { display: inline-flex; align-items: center; justify-content: center; min-width: 2.75rem; min-height: 2.75rem; padding: 0.5rem; }
 .pagination a[aria-current="page"] { color: var(--color-ink); text-decoration: underline; text-underline-offset: 0.25rem; }
 
-/* Details: two source images, factual attributes, safe return to results. */
-.product-breadcrumbs { display: flex; gap: 0.75rem; align-items: center; margin: 0 0 1.75rem; color: var(--color-ink-muted); font-size: 0.875rem; }
+/* Details keep image inspection and product facts together in one desktop work area. */
+.product-detail-page { max-width: 78rem; }
+.product-breadcrumbs { display: flex; gap: 0.75rem; align-items: center; margin: 0 0 1.25rem; color: var(--color-ink-muted); font-size: 0.875rem; }
 .product-breadcrumbs a { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; }
-.product-detail-layout { display: grid; grid-template-columns: 1.3fr 1fr; gap: 3rem; align-items: start; }
-  .product-gallery { display: block; }
+.product-detail-layout { display: grid; grid-template-columns: minmax(0,26rem) minmax(20rem,28rem); justify-content: center; gap: clamp(2rem,4vw,4rem); align-items: start; }
+  .product-gallery { display: block; min-width: 0; }
   .product-gallery-main { min-width: 0; }
   .product-detail-media { position: relative; display: block; width: 100%; border: 0; aspect-ratio: 4/4.35; padding: 0; background: var(--color-product-media); }
   .product-detail-media img { object-fit: contain; }
@@ -320,7 +321,7 @@ summary::-webkit-details-marker { display: none; }
   .product-gallery-thumbs { display: flex; overflow-x: auto; gap: 0.5rem; margin-top: 0.5rem; padding-bottom: 0.25rem; scroll-snap-type: x mandatory; }
   .product-gallery-thumbs::-webkit-scrollbar { height: 0.45rem; }
   .product-gallery-thumbs::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 999px; }
-  .product-gallery-thumb { flex: 0 0 min(6.25rem, 34vw); aspect-ratio: 4/5.6; border: 1px solid var(--color-line); padding: 0; background: var(--color-product-media); position: relative; }
+  .product-gallery-thumb { flex: 0 0 min(5rem, 34vw); aspect-ratio: 4/4.8; border: 1px solid var(--color-line); padding: 0; background: var(--color-product-media); position: relative; }
   .product-gallery-thumb + .product-gallery-thumb { margin-top: 0; }
   .product-gallery-thumb.is-active { outline: 2px solid var(--color-accent); outline-offset: 1px; }
   .product-gallery-thumb img { object-fit: contain; }
@@ -330,19 +331,19 @@ summary::-webkit-details-marker { display: none; }
 .product-zoom-badge { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; position: absolute; bottom: 0.5rem; right: 0.5rem; background: var(--color-surface); }
 .product-detail-category { font-size: 0.875rem; color: var(--color-accent); margin-bottom: 0.75rem; }
 .product-detail-title-row { display: flex; align-items: flex-start; gap: 1rem; }
-.product-detail-title-row h1 { font-size: 2rem; overflow-wrap: anywhere; margin-bottom: 1.125rem; }
+.product-detail-title-row h1 { font-size: clamp(1.625rem,2.25vw,2rem); overflow-wrap: anywhere; margin-bottom: 0.875rem; }
 .product-detail-title-row .wishlist-button { position: static; flex-shrink: 0; }
 .product-detail-store { display: inline-flex; gap: 0.5rem; align-items: center; min-height: 2.75rem; color: var(--color-ink-muted); font-size: 0.875rem; text-decoration: underline; text-underline-offset: 0.25rem; }
 .product-detail-price { display: flex; gap: 0.75rem; align-items: baseline; margin: 1rem 0 0.25rem; }
 .product-detail-price strong { font-size: 1.5rem; font-weight: 400; }
 .product-detail-price del { font-size: 1rem; color: var(--color-ink-muted); }
-.product-size-section { border-top: 1px solid var(--color-line); margin-top: 1.5rem; padding-top: 1.5rem; }
+.product-size-section { border-top: 1px solid var(--color-line); margin-top: 1.25rem; padding-top: 1.25rem; }
 .product-size-section>div { display: flex; justify-content: space-between; align-items: center; }
 .product-size-section h2 { font: 500 0.9375rem var(--font-body),Arial,sans-serif; letter-spacing: 0; margin: 0; }
-.product-size-section ul { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; margin: 1rem 0 1.5rem; }
+.product-size-section ul { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; margin: 0.75rem 0 1.25rem; }
 .product-size-section li { display: grid; place-items: center; min-width: 2.75rem; min-height: 2.75rem; border: 1px solid var(--color-line); padding: 0.5rem 0.75rem; font-size: 0.875rem; }
-.product-detail-facts { margin: 0 0 1.5rem; font-size: 0.875rem; }
-.product-detail-facts>div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.75rem 0; border-top: 1px solid var(--color-line); }
+.product-detail-facts { margin: 0 0 1.25rem; font-size: 0.875rem; }
+.product-detail-facts>div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.625rem 0; border-top: 1px solid var(--color-line); }
 .product-detail-facts dt { display: flex; align-items: center; gap: 0.5rem; color: var(--color-ink-muted); }
 .product-detail-facts dd { margin: 0; }
 .product-facts-section { border-top: 1px solid var(--color-line); margin-top: 1.5rem; padding-top: 1.25rem; }
@@ -420,7 +421,7 @@ summary::-webkit-details-marker { display: none; }
   .is-home .desktop-nav { display: none; }
   .is-home .mobile-menu { display: block; }
   .product-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
-  .product-detail-layout { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .product-detail-layout { grid-template-columns: minmax(0,24rem) minmax(18rem,1fr); gap: 1.5rem; }
   .product-detail-title-row h1 { font-size: 2rem; }
 }
 @media (max-width: 56.25em) {
@@ -515,6 +516,7 @@ summary::-webkit-details-marker { display: none; }
   .product-detail-layout { display: block; }
   .product-gallery { margin-bottom: 1.75rem; }
   .product-detail-media { aspect-ratio: 4/4.2; }
+  .product-gallery-thumb { flex-basis: min(5rem,34vw); aspect-ratio: 4/5; }
   .product-detail-title-row h1 { font-size: 1.8125rem; }
   .product-detail-actions .button { flex: 1; font-size: 0.875rem; padding-inline: 0.75rem; }
   .related-products { margin-top: 2.5rem; }
