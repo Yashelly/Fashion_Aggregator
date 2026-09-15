@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ProductGrid } from "@/components/product-grid";
+import { SearchForm } from "@/components/search-form";
+import { SearchInput } from "@/components/search-input";
 import { getCatalogProducts } from "@/lib/catalog";
 import { getCopy, getLocale, type SearchParamsInput, withLocale } from "@/lib/i18n";
 
@@ -25,9 +27,20 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           </picture>
         </div>
         <div className="campaign-copy">
-          <h1 id="home-title">{t.heroTitle}</h1>
-          <p>{t.heroLead}</p>
-          <Link className="campaign-cta" href={withLocale("/search", locale)}>{t.browse}</Link>
+          <h1 id="home-title">{t.heroSearchTitle}</h1>
+          <p>{t.heroSearchLead}</p>
+          <SearchForm action="/search" className="campaign-search" role="search">
+            {locale === "lt" && <input name="lang" type="hidden" value="lt" />}
+            <SearchInput locale={locale} />
+          </SearchForm>
+          <nav className="campaign-examples" aria-label={t.examplesLabel}>
+            {t.examples.map((example) => (
+              <Link key={example.query} href={withLocale(`/search?query=${encodeURIComponent(example.query)}`, locale)}>
+                {example.label}
+              </Link>
+            ))}
+          </nav>
+          <Link className="campaign-browse" href={withLocale("/search", locale)}>{t.browse}</Link>
         </div>
       </div>
     </section>

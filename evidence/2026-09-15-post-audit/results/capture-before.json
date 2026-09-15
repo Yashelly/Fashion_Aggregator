@@ -1,0 +1,220 @@
+{
+  "phase": "before",
+  "base_url": "http://127.0.0.1:3200",
+  "cases": [
+    {
+      "name": "home-en",
+      "path": "/?lang=en",
+      "viewport": [
+        1440,
+        900
+      ],
+      "status": 200,
+      "screenshot": "evidence/2026-09-15-post-audit/before/home-en-1440x900.png",
+      "metrics": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440,
+        "bodyWidth": 1440,
+        "lang": "en",
+        "title": "Weft — Fashion discovery",
+        "mainText": "Find your\nnext layer.\n\nClothing from different stores, in one search.\n\nExplore clothing\nExplore clothing\nView all\nStone Relaxed Cotton Shirt\nStore 01\nPrice:\n€29.99\nBlack Wide Leg Trousers\nStore 02\nPrice:\n€39.99\nPrevious price:\n€49.99\nOlive Utility Overshirt\nStore 03\nPrice:\n€54.99\n\nLow stock\n\nIvory Ribbed Tank Top\nStore 04\nPrice:\n€14.99\nWashed Blue Straight Jeans\nStore 05\nPrice:\n€44.99\nPrevious price:\n€59.99\nCamel Soft Knit Cardigan\nStore 06\nPrice:\n€49.99\n\nLow stock\n\nNavy Structured Blazer\nStore 01\nPrice:\n€79.99\nPrevious price:\n€99.99\nGrey Regular Fit Hoodie\nStore 02\nPrice:\n€34.99",
+        "overflowNodes": []
+      },
+      "page_errors": []
+    },
+    {
+      "name": "home-lt",
+      "path": "/?lang=lt",
+      "viewport": [
+        390,
+        844
+      ],
+      "status": 200,
+      "screenshot": "evidence/2026-09-15-post-audit/before/home-lt-390x844.png",
+      "metrics": {
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "bodyWidth": 390,
+        "lang": "lt",
+        "title": "Weft — Fashion discovery",
+        "mainText": "Atrask kitą sluoksnį.\n\nDrabužiai iš skirtingų parduotuvių vienoje paieškoje.\n\nAtrask drabužius\nAtrask drabužius\nVisos prekės\nStone Relaxed Cotton Shirt\nParduotuvė 01\nKaina:\n29,99 €\nBlack Wide Leg Trousers\nParduotuvė 02\nKaina:\n39,99 €\nAnkstesnė kaina:\n49,99 €\nOlive Utility Overshirt\nParduotuvė 03\nKaina:\n54,99 €\n\nLiko nedaug\n\nIvory Ribbed Tank Top\nParduotuvė 04\nKaina:\n14,99 €\nWashed Blue Straight Jeans\nParduotuvė 05\nKaina:\n44,99 €\nAnkstesnė kaina:\n59,99 €\nCamel Soft Knit Cardigan\nParduotuvė 06\nKaina:\n49,99 €\n\nLiko nedaug\n\nNavy Structured Blazer\nParduotuvė 01\nKaina:\n79,99 €\nAnkstesnė kaina:\n99,99 €\nGrey Regular Fit Hoodie\nParduotuvė 02\nKaina:\n34,99 €",
+        "overflowNodes": []
+      },
+      "page_errors": []
+    },
+    {
+      "name": "search-black-en",
+      "path": "/search?query=black&lang=en",
+      "viewport": [
+        1440,
+        900
+      ],
+      "status": 200,
+      "screenshot": "evidence/2026-09-15-post-audit/before/search-black-en-1440x900.png",
+      "metrics": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440,
+        "bodyWidth": 1440,
+        "lang": "en",
+        "title": "Weft — Fashion discovery",
+        "mainText": "What are you looking for?\nSearch\nOuterwear\nKnitwear\nJeans\nTrousers\nDresses\nShoes\nBags\nFilters\nPrice\nBudget\nFrom, €\nTo, €\n\nLeave either amount empty for no limit. Your description and these limits both apply.\n\nCategory\nStores\nDepartment\nColour\nSize\nAvailability\nOn sale\nSearch results\n\n13 pieces\n\nFilters\nView:\n4\nRelevance\nWe understood:\nColour: Black\n\nExact matches\n\nBlack Wide Leg Trousers\nStore 02\nPrice:\n€39.99\nPrevious price:\n€49.99\nBlack Faux Leather Belt\nStore 03\nPrice:\n€17.99\nBlack Mini Shoulder Bag\nStore 04\nPrice:\n€16.99\nBlack Flared Leggings\nStore 03\nPrice:\n€18.99\nBlack Retro Runner Sneakers\nStore 06\nPrice:\n€84.99\nBlack Platform Sneakers\nStore 03\nPrice:\n€69.99\nBlack Training Shorts\nStore 02\nPrice:\n€24.99\nBlack Leather Look Ankle Boots\nStore 01\nPrice:\n€109.99\nPrevious price:\n€139.99\nBlack Structured Tote Bag\nStore 05\nPrice:\n€69.99\nPrevious price:\n€89.99\nBlack Slim Leather Belt\nStore 01\nPrice:\n€39.99\nBlack Oversized Graphic Hoodie\nStore 03\nPrice:\n€35.99\nPrevious price:\n€45.99\nBlack Nylon Mini Backpack\nStore 06\nPrice:\n€24.99\nPrevious price:\n€29.99\nBlack Premium Crossbody Bag\nStore 04\nPrice:\n€79.99\n\nShowing 1–13 of 13\n\nShow\n20\n50\n100",
+        "overflowNodes": [
+          {
+            "tag": "FORM",
+            "className": "filter-fallback",
+            "left": 1093.296875,
+            "right": 1443.296875,
+            "text": "PriceBudgetFrom, €To, €Leave either amount empty for no limit. Your description and these limits both apply.CategoryCategoryAll categoriesAc"
+          }
+        ]
+      },
+      "page_errors": []
+    },
+    {
+      "name": "search-black-lt",
+      "path": "/search?query=black&lang=lt",
+      "viewport": [
+        390,
+        844
+      ],
+      "status": 200,
+      "screenshot": "evidence/2026-09-15-post-audit/before/search-black-lt-390x844.png",
+      "metrics": {
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "bodyWidth": 390,
+        "lang": "lt",
+        "title": "Weft — Fashion discovery",
+        "mainText": "Kokių drabužių ieškai?\nIeškoti\nStriukės ir paltai\nMegztiniai\nDžinsai\nKelnės\nSuknelės\nAvalynė\nRankinės\nPaieškos rezultatai\n\nPrekių: 13\n\nFiltrai\nAktualumą\nSupratome:\nSpalva: Juoda\n\nTikslūs atitikmenys\n\nBlack Wide Leg Trousers\nParduotuvė 02\nKaina:\n39,99 €\nAnkstesnė kaina:\n49,99 €\nBlack Faux Leather Belt\nParduotuvė 03\nKaina:\n17,99 €\nBlack Mini Shoulder Bag\nParduotuvė 04\nKaina:\n16,99 €\nBlack Flared Leggings\nParduotuvė 03\nKaina:\n18,99 €\nBlack Retro Runner Sneakers\nParduotuvė 06\nKaina:\n84,99 €\nBlack Platform Sneakers\nParduotuvė 03\nKaina:\n69,99 €\nBlack Training Shorts\nParduotuvė 02\nKaina:\n24,99 €\nBlack Leather Look Ankle Boots\nParduotuvė 01\nKaina:\n109,99 €\nAnkstesnė kaina:\n139,99 €\nBlack Structured Tote Bag\nParduotuvė 05\nKaina:\n69,99 €\nAnkstesnė kaina:\n89,99 €\nBlack Slim Leather Belt\nParduotuvė 01\nKaina:\n39,99 €\nBlack Oversized Graphic Hoodie\nParduotuvė 03\nKaina:\n35,99 €\nAnkstesnė kaina:\n45,99 €\nBlack Nylon Mini Backpack\nParduotuvė 06\nKaina:\n24,99 €\nAnkstesnė kaina:\n29,99 €\nBlack Premium Crossbody Bag\nParduotuvė 04\nKaina:\n79,99 €\n\nRodoma 1–13 iš 13\n\nRodyti\n20\n50\n100",
+        "overflowNodes": [
+          {
+            "tag": "A",
+            "className": "",
+            "left": 344.390625,
+            "right": 397.875,
+            "text": "Suknelės"
+          },
+          {
+            "tag": "A",
+            "className": "",
+            "left": 418.875,
+            "right": 464.890625,
+            "text": "Avalynė"
+          },
+          {
+            "tag": "A",
+            "className": "",
+            "left": 485.890625,
+            "right": 540.09375,
+            "text": "Rankinės"
+          }
+        ]
+      },
+      "page_errors": []
+    },
+    {
+      "name": "pdp-shirt-en",
+      "path": "/out/MOCK-001?lang=en",
+      "viewport": [
+        390,
+        844
+      ],
+      "status": 200,
+      "screenshot": "evidence/2026-09-15-post-audit/before/pdp-shirt-en-390x844.png",
+      "metrics": {
+        "clientWidth": 390,
+        "scrollWidth": 568,
+        "bodyWidth": 390,
+        "lang": "en",
+        "title": "Stone Relaxed Cotton Shirt — Weft",
+        "mainText": "Search\n/\nTops\n\nProduct view\n\nTops\n\nStone Relaxed Cotton Shirt\nStore 01\n€29.99\n\nIn stock\n\nProduct facts\n\nBased on the controlled demo catalogue\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMaterial\ncotton\nSurface\nsolid|washed_cotton\nConstruction\npoint_collar|button_placket|curved_hem|buttoned_cuffs|dropped_shoulder\nSize system\nLettered\nSizes listed\nS\nUnknown\nM\nUnknown\nL\nUnknown\nXL\nUnknown\nColour\nStone\nFor\nMen\nCategory\nTops\n3D preview\nBack to search\nMore in this category\n\nTops\n\nIvory Ribbed Tank Top\n€14.99\n\nTops\n\nWhite Boxy Cotton Tee\n€12.99\n\nTops\n\nSage Ribbed Long Sleeve Top\n€12.99\n\nTops\n\nWhite Oversized Graphic Tee\n€11.99",
+        "overflowNodes": [
+          {
+            "tag": "DD",
+            "className": "",
+            "left": 109.59375,
+            "right": 568.3125,
+            "text": "point_collar|button_placket|curved_hem|buttoned_cuffs|dropped_shoulder"
+          }
+        ]
+      },
+      "page_errors": []
+    },
+    {
+      "name": "pdp-trousers-en",
+      "path": "/out/MOCK-002?lang=en",
+      "viewport": [
+        390,
+        844
+      ],
+      "status": 200,
+      "screenshot": "evidence/2026-09-15-post-audit/before/pdp-trousers-en-390x844.png",
+      "metrics": {
+        "clientWidth": 390,
+        "scrollWidth": 530,
+        "bodyWidth": 390,
+        "lang": "en",
+        "title": "Black Wide Leg Trousers — Weft",
+        "mainText": "Search\n/\nTrousers\n\nProduct view\n\nTrousers\n\nBlack Wide Leg Trousers\nStore 02\n€39.99\n€49.99\n\nIn stock\n\nProduct facts\n\nBased on the controlled demo catalogue\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nSurface\nsolid|smooth_twill\nConstruction\nhigh_waist|pleated_front|wide_leg|pressed_crease|belt_loops_none\nSize system\nLettered\nSizes listed\nXS\nUnknown\nS\nUnknown\nM\nUnknown\nL\nUnknown\nColour\nBlack\nFor\nWomen\nCategory\nTrousers\n3D preview\nBack to search\nMore in this category\n\nTrousers\n\nWashed Blue Straight Jeans\n€44.99\n€59.99\n\nTrousers\n\nCream Midi Slip Skirt\n€35.99\n€45.99\n\nTrousers\n\nKhaki Cargo Mini Skirt\n€32.99\n\nTrousers\n\nLight Blue Mom Jeans\n€27.99\n€34.99",
+        "overflowNodes": [
+          {
+            "tag": "DD",
+            "className": "",
+            "left": 109.59375,
+            "right": 529.65625,
+            "text": "high_waist|pleated_front|wide_leg|pressed_crease|belt_loops_none"
+          }
+        ]
+      },
+      "page_errors": []
+    },
+    {
+      "name": "pdp-skirt-lt",
+      "path": "/out/MOCK-014?lang=lt",
+      "viewport": [
+        390,
+        844
+      ],
+      "status": 200,
+      "screenshot": "evidence/2026-09-15-post-audit/before/pdp-skirt-lt-390x844.png",
+      "metrics": {
+        "clientWidth": 390,
+        "scrollWidth": 576,
+        "bodyWidth": 390,
+        "lang": "lt",
+        "title": "Khaki Cargo Mini Skirt — Weft",
+        "mainText": "Paieška\n/\nKelnės\n\nPrekės vaizdas\n\nKelnės\n\nKhaki Cargo Mini Skirt\nParduotuvė 02\n32,99 €\n\nIšparduota\n\nPrekės faktai\n\nRemiamasi kontroliuojamu demonstraciniu katalogu\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMedžiaga\ncotton\nPaviršius\nsolid|cotton_twill|washed\nKonstrukcija\nhigh_waist|belt_loops|two_cargo_flap_pockets|a_line|mini_length|button_fly\nDydžių sistema\nLettered\nNurodyti dydžiai\nXS\nNežinoma\nS\nNežinoma\nM\nNežinoma\nSpalva\nChaki\nSkirta\nMoterims\nKategorija\nKelnės\n3D peržiūra\nGrįžti į paiešką\nDaugiau šioje kategorijoje\n\nKelnės\n\nBlack Wide Leg Trousers\n39,99 €\n49,99 €\n\nKelnės\n\nWashed Blue Straight Jeans\n44,99 €\n59,99 €\n\nKelnės\n\nCream Midi Slip Skirt\n35,99 €\n45,99 €\n\nKelnės\n\nLight Blue Mom Jeans\n27,99 €\n34,99 €",
+        "overflowNodes": [
+          {
+            "tag": "DD",
+            "className": "",
+            "left": 107.265625,
+            "right": 576.09375,
+            "text": "high_waist|belt_loops|two_cargo_flap_pockets|a_line|mini_length|button_fly"
+          }
+        ]
+      },
+      "page_errors": []
+    },
+    {
+      "name": "pdp-shirt-desktop",
+      "path": "/out/MOCK-001?lang=en",
+      "viewport": [
+        1440,
+        900
+      ],
+      "status": 200,
+      "screenshot": "evidence/2026-09-15-post-audit/before/pdp-shirt-desktop-1440x900.png",
+      "metrics": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440,
+        "bodyWidth": 1440,
+        "lang": "en",
+        "title": "Stone Relaxed Cotton Shirt — Weft",
+        "mainText": "Search\n/\nTops\n\nProduct view\n\nTops\n\nStone Relaxed Cotton Shirt\nStore 01\n€29.99\n\nIn stock\n\nProduct facts\n\nBased on the controlled demo catalogue\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMaterial\ncotton\nSurface\nsolid|washed_cotton\nConstruction\npoint_collar|button_placket|curved_hem|buttoned_cuffs|dropped_shoulder\nSize system\nLettered\nSizes listed\nS\nUnknown\nM\nUnknown\nL\nUnknown\nXL\nUnknown\nColour\nStone\nFor\nMen\nCategory\nTops\n3D preview\nBack to search\nMore in this category\n\nTops\n\nIvory Ribbed Tank Top\n€14.99\n\nTops\n\nWhite Boxy Cotton Tee\n€12.99\n\nTops\n\nSage Ribbed Long Sleeve Top\n€12.99\n\nTops\n\nWhite Oversized Graphic Tee\n€11.99",
+        "overflowNodes": []
+      },
+      "page_errors": []
+    }
+  ]
+}

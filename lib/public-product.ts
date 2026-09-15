@@ -25,6 +25,7 @@ export type PublicProduct = Readonly<{
   id: string;
   title: string;
   category: string;
+  subcategory: string;
   gender: string;
   color: string;
   sizeOptions: string[];
@@ -55,6 +56,7 @@ export type PublicRelatedProduct = Readonly<{
   id: string;
   title: string;
   category: string;
+  subcategory: string;
   priceEur: string;
   oldPriceEur: string;
   currency: string;
@@ -96,6 +98,7 @@ export function toPublicProduct(
     id: product.mock_product_id,
     title: product.title,
     category: product.category,
+    subcategory: product.subcategory,
     gender: product.gender,
     color: product.color,
     sizeOptions: product.size_options.split("|").filter(Boolean),
@@ -122,6 +125,7 @@ export function toPublicRelatedProduct(
     id: product.mock_product_id,
     title: product.title,
     category: product.category,
+    subcategory: product.subcategory,
     priceEur: product.price_eur,
     oldPriceEur: product.old_price_eur,
     currency: product.currency,

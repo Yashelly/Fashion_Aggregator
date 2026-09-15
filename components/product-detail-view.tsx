@@ -20,7 +20,7 @@ import {
 import { WishlistButton } from "@/components/wishlist-button";
 import {
   formatAvailabilityLabel,
-  formatCategoryLabel,
+  formatProductCategoryLabel,
   formatColorLabel,
   formatGenderLabel,
   getCopy,
@@ -31,6 +31,7 @@ import type { PublicProduct, PublicRelatedProduct } from "@/lib/public-product";
 import { formatPrice } from "@/lib/format-price";
 import { containDialogFocus } from "@/lib/dialog-focus";
 import { useClientLocale } from "@/lib/use-client-locale";
+import { formatMaterialLabel, presentControlledValues } from "@/lib/product-presentation";
 
 function price(amount: string, currency: string, locale: Locale) {
   return formatPrice(amount, currency, locale);
@@ -49,7 +50,7 @@ function ProductSummary({ locale, product }: { locale: Locale; product: PublicPr
 
   return (
     <header className="product-detail-intro">
-      <p className="product-detail-category">{formatCategoryLabel(product.category, locale)}</p>
+      <p className="product-detail-category">{formatProductCategoryLabel(product.category, product.subcategory, locale)}</p>
       <div className="product-detail-title-row">
         <h1>{product.title}</h1>
         <WishlistButton locale={locale} label={product.title} productId={product.id} />
@@ -92,12 +93,17 @@ export function ProductDetailView({
   const [zoomFailed, setZoomFailed] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [origin, setOrigin] = useState({ x: 50, y: 50 });
-  const categoryLabel = formatCategoryLabel(product.category, locale);
+  const categoryLabel = formatProductCategoryLabel(product.category, product.subcategory, locale);
   const storeLabel = product.storeLabel?.[locale] ?? t.storeFallback;
   const returnHref = withLocale(returnTo, locale);
   const imageGallery = product.imageGallery.length > 0 ? product.imageGallery : [];
   const selectedImage = imageGallery[activeImageIndex];
   const productAlt = `${product.title}, ${categoryLabel}, ${storeLabel}`;
+  const surfaces = presentControlledValues(product.surface, locale, "surface");
+  const construction = presentControlledValues(product.constructionDetails, locale, "details");
+  const material = formatMaterialLabel(product.material, locale);
+  const sizeStatuses = Object.values(product.sizeAvailability ?? {});
+  const unknownSizeAvailability = sizeStatuses.length > 0 && sizeStatuses.every((status) => status === "unknown");
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -144,6 +150,16 @@ export function ProductDetailView({
       </nav>
 
       <div className="product-detail-layout">
+        <div className="product-detail-mobile-summary">
+          <ProductSummary locale={locale} product={product} />
+          <div className="product-detail-primary-action">
+            <Link className="button" href={withLocale(`/ai-fitting-room?product=${product.id}`, locale)}>
+              <Rotate3D aria-hidden="true" size={18} />
+              {t.preview3d}
+            </Link>
+            <p>{t.previewBoundary}</p>
+          </div>
+        </div>
         <section className="product-gallery" aria-label={t.galleryAria}>
           <div className="product-gallery-main">
             <div className="product-gallery-stage">
@@ -209,16 +225,23 @@ export function ProductDetailView({
 
         <article className="product-detail-card">
           <ProductSummary locale={locale} product={product} />
+          <div className="product-detail-primary-action">
+            <Link className="button" href={withLocale(`/ai-fitting-room?product=${product.id}`, locale)}>
+              <Rotate3D aria-hidden="true" size={18} />
+              {t.preview3d}
+            </Link>
+            <p>{t.previewBoundary}</p>
+          </div>
 
-          {(product.description || product.material || product.surface || product.constructionDetails || product.sizeSystem || product.fitNote || product.factProvenance) ? (
+          {(product.description || material || product.surface || product.constructionDetails || product.sizeSystem || product.fitNote || product.factProvenance) ? (
             <section className="product-facts-section" aria-labelledby="product-facts-title">
               <h2 id="product-facts-title">{t.factsTitle}</h2>
-              {product.factProvenance ? <p className="product-facts-provenance">{t.provenance(product.factProvenance)}</p> : null}
-              {product.description ? <p className="product-facts-description">{product.description}</p> : null}
+              {locale === "lt" && product.description ? <p className="product-facts-provenance">{t.sourceLanguageNote}</p> : null}
+              {product.description ? <p className="product-facts-description" lang="en">{product.description}</p> : null}
               <dl className="product-detail-facts">
-                {product.material ? <div><dt>{t.material}</dt><dd>{product.material}</dd></div> : null}
-                {product.surface ? <div><dt>{t.surface}</dt><dd>{product.surface}</dd></div> : null}
-                {product.constructionDetails ? <div><dt>{t.details}</dt><dd>{product.constructionDetails}</dd></div> : null}
+                {material ? <div><dt>{t.material}</dt><dd>{material}</dd></div> : null}
+                {surfaces.length > 0 ? <div><dt>{t.surface}</dt><dd><ul className="product-fact-chips">{surfaces.map((item) => <li key={item}>{item}</li>)}</ul></dd></div> : null}
+                {construction.length > 0 ? <div><dt>{t.details}</dt><dd><ul className="product-fact-chips">{construction.map((item) => <li key={item}>{item}</li>)}</ul></dd></div> : null}
                 {product.sizeSystem ? <div><dt>{t.sizeSystem}</dt><dd>{product.sizeSystem}</dd></div> : null}
                 {product.fitNote ? <div><dt>{t.fitNote}</dt><dd>{product.fitNote}</dd></div> : null}
                 {product.measurementSource ? <div><dt>{t.measurementSource}</dt><dd>{product.measurementSource}</dd></div> : null}
@@ -240,11 +263,12 @@ export function ProductDetailView({
                 const status = product.sizeAvailability?.[size];
                 return <li key={size} className={status === "out_of_stock" ? "is-unavailable" : undefined}>
                   <span>{size}</span>
-                  {status ? <small>{formatAvailabilityLabel(status, locale)}</small> : null}
+                  {status && status !== "unknown" ? <small>{formatAvailabilityLabel(status, locale)}</small> : null}
                   {status === "out_of_stock" ? <Link href={withLocale(`/search?size=${encodeURIComponent(size)}&category=${encodeURIComponent(product.category)}`, locale)}>{t.findSimilarSize(size)}</Link> : null}
                 </li>;
               })}
             </ul>
+            {unknownSizeAvailability ? <p className="product-size-note">{t.sizeAvailabilityUnknown}</p> : null}
           </section>}
 
           <dl className="product-detail-facts">
@@ -263,10 +287,6 @@ export function ProductDetailView({
           </dl>
 
           <div className="product-detail-actions">
-            <Link className="button secondary" href={withLocale(`/ai-fitting-room?product=${product.id}`, locale)}>
-              <Rotate3D aria-hidden="true" size={18} />
-              {t.preview3d}
-            </Link>
             <Link className="button secondary" href={returnHref}>
               {t.backToSearch}
               <ArrowRight aria-hidden="true" size={18} />
@@ -282,7 +302,7 @@ export function ProductDetailView({
             {related.map((item) => {
               const itemHref = detailHref(item.id, returnTo, locale);
               const itemStore = item.storeLabel?.[locale] ?? t.storeFallback;
-              const itemCategory = formatCategoryLabel(item.category, locale);
+              const itemCategory = formatProductCategoryLabel(item.category, item.subcategory, locale);
               const itemAlt = `${item.title}, ${itemCategory}, ${itemStore}`;
 
               return (

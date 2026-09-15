@@ -97,6 +97,7 @@ test("public product DTOs serialize only explicitly allowlisted shopper fields",
     "publicStoreId",
     "sizeOptions",
     "storeLabel",
+    "subcategory",
     "surface",
     "title",
   ]);

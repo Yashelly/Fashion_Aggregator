@@ -153,7 +153,7 @@ def main() -> int:
             exact_link(page.locator(".category-nav"), "Jeans").click()
             page.wait_for_function("() => new URL(location.href).searchParams.get('category') === 'jeans'")
             current = query(page)
-            assert current.get("query") == ["blue"] and current.get("gender") == ["women"]
+            assert current.get("query") == ["blue"] and current.get("department") == ["women"]
             assert current.get("color") == ["light_blue"] and current.get("sort") == ["price-low"]
             assert "page" not in current
 
@@ -208,7 +208,7 @@ def main() -> int:
                     assert chip.count() == 1
                     chip.click()
                     page.wait_for_function("() => !new URL(location.href).searchParams.has('category')")
-                    assert query(page).get("query") == ["blue"] and query(page).get("gender") == ["women"]
+                    assert query(page).get("query") == ["blue"] and query(page).get("department") == ["women"]
                     if width > 700:
                         qa.goto(page, "/search?query=blue&category=jeans&gender=women&lang=en")
                         panel = page.locator("aside.filter-panel")
@@ -219,10 +219,10 @@ def main() -> int:
                         assert all_categories.is_checked()
                         panel.get_by_role("button", name=re.compile("Apply|Taikyti", re.I)).click()
                         page.wait_for_function("() => !new URL(location.href).searchParams.has('category')")
-                        assert query(page).get("query") == ["blue"] and query(page).get("gender") == ["women"]
+                        assert query(page).get("query") == ["blue"] and query(page).get("department") == ["women"]
                     records.append({"locale": locale, "viewport": [width, height], "titles": titles, "ids": sorted(ids),
                                     "clean_screenshot": clean_screenshot,
-                                    "cleared_query": query(page).get("query"), "gender_preserved": query(page).get("gender")})
+                                    "cleared_query": query(page).get("query"), "department_preserved": query(page).get("department")})
                     context.close()
                 return {"cases": records}
 
@@ -238,7 +238,7 @@ def main() -> int:
                 link.click()
                 current = query(page)
                 assert current.get("category") == ["jeans"] and current.get("query") == ["blue"]
-                assert current.get("gender") == ["women"] and current.get("maxPrice") == ["150"] and current.get("lang") == ["lt"]
+                assert current.get("department") == ["women"] and current.get("maxPrice") == ["150"] and current.get("lang") == ["lt"]
                 context.close()
                 return {"href": href, "params": current}
 
