@@ -55,7 +55,7 @@ const categoryLabels: Record<Locale, Record<string, string>> = {
     accessories: "Accessories",
     activewear: "Activewear",
     bags: "Bags",
-    bottoms: "Trousers",
+    bottoms: "Bottoms",
     dresses: "Dresses",
     jeans: "Jeans",
     knitwear: "Knitwear",
@@ -68,7 +68,7 @@ const categoryLabels: Record<Locale, Record<string, string>> = {
     accessories: "Aksesuarai",
     activewear: "Sportinė apranga",
     bags: "Rankinės",
-    bottoms: "Kelnės",
+    bottoms: "Apatinė apranga",
     dresses: "Suknelės",
     jeans: "Džinsai",
     knitwear: "Megztiniai",
@@ -76,6 +76,67 @@ const categoryLabels: Record<Locale, Record<string, string>> = {
     shoes: "Avalynė",
     sweats: "Džemperiai",
     tops: "Marškinėliai",
+  },
+};
+
+const subcategoryLabels: Record<Locale, Record<string, string>> = {
+  en: {
+    blazer: "Blazer",
+    cardigan: "Cardigan",
+    coat: "Coat",
+    crossbody: "Crossbody bag",
+    dress: "Dress",
+    jeans: "Jeans",
+    hoodie: "Hoodie",
+    jacket: "Jacket",
+    leggings: "Leggings",
+    midi_dress: "Midi dress",
+    mini_dress: "Mini dress",
+    mini_skirt: "Mini skirt",
+    overshirt: "Overshirt",
+    parka: "Parka",
+    shirt: "Shirt",
+    shirt_dress: "Shirt dress",
+    shoes: "Shoes",
+    skirt: "Skirt",
+    sneakers: "Sneakers",
+    sweater: "Sweater",
+    sweatshirt: "Sweatshirt",
+    sweatpants: "Sweatpants",
+    tank: "Tank top",
+    trousers: "Trousers",
+    tshirt: "T-shirt",
+    tote: "Tote bag",
+    wrap_dress: "Wrap dress",
+  },
+  lt: {
+    blazer: "Švarkas",
+    cardigan: "Kardiganas",
+    coat: "Paltas",
+    crossbody: "Rankinė per petį",
+    dress: "Suknelė",
+    jeans: "Džinsai",
+    hoodie: "Džemperis su gobtuvu",
+    jacket: "Striukė",
+    leggings: "Tamprės",
+    midi_dress: "Midi suknelė",
+    mini_dress: "Mini suknelė",
+    mini_skirt: "Mini sijonas",
+    overshirt: "Marškinių tipo švarkas",
+    parka: "Parka",
+    shirt: "Marškiniai",
+    shirt_dress: "Marškininė suknelė",
+    shoes: "Avalynė",
+    skirt: "Sijonas",
+    sneakers: "Sportbačiai",
+    sweater: "Megztinis",
+    sweatshirt: "Džemperis",
+    sweatpants: "Sportinės kelnės",
+    tank: "Marškinėliai su petnešėlėmis",
+    trousers: "Kelnės",
+    tshirt: "Marškinėliai",
+    tote: "Drobės rankinė",
+    wrap_dress: "Suknelė su užsegimu priekyje",
   },
 };
 
@@ -161,6 +222,16 @@ export function formatCategoryLabel(value: string, locale: Locale) {
   return categoryLabels[locale][value] ?? humanize(value);
 }
 
+export function formatSubcategoryLabel(value: string | undefined, locale: Locale) {
+  if (!value) return undefined;
+  return subcategoryLabels[locale][value] ?? undefined;
+}
+
+/** Use the most specific trustworthy garment label without changing facet keys. */
+export function formatProductCategoryLabel(category: string, subcategory: string | undefined, locale: Locale) {
+  return formatSubcategoryLabel(subcategory, locale) ?? formatCategoryLabel(category, locale);
+}
+
 export function formatColorLabel(value: string, locale: Locale) {
   return colorLabels[locale][value] ?? humanize(value);
 }
@@ -178,6 +249,8 @@ export const copy = {
     frontend: {
       heroTitle: "Find your\nnext layer.",
       heroLead: "Clothing from different stores, in one search.",
+      heroSearchTitle: "Find clothes in your own words.",
+      heroSearchLead: "Describe what you’re looking for and explore pieces across the catalog.",
       heroLabel: "Clothing search, in your own words",
       aiLabel: "A little AI. A lot more possibility.",
       searchLabel: "What are you looking for?",
@@ -232,14 +305,9 @@ export const copy = {
       storeSummary: (items: number, categories: number) => `${items} pieces across ${categories} categories`,
       next: "Next", previous: "Previous", pages: "Result pages", perPage: "Products per page", show: "Show",
       examples: [
-        { label: "A wool coat", query: "wool coat under 150" },
-        { label: "Easy knitwear", query: "knitwear" },
-        { label: "White trainers", query: "white sneakers under 80" },
-        { label: "Linen shirts", query: "linen shirt" },
-        { label: "Wide-leg trousers", query: "wide leg trousers" },
-        { label: "Summer dresses", query: "summer dress" },
-        { label: "Leather boots", query: "leather boots" },
-        { label: "Winter layers", query: "something warm for winter" },
+        { label: "Black trousers under €45", query: "black wide leg trousers under 45" },
+        { label: "Blue jeans under €40", query: "blue jeans under 40" },
+        { label: "White sneakers under €80", query: "white sneakers under 80" },
       ],
     },
     productDetail: {
@@ -249,7 +317,7 @@ export const copy = {
       sizesTitle: "Sizes listed", sizesAria: "Size list", colour: "Colour", forLabel: "For", category: "Category",
       preview3d: "3D preview", backToSearch: "Back to search", relatedAria: "Related products", relatedTitle: "More in this category",
       dialogAria: "Enlarged image", close: "Close", zoomInHint: "Click the photo to zoom in", zoomOutHint: "Move to pan · click to zoom out", storeFallback: "Store",
-      factsTitle: "Product facts", provenance: (value: string) => value === "controlled_synthetic" ? "Based on the controlled demo catalogue" : "Verified product information", description: "Description", material: "Material", surface: "Surface", details: "Construction", sizeSystem: "Size system", measurements: "Garment measurements", measurementSource: "Measurement source", fitNote: "Fit note", findSimilarSize: (size: string) => `Find similar in size ${size}`,
+      factsTitle: "Product facts", provenance: (value: string) => value === "controlled_synthetic" ? "Controlled catalog information" : "Verified product information", description: "Description", material: "Material", surface: "Surface", details: "Construction", sizeSystem: "Size system", measurements: "Garment measurements", measurementSource: "Measurement source", fitNote: "Fit note", findSimilarSize: (size: string) => `Find similar in size ${size}`, sizeAvailabilityUnknown: "Size availability is not provided.", previewBoundary: "Catalogue preview only. Retailer checkout is not available here.", sourceLanguageNote: "Product name and description are shown in the source language.",
     },
     common: {
       skipToContent: "Skip to content",
@@ -495,6 +563,8 @@ export const copy = {
     frontend: {
       heroTitle: "Atrask kitą\nsluoksnį.",
       heroLead: "Drabužiai iš skirtingų parduotuvių vienoje paieškoje.",
+      heroSearchTitle: "Ieškok drabužių savais žodžiais.",
+      heroSearchLead: "Aprašyk, ko ieškai, ir atrask katalogo prekes vienoje paieškoje.",
       heroLabel: "Drabužių paieška savais žodžiais",
       aiLabel: "Truputis DI. Daugiau galimybių.",
       searchLabel: "Kokių drabužių ieškai?", searchPlaceholder: "Aprašyk drabužį, spalvą ar biudžetą",
@@ -538,14 +608,9 @@ export const copy = {
       storeSummary: (items: number, categories: number) => `Prekių: ${items}. Kategorijų: ${categories}.`,
       next: "Kitas", previous: "Ankstesnis", pages: "Rezultatų puslapiai", perPage: "Prekių skaičius puslapyje", show: "Rodyti",
       examples: [
-        { label: "Vilnonis paltas", query: "vilnonis paltas iki 150" },
-        { label: "Jaukūs megztiniai", query: "megztiniai" },
-        { label: "Balti sportbačiai", query: "balti sportbačiai iki 80" },
-        { label: "Lininiai marškiniai", query: "lininiai marškiniai" },
-        { label: "Plačios kelnės", query: "plačios kelnės" },
-        { label: "Vasarinės suknelės", query: "vasarinė suknelė" },
-        { label: "Odiniai batai", query: "odiniai batai" },
-        { label: "Šiluma žiemai", query: "kažkas šilto žiemai" },
+        { label: "Juodos kelnės iki 45 €", query: "juodos plačios kelnės iki 45" },
+        { label: "Mėlyni džinsai iki 40 €", query: "mėlyni džinsai iki 40" },
+        { label: "Balti sportbačiai iki 80 €", query: "balti sportbačiai iki 80" },
       ],
     },
     productDetail: {
@@ -555,7 +620,7 @@ export const copy = {
       sizesTitle: "Nurodyti dydžiai", sizesAria: "Dydžių sąrašas", colour: "Spalva", forLabel: "Skirta", category: "Kategorija",
       preview3d: "3D peržiūra", backToSearch: "Grįžti į paiešką", relatedAria: "Panašios prekės", relatedTitle: "Daugiau šioje kategorijoje",
       dialogAria: "Padidinta nuotrauka", close: "Uždaryti", zoomInHint: "Spustelėkite nuotrauką, kad priartintumėte", zoomOutHint: "Judinkite pelę · spustelėkite, kad sumažintumėte", storeFallback: "Parduotuvė",
-      factsTitle: "Prekės faktai", provenance: (value: string) => value === "controlled_synthetic" ? "Remiamasi kontroliuojamu demonstraciniu katalogu" : "Patikrinta prekės informacija", description: "Aprašymas", material: "Medžiaga", surface: "Paviršius", details: "Konstrukcija", sizeSystem: "Dydžių sistema", measurements: "Drabužio išmatavimai", measurementSource: "Matavimų šaltinis", fitNote: "Pasiūtas siluetas", findSimilarSize: (size: string) => `Rasti panašių ${size} dydžio prekių`,
+      factsTitle: "Prekės faktai", provenance: (value: string) => value === "controlled_synthetic" ? "Kontroliuojamo katalogo informacija" : "Patikrinta prekės informacija", description: "Aprašymas", material: "Medžiaga", surface: "Paviršius", details: "Konstrukcija", sizeSystem: "Dydžių sistema", measurements: "Drabužio išmatavimai", measurementSource: "Matavimų šaltinis", fitNote: "Pasiūtas siluetas", findSimilarSize: (size: string) => `Rasti panašių ${size} dydžio prekių`, sizeAvailabilityUnknown: "Informacija apie dydžių prieinamumą nepateikta.", previewBoundary: "Tik katalogo peržiūra. Pardavėjo atsiskaitymas čia nepasiekiamas.", sourceLanguageNote: "Prekės pavadinimas ir aprašymas pateikiami originalo kalba.",
     },
     common: {
       skipToContent: "Pereiti prie pagrindinio turinio",

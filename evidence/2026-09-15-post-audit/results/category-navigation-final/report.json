@@ -1,0 +1,234 @@
+{
+  "generated_at": "2026-09-15T20:11:29.841727+00:00",
+  "mode": "final",
+  "base_url": "http://127.0.0.1:3300",
+  "summary": {
+    "PASS": 5,
+    "FAIL": 0
+  },
+  "results": [
+    {
+      "id": "NAV-01",
+      "description": "global Catalog label and one generic catalog heading remove the duplicate",
+      "status": "PASS",
+      "evidence": {
+        "cases": [
+          {
+            "locale": "en",
+            "viewport": [
+              1440,
+              1000
+            ],
+            "header": "Catalog",
+            "header_catalog_links": 1,
+            "category_nav_generic_links": 0,
+            "generic_headings": 1,
+            "generic_text_nodes": 1,
+            "overflow": {
+              "client": 1440,
+              "scroll": 1440
+            },
+            "screenshot": "evidence/2026-09-15-post-audit/results/category-navigation-final/screenshots/catalog-en-1440.png"
+          },
+          {
+            "locale": "lt",
+            "viewport": [
+              2560,
+              1440
+            ],
+            "header": "Katalogas",
+            "header_catalog_links": 1,
+            "category_nav_generic_links": 0,
+            "generic_headings": 1,
+            "generic_text_nodes": 1,
+            "overflow": {
+              "client": 2560,
+              "scroll": 2560
+            },
+            "screenshot": "evidence/2026-09-15-post-audit/results/category-navigation-final/screenshots/catalog-lt-2560.png"
+          },
+          {
+            "locale": "en",
+            "viewport": [
+              390,
+              844
+            ],
+            "header": "Catalog",
+            "header_catalog_links": 1,
+            "category_nav_generic_links": 0,
+            "generic_headings": 1,
+            "generic_text_nodes": 1,
+            "overflow": {
+              "client": 390,
+              "scroll": 390
+            },
+            "screenshot": "evidence/2026-09-15-post-audit/results/category-navigation-final/screenshots/catalog-en-390.png"
+          },
+          {
+            "locale": "lt",
+            "viewport": [
+              390,
+              844
+            ],
+            "header": "Katalogas",
+            "header_catalog_links": 1,
+            "category_nav_generic_links": 0,
+            "generic_headings": 1,
+            "generic_text_nodes": 1,
+            "overflow": {
+              "client": 390,
+              "scroll": 390
+            },
+            "screenshot": "evidence/2026-09-15-post-audit/results/category-navigation-final/screenshots/catalog-lt-390.png"
+          }
+        ]
+      }
+    },
+    {
+      "id": "NAV-02",
+      "description": "Jeans sets a real facet while preserving blank, blue and denim query intent",
+      "status": "PASS",
+      "evidence": {
+        "blank": "category=jeans without query",
+        "blue": "query preserved",
+        "denim_to_outerwear": "query preserved",
+        "global_catalog": {}
+      }
+    },
+    {
+      "id": "NAV-03",
+      "description": "Jeans facet, sidebar radio and chip agree; clearing it keeps typed query",
+      "status": "PASS",
+      "evidence": {
+        "cases": [
+          {
+            "locale": "en",
+            "viewport": [
+              1440,
+              1000
+            ],
+            "titles": [
+              "Washed Blue Straight Jeans",
+              "Light Blue Mom Jeans",
+              "Washed Grey Cargo Jeans"
+            ],
+            "ids": [
+              "MOCK-005",
+              "MOCK-017",
+              "MOCK-058"
+            ],
+            "clean_screenshot": "evidence/2026-09-15-post-audit/results/category-navigation-final/screenshots/jeans-en-1440.png",
+            "cleared_query": [
+              "blue"
+            ],
+            "department_preserved": [
+              "women"
+            ]
+          },
+          {
+            "locale": "lt",
+            "viewport": [
+              2560,
+              1440
+            ],
+            "titles": [
+              "Washed Blue Straight Jeans",
+              "Light Blue Mom Jeans",
+              "Washed Grey Cargo Jeans"
+            ],
+            "ids": [
+              "MOCK-005",
+              "MOCK-017",
+              "MOCK-058"
+            ],
+            "clean_screenshot": "evidence/2026-09-15-post-audit/results/category-navigation-final/screenshots/jeans-lt-2560.png",
+            "cleared_query": [
+              "blue"
+            ],
+            "department_preserved": [
+              "women"
+            ]
+          },
+          {
+            "locale": "lt",
+            "viewport": [
+              390,
+              844
+            ],
+            "titles": [
+              "Washed Blue Straight Jeans",
+              "Light Blue Mom Jeans",
+              "Washed Grey Cargo Jeans"
+            ],
+            "ids": [
+              "MOCK-005",
+              "MOCK-017",
+              "MOCK-058"
+            ],
+            "clean_screenshot": "evidence/2026-09-15-post-audit/results/category-navigation-final/screenshots/jeans-lt-390.png",
+            "cleared_query": [
+              "blue"
+            ],
+            "department_preserved": [
+              "women"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "NAV-04",
+      "description": "server-rendered Jeans anchor works without JavaScript and preserves GET state",
+      "status": "PASS",
+      "evidence": {
+        "href": "/search?query=blue&category=jeans&department=women&maxPrice=150&lang=lt",
+        "params": {
+          "query": [
+            "blue"
+          ],
+          "category": [
+            "jeans"
+          ],
+          "department": [
+            "women"
+          ],
+          "maxPrice": [
+            "150"
+          ],
+          "lang": [
+            "lt"
+          ]
+        }
+      }
+    },
+    {
+      "id": "NAV-05",
+      "description": "density and sort continue working with a real Jeans facet",
+      "status": "PASS",
+      "evidence": {
+        "params": {
+          "query": [
+            "blue"
+          ],
+          "category": [
+            "jeans"
+          ],
+          "lang": [
+            "lt"
+          ],
+          "sort": [
+            "price-high"
+          ]
+        },
+        "density": 5,
+        "overflow": {
+          "client": 2560,
+          "scroll": 2560
+        },
+        "screenshot": "evidence/2026-09-15-post-audit/results/category-navigation-final/screenshots/jeans-lt-2560-density5-price-high.png"
+      }
+    }
+  ],
+  "browser_errors": [],
+  "contract": "Category navigation changes only the category facet; query text remains shopper-owned state."
+}

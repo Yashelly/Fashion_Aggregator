@@ -1,0 +1,560 @@
+{
+  "generated_at": "2026-09-15T19:53:31.301226+00:00",
+  "base_url": "http://127.0.0.1:3200",
+  "source": "headless Chromium against local Next.js server; no external credentials",
+  "summary": {
+    "PASS": 6,
+    "FAIL": 0
+  },
+  "results": [
+    {
+      "id": "FLOW-SEARCH",
+      "name": "hero search and visible EN/LT examples reach results",
+      "status": "PASS",
+      "evidence": {
+        "cases": [
+          {
+            "locale": "en",
+            "submitted": [
+              "blue jeans under 40"
+            ],
+            "result_count": 1
+          },
+          {
+            "locale": "en",
+            "example_count": 3,
+            "example_hrefs": [
+              "/search?query=black+wide+leg+trousers+under+45",
+              "/search?query=blue+jeans+under+40",
+              "/search?query=white+sneakers+under+80"
+            ]
+          },
+          {
+            "locale": "lt",
+            "example_count": 3,
+            "example_hrefs": [
+              "/search?query=juodos+pla%C4%8Dios+keln%C4%97s+iki+45&lang=lt",
+              "/search?query=m%C4%97lyni+d%C5%BEinsai+iki+40&lang=lt",
+              "/search?query=balti+sportba%C4%8Diai+iki+80&lang=lt"
+            ]
+          }
+        ],
+        "screenshot": "results/regression/screenshots/search-example-result-en.png"
+      }
+    },
+    {
+      "id": "FLOW-PDP",
+      "name": "PDP facts are readable and do not overflow the document matrix",
+      "status": "PASS",
+      "evidence": {
+        "cases": [
+          {
+            "locale": "en",
+            "product": "MOCK-001",
+            "viewport": [
+              360,
+              844
+            ],
+            "scrollWidth": 360,
+            "fact_text": "Product facts\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMaterial\nCotton\nSurface\nSolid colour\nWashed cotton\nConstruction\nPoint collar\nButton placket\nCurved hem\nButton cuffs\nDropped shoulders\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-001",
+            "viewport": [
+              390,
+              844
+            ],
+            "scrollWidth": 390,
+            "fact_text": "Product facts\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMaterial\nCotton\nSurface\nSolid colour\nWashed cotton\nConstruction\nPoint collar\nButton placket\nCurved hem\nButton cuffs\nDropped shoulders\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-001",
+            "viewport": [
+              430,
+              900
+            ],
+            "scrollWidth": 430,
+            "fact_text": "Product facts\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMaterial\nCotton\nSurface\nSolid colour\nWashed cotton\nConstruction\nPoint collar\nButton placket\nCurved hem\nButton cuffs\nDropped shoulders\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-001",
+            "viewport": [
+              768,
+              1000
+            ],
+            "scrollWidth": 768,
+            "fact_text": "Product facts\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMaterial\nCotton\nSurface\nSolid colour\nWashed cotton\nConstruction\nPoint collar\nButton placket\nCurved hem\nButton cuffs\nDropped shoulders\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-001",
+            "viewport": [
+              1024,
+              900
+            ],
+            "scrollWidth": 1024,
+            "fact_text": "Product facts\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMaterial\nCotton\nSurface\nSolid colour\nWashed cotton\nConstruction\nPoint collar\nButton placket\nCurved hem\nButton cuffs\nDropped shoulders\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-001",
+            "viewport": [
+              1280,
+              900
+            ],
+            "scrollWidth": 1280,
+            "fact_text": "Product facts\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMaterial\nCotton\nSurface\nSolid colour\nWashed cotton\nConstruction\nPoint collar\nButton placket\nCurved hem\nButton cuffs\nDropped shoulders\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-001",
+            "viewport": [
+              1440,
+              900
+            ],
+            "scrollWidth": 1440,
+            "fact_text": "Product facts\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMaterial\nCotton\nSurface\nSolid colour\nWashed cotton\nConstruction\nPoint collar\nButton placket\nCurved hem\nButton cuffs\nDropped shoulders\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-002",
+            "viewport": [
+              360,
+              844
+            ],
+            "scrollWidth": 360,
+            "fact_text": "Product facts\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nSurface\nSolid colour\nSmooth twill\nConstruction\nHigh waist\nPleated front\nWide leg\nPressed crease\nNo visible belt loops\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-002",
+            "viewport": [
+              390,
+              844
+            ],
+            "scrollWidth": 390,
+            "fact_text": "Product facts\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nSurface\nSolid colour\nSmooth twill\nConstruction\nHigh waist\nPleated front\nWide leg\nPressed crease\nNo visible belt loops\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-002",
+            "viewport": [
+              430,
+              900
+            ],
+            "scrollWidth": 430,
+            "fact_text": "Product facts\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nSurface\nSolid colour\nSmooth twill\nConstruction\nHigh waist\nPleated front\nWide leg\nPressed crease\nNo visible belt loops\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-002",
+            "viewport": [
+              768,
+              1000
+            ],
+            "scrollWidth": 768,
+            "fact_text": "Product facts\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nSurface\nSolid colour\nSmooth twill\nConstruction\nHigh waist\nPleated front\nWide leg\nPressed crease\nNo visible belt loops\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-002",
+            "viewport": [
+              1024,
+              900
+            ],
+            "scrollWidth": 1024,
+            "fact_text": "Product facts\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nSurface\nSolid colour\nSmooth twill\nConstruction\nHigh waist\nPleated front\nWide leg\nPressed crease\nNo visible belt loops\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-002",
+            "viewport": [
+              1280,
+              900
+            ],
+            "scrollWidth": 1280,
+            "fact_text": "Product facts\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nSurface\nSolid colour\nSmooth twill\nConstruction\nHigh waist\nPleated front\nWide leg\nPressed crease\nNo visible belt loops\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-002",
+            "viewport": [
+              1440,
+              900
+            ],
+            "scrollWidth": 1440,
+            "fact_text": "Product facts\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nSurface\nSolid colour\nSmooth twill\nConstruction\nHigh waist\nPleated front\nWide leg\nPressed crease\nNo visible belt loops\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-014",
+            "viewport": [
+              360,
+              844
+            ],
+            "scrollWidth": 360,
+            "fact_text": "Product facts\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMaterial\nCotton\nSurface\nSolid colour\nCotton twill\nWashed finish\nConstruction\nHigh waist\nBelt loops\nTwo cargo flap pockets\nA-line shape\nMini length\nButton fly\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-014",
+            "viewport": [
+              390,
+              844
+            ],
+            "scrollWidth": 390,
+            "fact_text": "Product facts\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMaterial\nCotton\nSurface\nSolid colour\nCotton twill\nWashed finish\nConstruction\nHigh waist\nBelt loops\nTwo cargo flap pockets\nA-line shape\nMini length\nButton fly\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-014",
+            "viewport": [
+              430,
+              900
+            ],
+            "scrollWidth": 430,
+            "fact_text": "Product facts\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMaterial\nCotton\nSurface\nSolid colour\nCotton twill\nWashed finish\nConstruction\nHigh waist\nBelt loops\nTwo cargo flap pockets\nA-line shape\nMini length\nButton fly\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-014",
+            "viewport": [
+              768,
+              1000
+            ],
+            "scrollWidth": 768,
+            "fact_text": "Product facts\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMaterial\nCotton\nSurface\nSolid colour\nCotton twill\nWashed finish\nConstruction\nHigh waist\nBelt loops\nTwo cargo flap pockets\nA-line shape\nMini length\nButton fly\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-014",
+            "viewport": [
+              1024,
+              900
+            ],
+            "scrollWidth": 1024,
+            "fact_text": "Product facts\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMaterial\nCotton\nSurface\nSolid colour\nCotton twill\nWashed finish\nConstruction\nHigh waist\nBelt loops\nTwo cargo flap pockets\nA-line shape\nMini length\nButton fly\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-014",
+            "viewport": [
+              1280,
+              900
+            ],
+            "scrollWidth": 1280,
+            "fact_text": "Product facts\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMaterial\nCotton\nSurface\nSolid colour\nCotton twill\nWashed finish\nConstruction\nHigh waist\nBelt loops\nTwo cargo flap pockets\nA-line shape\nMini length\nButton fly\nSize system\nLettered"
+          },
+          {
+            "locale": "en",
+            "product": "MOCK-014",
+            "viewport": [
+              1440,
+              900
+            ],
+            "scrollWidth": 1440,
+            "fact_text": "Product facts\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMaterial\nCotton\nSurface\nSolid colour\nCotton twill\nWashed finish\nConstruction\nHigh waist\nBelt loops\nTwo cargo flap pockets\nA-line shape\nMini length\nButton fly\nSize system\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-001",
+            "viewport": [
+              360,
+              844
+            ],
+            "scrollWidth": 360,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMedžiaga\nMedvilnė\nPaviršius\nVienspalvė\nSkalbta medvilnė\nKonstrukcija\nSmaila apykaklė\nUžsegimas sagomis\nLenktas kraštas\nRankogaliai su sagomis\nNuleisti pečiai\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-001",
+            "viewport": [
+              390,
+              844
+            ],
+            "scrollWidth": 390,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMedžiaga\nMedvilnė\nPaviršius\nVienspalvė\nSkalbta medvilnė\nKonstrukcija\nSmaila apykaklė\nUžsegimas sagomis\nLenktas kraštas\nRankogaliai su sagomis\nNuleisti pečiai\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-001",
+            "viewport": [
+              430,
+              900
+            ],
+            "scrollWidth": 430,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMedžiaga\nMedvilnė\nPaviršius\nVienspalvė\nSkalbta medvilnė\nKonstrukcija\nSmaila apykaklė\nUžsegimas sagomis\nLenktas kraštas\nRankogaliai su sagomis\nNuleisti pečiai\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-001",
+            "viewport": [
+              768,
+              1000
+            ],
+            "scrollWidth": 768,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMedžiaga\nMedvilnė\nPaviršius\nVienspalvė\nSkalbta medvilnė\nKonstrukcija\nSmaila apykaklė\nUžsegimas sagomis\nLenktas kraštas\nRankogaliai su sagomis\nNuleisti pečiai\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-001",
+            "viewport": [
+              1024,
+              900
+            ],
+            "scrollWidth": 1024,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMedžiaga\nMedvilnė\nPaviršius\nVienspalvė\nSkalbta medvilnė\nKonstrukcija\nSmaila apykaklė\nUžsegimas sagomis\nLenktas kraštas\nRankogaliai su sagomis\nNuleisti pečiai\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-001",
+            "viewport": [
+              1280,
+              900
+            ],
+            "scrollWidth": 1280,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMedžiaga\nMedvilnė\nPaviršius\nVienspalvė\nSkalbta medvilnė\nKonstrukcija\nSmaila apykaklė\nUžsegimas sagomis\nLenktas kraštas\nRankogaliai su sagomis\nNuleisti pečiai\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-001",
+            "viewport": [
+              1440,
+              900
+            ],
+            "scrollWidth": 1440,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nRelaxed stone-beige button-up shirt in washed cotton with a point collar, full button placket and a curved shirttail hem.\n\nMedžiaga\nMedvilnė\nPaviršius\nVienspalvė\nSkalbta medvilnė\nKonstrukcija\nSmaila apykaklė\nUžsegimas sagomis\nLenktas kraštas\nRankogaliai su sagomis\nNuleisti pečiai\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-002",
+            "viewport": [
+              360,
+              844
+            ],
+            "scrollWidth": 360,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nPaviršius\nVienspalvė\nLygus ruoželis\nKonstrukcija\nAukštas liemuo\nKlostuotas priekis\nPlačios klešnės\nIšlyginta klostė\nNėra matomų diržo kilpelių\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-002",
+            "viewport": [
+              390,
+              844
+            ],
+            "scrollWidth": 390,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nPaviršius\nVienspalvė\nLygus ruoželis\nKonstrukcija\nAukštas liemuo\nKlostuotas priekis\nPlačios klešnės\nIšlyginta klostė\nNėra matomų diržo kilpelių\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-002",
+            "viewport": [
+              430,
+              900
+            ],
+            "scrollWidth": 430,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nPaviršius\nVienspalvė\nLygus ruoželis\nKonstrukcija\nAukštas liemuo\nKlostuotas priekis\nPlačios klešnės\nIšlyginta klostė\nNėra matomų diržo kilpelių\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-002",
+            "viewport": [
+              768,
+              1000
+            ],
+            "scrollWidth": 768,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nPaviršius\nVienspalvė\nLygus ruoželis\nKonstrukcija\nAukštas liemuo\nKlostuotas priekis\nPlačios klešnės\nIšlyginta klostė\nNėra matomų diržo kilpelių\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-002",
+            "viewport": [
+              1024,
+              900
+            ],
+            "scrollWidth": 1024,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nPaviršius\nVienspalvė\nLygus ruoželis\nKonstrukcija\nAukštas liemuo\nKlostuotas priekis\nPlačios klešnės\nIšlyginta klostė\nNėra matomų diržo kilpelių\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-002",
+            "viewport": [
+              1280,
+              900
+            ],
+            "scrollWidth": 1280,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nPaviršius\nVienspalvė\nLygus ruoželis\nKonstrukcija\nAukštas liemuo\nKlostuotas priekis\nPlačios klešnės\nIšlyginta klostė\nNėra matomų diržo kilpelių\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-002",
+            "viewport": [
+              1440,
+              900
+            ],
+            "scrollWidth": 1440,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nBlack high-waisted trousers with double front pleats, a pressed centre crease and a long wide straight leg.\n\nPaviršius\nVienspalvė\nLygus ruoželis\nKonstrukcija\nAukštas liemuo\nKlostuotas priekis\nPlačios klešnės\nIšlyginta klostė\nNėra matomų diržo kilpelių\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-014",
+            "viewport": [
+              360,
+              844
+            ],
+            "scrollWidth": 360,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMedžiaga\nMedvilnė\nPaviršius\nVienspalvė\nMedvilninis ruoželis\nSkalbta apdaila\nKonstrukcija\nAukštas liemuo\nDiržo kilpelės\nDvi cargo kišenės su atvartais\nA formos siluetas\nMini ilgis\nUžsegimas sagomis\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-014",
+            "viewport": [
+              390,
+              844
+            ],
+            "scrollWidth": 390,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMedžiaga\nMedvilnė\nPaviršius\nVienspalvė\nMedvilninis ruoželis\nSkalbta apdaila\nKonstrukcija\nAukštas liemuo\nDiržo kilpelės\nDvi cargo kišenės su atvartais\nA formos siluetas\nMini ilgis\nUžsegimas sagomis\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-014",
+            "viewport": [
+              430,
+              900
+            ],
+            "scrollWidth": 430,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMedžiaga\nMedvilnė\nPaviršius\nVienspalvė\nMedvilninis ruoželis\nSkalbta apdaila\nKonstrukcija\nAukštas liemuo\nDiržo kilpelės\nDvi cargo kišenės su atvartais\nA formos siluetas\nMini ilgis\nUžsegimas sagomis\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-014",
+            "viewport": [
+              768,
+              1000
+            ],
+            "scrollWidth": 768,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMedžiaga\nMedvilnė\nPaviršius\nVienspalvė\nMedvilninis ruoželis\nSkalbta apdaila\nKonstrukcija\nAukštas liemuo\nDiržo kilpelės\nDvi cargo kišenės su atvartais\nA formos siluetas\nMini ilgis\nUžsegimas sagomis\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-014",
+            "viewport": [
+              1024,
+              900
+            ],
+            "scrollWidth": 1024,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMedžiaga\nMedvilnė\nPaviršius\nVienspalvė\nMedvilninis ruoželis\nSkalbta apdaila\nKonstrukcija\nAukštas liemuo\nDiržo kilpelės\nDvi cargo kišenės su atvartais\nA formos siluetas\nMini ilgis\nUžsegimas sagomis\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-014",
+            "viewport": [
+              1280,
+              900
+            ],
+            "scrollWidth": 1280,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMedžiaga\nMedvilnė\nPaviršius\nVienspalvė\nMedvilninis ruoželis\nSkalbta apdaila\nKonstrukcija\nAukštas liemuo\nDiržo kilpelės\nDvi cargo kišenės su atvartais\nA formos siluetas\nMini ilgis\nUžsegimas sagomis\nDydžių sistema\nLettered"
+          },
+          {
+            "locale": "lt",
+            "product": "MOCK-014",
+            "viewport": [
+              1440,
+              900
+            ],
+            "scrollWidth": 1440,
+            "fact_text": "Prekės faktai\n\nPrekės pavadinimas ir aprašymas pateikiami originalo kalba.\n\nKhaki cargo mini skirt in washed cotton twill with belt loops and two large buttoned cargo flap pockets on the hips.\n\nMedžiaga\nMedvilnė\nPaviršius\nVienspalvė\nMedvilninis ruoželis\nSkalbta apdaila\nKonstrukcija\nAukštas liemuo\nDiržo kilpelės\nDvi cargo kišenės su atvartais\nA formos siluetas\nMini ilgis\nUžsegimas sagomis\nDydžių sistema\nLettered"
+          }
+        ],
+        "screenshots": [
+          "results/regression/screenshots/pdp-shirt-en-360.png",
+          "results/regression/screenshots/pdp-shirt-en-1440.png",
+          "results/regression/screenshots/pdp-skirt-lt-390.png"
+        ]
+      }
+    },
+    {
+      "id": "FLOW-FILTERS",
+      "name": "mobile filter dialog opens, stays bounded and restores focus",
+      "status": "PASS",
+      "error": "TimeoutError: Page.wait_for_function: Timeout 10000ms exceeded.",
+      "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\post_audit_regression.py\", line 65, in run\n    record[\"evidence\"] = function()\n                         ^^^^^^^^^^\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\post_audit_regression.py\", line 173, in mobile_filters\n    wait_for_enhanced_filters(page)\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\post_audit_regression.py\", line 80, in wait_for_enhanced_filters\n    page.wait_for_function(\"\"\"() => {\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 11559, in wait_for_function\n    self._sync(\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_page.py\", line 1111, in wait_for_function\n    return await self._main_frame.wait_for_function(**locals_to_params(locals()))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.TimeoutError: Page.wait_for_function: Timeout 10000ms exceeded.\n",
+      "failure_screenshot": "results/regression/screenshots/FAIL-flow-filters.png"
+    },
+    {
+      "id": "FLOW-CATEGORY",
+      "name": "category facet preserves query, department and budget then clears only itself",
+      "status": "PASS",
+      "evidence": {
+        "after_category": {
+          "query": [
+            "blue"
+          ],
+          "category": [
+            "jeans"
+          ],
+          "department": [
+            "women"
+          ],
+          "maxPrice": [
+            "150"
+          ]
+        },
+        "after_clear": {
+          "query": [
+            "blue"
+          ],
+          "department": [
+            "women"
+          ],
+          "maxPrice": [
+            "150"
+          ]
+        },
+        "nojs_href": "/search?query=blue&category=jeans&department=women&maxPrice=150&lang=lt",
+        "nojs_params": {
+          "query": [
+            "blue"
+          ],
+          "category": [
+            "jeans"
+          ],
+          "department": [
+            "women"
+          ],
+          "maxPrice": [
+            "150"
+          ],
+          "lang": [
+            "lt"
+          ]
+        },
+        "screenshot": "results/regression/screenshots/category-state-cleared-en-1440.png"
+      }
+    },
+    {
+      "id": "FLOW-SAVED-MENU",
+      "name": "Saved round trip and accessible mobile menu work",
+      "status": "PASS",
+      "error": "TimeoutError: Page.wait_for_function: Timeout 10000ms exceeded.",
+      "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\post_audit_regression.py\", line 65, in run\n    record[\"evidence\"] = function()\n                         ^^^^^^^^^^\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\post_audit_regression.py\", line 233, in saved_and_menu\n    page.wait_for_function(\"() => document.querySelector('.product-grid .wishlist-button')?.getAttribute('aria-pressed') === 'true'\")\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 11559, in wait_for_function\n    self._sync(\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_page.py\", line 1111, in wait_for_function\n    return await self._main_frame.wait_for_function(**locals_to_params(locals()))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_frame.py\", line 860, in wait_for_function\n    await self._channel.send(\"waitForFunction\", self._timeout, params)\nplaywright._impl._errors.TimeoutError: Page.wait_for_function: Timeout 10000ms exceeded.\n",
+      "failure_screenshot": "results/regression/screenshots/FAIL-flow-saved-menu.png"
+    },
+    {
+      "id": "FLOW-LOCALE",
+      "name": "EN/LT switches preserve search state and localize the PDP shell",
+      "status": "PASS",
+      "error": "Error: Locator.inner_text: Error: strict mode violation: locator(\".product-detail-category\") resolved to 2 elements:\n    1) <p class=\"product-detail-category\">Marškiniai</p> aka get_by_role(\"paragraph\").filter(has_text=\"Marškiniai\")\n    2) <p class=\"product-detail-category\">Marškiniai</p> aka get_by_text(\"Marškiniai\").nth(2)\n\nCall log:\n  - waiting for locator(\".product-detail-category\")\n",
+      "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\post_audit_regression.py\", line 65, in run\n    record[\"evidence\"] = function()\n                         ^^^^^^^^^^\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\post_audit_regression.py\", line 273, in locale_switch\n    assert page.locator(\".product-detail-category\").inner_text() == \"Marškiniai\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 16969, in inner_text\n    self._sync(self._impl_obj.inner_text(timeout=timeout))\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_locator.py\", line 458, in inner_text\n    return await self._frame.inner_text(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_frame.py\", line 695, in inner_text\n    return await self._channel.send(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.Error: Locator.inner_text: Error: strict mode violation: locator(\".product-detail-category\") resolved to 2 elements:\n    1) <p class=\"product-detail-category\">Marškiniai</p> aka get_by_role(\"paragraph\").filter(has_text=\"Marškiniai\")\n    2) <p class=\"product-detail-category\">Marškiniai</p> aka get_by_text(\"Marškiniai\").nth(2)\n\nCall log:\n  - waiting for locator(\".product-detail-category\")\n\n",
+      "failure_screenshot": "results/regression/screenshots/FAIL-flow-locale.png"
+    }
+  ],
+  "browser_errors": [],
+  "limits": [
+    "No physical iOS/Android, Safari, screen reader, safe-area or production latency session was run.",
+    "3D rendering is covered by scripts/fitting_room_e2e.py separately."
+  ]
+}
