@@ -1,0 +1,741 @@
+{
+  "generated_at": "2026-09-15T20:06:50.201959+00:00",
+  "base_url": "http://127.0.0.1:3300",
+  "source": "real local production server; deterministic catalog fallback; external keys not used",
+  "summary": {
+    "PASS": 19,
+    "FAIL": 2,
+    "PARTIAL": 0,
+    "NOT RUN": 3
+  },
+  "results": [
+    {
+      "id": "UX-03/04",
+      "name": "EN/LT search by Enter reaches useful results",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 2401,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "UX-07",
+      "name": "visible EN/LT query examples lead to useful results",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 1336,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "UX-05",
+      "name": "blank/whitespace browse behavior and explicit clear",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 460,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "FORM-01",
+      "name": "501-character URL and special/diacritic input are bounded and escaped",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 524,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "UX-15",
+      "name": "exact-word result and zero-results state",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 611,
+      "screenshot": null,
+      "details": {
+        "page_errors": [],
+        "zero_results_url": "http://127.0.0.1:3300/search?query=qxzv-no-such-garment-999&lang=en"
+      }
+    },
+    {
+      "id": "UX-10",
+      "name": "filter draft cancel, Escape and backdrop discard state and restore focus",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 626,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "UX-08",
+      "name": "invalid range focuses error; zero and comma-decimal budget apply",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 499,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "UX-09/12/13",
+      "name": "multi-store apply, one-chip removal and clear-filters retaining query",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "TimeoutError: Locator.check: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".filter-dialog[open]\").locator(\".store-options input[type=\\\"checkbox\\\"]\").first\n    - locator resolved to <input name=\"store\" type=\"checkbox\" value=\"demo-store-01\"/>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    15 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n",
+      "duration_ms": 8368,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e-prod/screenshots/FAIL-ux-09-12-13.png",
+      "details": {
+        "page_errors": [],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 381, in multi_store_and_chips\n    first.check()\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 15432, in check\n    self._sync(\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_locator.py\", line 145, in check\n    return await self._frame.check(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.TimeoutError: Locator.check: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".filter-dialog[open]\").locator(\".store-options input[type=\\\"checkbox\\\"]\").first\n    - locator resolved to <input name=\"store\" type=\"checkbox\" value=\"demo-store-01\"/>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    15 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n\n"
+      }
+    },
+    {
+      "id": "UX-14",
+      "name": "numeric sorting, per-page reset, relevance/default and browser history",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 1163,
+      "screenshot": null,
+      "details": {
+        "page_errors": [],
+        "low_url": "http://127.0.0.1:3300/search?perPage=50&sort=price-high&lang=en",
+        "after_back": "http://127.0.0.1:3300/search?perPage=50&sort=price-low&lang=en",
+        "after_forward": "http://127.0.0.1:3300/search?perPage=50&sort=price-high&lang=en"
+      }
+    },
+    {
+      "id": "UX-20/21",
+      "name": "details restores search and rejects external return/unknown id",
+      "severity": "P0",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 707,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "DETAIL-01",
+      "name": "mobile gallery traps focus, closes with Escape and restores trigger",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 2000,
+      "screenshot": null,
+      "details": {
+        "page_errors": [],
+        "focus_cycle": [
+          {
+            "tag": "BUTTON",
+            "cls": "lightbox-image-button",
+            "body": false
+          },
+          {
+            "tag": "BUTTON",
+            "cls": "lightbox-close",
+            "body": false
+          },
+          {
+            "tag": "BUTTON",
+            "cls": "lightbox-image-button",
+            "body": false
+          },
+          {
+            "tag": "BUTTON",
+            "cls": "lightbox-close",
+            "body": false
+          },
+          {
+            "tag": "BUTTON",
+            "cls": "lightbox-image-button",
+            "body": false
+          },
+          {
+            "tag": "BUTTON",
+            "cls": "lightbox-close",
+            "body": false
+          },
+          {
+            "tag": "BUTTON",
+            "cls": "lightbox-image-button",
+            "body": false
+          },
+          {
+            "tag": "BUTTON",
+            "cls": "lightbox-close",
+            "body": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "SAVE-01",
+      "name": "save/remove persists on same SPA and synchronizes another tab",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 828,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "SAVE-02",
+      "name": "malformed and blocked localStorage degrade safely",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 853,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "NOJS-01",
+      "name": "native GET search and filter fallback work without JavaScript",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "Error: Locator.check: Clicking the checkbox did not change its state\nCall log:\n  - waiting for locator(\".filter-fallback\").locator(\".store-options input[type=\\\"checkbox\\\"]\").first\n    - locator resolved to <input name=\"store\" type=\"checkbox\" value=\"demo-store-01\"/>\n  - attempting click action\n    - scrolling into view if needed\n    - done scrolling\n    - forcing action\n    - performing click action\n    - click action done\n    - waiting for scheduled navigations to finish\n    - navigations have finished\n",
+      "duration_ms": 414,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e-prod/screenshots/FAIL-nojs-01.png",
+      "details": {
+        "page_errors": [],
+        "nojs_input_box": {
+          "x": 54,
+          "y": 72,
+          "width": 256,
+          "height": 50
+        },
+        "nojs_input_visible": true,
+        "nojs_ancestors": [
+          {
+            "tag": "INPUT",
+            "cls": "",
+            "hidden": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "cls": "search-input-row",
+            "hidden": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "cls": "search-input-group",
+            "hidden": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "FORM",
+            "cls": "catalog-form",
+            "hidden": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "cls": "catalog-search-row",
+            "hidden": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "cls": "route-shell search-route",
+            "hidden": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "MAIN",
+            "cls": "main",
+            "hidden": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "cls": "shell",
+            "hidden": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        ],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 544, in no_javascript_get_forms\n    fallback.locator('.store-options input[type=\"checkbox\"]').first.check(force=True)\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 15432, in check\n    self._sync(\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_locator.py\", line 145, in check\n    return await self._frame.check(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.Error: Locator.check: Clicking the checkbox did not change its state\nCall log:\n  - waiting for locator(\".filter-fallback\").locator(\".store-options input[type=\\\"checkbox\\\"]\").first\n    - locator resolved to <input name=\"store\" type=\"checkbox\" value=\"demo-store-01\"/>\n  - attempting click action\n    - scrolling into view if needed\n    - done scrolling\n    - forcing action\n    - performing click action\n    - click action done\n    - waiting for scheduled navigations to finish\n    - navigations have finished\n\n"
+      }
+    },
+    {
+      "id": "UX-06",
+      "name": "duplicate submit is coalesced and latest rapid query wins",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 446,
+      "screenshot": null,
+      "details": {
+        "page_errors": [],
+        "final_rapid_url": "http://127.0.0.1:3300/search?query=white+sneakers&lang=en",
+        "final_visible_query": "white sneakers",
+        "white_before_press": "white sneakers",
+        "submitted_queries": [
+          "black coat",
+          "black coat",
+          "linen shirt",
+          "white sneakers"
+        ],
+        "search_request_urls": [
+          "http://127.0.0.1:3300/search?query=black+wide+leg+trousers+under+45&_rsc=5CB68i4pnAekjehf",
+          "http://127.0.0.1:3300/search?query=blue+jeans+under+40&_rsc=5CB68i4pnAekjehf",
+          "http://127.0.0.1:3300/search?query=white+sneakers+under+80&_rsc=5CB68i4pnAekjehf",
+          "http://127.0.0.1:3300/search?_rsc=5CB68i4pnAekjehf",
+          "http://127.0.0.1:3300/search?query=black+wide+leg+trousers+under+45&_rsc=tXyZJ52UQVBCVsD3",
+          "http://127.0.0.1:3300/search?query=blue+jeans+under+40&_rsc=tXyZJ52UQVBCVsD3",
+          "http://127.0.0.1:3300/search?query=white+sneakers+under+80&_rsc=tXyZJ52UQVBCVsD3",
+          "http://127.0.0.1:3300/search?_rsc=tXyZJ52UQVBCVsD3",
+          "http://127.0.0.1:3300/search?query=black+coat&lang=en&_rsc=jFwJsYsO96vrh6Ia",
+          "http://127.0.0.1:3300/search?query=linen+shirt&lang=en&_rsc=5x7wvxyyC2Avb3E7",
+          "http://127.0.0.1:3300/search?query=white+sneakers&lang=en&_rsc=5x7wvxyyC2Avb3E7"
+        ],
+        "black_query_rsc_requests": 3,
+        "final_url": "http://127.0.0.1:3300/search?query=white+sneakers&lang=en"
+      }
+    },
+    {
+      "id": "UX-22/27",
+      "name": "LT is server-rendered; soft switch preserves search; unknown route recovers",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 459,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "UX-19",
+      "name": "one image 404 keeps the grid stable and does not substitute another garment",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 407,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "UX-23",
+      "name": "keyboard skip link and modal focus containment/restoration",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 653,
+      "screenshot": null,
+      "details": {
+        "page_errors": [],
+        "focus_cycle": [
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "INPUT",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "INPUT",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "BUTTON",
+            "cls": "text-link",
+            "body": false
+          },
+          {
+            "tag": "BUTTON",
+            "cls": "button secondary",
+            "body": false
+          },
+          {
+            "tag": "BUTTON",
+            "cls": "button",
+            "body": false
+          },
+          {
+            "tag": "BUTTON",
+            "cls": "icon-button",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "INPUT",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "INPUT",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          },
+          {
+            "tag": "SUMMARY",
+            "cls": "",
+            "body": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "RESP-01",
+      "name": "representative routes do not horizontally overflow at 320–1920px",
+      "severity": "P2",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 2960,
+      "screenshot": null,
+      "details": {
+        "page_errors": [],
+        "matrix": [
+          {
+            "viewport": "320x844",
+            "route": "/?lang=lt"
+          },
+          {
+            "viewport": "360x844",
+            "route": "/search?query=black&store=demo-store-01,demo-store-02&maxPrice=150&lang=lt"
+          },
+          {
+            "viewport": "390x844",
+            "route": "/search?query=black&lang=en"
+          },
+          {
+            "viewport": "430x900",
+            "route": "/out/MOCK-001?lang=lt"
+          },
+          {
+            "viewport": "768x1000",
+            "route": "/out/MOCK-001?lang=en"
+          },
+          {
+            "viewport": "1280x900",
+            "route": "/search?query=black&lang=en"
+          },
+          {
+            "viewport": "1440x1000",
+            "route": "/?lang=en"
+          },
+          {
+            "viewport": "1920x1080",
+            "route": "/search?query=black&lang=lt"
+          }
+        ]
+      }
+    },
+    {
+      "id": "UX-24/25/26",
+      "name": "320-effective 200% CSS zoom, long LT copy and reduced motion",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 506,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "A11Y-01",
+      "name": "axe WCAG-tag scan: 5 routes + open dialog, EN/LT, light/dark",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 15591,
+      "screenshot": null,
+      "details": {
+        "page_errors": [],
+        "axe_runs": 24,
+        "serious": []
+      }
+    },
+    {
+      "id": "UX-16",
+      "name": "controlled full catalog failure and retry",
+      "severity": "scope",
+      "status": "NOT RUN",
+      "message": "Covered by the separate scripts/catalog_failure_e2e.py localhost fixture; its result is recorded independently, not included in this runner's count.",
+      "duration_ms": 0,
+      "screenshot": null,
+      "details": {}
+    },
+    {
+      "id": "UX-17",
+      "name": "live AI error/timeout with local fallback",
+      "severity": "scope",
+      "status": "NOT RUN",
+      "message": "External Gemini was intentionally disabled and no paid/live credential was used; integration coverage belongs to the existing search tests.",
+      "duration_ms": 0,
+      "screenshot": null,
+      "details": {}
+    },
+    {
+      "id": "MANUAL-01",
+      "name": "physical device, NVDA/TalkBack and Windows High Contrast",
+      "severity": "scope",
+      "status": "NOT RUN",
+      "message": "Unavailable in this headless browser pass; automated axe and keyboard evidence are not equivalent.",
+      "duration_ms": 0,
+      "screenshot": null,
+      "details": {}
+    }
+  ],
+  "axe": [
+    {
+      "locale": "en",
+      "theme": "light",
+      "route": "/",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "light",
+      "route": "/search?query=black",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "light",
+      "route": "/out/MOCK-001",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "light",
+      "route": "/saved",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "light",
+      "route": "/stores",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "light",
+      "route": "/search#filter-dialog",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "dark",
+      "route": "/",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "dark",
+      "route": "/search?query=black",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "dark",
+      "route": "/out/MOCK-001",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "dark",
+      "route": "/saved",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "dark",
+      "route": "/stores",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "dark",
+      "route": "/search#filter-dialog",
+      "violations": []
+    },
+    {
+      "locale": "lt",
+      "theme": "light",
+      "route": "/",
+      "violations": []
+    },
+    {
+      "locale": "lt",
+      "theme": "light",
+      "route": "/search?query=black",
+      "violations": []
+    },
+    {
+      "locale": "lt",
+      "theme": "light",
+      "route": "/out/MOCK-001",
+      "violations": []
+    },
+    {
+      "locale": "lt",
+      "theme": "light",
+      "route": "/saved",
+      "violations": []
+    },
+    {
+      "locale": "lt",
+      "theme": "light",
+      "route": "/stores",
+      "violations": []
+    },
+    {
+      "locale": "lt",
+      "theme": "light",
+      "route": "/search#filter-dialog",
+      "violations": []
+    },
+    {
+      "locale": "lt",
+      "theme": "dark",
+      "route": "/",
+      "violations": []
+    },
+    {
+      "locale": "lt",
+      "theme": "dark",
+      "route": "/search?query=black",
+      "violations": []
+    },
+    {
+      "locale": "lt",
+      "theme": "dark",
+      "route": "/out/MOCK-001",
+      "violations": []
+    },
+    {
+      "locale": "lt",
+      "theme": "dark",
+      "route": "/saved",
+      "violations": []
+    },
+    {
+      "locale": "lt",
+      "theme": "dark",
+      "route": "/stores",
+      "violations": []
+    },
+    {
+      "locale": "lt",
+      "theme": "dark",
+      "route": "/search#filter-dialog",
+      "violations": []
+    }
+  ],
+  "limits": [
+    "No physical-device or screen-reader session was run.",
+    "No live Gemini, Supabase cloud, paid service, field RUM, or production deployment was exercised.",
+    "Catalog failure/sparse rendering and delayed navigation have separate controlled runners and reports; this runner does not include those counts. No public simulation switch was added."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "baseUrl": "http://127.0.0.1:3300",
+  "assertions": [
+    "WebGL canvas renders the mannequin",
+    "Selecting another garment changes the rendered model",
+    "Knitwear renders through the approximate top-garment geometry",
+    "Changing a measurement changes the rendered model and local state",
+    "The rotate control works from the keyboard",
+    "Reduced motion disables automatic rotation"
+  ],
+  "browserErrors": [],
+  "screenshots": [
+    "initial-en-desktop.png",
+    "adjusted-en-desktop.png",
+    "knitwear-en-desktop.png",
+    "reduced-motion-lt-mobile.png"
+  ]
+}

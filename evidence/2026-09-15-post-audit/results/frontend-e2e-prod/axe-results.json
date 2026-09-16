@@ -1,0 +1,146 @@
+[
+  {
+    "locale": "en",
+    "theme": "light",
+    "route": "/",
+    "violations": []
+  },
+  {
+    "locale": "en",
+    "theme": "light",
+    "route": "/search?query=black",
+    "violations": []
+  },
+  {
+    "locale": "en",
+    "theme": "light",
+    "route": "/out/MOCK-001",
+    "violations": []
+  },
+  {
+    "locale": "en",
+    "theme": "light",
+    "route": "/saved",
+    "violations": []
+  },
+  {
+    "locale": "en",
+    "theme": "light",
+    "route": "/stores",
+    "violations": []
+  },
+  {
+    "locale": "en",
+    "theme": "light",
+    "route": "/search#filter-dialog",
+    "violations": []
+  },
+  {
+    "locale": "en",
+    "theme": "dark",
+    "route": "/",
+    "violations": []
+  },
+  {
+    "locale": "en",
+    "theme": "dark",
+    "route": "/search?query=black",
+    "violations": []
+  },
+  {
+    "locale": "en",
+    "theme": "dark",
+    "route": "/out/MOCK-001",
+    "violations": []
+  },
+  {
+    "locale": "en",
+    "theme": "dark",
+    "route": "/saved",
+    "violations": []
+  },
+  {
+    "locale": "en",
+    "theme": "dark",
+    "route": "/stores",
+    "violations": []
+  },
+  {
+    "locale": "en",
+    "theme": "dark",
+    "route": "/search#filter-dialog",
+    "violations": []
+  },
+  {
+    "locale": "lt",
+    "theme": "light",
+    "route": "/",
+    "violations": []
+  },
+  {
+    "locale": "lt",
+    "theme": "light",
+    "route": "/search?query=black",
+    "violations": []
+  },
+  {
+    "locale": "lt",
+    "theme": "light",
+    "route": "/out/MOCK-001",
+    "violations": []
+  },
+  {
+    "locale": "lt",
+    "theme": "light",
+    "route": "/saved",
+    "violations": []
+  },
+  {
+    "locale": "lt",
+    "theme": "light",
+    "route": "/stores",
+    "violations": []
+  },
+  {
+    "locale": "lt",
+    "theme": "light",
+    "route": "/search#filter-dialog",
+    "violations": []
+  },
+  {
+    "locale": "lt",
+    "theme": "dark",
+    "route": "/",
+    "violations": []
+  },
+  {
+    "locale": "lt",
+    "theme": "dark",
+    "route": "/search?query=black",
+    "violations": []
+  },
+  {
+    "locale": "lt",
+    "theme": "dark",
+    "route": "/out/MOCK-001",
+    "violations": []
+  },
+  {
+    "locale": "lt",
+    "theme": "dark",
+    "route": "/saved",
+    "violations": []
+  },
+  {
+    "locale": "lt",
+    "theme": "dark",
+    "route": "/stores",
+    "violations": []
+  },
+  {
+    "locale": "lt",
+    "theme": "dark",
+    "route": "/search#filter-dialog",
+    "violations": []
+  }
+]

@@ -1,0 +1,961 @@
+{
+  "generated_at": "2026-09-15T20:14:05.405573+00:00",
+  "mode": "final",
+  "base_url": "http://127.0.0.1:3300",
+  "summary": {
+    "PASS": 9,
+    "FAIL": 0
+  },
+  "results": [
+    {
+      "id": "CTRL-01",
+      "description": "catalog contains no native selects or duplicated field labels",
+      "status": "PASS",
+      "evidence": {
+        "select_count": 0,
+        "duplicated_category_labels": 0,
+        "screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/catalog-lt-controls-1440.png"
+      }
+    },
+    {
+      "id": "CTRL-02",
+      "description": "radio filter lists are accessible, complete, cancellable and responsive",
+      "status": "PASS",
+      "evidence": {
+        "cases": [
+          {
+            "viewport": [
+              1440,
+              1000
+            ],
+            "locale": "en",
+            "category_choices": 12,
+            "category_only_screenshot": null,
+            "filters_screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/filters-en-1440.png",
+            "picker_screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/density-open-en-1440.png",
+            "picker_box": {
+              "x": 1084.45,
+              "y": 237.0,
+              "width": 136.0,
+              "height": 146.0
+            },
+            "open_overflow": {
+              "client": 1440,
+              "scroll": 1440
+            },
+            "overflow": {
+              "client": 1440,
+              "scroll": 1440
+            }
+          },
+          {
+            "viewport": [
+              2560,
+              1440
+            ],
+            "locale": "lt",
+            "category_choices": 12,
+            "category_only_screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/category-only-lt-2560.png",
+            "filters_screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/filters-lt-2560.png",
+            "picker_screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/sort-open-lt-2560.png",
+            "picker_box": {
+              "x": 2037.8,
+              "y": 355.5,
+              "width": 389.8,
+              "height": 284.0
+            },
+            "open_overflow": {
+              "client": 2560,
+              "scroll": 2560
+            },
+            "overflow": {
+              "client": 2560,
+              "scroll": 2560
+            }
+          },
+          {
+            "viewport": [
+              390,
+              844
+            ],
+            "locale": "en",
+            "category_choices": 12,
+            "category_only_screenshot": null,
+            "filters_screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/filters-en-390.png",
+            "picker_screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/sort-open-en-390.png",
+            "picker_box": {
+              "x": 157.75,
+              "y": 279.0,
+              "width": 205.25,
+              "height": 190.0
+            },
+            "open_overflow": {
+              "client": 390,
+              "scroll": 390
+            },
+            "overflow": {
+              "client": 390,
+              "scroll": 390
+            }
+          },
+          {
+            "viewport": [
+              390,
+              844
+            ],
+            "locale": "lt",
+            "category_choices": 12,
+            "category_only_screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/category-only-lt-390.png",
+            "filters_screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/filters-lt-390.png",
+            "picker_screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/sort-open-lt-390.png",
+            "picker_box": {
+              "x": 115.86,
+              "y": 279.0,
+              "width": 247.14,
+              "height": 190.0
+            },
+            "open_overflow": {
+              "client": 390,
+              "scroll": 390
+            },
+            "overflow": {
+              "client": 390,
+              "scroll": 390
+            }
+          },
+          {
+            "viewport": [
+              320,
+              844
+            ],
+            "locale": "lt",
+            "category_choices": 12,
+            "category_only_screenshot": null,
+            "filters_screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/filters-lt-320.png",
+            "picker_screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/sort-open-lt-320.png",
+            "picker_box": {
+              "x": 45.86,
+              "y": 279.0,
+              "width": 247.14,
+              "height": 190.0
+            },
+            "open_overflow": {
+              "client": 320,
+              "scroll": 320
+            },
+            "overflow": {
+              "client": 320,
+              "scroll": 320
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "CTRL-03",
+      "description": "custom pickers support keyboard navigation, Escape and outside close without overlap",
+      "status": "PASS",
+      "evidence": {
+        "toolbar_boxes": [
+          {
+            "x": 1065.28,
+            "y": 187.0,
+            "width": 90.14,
+            "height": 44.0
+          },
+          {
+            "x": 1180.42,
+            "y": 187.0,
+            "width": 68.81,
+            "height": 44.0
+          },
+          {
+            "x": 1274.23,
+            "y": 187.0,
+            "width": 88.16,
+            "height": 44.0
+          }
+        ],
+        "first_keyboard_density": "3",
+        "density_screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/density-picker-open-en-1440.png",
+        "sort_screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/sort-picker-open-en-1440.png"
+      }
+    },
+    {
+      "id": "CTRL-04",
+      "description": "density persists without URL mutation and sort submits its chosen value",
+      "status": "PASS",
+      "evidence": {
+        "density": "3",
+        "sort_url": "http://127.0.0.1:3300/search?query=black&sort=price-low&lang=en"
+      }
+    },
+    {
+      "id": "CTRL-05",
+      "description": "every sort value, including longest LT sale, fits at 320, 390 and 1024",
+      "status": "PASS",
+      "evidence": {
+        "states": [
+          {
+            "viewport": [
+              320,
+              844
+            ],
+            "locale": "lt",
+            "value": "sale",
+            "route": "/search?gender=women&sort=sale&lang=lt",
+            "filter_count": 1,
+            "controls": [
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 71.47,
+                "height": 44.0
+              },
+              {
+                "x": 114.47,
+                "y": 229.0,
+                "width": 196.14,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 27.0,
+                "y": 199.0,
+                "width": 266.0,
+                "height": 25.3
+              },
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 266.0,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 320,
+              "scroll": 320
+            },
+            "screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/sort-sale-active-filter-lt-320.png"
+          },
+          {
+            "viewport": [
+              320,
+              844
+            ],
+            "locale": "lt",
+            "value": "price-low",
+            "controls": [
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 71.47,
+                "height": 44.0
+              },
+              {
+                "x": 140.19,
+                "y": 229.0,
+                "width": 152.81,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 27.0,
+                "y": 199.0,
+                "width": 266.0,
+                "height": 25.3
+              },
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 266.0,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 320,
+              "scroll": 320
+            },
+            "screenshot": null
+          },
+          {
+            "viewport": [
+              320,
+              844
+            ],
+            "locale": "lt",
+            "value": "price-high",
+            "controls": [
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 71.47,
+                "height": 44.0
+              },
+              {
+                "x": 140.91,
+                "y": 229.0,
+                "width": 152.09,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 27.0,
+                "y": 199.0,
+                "width": 266.0,
+                "height": 25.3
+              },
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 266.0,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 320,
+              "scroll": 320
+            },
+            "screenshot": null
+          },
+          {
+            "viewport": [
+              320,
+              844
+            ],
+            "locale": "lt",
+            "value": "available",
+            "controls": [
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 71.47,
+                "height": 44.0
+              },
+              {
+                "x": 164.08,
+                "y": 229.0,
+                "width": 128.92,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 27.0,
+                "y": 199.0,
+                "width": 266.0,
+                "height": 25.3
+              },
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 266.0,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 320,
+              "scroll": 320
+            },
+            "screenshot": null
+          },
+          {
+            "viewport": [
+              320,
+              844
+            ],
+            "locale": "lt",
+            "value": "sale",
+            "controls": [
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 71.47,
+                "height": 44.0
+              },
+              {
+                "x": 114.47,
+                "y": 229.0,
+                "width": 196.14,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 27.0,
+                "y": 199.0,
+                "width": 266.0,
+                "height": 25.3
+              },
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 266.0,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 320,
+              "scroll": 320
+            },
+            "screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/sort-sale-lt-320.png"
+          },
+          {
+            "viewport": [
+              320,
+              844
+            ],
+            "locale": "lt",
+            "value": "",
+            "controls": [
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 71.47,
+                "height": 44.0
+              },
+              {
+                "x": 209.58,
+                "y": 229.0,
+                "width": 83.42,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 27.0,
+                "y": 199.0,
+                "width": 266.0,
+                "height": 25.3
+              },
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 266.0,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 320,
+              "scroll": 320
+            },
+            "screenshot": null
+          },
+          {
+            "viewport": [
+              390,
+              844
+            ],
+            "locale": "en",
+            "value": "price-low",
+            "controls": [
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 75.08,
+                "height": 44.0
+              },
+              {
+                "x": 242.0,
+                "y": 229.0,
+                "width": 121.0,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 27.0,
+                "y": 199.0,
+                "width": 336.0,
+                "height": 25.3
+              },
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 336.0,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 390,
+              "scroll": 390
+            },
+            "screenshot": null
+          },
+          {
+            "viewport": [
+              390,
+              844
+            ],
+            "locale": "en",
+            "value": "price-high",
+            "controls": [
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 75.08,
+                "height": 44.0
+              },
+              {
+                "x": 242.0,
+                "y": 229.0,
+                "width": 121.0,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 27.0,
+                "y": 199.0,
+                "width": 336.0,
+                "height": 25.3
+              },
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 336.0,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 390,
+              "scroll": 390
+            },
+            "screenshot": null
+          },
+          {
+            "viewport": [
+              390,
+              844
+            ],
+            "locale": "en",
+            "value": "available",
+            "controls": [
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 75.08,
+                "height": 44.0
+              },
+              {
+                "x": 263.92,
+                "y": 229.0,
+                "width": 99.08,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 27.0,
+                "y": 199.0,
+                "width": 336.0,
+                "height": 25.3
+              },
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 336.0,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 390,
+              "scroll": 390
+            },
+            "screenshot": null
+          },
+          {
+            "viewport": [
+              390,
+              844
+            ],
+            "locale": "en",
+            "value": "sale",
+            "controls": [
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 75.08,
+                "height": 44.0
+              },
+              {
+                "x": 208.75,
+                "y": 229.0,
+                "width": 154.25,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 27.0,
+                "y": 199.0,
+                "width": 336.0,
+                "height": 25.3
+              },
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 336.0,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 390,
+              "scroll": 390
+            },
+            "screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/sort-sale-en-390.png"
+          },
+          {
+            "viewport": [
+              390,
+              844
+            ],
+            "locale": "en",
+            "value": "",
+            "controls": [
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 75.08,
+                "height": 44.0
+              },
+              {
+                "x": 279.56,
+                "y": 229.0,
+                "width": 83.44,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 27.0,
+                "y": 199.0,
+                "width": 336.0,
+                "height": 25.3
+              },
+              {
+                "x": 27.0,
+                "y": 229.0,
+                "width": 336.0,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 390,
+              "scroll": 390
+            },
+            "screenshot": null
+          },
+          {
+            "viewport": [
+              1024,
+              900
+            ],
+            "locale": "lt",
+            "value": "price-low",
+            "controls": [
+              {
+                "x": 272.95,
+                "y": 217.3,
+                "width": 112.05,
+                "height": 44.0
+              },
+              {
+                "x": 544.69,
+                "y": 217.3,
+                "width": 95.78,
+                "height": 44.0
+              },
+              {
+                "x": 800.16,
+                "y": 217.3,
+                "width": 162.88,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 272.95,
+                "y": 192.0,
+                "width": 247.47,
+                "height": 25.3
+              },
+              {
+                "x": 272.95,
+                "y": 217.3,
+                "width": 690.08,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 1024,
+              "scroll": 1024
+            },
+            "screenshot": null
+          },
+          {
+            "viewport": [
+              1024,
+              900
+            ],
+            "locale": "lt",
+            "value": "price-high",
+            "controls": [
+              {
+                "x": 272.95,
+                "y": 217.3,
+                "width": 112.05,
+                "height": 44.0
+              },
+              {
+                "x": 545.06,
+                "y": 217.3,
+                "width": 95.78,
+                "height": 44.0
+              },
+              {
+                "x": 800.91,
+                "y": 217.3,
+                "width": 162.11,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 272.95,
+                "y": 192.0,
+                "width": 247.47,
+                "height": 25.3
+              },
+              {
+                "x": 272.95,
+                "y": 217.3,
+                "width": 690.08,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 1024,
+              "scroll": 1024
+            },
+            "screenshot": null
+          },
+          {
+            "viewport": [
+              1024,
+              900
+            ],
+            "locale": "lt",
+            "value": "available",
+            "controls": [
+              {
+                "x": 272.95,
+                "y": 217.3,
+                "width": 112.05,
+                "height": 44.0
+              },
+              {
+                "x": 557.55,
+                "y": 217.3,
+                "width": 95.78,
+                "height": 44.0
+              },
+              {
+                "x": 825.88,
+                "y": 217.3,
+                "width": 137.14,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 272.95,
+                "y": 192.0,
+                "width": 247.47,
+                "height": 25.3
+              },
+              {
+                "x": 272.95,
+                "y": 217.3,
+                "width": 690.08,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 1024,
+              "scroll": 1024
+            },
+            "screenshot": null
+          },
+          {
+            "viewport": [
+              1024,
+              900
+            ],
+            "locale": "lt",
+            "value": "sale",
+            "controls": [
+              {
+                "x": 272.95,
+                "y": 217.3,
+                "width": 112.05,
+                "height": 44.0
+              },
+              {
+                "x": 521.36,
+                "y": 217.3,
+                "width": 95.78,
+                "height": 44.0
+              },
+              {
+                "x": 753.5,
+                "y": 217.3,
+                "width": 209.53,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 272.95,
+                "y": 192.0,
+                "width": 247.47,
+                "height": 25.3
+              },
+              {
+                "x": 272.95,
+                "y": 217.3,
+                "width": 690.08,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 1024,
+              "scroll": 1024
+            },
+            "screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/sort-sale-lt-1024.png"
+          },
+          {
+            "viewport": [
+              1024,
+              900
+            ],
+            "locale": "lt",
+            "value": "",
+            "controls": [
+              {
+                "x": 272.95,
+                "y": 217.3,
+                "width": 112.05,
+                "height": 44.0
+              },
+              {
+                "x": 582.05,
+                "y": 217.3,
+                "width": 95.78,
+                "height": 44.0
+              },
+              {
+                "x": 874.88,
+                "y": 217.3,
+                "width": 88.16,
+                "height": 44.0
+              }
+            ],
+            "toolbar": [
+              {
+                "x": 272.95,
+                "y": 192.0,
+                "width": 247.47,
+                "height": 25.3
+              },
+              {
+                "x": 272.95,
+                "y": 217.3,
+                "width": 690.08,
+                "height": 44.0
+              }
+            ],
+            "overflow": {
+              "client": 1024,
+              "scroll": 1024
+            },
+            "screenshot": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "CTRL-06",
+      "description": "no-JS sort submit buttons and radio filter GET fallback remain functional",
+      "status": "PASS",
+      "evidence": {
+        "params": {
+          "query": [
+            "black"
+          ],
+          "sort": [
+            "price-low"
+          ],
+          "lang": [
+            "lt"
+          ],
+          "category": [
+            "outerwear"
+          ]
+        }
+      }
+    },
+    {
+      "id": "CTRL-07",
+      "description": "dark-theme open controls remain contained",
+      "status": "PASS",
+      "evidence": {
+        "screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/controls-lt-dark-1440.png",
+        "overflow": {
+          "client": 1440,
+          "scroll": 1440
+        }
+      }
+    },
+    {
+      "id": "CTRL-08",
+      "description": "forced-colors active keeps the radio filter sheet usable",
+      "status": "PASS",
+      "evidence": {
+        "forced_colors": "active",
+        "screenshot": "evidence/2026-09-15-post-audit/results/catalog-controls-final3/screenshots/category-lt-forced-colors-390.png",
+        "overflow": {
+          "client": 390,
+          "scroll": 390
+        }
+      }
+    },
+    {
+      "id": "CTRL-09",
+      "description": "missing showModal exposes a native disclosure and real GET fallback",
+      "status": "PASS",
+      "evidence": {
+        "params": {
+          "query": [
+            "black"
+          ],
+          "maxPrice": [
+            "150"
+          ],
+          "category": [
+            "outerwear"
+          ]
+        },
+        "navigation": "document GET"
+      }
+    }
+  ],
+  "browser_errors": [],
+  "limits": [
+    "Headless Chromium cannot display an operating-system native menu; DOM absence of SELECT is the deterministic guard.",
+    "Chromium forced-colors emulation is automated; it is not equivalent to a physical Windows High Contrast and screen-reader pass."
+  ]
+}

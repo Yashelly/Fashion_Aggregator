@@ -181,8 +181,13 @@ def main() -> int:
                         page.evaluate("scrollTo(0, 0)")
                         page.mouse.move(1, 1)
                         clean_shot = qa.screenshot(page, f"category-only-lt-{width}")
-                    for name in ("gender", "color", "status"):
+                    for name in ("department", "status"):
                         group = open_group(scope, name)
+                        assert group.locator("fieldset > legend.sr-only").count() == 1
+                    for name in ("color", "size", "store"):
+                        group = scope.locator(f'.filter-group:has(input[name="{name}"])')
+                        if group.get_attribute("open") is None:
+                            group.locator(":scope > summary").click()
                         assert group.locator("fieldset > legend.sr-only").count() == 1
                     for index in range(scope.locator(".filter-group").count()):
                         group = scope.locator(".filter-group").nth(index)

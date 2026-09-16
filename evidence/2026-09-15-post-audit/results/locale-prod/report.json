@@ -1,0 +1,29 @@
+{
+  "status": "passed",
+  "base_url": "http://127.0.0.1:3300",
+  "routes": 15,
+  "viewports": [
+    375,
+    1440
+  ],
+  "clicked_internal_links": 237,
+  "assertions": {
+    "direct_cookie_query_matrix": 660,
+    "language_switch_matrix": 256,
+    "internal_link_matrix": 1477,
+    "search_filter_matrix": 39,
+    "saved_collection_matrix": 16,
+    "no_script_search_matrix": 10,
+    "history_and_stress_matrix": 72,
+    "zero_delay_atomic_switch_matrix": 700
+  },
+  "browser_errors": 0,
+  "boundaries": {
+    "known_out_route": "public path retained",
+    "unknown_out_route": "404 and public path retained",
+    "search_filters": "preserved across EN/LT switches",
+    "saved_collection": "browser-local save, canonical recent URL, clear-all, and account redirect",
+    "progressive_enhancement": "search and filters submit without JavaScript",
+    "history": "locale restored across back/forward"
+  }
+}

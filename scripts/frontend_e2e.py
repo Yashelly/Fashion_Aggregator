@@ -117,7 +117,7 @@ class BrowserQA:
                     "details": self.current_details,
                 }
             )
-            print(f"{status:4} {test_id} {name}{': ' + message if message else ''}", flush=True)
+            print((f"{status:4} {test_id} {name}{': ' + message if message else ''}").encode("ascii", "backslashreplace").decode("ascii"), flush=True)
 
     def note(self, test_id: str, name: str, status: str, reason: str, severity: str = "scope") -> None:
         self.results.append(
@@ -188,6 +188,14 @@ def focused(locator: Any) -> bool:
     return bool(locator.evaluate("element => element === document.activeElement"))
 
 
+def wait_for_enhanced_filters(page: Page) -> None:
+    """Wait for the hydrated dialog trigger instead of racing the hidden SSR button."""
+    page.wait_for_function("""() => {
+      const button = document.querySelector('.catalog-toolbar .filter-toggle');
+      return Boolean(button && !button.hidden);
+    }""")
+
+
 def choose_sort(page: Page, value: str) -> None:
     picker = page.locator(".sort-form details.option-picker")
     picker.locator(":scope > summary").click()
@@ -211,7 +219,7 @@ def main() -> int:
                 context = qa.context(390 if locale == "lt" else 1440, 844 if locale == "lt" else 1000)
                 page = qa.page(context)
                 qa.goto(page, f"/?lang={locale}")
-                field = page.locator('form[role="search"] input[name="query"]')
+                field = page.locator('.campaign-search input[name="query"]')
                 field.fill(phrase)
                 field.press("Enter")
                 page.wait_for_url(re.compile(r"/search\?"))
@@ -229,7 +237,7 @@ def main() -> int:
             page = qa.page(context)
             for locale in ("en", "lt"):
                 qa.goto(page, f"/?lang={locale}")
-                examples = page.locator(".search-examples a")
+                examples = page.locator(".campaign-examples a")
                 if examples.count() < 2:
                     raise AssertionError(f"{locale} exposes fewer than two query examples")
                 hrefs = [examples.nth(index).get_attribute("href") for index in range(2)]
@@ -247,8 +255,9 @@ def main() -> int:
             context = qa.context(390, 844)
             page = qa.page(context)
             qa.goto(page, "/?lang=en")
-            field = page.locator('form[role="search"] input[name="query"]')
-            button = page.locator('form[role="search"] .search-submit')
+            form = page.locator('.campaign-search')
+            field = form.locator('input[name="query"]')
+            button = form.locator('.search-submit')
             field.fill("   ")
             button.click()
             page.wait_for_url(re.compile(r"/search(?:\?|$)"))
@@ -297,6 +306,8 @@ def main() -> int:
             qa.goto(page, "/search?query=black&lang=en")
             original = page.url
             trigger = page.locator(".catalog-toolbar .filter-toggle")
+            wait_for_enhanced_filters(page)
+            trigger.wait_for(state="visible")
             trigger.click()
             dialog = page.locator(".filter-dialog[open]")
             dialog.wait_for(state="visible")
@@ -329,7 +340,10 @@ def main() -> int:
             context = qa.context(390, 844)
             page = qa.page(context)
             qa.goto(page, "/search?query=shirt&lang=en")
-            page.locator(".catalog-toolbar .filter-toggle").click()
+            trigger = page.locator(".catalog-toolbar .filter-toggle")
+            wait_for_enhanced_filters(page)
+            trigger.wait_for(state="visible")
+            trigger.click()
             dialog = page.locator(".filter-dialog[open]")
             minimum = dialog.locator('input[name="minPrice"]')
             maximum = dialog.locator('input[name="maxPrice"]')
@@ -353,11 +367,16 @@ def main() -> int:
         qa.run("UX-08", "invalid range focuses error; zero and comma-decimal budget apply", "P1", invalid_and_decimal_budget)
 
         def multi_store_and_chips() -> None:
-            context = qa.context(1440, 1000)
+            context = qa.context(390, 844)
             page = qa.page(context)
             qa.goto(page, "/search?query=shirt&lang=en")
-            page.locator(".catalog-toolbar .filter-toggle").click()
+            trigger = page.locator(".catalog-toolbar .filter-toggle")
+            wait_for_enhanced_filters(page)
+            trigger.wait_for(state="visible")
+            trigger.click()
             dialog = page.locator(".filter-dialog[open]")
+            store_group = dialog.locator('.store-options input[type="checkbox"]').first.locator("xpath=ancestor::details[contains(@class,'filter-group')]")
+            store_group.locator(":scope > summary").click()
             checks = dialog.locator('.store-options input[type="checkbox"]')
             first, second = checks.nth(0), checks.nth(1)
             first_id, second_id = first.get_attribute("value"), second.get_attribute("value")
@@ -365,16 +384,17 @@ def main() -> int:
             second.check()
             dialog.get_by_role("button", name="Apply filters", exact=True).click()
             page.wait_for_url(re.compile(r"store="))
-            page.locator(".active-filters").wait_for(state="visible")
+            filter_nav = page.get_by_role("navigation", name="Active filters")
+            filter_nav.wait_for(state="visible")
             assert set(query(page)["store"][0].split(",")) == {first_id, second_id}
-            chips = page.locator(".active-filters a:not(.clear-link)")
+            chips = filter_nav.locator("a:not(.clear-link)")
             assert chips.count() == 2
             qa.screenshot(page, "results-en-desktop-two-stores")
             before_remove = page.url
             chips.nth(0).click()
             page.wait_for_function("before => location.href !== before", arg=before_remove)
             assert query(page)["store"][0] in {first_id, second_id}
-            clear = page.locator(".active-filters .clear-link")
+            clear = filter_nav.locator(".clear-link")
             before_clear = page.url
             clear.click()
             page.wait_for_function("before => location.href !== before", arg=before_clear)
@@ -476,7 +496,7 @@ def main() -> int:
             second.wait_for_function("() => document.querySelector('.wishlist-button')?.getAttribute('aria-pressed') === 'true'")
             assert one.get_attribute("aria-pressed") == "true" and two.get_attribute("aria-pressed") == "true"
             first.locator('.account-link').click()
-            first.wait_for_url(re.compile(r"/account"))
+            first.wait_for_url(re.compile(r"/saved"))
             first.locator(".saved-product").wait_for(state="visible")
             first.locator(".saved-product .wishlist-button").first.click()
             second.wait_for_function("() => document.querySelector('.wishlist-button')?.getAttribute('aria-pressed') === 'false'")
@@ -499,7 +519,7 @@ def main() -> int:
             page.locator(".wishlist-button").first.click()
             assert page.locator(".wishlist-button").first.get_attribute("aria-pressed") == "true"
             page.locator(".account-link").click()
-            page.wait_for_url(re.compile(r"/account"))
+            page.wait_for_url(re.compile(r"/saved"))
             page.locator('.account-storage-note[role="status"]').wait_for(state="visible")
             blocked.close()
 
@@ -524,6 +544,8 @@ def main() -> int:
             page.locator(".filter-disclosure > summary").click()
             fallback = page.locator(".filter-fallback")
             fallback.locator('input[name="maxPrice"]').fill("150")
+            store_group = fallback.locator('.store-options input[type="checkbox"]').first.locator("xpath=ancestor::details[contains(@class,'filter-group')]")
+            store_group.locator(":scope > summary").click()
             fallback.locator('.store-options input[type="checkbox"]').first.check()
             fallback.locator('button[type="submit"]').click()
             page.wait_for_url(re.compile(r"maxPrice=150"))
@@ -535,7 +557,7 @@ def main() -> int:
         qa.run("NOJS-01", "native GET search and filter fallback work without JavaScript", "P1", no_javascript_get_forms)
 
         def rapid_intent() -> None:
-            context = qa.context()
+            context = qa.context(390, 844)
             context.add_init_script("""
               window.__qaSubmittedQueries = [];
               document.addEventListener('submit', event => {
@@ -547,9 +569,9 @@ def main() -> int:
             requests: list[str] = []
             page.on("request", lambda request: requests.append(request.url) if "/search" in request.url else None)
             qa.goto(page, "/?lang=en")
-            field = page.locator('form[role="search"] input[name="query"]')
+            field = page.locator('.campaign-search input[name="query"]')
             field.fill("black coat")
-            page.locator('form[role="search"]').evaluate("form => { form.requestSubmit(); form.requestSubmit(); }")
+            page.locator('.campaign-search').evaluate("form => { form.requestSubmit(); form.requestSubmit(); }")
             page.wait_for_url(re.compile(r"query=black(?:\+|%20)coat"))
             page.locator('input[type="search"][name="query"]').fill("linen shirt")
             page.locator('input[type="search"][name="query"]').press("Enter")
@@ -601,7 +623,7 @@ def main() -> int:
             qa.goto(page, "/search?query=black&lang=en")
             image = page.locator(".product-media img").first
             image.scroll_into_view_if_needed()
-            image.evaluate("img => { img.srcset = ''; img.src = '/images/__qa-missing-product__.webp'; }")
+            image.evaluate("img => { img.srcset = ''; img.src = '/images/__qa-missing-product__.webp'; img.dispatchEvent(new Event('error')); }")
             page.wait_for_function("() => document.querySelectorAll('.image-fallback').length > 0")
             assert page.locator(".product-tile").count() > 1
             first_box = page.locator(".product-media").first.bounding_box()
@@ -612,14 +634,17 @@ def main() -> int:
         qa.run("UX-19", "one image 404 keeps the grid stable and does not substitute another garment", "P1", image_404_stability)
 
         def keyboard_core_and_dialog() -> None:
-            context = qa.context()
+            context = qa.context(390, 844)
             page = qa.page(context)
             qa.goto(page, "/search?query=black&lang=en")
             page.locator("body").press("Tab")
             assert focused(page.locator(".skip-link"))
             page.keyboard.press("Enter")
             assert focused(page.locator("main"))
-            page.locator(".catalog-toolbar .filter-toggle").focus()
+            trigger = page.locator(".catalog-toolbar .filter-toggle")
+            wait_for_enhanced_filters(page)
+            trigger.wait_for(state="visible")
+            trigger.focus()
             page.keyboard.press("Enter")
             dialog = page.locator(".filter-dialog[open]")
             dialog.wait_for(state="visible")
@@ -632,7 +657,7 @@ def main() -> int:
                 assert dialog.evaluate("d => d.contains(document.activeElement)")
             qa.screenshot(page, "keyboard-filter-focus-desktop")
             page.keyboard.press("Escape")
-            assert focused(page.locator(".catalog-toolbar .filter-toggle"))
+            assert focused(trigger)
             context.close()
 
         qa.run("UX-23", "keyboard skip link and modal focus containment/restoration", "P1", keyboard_core_and_dialog)
@@ -676,7 +701,7 @@ def main() -> int:
         def axe_matrix() -> None:
             if not AXE_PATH.exists():
                 raise AssertionError(f"axe bundle missing at {AXE_PATH}")
-            routes = ["/", "/search?query=black", "/out/MOCK-001", "/account", "/stores"]
+            routes = ["/", "/search?query=black", "/out/MOCK-001", "/saved", "/stores"]
             serious: list[dict[str, Any]] = []
             for locale in ("en", "lt"):
                 for theme in ("light", "dark"):
@@ -707,7 +732,10 @@ def main() -> int:
                         page.close()
                     page = qa.page(context)
                     qa.goto(page, f"/search?query=black&lang={locale}")
-                    page.locator(".catalog-toolbar .filter-toggle").click()
+                    trigger = page.locator(".catalog-toolbar .filter-toggle")
+                    wait_for_enhanced_filters(page)
+                    trigger.wait_for(state="visible")
+                    trigger.click()
                     page.locator(".filter-dialog[open]").wait_for(state="visible")
                     page.add_script_tag(path=str(AXE_PATH))
                     result = page.evaluate("async () => await axe.run(document, {runOnly: {type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa']}})")

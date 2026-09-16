@@ -190,9 +190,10 @@ def click_language(page: Page, locale: str) -> None:
         link = page.locator(".mobile-menu-locales a", has_text=label)
     link.wait_for(state="visible")
     link.click()
+    expect_default_query = locale == "en" and page.url.split("?", 1)[0].rstrip("/").endswith("/search")
     page.wait_for_function(
-        "expected => new URL(location.href).searchParams.get('lang') === expected",
-        arg=locale,
+        "({ locale, expectDefaultQuery }) => { const value = new URL(location.href).searchParams.get('lang'); return locale === 'en' ? (expectDefaultQuery ? !value : value === 'en') : value === locale; }",
+        arg={"locale": locale, "expectDefaultQuery": expect_default_query},
     )
     wait_for_locale(page, locale)
 
@@ -361,7 +362,9 @@ def run_search_matrix(browser) -> int:
     current = parse_qs(urlparse(page.url).query)
     for name, value in filters.items():
         assert current.get(name) == [value], (name, current)
-    assert current.get("lang") == ["en"]
+    # EN is the canonical default locale, so `withLocale` intentionally removes
+    # the redundant `lang=en` query parameter while preserving all filters.
+    assert "lang" not in current
     assert_locale(page, context, "en")
     assertions += 7
 
@@ -664,8 +667,11 @@ def run_atomic_switch_matrix(browser) -> int:
 
             page.evaluate(
                 """() => {
-                  document.querySelector('.language-switcher a:last-child').click();
-                  document.querySelector('.campaign-cta').click();
+                  const languageLink = window.innerWidth < 768
+                    ? (() => { document.querySelector('.mobile-menu > summary').click(); return document.querySelector('.mobile-menu-locales a:last-child'); })()
+                    : document.querySelector('.language-switcher a:last-child');
+                  languageLink.click();
+                  document.querySelector('.campaign-browse').click();
                 }"""
             )
             page.wait_for_function(
@@ -690,8 +696,11 @@ def run_atomic_switch_matrix(browser) -> int:
 
             page.evaluate(
                 """() => {
-                  document.querySelector('.language-switcher a:first-child').click();
-                  document.querySelector('.campaign-cta').click();
+                  const languageLink = window.innerWidth < 768
+                    ? (() => { document.querySelector('.mobile-menu > summary').click(); return document.querySelector('.mobile-menu-locales a:first-child'); })()
+                    : document.querySelector('.language-switcher a:first-child');
+                  languageLink.click();
+                  document.querySelector('.campaign-browse').click();
                 }"""
             )
             page.wait_for_function(

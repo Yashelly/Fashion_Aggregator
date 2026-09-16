@@ -1,0 +1,449 @@
+{
+  "generated_at": "2026-09-15T19:40:21.619328+00:00",
+  "base_url": "http://127.0.0.1:3200",
+  "source": "real local production server; deterministic catalog fallback; external keys not used",
+  "summary": {
+    "PASS": 7,
+    "FAIL": 14,
+    "PARTIAL": 0,
+    "NOT RUN": 3
+  },
+  "results": [
+    {
+      "id": "UX-03/04",
+      "name": "EN/LT search by Enter reaches useful results",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "Error: Locator.fill: Error: strict mode violation: locator(\"form[role=\\\"search\\\"] input[name=\\\"query\\\"]\") resolved to 2 elements:\n    1) <input value=\"\" name=\"query\" type=\"search\" id=\"_R_4smlb_\" maxlength=\"500\" autocomplete=\"off\" placeholder=\"What are you looking for?\"/> aka get_by_placeholder(\"What are you looking for?\")\n    2) <input value=\"\" name=\"query\" type=\"search\" maxlength=\"500\" id=\"_R_4spbn6lb_\" autocomplete=\"off\" placeholder=\"Describe a piece, colour or budget\"/> aka get_by_placeholder(\"Describe a piece, colour or\")\n\nCall log:\n  - waiting for locator(\"form[role=\\\"search\\\"] input[name=\\\"query\\\"]\")\n",
+      "duration_ms": 2426,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e/screenshots/FAIL-ux-03-04.png",
+      "details": {
+        "page_errors": [],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 215, in search_keyboard\n    field.fill(phrase)\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 15870, in fill\n    self._sync(\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_locator.py\", line 212, in fill\n    return await self._frame.fill(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.Error: Locator.fill: Error: strict mode violation: locator(\"form[role=\\\"search\\\"] input[name=\\\"query\\\"]\") resolved to 2 elements:\n    1) <input value=\"\" name=\"query\" type=\"search\" id=\"_R_4smlb_\" maxlength=\"500\" autocomplete=\"off\" placeholder=\"What are you looking for?\"/> aka get_by_placeholder(\"What are you looking for?\")\n    2) <input value=\"\" name=\"query\" type=\"search\" maxlength=\"500\" id=\"_R_4spbn6lb_\" autocomplete=\"off\" placeholder=\"Describe a piece, colour or budget\"/> aka get_by_placeholder(\"Describe a piece, colour or\")\n\nCall log:\n  - waiting for locator(\"form[role=\\\"search\\\"] input[name=\\\"query\\\"]\")\n\n"
+      }
+    },
+    {
+      "id": "UX-07",
+      "name": "visible EN/LT query examples lead to useful results",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "AssertionError: en exposes fewer than two query examples",
+      "duration_ms": 796,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e/screenshots/FAIL-ux-07.png",
+      "details": {
+        "page_errors": [],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 234, in hero_examples_are_useful\n    raise AssertionError(f\"{locale} exposes fewer than two query examples\")\nAssertionError: en exposes fewer than two query examples\n"
+      }
+    },
+    {
+      "id": "UX-05",
+      "name": "blank/whitespace browse behavior and explicit clear",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "Error: Locator.fill: Error: strict mode violation: locator(\"form[role=\\\"search\\\"] input[name=\\\"query\\\"]\") resolved to 2 elements:\n    1) <input value=\"\" name=\"query\" type=\"search\" id=\"_R_4smlb_\" maxlength=\"500\" autocomplete=\"off\" placeholder=\"What are you looking for?\"/> aka get_by_placeholder(\"What are you looking for?\")\n    2) <input value=\"\" name=\"query\" type=\"search\" maxlength=\"500\" id=\"_R_4spbn6lb_\" autocomplete=\"off\" placeholder=\"Describe a piece, colour or budget\"/> aka get_by_placeholder(\"Describe a piece, colour or\")\n\nCall log:\n  - waiting for locator(\"form[role=\\\"search\\\"] input[name=\\\"query\\\"]\")\n",
+      "duration_ms": 528,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e/screenshots/FAIL-ux-05.png",
+      "details": {
+        "page_errors": [],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 252, in search_button_blank_and_clear\n    field.fill(\"   \")\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 15870, in fill\n    self._sync(\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_locator.py\", line 212, in fill\n    return await self._frame.fill(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.Error: Locator.fill: Error: strict mode violation: locator(\"form[role=\\\"search\\\"] input[name=\\\"query\\\"]\") resolved to 2 elements:\n    1) <input value=\"\" name=\"query\" type=\"search\" id=\"_R_4smlb_\" maxlength=\"500\" autocomplete=\"off\" placeholder=\"What are you looking for?\"/> aka get_by_placeholder(\"What are you looking for?\")\n    2) <input value=\"\" name=\"query\" type=\"search\" maxlength=\"500\" id=\"_R_4spbn6lb_\" autocomplete=\"off\" placeholder=\"Describe a piece, colour or budget\"/> aka get_by_placeholder(\"Describe a piece, colour or\")\n\nCall log:\n  - waiting for locator(\"form[role=\\\"search\\\"] input[name=\\\"query\\\"]\")\n\n"
+      }
+    },
+    {
+      "id": "FORM-01",
+      "name": "501-character URL and special/diacritic input are bounded and escaped",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 763,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "UX-15",
+      "name": "exact-word result and zero-results state",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 779,
+      "screenshot": null,
+      "details": {
+        "page_errors": [],
+        "zero_results_url": "http://127.0.0.1:3200/search?query=qxzv-no-such-garment-999&lang=en"
+      }
+    },
+    {
+      "id": "UX-10",
+      "name": "filter draft cancel, Escape and backdrop discard state and restore focus",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "TimeoutError: Locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".catalog-toolbar .filter-toggle\")\n    - locator resolved to <button hidden=\"\" type=\"button\" aria-expanded=\"true\" class=\"filter-toggle\" aria-controls=\"_R_4inebn6lb_-panel\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    15 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n",
+      "duration_ms": 8591,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e/screenshots/FAIL-ux-10.png",
+      "details": {
+        "page_errors": [],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 300, in filter_draft_close_paths\n    trigger.click()\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 15524, in click\n    self._sync(\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_locator.py\", line 160, in click\n    return await self._frame.click(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".catalog-toolbar .filter-toggle\")\n    - locator resolved to <button hidden=\"\" type=\"button\" aria-expanded=\"true\" class=\"filter-toggle\" aria-controls=\"_R_4inebn6lb_-panel\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    15 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n\n"
+      }
+    },
+    {
+      "id": "UX-08",
+      "name": "invalid range focuses error; zero and comma-decimal budget apply",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "TimeoutError: Locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".catalog-toolbar .filter-toggle\")\n    - locator resolved to <button hidden=\"\" type=\"button\" aria-expanded=\"true\" class=\"filter-toggle\" aria-controls=\"_R_4inebn6lb_-panel\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    15 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n",
+      "duration_ms": 8494,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e/screenshots/FAIL-ux-08.png",
+      "details": {
+        "page_errors": [],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 332, in invalid_and_decimal_budget\n    page.locator(\".catalog-toolbar .filter-toggle\").click()\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 15524, in click\n    self._sync(\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_locator.py\", line 160, in click\n    return await self._frame.click(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".catalog-toolbar .filter-toggle\")\n    - locator resolved to <button hidden=\"\" type=\"button\" aria-expanded=\"true\" class=\"filter-toggle\" aria-controls=\"_R_4inebn6lb_-panel\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    15 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n\n"
+      }
+    },
+    {
+      "id": "UX-09/12/13",
+      "name": "multi-store apply, one-chip removal and clear-filters retaining query",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "TimeoutError: Locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".catalog-toolbar .filter-toggle\")\n    - locator resolved to <button hidden=\"\" type=\"button\" aria-expanded=\"true\" class=\"filter-toggle\" aria-controls=\"_R_4inebn6lb_-panel\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    15 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n",
+      "duration_ms": 10033,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e/screenshots/FAIL-ux-09-12-13.png",
+      "details": {
+        "page_errors": [],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 359, in multi_store_and_chips\n    page.locator(\".catalog-toolbar .filter-toggle\").click()\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 15524, in click\n    self._sync(\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_locator.py\", line 160, in click\n    return await self._frame.click(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".catalog-toolbar .filter-toggle\")\n    - locator resolved to <button hidden=\"\" type=\"button\" aria-expanded=\"true\" class=\"filter-toggle\" aria-controls=\"_R_4inebn6lb_-panel\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    15 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n\n"
+      }
+    },
+    {
+      "id": "UX-14",
+      "name": "numeric sorting, per-page reset, relevance/default and browser history",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 3987,
+      "screenshot": null,
+      "details": {
+        "page_errors": [],
+        "low_url": "http://127.0.0.1:3200/search?perPage=50&sort=price-high",
+        "after_back": "http://127.0.0.1:3200/search?perPage=50&sort=price-low",
+        "after_forward": "http://127.0.0.1:3200/search?perPage=50&sort=price-high"
+      }
+    },
+    {
+      "id": "UX-20/21",
+      "name": "details restores search and rejects external return/unknown id",
+      "severity": "P0",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 1306,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "DETAIL-01",
+      "name": "mobile gallery traps focus, closes with Escape and restores trigger",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "TimeoutError: Locator.wait_for: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".lightbox[open]\") to be visible\n",
+      "duration_ms": 8443,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e/screenshots/FAIL-detail-01.png",
+      "details": {
+        "page_errors": [],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 447, in mobile_gallery_focus\n    dialog.wait_for(state=\"visible\")\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 17956, in wait_for\n    self._sync(self._impl_obj.wait_for(timeout=timeout, state=state))\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_locator.py\", line 692, in wait_for\n    await self._frame.wait_for_selector(\nplaywright._impl._errors.TimeoutError: Locator.wait_for: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".lightbox[open]\") to be visible\n\n"
+      }
+    },
+    {
+      "id": "SAVE-01",
+      "name": "save/remove persists on same SPA and synchronizes another tab",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "TimeoutError: Page.wait_for_function: Timeout 8000ms exceeded.",
+      "duration_ms": 9537,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e/screenshots/FAIL-save-01.png",
+      "details": {
+        "page_errors": [],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 476, in saved_items_cross_tab\n    second.wait_for_function(\"() => document.querySelector('.wishlist-button')?.getAttribute('aria-pressed') === 'true'\")\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 11559, in wait_for_function\n    self._sync(\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_page.py\", line 1111, in wait_for_function\n    return await self._main_frame.wait_for_function(**locals_to_params(locals()))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.TimeoutError: Page.wait_for_function: Timeout 8000ms exceeded.\n"
+      }
+    },
+    {
+      "id": "SAVE-02",
+      "name": "malformed and blocked localStorage degrade safely",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "AssertionError: ",
+      "duration_ms": 1040,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e/screenshots/FAIL-save-02.png",
+      "details": {
+        "page_errors": [],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 494, in saved_items_failure_modes\n    assert page.locator(\".wishlist-button\").first.get_attribute(\"aria-pressed\") == \"true\"\nAssertionError\n"
+      }
+    },
+    {
+      "id": "NOJS-01",
+      "name": "native GET search and filter fallback work without JavaScript",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "TimeoutError: Locator.check: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".filter-fallback\").locator(\".store-options input[type=\\\"checkbox\\\"]\").first\n    - locator resolved to <input name=\"store\" type=\"checkbox\" value=\"demo-store-01\"/>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n",
+      "duration_ms": 8866,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e/screenshots/FAIL-nojs-01.png",
+      "details": {
+        "page_errors": [],
+        "nojs_input_box": {
+          "x": 54,
+          "y": 72,
+          "width": 256,
+          "height": 50
+        },
+        "nojs_input_visible": true,
+        "nojs_ancestors": [
+          {
+            "tag": "INPUT",
+            "cls": "",
+            "hidden": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "cls": "search-input-row",
+            "hidden": false,
+            "display": "flex",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "cls": "search-input-group",
+            "hidden": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "FORM",
+            "cls": "catalog-form",
+            "hidden": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "cls": "catalog-search-row",
+            "hidden": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "cls": "route-shell search-route",
+            "hidden": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "MAIN",
+            "cls": "main",
+            "hidden": false,
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "cls": "shell",
+            "hidden": false,
+            "display": "block",
+            "visibility": "visible"
+          }
+        ],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 527, in no_javascript_get_forms\n    fallback.locator('.store-options input[type=\"checkbox\"]').first.check()\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 15432, in check\n    self._sync(\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_locator.py\", line 145, in check\n    return await self._frame.check(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.TimeoutError: Locator.check: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".filter-fallback\").locator(\".store-options input[type=\\\"checkbox\\\"]\").first\n    - locator resolved to <input name=\"store\" type=\"checkbox\" value=\"demo-store-01\"/>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n\n"
+      }
+    },
+    {
+      "id": "UX-06",
+      "name": "duplicate submit is coalesced and latest rapid query wins",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "Error: Locator.fill: Error: strict mode violation: locator(\"form[role=\\\"search\\\"] input[name=\\\"query\\\"]\") resolved to 2 elements:\n    1) <input value=\"\" name=\"query\" type=\"search\" id=\"_R_4smlb_\" maxlength=\"500\" autocomplete=\"off\" placeholder=\"What are you looking for?\"/> aka get_by_placeholder(\"What are you looking for?\")\n    2) <input value=\"\" name=\"query\" type=\"search\" maxlength=\"500\" id=\"_R_4spbn6lb_\" autocomplete=\"off\" placeholder=\"Describe a piece, colour or budget\"/> aka get_by_placeholder(\"Describe a piece, colour or\")\n\nCall log:\n  - waiting for locator(\"form[role=\\\"search\\\"] input[name=\\\"query\\\"]\")\n",
+      "duration_ms": 1314,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e/screenshots/FAIL-ux-06.png",
+      "details": {
+        "page_errors": [],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 551, in rapid_intent\n    field.fill(\"black coat\")\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 15870, in fill\n    self._sync(\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_locator.py\", line 212, in fill\n    return await self._frame.fill(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.Error: Locator.fill: Error: strict mode violation: locator(\"form[role=\\\"search\\\"] input[name=\\\"query\\\"]\") resolved to 2 elements:\n    1) <input value=\"\" name=\"query\" type=\"search\" id=\"_R_4smlb_\" maxlength=\"500\" autocomplete=\"off\" placeholder=\"What are you looking for?\"/> aka get_by_placeholder(\"What are you looking for?\")\n    2) <input value=\"\" name=\"query\" type=\"search\" maxlength=\"500\" id=\"_R_4spbn6lb_\" autocomplete=\"off\" placeholder=\"Describe a piece, colour or budget\"/> aka get_by_placeholder(\"Describe a piece, colour or\")\n\nCall log:\n  - waiting for locator(\"form[role=\\\"search\\\"] input[name=\\\"query\\\"]\")\n\n"
+      }
+    },
+    {
+      "id": "UX-22/27",
+      "name": "LT is server-rendered; soft switch preserves search; unknown route recovers",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 1231,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "UX-19",
+      "name": "one image 404 keeps the grid stable and does not substitute another garment",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "TimeoutError: Page.wait_for_function: Timeout 8000ms exceeded.",
+      "duration_ms": 8613,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e/screenshots/FAIL-ux-19.png",
+      "details": {
+        "page_errors": [],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 605, in image_404_stability\n    page.wait_for_function(\"() => document.querySelectorAll('.image-fallback').length > 0\")\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 11559, in wait_for_function\n    self._sync(\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_page.py\", line 1111, in wait_for_function\n    return await self._main_frame.wait_for_function(**locals_to_params(locals()))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.TimeoutError: Page.wait_for_function: Timeout 8000ms exceeded.\n"
+      }
+    },
+    {
+      "id": "UX-23",
+      "name": "keyboard skip link and modal focus containment/restoration",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "TimeoutError: Locator.wait_for: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".filter-dialog[open]\") to be visible\n",
+      "duration_ms": 8726,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e/screenshots/FAIL-ux-23.png",
+      "details": {
+        "page_errors": [],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 625, in keyboard_core_and_dialog\n    dialog.wait_for(state=\"visible\")\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 17956, in wait_for\n    self._sync(self._impl_obj.wait_for(timeout=timeout, state=state))\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_locator.py\", line 692, in wait_for\n    await self._frame.wait_for_selector(\nplaywright._impl._errors.TimeoutError: Locator.wait_for: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".filter-dialog[open]\") to be visible\n\n"
+      }
+    },
+    {
+      "id": "RESP-01",
+      "name": "representative routes do not horizontally overflow at 320–1920px",
+      "severity": "P2",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 5858,
+      "screenshot": null,
+      "details": {
+        "page_errors": [],
+        "matrix": [
+          {
+            "viewport": "320x844",
+            "route": "/?lang=lt"
+          },
+          {
+            "viewport": "360x844",
+            "route": "/search?query=black&store=demo-store-01,demo-store-02&maxPrice=150&lang=lt"
+          },
+          {
+            "viewport": "390x844",
+            "route": "/search?query=black&lang=en"
+          },
+          {
+            "viewport": "430x900",
+            "route": "/out/MOCK-001?lang=lt"
+          },
+          {
+            "viewport": "768x1000",
+            "route": "/out/MOCK-001?lang=en"
+          },
+          {
+            "viewport": "1280x900",
+            "route": "/search?query=black&lang=en"
+          },
+          {
+            "viewport": "1440x1000",
+            "route": "/?lang=en"
+          },
+          {
+            "viewport": "1920x1080",
+            "route": "/search?query=black&lang=lt"
+          }
+        ]
+      }
+    },
+    {
+      "id": "UX-24/25/26",
+      "name": "320-effective 200% CSS zoom, long LT copy and reduced motion",
+      "severity": "P1",
+      "status": "PASS",
+      "message": "",
+      "duration_ms": 655,
+      "screenshot": null,
+      "details": {
+        "page_errors": []
+      }
+    },
+    {
+      "id": "A11Y-01",
+      "name": "axe WCAG-tag scan: 5 routes + open dialog, EN/LT, light/dark",
+      "severity": "P1",
+      "status": "FAIL",
+      "message": "TimeoutError: Locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".catalog-toolbar .filter-toggle\")\n    - locator resolved to <button hidden=\"\" type=\"button\" aria-expanded=\"true\" class=\"filter-toggle\" aria-controls=\"_R_4inebn6lb_-panel\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    15 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n",
+      "duration_ms": 13094,
+      "screenshot": "evidence/2026-09-15-post-audit/results/frontend-e2e/screenshots/FAIL-a11y-01.png",
+      "details": {
+        "page_errors": [],
+        "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 96, in run\n    function()\n  File \"C:\\Users\\rober\\Fashion_Aggregator\\scripts\\frontend_e2e.py\", line 710, in axe_matrix\n    page.locator(\".catalog-toolbar .filter-toggle\").click()\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\sync_api\\_generated.py\", line 15524, in click\n    self._sync(\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"C:\\Python312\\Lib\\site-packages\\playwright\\_impl\\_locator.py\", line 160, in click\n    return await self._frame.click(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\".catalog-toolbar .filter-toggle\")\n    - locator resolved to <button hidden=\"\" type=\"button\" aria-expanded=\"true\" class=\"filter-toggle\" aria-controls=\"_R_4inebn6lb_-panel\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    15 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n\n"
+      }
+    },
+    {
+      "id": "UX-16",
+      "name": "controlled full catalog failure and retry",
+      "severity": "scope",
+      "status": "NOT RUN",
+      "message": "Covered by the separate scripts/catalog_failure_e2e.py localhost fixture; its result is recorded independently, not included in this runner's count.",
+      "duration_ms": 0,
+      "screenshot": null,
+      "details": {}
+    },
+    {
+      "id": "UX-17",
+      "name": "live AI error/timeout with local fallback",
+      "severity": "scope",
+      "status": "NOT RUN",
+      "message": "External Gemini was intentionally disabled and no paid/live credential was used; integration coverage belongs to the existing search tests.",
+      "duration_ms": 0,
+      "screenshot": null,
+      "details": {}
+    },
+    {
+      "id": "MANUAL-01",
+      "name": "physical device, NVDA/TalkBack and Windows High Contrast",
+      "severity": "scope",
+      "status": "NOT RUN",
+      "message": "Unavailable in this headless browser pass; automated axe and keyboard evidence are not equivalent.",
+      "duration_ms": 0,
+      "screenshot": null,
+      "details": {}
+    }
+  ],
+  "axe": [
+    {
+      "locale": "en",
+      "theme": "light",
+      "route": "/",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "light",
+      "route": "/search?query=black",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "light",
+      "route": "/out/MOCK-001",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "light",
+      "route": "/account",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "theme": "light",
+      "route": "/stores",
+      "violations": []
+    }
+  ],
+  "limits": [
+    "No physical-device or screen-reader session was run.",
+    "No live Gemini, Supabase cloud, paid service, field RUM, or production deployment was exercised.",
+    "Catalog failure/sparse rendering and delayed navigation have separate controlled runners and reports; this runner does not include those counts. No public simulation switch was added."
+  ]
+}

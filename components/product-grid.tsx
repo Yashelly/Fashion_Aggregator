@@ -3,7 +3,7 @@ import type { MockProduct } from "@/lib/mock-products";
 import { getPublicDemoStoreById, getPublicDemoStoreLabel } from "@/lib/demo-stores";
 import { WishlistButton } from "@/components/wishlist-button";
 import { ProductImage } from "@/components/product-image";
-import { formatAvailabilityLabel, getCopy, type Locale, withLocale } from "@/lib/i18n";
+import { formatAvailabilityLabel, formatProductCategoryLabel, getCopy, type Locale, withLocale } from "@/lib/i18n";
 import { formatPrice } from "@/lib/format-price";
 import {
   SearchContinuityController,
@@ -22,6 +22,7 @@ export function ProductGrid({ ariaLabel, locale = "en", products, returnTo = "/s
       const titleFocusTarget = productLinkDomId(product.mock_product_id, "title");
       const store = getPublicDemoStoreById(product.public_store_id);
       const storeLabel = store ? getPublicDemoStoreLabel(store, locale) : t.storeFallback;
+      const categoryLabel = formatProductCategoryLabel(product.category, product.subcategory, locale);
       const styled = index % 2 === 0 && product.detail_image_available;
       const image = styled ? product.detail_image_path : product.image_available ? product.image_path : null;
       return <article className={`product-tile${product.availability === "out_of_stock" ? " is-sold-out" : ""}`} key={product.mock_product_id}>
@@ -34,6 +35,7 @@ export function ProductGrid({ ariaLabel, locale = "en", products, returnTo = "/s
           <WishlistButton locale={locale} label={product.title} productId={product.mock_product_id} />
         </div>
         <div className="product-body">
+          <p className="product-kicker">{categoryLabel}</p>
           <h2 className="product-title"><Link className="product-link" href={href}
             id={titleFocusTarget} data-search-continuity data-product-id={product.mock_product_id} data-search-href={returnTo}>{product.title}</Link></h2>
           <div className="product-meta">
