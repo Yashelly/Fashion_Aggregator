@@ -26,6 +26,8 @@ test('canonical params trim, canonicalize multi-values and consume legacy aliase
   assert.equal(searchHref({color:'navy,black',size:'S,M',store:'demo-store-02,demo-store-01'}),'/search?color=black%2Cnavy&size=M%2CS&store=demo-store-01%2Cdemo-store-02');
   assert.equal(searchHref({query:'coat',page:'1'}),'/search?query=coat');
   assert.equal(canonicalizeSearchHref('/search?color=navy&color=black&gender=women&page=1'),'/search?department=women&color=black%2Cnavy');
+  assert.deepEqual(normalizeSearchValues({q:'black',category:'trousers'}),{query:'black',category:'bottoms'});
+  assert.equal(canonicalizeSearchHref('/search?q=black&category=trousers'),'/search?query=black&category=bottoms');
 });
 test('budget boundaries, malformed values and zero are explicit',()=>{
   for(const [a,b] of [['',''],['0','0'],['10,50','20.10'],['','150']]) assert.ok(validPriceRange(a,b));

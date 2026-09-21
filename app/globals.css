@@ -139,7 +139,7 @@ h3 { font-size: 1.1875rem; font-weight: 500; }
 .home-storefront { padding-bottom: 4rem; }
 .campaign { position: relative; background: var(--color-canvas); }
 .campaign-frame { position: relative; width: 100%; container-type: inline-size; }
-.campaign-image { width: 100%; aspect-ratio: 2508 / 1412; max-height: calc(100svh - var(--home-header-h)); overflow: hidden; }
+.campaign-image { width: 100%; height: clamp(31rem, 54svh, 42rem); overflow: hidden; }
 .campaign-image picture, .campaign-image img { display: block; width: 100%; height: 100%; }
 .campaign-image img { object-fit: cover; object-position: 50% 20%; }
 /* Contrast support ends before the people; it is not a filter on the photograph. */
@@ -171,6 +171,7 @@ h3 { font-size: 1.1875rem; font-weight: 500; }
 .home-section { width: var(--collection-width); max-width: calc(2560px * .92); margin-inline: auto; }
 .home-section-head { display: flex; justify-content: space-between; align-items: center; gap: 1.25rem; padding: 1.8125rem 1.5625rem 1.375rem; }
 .home-section-head h2 { margin: 0; font-size: 1.5rem; letter-spacing: -.65px; }
+.home-section .product-grid { grid-template-columns: repeat(5,minmax(0,1fr)); }
 
 /* The query, refinements and count fit into one compact workbench. */
 .search-input-row { display: flex; align-items: center; gap: 0.875rem; padding: 0; min-height: 3.5625rem; border-bottom: 1px solid var(--color-ink); background: var(--color-surface); }
@@ -237,7 +238,8 @@ h3 { font-size: 1.1875rem; font-weight: 500; }
 .mobile-filter-label { display: none; }
 summary::-webkit-details-marker { display: none; }
 .filter-count { font-size: 0.75rem; color: var(--color-ink-muted); }
-.filter-fallback { padding: 1.25rem; width: min(21.875rem, calc(100vw - 1.875rem)); border: 1px solid var(--color-control); background: var(--color-surface); position: absolute; top: 2.75rem; left: 0; z-index: 5; box-shadow: var(--shadow); max-height: 70dvh; overflow-y: auto; }
+.filter-disclosure[hidden] { display: none; }
+.filter-fallback { padding: 1.25rem; width: min(21.875rem, calc(100vw - 1.875rem)); max-width: calc(100vw - 2 * var(--gutter)); border: 1px solid var(--color-control); background: var(--color-surface); position: absolute; top: 2.75rem; right: 0; z-index: 5; box-shadow: var(--shadow); max-height: 70dvh; overflow-y: auto; }
 .filter-fallback>.button { margin-top: 1.25rem; }
 .option-picker { position: relative; min-width: 0; }
 .option-picker:not([open])>.picker-options { display: none; }
@@ -282,7 +284,7 @@ summary::-webkit-details-marker { display: none; }
 .catalog-body .product-grid { grid-template-columns: repeat(var(--catalog-columns,4),minmax(0,1fr)); }
 .product-tile { min-width: 0; }
 .product-media-wrap { position: relative; }
-.product-media { display: block; position: relative; aspect-ratio: 4/5; background: var(--color-product-media); }
+.product-media { display: block; position: relative; aspect-ratio: 4/4.6; background: var(--color-product-media); }
 .product-media img { object-fit: contain; }
 .image-fallback { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; padding: 1rem; color: #62635d; background: #eeeae4; font-size: 0.8125rem; text-align: center; }
 .wishlist-button { position: absolute; top: 0.5625rem; right: 0.5rem; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; background: transparent; color: var(--color-ink); border: 0; }
@@ -444,6 +446,7 @@ summary::-webkit-details-marker { display: none; }
 @media (max-width: 56.25em) {
   .catalog-layout { display: block; }
   .filter-panel { display: none; }
+  .filter-fallback { left: 0; right: auto; }
   .catalog-toolbar { min-height: 5.875rem; align-items: stretch; padding: 1rem 0.9375rem 0.25rem; gap: 0.25rem; }
   .catalog-title { justify-content: space-between; }
   .catalog-title p { font-size: 0.75rem; }
@@ -452,6 +455,7 @@ summary::-webkit-details-marker { display: none; }
   .mobile-filter-label { display: initial; }
   .density-view { display: none; }
   .catalog-body .product-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .home-section .product-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
   .filter-dialog { margin: auto 0 0; width: 100%; max-width: 100%; max-height: calc(100dvh - 1.5rem); border-radius: 0; }
   .filter-dialog form { max-height: calc(100dvh - 1.625rem); }
   .filter-dialog-head, .filter-dialog-body { padding: 1rem 1.25rem; }
@@ -490,7 +494,7 @@ summary::-webkit-details-marker { display: none; }
   .campaign { background: var(--color-canvas); }
   .campaign-frame { width: 100%; container-type: normal; }
   .campaign-frame::after { display: none; }
-  .campaign-image { aspect-ratio: 4 / 5; max-height: none; background: var(--color-surface-soft); }
+  .campaign-image { height: auto; aspect-ratio: 4 / 5; max-height: none; background: var(--color-surface-soft); }
   .campaign-copy { position: static; width: auto; max-width: none; padding: 1.25rem var(--gutter) 1.5rem; color: var(--color-ink); }
   .campaign-copy h1 { font-size: clamp(2rem, 8vw, 2.75rem); max-width: 18ch; white-space: normal; }
   .campaign-copy>p { font-size: 1rem; max-width: 38ch; margin: 0.75rem 0 1rem; }
@@ -524,7 +528,7 @@ summary::-webkit-details-marker { display: none; }
   .active-filters a { min-height: 2.5rem; padding: 0.4375rem 0.625rem; font-size: 0.75rem; }
   .search-interpretation { font-size: 0.8125rem; gap: 0 0.5rem; margin-top: 0.75rem; }
   .filter-field-grid { gap: 0.75rem; }
-  .product-grid, .catalog-body .product-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0.75rem 2px; }
+  .product-grid, .catalog-body .product-grid, .home-section .product-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0.75rem 2px; }
   .product-body { padding: 0.625rem 0.625rem 0; min-height: 5rem; }
   .product-title { font-size: 0.875rem; line-height: 1.35; min-height: 2.1875rem; margin-bottom: 0.4375rem; }
   .product-meta { gap: 0.25rem; }
@@ -558,10 +562,6 @@ summary::-webkit-details-marker { display: none; }
   .empty-state h2 { font-size: 1.6875rem; }
   .cookie-consent { display: block; max-height: 75dvh; overflow-y: auto; padding: 1.25rem; }
   .cookie-consent-actions { margin-top: 1rem; }
-}
-@media (max-width: 43.75em) and (max-height: 54em) {
-  .campaign-image { aspect-ratio: 4 / 3.35; }
-  .campaign-image img { object-position: 50% 19%; }
 }
 @media (max-width: 22.5em) {
   .site-header { gap: 0.25rem; }
