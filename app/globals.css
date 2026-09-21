@@ -148,7 +148,7 @@ h3 { font-size: 1.1875rem; font-weight: 500; }
 .campaign-copy h1 { max-width: 14ch; font-size: clamp(1.75rem, min(4cqw, 8svh), 3.75rem); letter-spacing: -.04em; line-height: 1.03; margin: 0; }
 .campaign-copy>p { font-size: 1rem; max-width: 39ch; margin: 0.875rem 0 1rem; }
 .campaign-search { max-width: 35rem; color: #161616; }
-.campaign-search .search-input-row { min-height: 3.5rem; padding-inline: 0.75rem 0.25rem; border-bottom: 0; background: white; }
+.campaign-search .search-input-row { min-height: 3.5rem; padding-inline: 0.75rem 0; border-bottom: 0; background: white; }
 .campaign-search .search-input-row:focus-within { outline: 2px solid white; outline-offset: 0.1875rem; border-bottom: 0; }
 .campaign-search input { color: #161616; background: white; font-size: 1rem; }
 .campaign-search input::placeholder { color: #575757; }
