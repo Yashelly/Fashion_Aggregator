@@ -31,7 +31,7 @@ import type { PublicProduct, PublicRelatedProduct } from "@/lib/public-product";
 import { formatPrice } from "@/lib/format-price";
 import { containDialogFocus } from "@/lib/dialog-focus";
 import { useClientLocale } from "@/lib/use-client-locale";
-import { formatMaterialLabel, presentControlledValues } from "@/lib/product-presentation";
+import { formatMaterialLabel, formatSizeSystemLabel, presentControlledValues } from "@/lib/product-presentation";
 
 function price(amount: string, currency: string, locale: Locale) {
   return formatPrice(amount, currency, locale);
@@ -102,6 +102,7 @@ export function ProductDetailView({
   const surfaces = presentControlledValues(product.surface, locale, "surface");
   const construction = presentControlledValues(product.constructionDetails, locale, "details");
   const material = formatMaterialLabel(product.material, locale);
+  const sizeSystem = formatSizeSystemLabel(product.sizeSystem, locale);
   const sizeStatuses = Object.values(product.sizeAvailability ?? {});
   const unknownSizeAvailability = sizeStatuses.length > 0 && sizeStatuses.every((status) => status === "unknown");
 
@@ -242,7 +243,7 @@ export function ProductDetailView({
                 {material ? <div><dt>{t.material}</dt><dd>{material}</dd></div> : null}
                 {surfaces.length > 0 ? <div><dt>{t.surface}</dt><dd><ul className="product-fact-chips">{surfaces.map((item) => <li key={item}>{item}</li>)}</ul></dd></div> : null}
                 {construction.length > 0 ? <div><dt>{t.details}</dt><dd><ul className="product-fact-chips">{construction.map((item) => <li key={item}>{item}</li>)}</ul></dd></div> : null}
-                {product.sizeSystem ? <div><dt>{t.sizeSystem}</dt><dd>{product.sizeSystem}</dd></div> : null}
+                {sizeSystem ? <div><dt>{t.sizeSystem}</dt><dd>{sizeSystem}</dd></div> : null}
                 {product.fitNote ? <div><dt>{t.fitNote}</dt><dd>{product.fitNote}</dd></div> : null}
                 {product.measurementSource ? <div><dt>{t.measurementSource}</dt><dd>{product.measurementSource}</dd></div> : null}
               </dl>

@@ -6,7 +6,11 @@ export const FILTER_KEYS = ["category", "department", "color", "size", "store", 
 export const MAX_QUERY_LENGTH = 500;
 
 const MULTI_VALUE_KEYS = ["color", "size", "store"] as const;
-const SEARCH_INPUT_KEYS = new Set<string>([...SEARCH_PARAM_KEYS, "availability", "gender", "stores"]);
+const SEARCH_INPUT_KEYS = new Set<string>([...SEARCH_PARAM_KEYS, "q", "availability", "gender", "stores"]);
+
+const CATEGORY_ALIASES: Record<string, string> = {
+  trousers: "bottoms",
+};
 
 function normalizeMultiValue(values: readonly string[]): string | undefined {
   const normalized = Array.from(new Set(
@@ -32,6 +36,11 @@ export function normalizeSearchValues(input: Record<string, string | string[] | 
   const first = (key: string) => { const v = input[key]; return (Array.isArray(v) ? v[0] : v)?.trim() || undefined; };
   const values: SearchValues = {};
   for (const key of SEARCH_PARAM_KEYS) { const value = first(key); if (value) values[key] = value; }
+  if (!values.query) {
+    const legacyQuery = first("q");
+    if (legacyQuery) values.query = legacyQuery;
+  }
+  if (values.category) values.category = CATEGORY_ALIASES[values.category] ?? values.category;
   if (!values.department) {
     const legacyDepartment = first("gender");
     if (legacyDepartment) values.department = legacyDepartment;

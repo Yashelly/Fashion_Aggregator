@@ -30,6 +30,7 @@ const {
 } = loadPublicProductModule();
 const { formatPrice } = loadPublicProductModule("format-price.ts");
 const { formatAvailabilityLabel } = loadPublicProductModule("i18n.ts");
+const { formatSizeSystemLabel } = loadPublicProductModule("product-presentation.ts");
 const {
   consumeSearchContinuityPayload,
   createSearchContinuityPayload,
@@ -237,6 +238,14 @@ test("availability labels expose the four shopper-facing stock states exactly", 
     ["in_stock", "limited", "out_of_stock", "unknown"].map((value) => formatAvailabilityLabel(value, "lt")),
     ["Yra sandėlyje", "Liko nedaug", "Išparduota", "Nežinoma"],
   );
+});
+
+test("size systems expose only reviewed shopper-facing labels", () => {
+  assert.equal(formatSizeSystemLabel("lettered", "en"), "Lettered");
+  assert.equal(formatSizeSystemLabel("NUMERIC", "lt"), "Skaitinis");
+  assert.equal(formatSizeSystemLabel("shoe", "lt"), "Avalynės dydžiai");
+  assert.equal(formatSizeSystemLabel("internal_size_token", "en"), undefined);
+  assert.equal(formatSizeSystemLabel(undefined, "en"), undefined);
 });
 
 test("absent optional product facts remain absent rather than acquiring invented defaults", () => {

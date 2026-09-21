@@ -146,6 +146,17 @@ export function formatMaterialLabel(value: string | undefined, locale: Locale) {
   return materialLabels[value.trim().toLowerCase()]?.[locale];
 }
 
+const sizeSystemLabels: Record<string, LocalizedLabel> = {
+  lettered: { en: "Lettered", lt: "Raidinis" },
+  numeric: { en: "Numeric", lt: "Skaitinis" },
+  shoe: { en: "Shoe sizing", lt: "Avalynės dydžiai" },
+};
+
+export function formatSizeSystemLabel(value: string | undefined, locale: Locale) {
+  if (!value) return undefined;
+  return sizeSystemLabels[value.trim().toLowerCase()]?.[locale];
+}
+
 function splitTokens(value: string | undefined) {
   return (value ?? "").split("|").map((token) => token.trim()).filter(Boolean);
 }
